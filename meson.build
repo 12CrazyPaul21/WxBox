@@ -12,6 +12,16 @@ wxbot_root = 'WxBot'
 assets_root = 'assets'
 
 #
+# clang_format
+#
+
+clang_format = find_program('clang-format', required: false)
+if not clang_format.found() and host_os == 'windows'
+    clang_format = find_program(['clang-format', join_paths(meson.current_source_dir(), 'wintools/bin/clang-format')], required: true)
+    meson.override_find_program('clang-format', clang_format)
+endif
+
+#
 # handle dependency
 #
 
@@ -70,7 +80,7 @@ qt_processed = qt5.preprocess(
 
 wxbox_src = [
     join_paths(wxbox_root, 'main.cpp'),
-    join_paths(wxbox_root, 'mainwindow.cpp')
+    join_paths(wxbox_root, 'mainwindow.cpp'),
 ]
 
 # resources
@@ -81,6 +91,7 @@ elif host_os == 'darwin'
     # 暂时不管苹果
 endif
 
+# add wxbox executable
 exe = executable('wxbox', sources: [wxbox_src, qt_processed],
   install : true, dependencies: [qt5_dep, spdlog_dep, grpc_dep], gui_app: true)
 
@@ -91,6 +102,12 @@ test('basic', exe)
 #
 
 subdir(wxbot_root)
+
+#
+# add clang-format target
+#
+
+format_target = run_target('pretty_format', command: ['powershell.exe', '/C', 'echo hello, 暂时不实现'])
 
 #
 # install与pack【这个留到之后补充】
