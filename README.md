@@ -147,7 +147,25 @@ meson compile -C build/release
 
 ## 开发时的调试方法
 
-​	开发调试不使用ninja作为backend，也不使用vscode作为编辑器，而是切为IDE，在Windows下用Visual Studio，在Mac OS下用xcode。具体怎么做之后再说。
+​	开发调试不使用ninja作为backend，也不使用vscode作为编辑器，而是切为IDE，在Windows下用Visual Studio，在Mac OS下用xcode。
+
+### Windows下使用Visual Studio IDE来开发并调试
+
+```bash
+# 以Visual Studio为backend创建工程
+meson setup build/vsdebug --buildtype debug --backend vs
+
+# 构建vs工程完成后，就可以打开build/vsdebug/WxBox.sln工程，然后把“wxbox@exe”修改为启动项目，接着就可以开发调试了
+```
+
+### Mac OS下使用xcode IDE来开发并调试
+
+```bash
+# 以xcode为backend创建工程
+meson setup build/xcodedebug --buildtype debug --backend xcode
+```
+
+
 
 ## install与打包方法
 

@@ -55,17 +55,22 @@ lua_dep = lua_proj.get_variable('lua_dep')
 # WxBox
 #
 
+moc_headers = [join_paths(wxbox_root, 'mainwindow.h')]
+moc_sources = [join_paths(wxbox_root, 'mainwindow.cpp')]
+ui_files = [join_paths(wxbox_root, 'mainwindow.ui')]
+qt_resources = [join_paths(assets_root, 'wxbox.qrc')]
+
 # process about qt
 qt_processed = qt5.preprocess(
-    moc_headers: [join_paths(wxbox_root, 'mainwindow.h')],
-    moc_sources: [join_paths(wxbox_root, 'mainwindow.cpp')],
-    ui_files: [join_paths(wxbox_root, 'mainwindow.ui')],
-    qresources: [join_paths(assets_root, 'wxbox.qrc')]
+    moc_headers: moc_headers,
+    # moc_sources: moc_sources,
+    ui_files: ui_files,
+    qresources: qt_resources
 )
 
 wxbox_src = [
     join_paths(wxbox_root, 'main.cpp'),
-    join_paths(wxbox_root, 'mainwindow.cpp'),
+    join_paths(wxbox_root, 'mainwindow.cpp')
 ]
 
 # resources
@@ -86,8 +91,6 @@ test('basic', exe)
 #
 
 subdir(wxbot_root)
-
-
 
 #
 # install与pack【这个留到之后补充】
