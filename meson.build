@@ -107,7 +107,11 @@ subdir(wxbot_root)
 # add clang-format target
 #
 
-format_target = run_target('pretty_format', command: './scripts/pretty_format')
+format_command = 'scripts/pretty_format'
+if host_os == 'windows'
+    format_command += '.bat'
+endif
+format_target = run_target('pretty_format', command: format_command)
 
 #
 # install与pack【这个留到之后补充】

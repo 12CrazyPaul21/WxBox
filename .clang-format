@@ -56,7 +56,7 @@ IncludeBlocks: Preserve
 IndentCaseLabels: true
 IndentGotoLabels: false
 IndentPPDirectives: BeforeHash
-IndentWidth: 10
+IndentWidth: 4
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None

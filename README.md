@@ -167,7 +167,12 @@ meson setup build/xcodedebug --buildtype debug --backend xcode
 
 ## 代码风格
 
-​	代码风格使用clang-format来统一，在命令行或在IDE（Visual Studio、xcode）上构建都要使用clang-format来把所有代码给格式化，暂时还没实现。
+​	代码风格使用clang-format来统一，在命令行或在IDE（Visual Studio、xcode）上构建都要使用clang-format来把所有代码给格式化。
+
+```bash
+# 项目中已经为Windows还有Mac OS写了两个脚本，执行下面的Target就会调用了，另外-C不一定需要build/release
+meson compile -C build/release pretty_format
+```
 
 ## install与打包方法
 
