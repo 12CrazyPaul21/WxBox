@@ -107,7 +107,7 @@ subdir(wxbot_root)
 # add clang-format target
 #
 
-format_target = run_target('pretty_format', command: ['powershell.exe', '/C', 'echo hello, 暂时不实现'])
+format_target = run_target('pretty_format', command: './scripts/pretty_format')
 
 #
 # install与pack【这个留到之后补充】
