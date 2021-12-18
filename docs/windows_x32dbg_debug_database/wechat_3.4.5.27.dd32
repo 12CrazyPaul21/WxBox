@@ -1,0 +1,583 @@
+{
+ "comments": [
+  {
+   "module": "wechatwin.dll",
+   "address": "0xC45E20",
+   "manual": true,
+   "text": "检查程序是否为单例，返回0表示单例，返回1表示不是单例"
+  },
+  {
+   "module": "",
+   "address": "0x2ED0000",
+   "manual": true,
+   "text": "用户分配的内存"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0xCAEA40",
+   "manual": true,
+   "text": "微信窗口过程"
+  },
+  {
+   "module": "",
+   "address": "0x3170000",
+   "manual": true,
+   "text": "用户分配的内存"
+  },
+  {
+   "module": "",
+   "address": "0x2F40000",
+   "manual": true,
+   "text": "用户分配的内存"
+  },
+  {
+   "module": "",
+   "address": "0x2F60000",
+   "manual": true,
+   "text": "用户分配的内存"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x46B886",
+   "manual": true,
+   "text": "把消息转换为宽字节字符串"
+  },
+  {
+   "module": "",
+   "address": "0x78E0000",
+   "manual": true,
+   "text": "用户分配的内存"
+  },
+  {
+   "module": "",
+   "address": "0x8620000",
+   "manual": true,
+   "text": "用户分配的内存"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x46B544",
+   "manual": true,
+   "text": "把发送消息的wxid转换为宽字节字符串"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x46BF93",
+   "manual": true,
+   "text": "识别不同类型的消息跳转入不同的逻辑入口"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x46DF73",
+   "manual": true,
+   "text": "对常规消息执行拷贝消息结构体"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x153844",
+   "manual": true,
+   "text": "发送文本消息"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x441FBF",
+   "manual": true,
+   "text": "发送文件或者图片"
+  }
+ ],
+ "labels": [
+  {
+   "module": "wechatwin.dll",
+   "address": "0xC45E20",
+   "manual": true,
+   "text": "CheckAppSingleton"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0xCAEA40",
+   "manual": true,
+   "text": "WeChatWndProc"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x9C7B0",
+   "manual": true,
+   "text": "FetchGlobalProfileContext"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x5BC240",
+   "manual": true,
+   "text": "FindAndDeepCopyWeChatContactItemWithWXID"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x5BD9A0",
+   "manual": true,
+   "text": "FindAndDeepCopyWeChatContactItemWithWXIDWrapper"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x141400",
+   "manual": true,
+   "text": "FindNodeInBinaryTree"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x99610",
+   "manual": true,
+   "text": "DeepCopyWeChatContactItem"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x5B7460",
+   "manual": true,
+   "text": "InitWeChatContactItem"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x406540",
+   "manual": true,
+   "text": "FetchGlobalContactContextAddress"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x8ED40",
+   "manual": true,
+   "text": "CopyMessageStructure"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x442540",
+   "manual": true,
+   "text": "WXSendTextMessage"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x46B420",
+   "manual": true,
+   "text": "PreHandleReceivedMessage"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x5B7D40",
+   "manual": true,
+   "text": "DeinitWeChatContactItem"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x16EDC0",
+   "manual": true,
+   "text": "FreeWeChatContactItem"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x638B80",
+   "manual": true,
+   "text": "CopyStringStructure"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x5781F0",
+   "manual": true,
+   "text": "RecordLoginProfile"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x2DC850",
+   "manual": true,
+   "text": "LoginSuccessAndOpenMainWindow"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x2DC0F0",
+   "manual": true,
+   "text": "CloseLoginWnd"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x2E66C0",
+   "manual": true,
+   "text": "WeChatEventProc"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x645370",
+   "manual": true,
+   "text": "ToWString"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x989A0",
+   "manual": true,
+   "text": "FetchGlobalSendMessageContext"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x638C90",
+   "manual": true,
+   "text": "ToWStringWrapper"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x637A40",
+   "manual": true,
+   "text": "WeChatPrintLog"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x13A0ED0",
+   "manual": true,
+   "text": "AllocateStackSpace"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x92C20",
+   "manual": true,
+   "text": "InitMessageStrucutre"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x638F00",
+   "manual": true,
+   "text": "CopyWString"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0xC4C40",
+   "manual": true,
+   "text": "CopyMessageStructureWrapper"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x2DB590",
+   "manual": true,
+   "text": "FetchGlobalMessageContext"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x471500",
+   "manual": true,
+   "text": "HandleReceivedMessages"
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x43DC20",
+   "manual": true,
+   "text": "WXSendFileMessage"
+  }
+ ],
+ "functions": [
+  {
+   "module": "wechatwin.dll",
+   "start": "0x3ADF94",
+   "end": "0x3ADFDA",
+   "icount": "0x15",
+   "manual": false,
+   "parent": "0x3ADF94"
+  },
+  {
+   "module": "wechatwin.dll",
+   "start": "0x3ADFDF",
+   "end": "0x3ADFF8",
+   "icount": "0xA",
+   "manual": false,
+   "parent": "0x3ADF94"
+  }
+ ],
+ "xrefs": [
+  {
+   "module": "wechatwin.dll",
+   "address": "0x406540",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x3ADF9D",
+     "type": "0x3"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x3ADFDF",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x3ADFDA",
+     "type": "0x2"
+    },
+    {
+     "addr": "0x3ADFC8",
+     "type": "0x2"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x5BD9A0",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x3ADFA4",
+     "type": "0x3"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x3ADFCA",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x3ADFAB",
+     "type": "0x2"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x13A8938",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A8934",
+     "type": "0x2"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x5B7D40",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x3ADFD3",
+     "type": "0x3"
+    },
+    {
+     "addr": "0x3ADFC1",
+     "type": "0x3"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x3AE500",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x3ADFB4",
+     "type": "0x3"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x13A00A9",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x3ADFF0",
+     "type": "0x3"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x16FCDD0",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A8870",
+     "type": "0x3"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x181E55B",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A8845",
+     "type": "0x1"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x13A8893",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A888D",
+     "type": "0x2"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x13A893C",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A8912",
+     "type": "0x2"
+    },
+    {
+     "addr": "0x13A891C",
+     "type": "0x2"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x13A8895",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A8891",
+     "type": "0x2"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x13A892D",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A891E",
+     "type": "0x2"
+    }
+   ]
+  },
+  {
+   "module": "wechatwin.dll",
+   "address": "0x8AEB0",
+   "manual": false,
+   "references": [
+    {
+     "addr": "0x13A8928",
+     "type": "0x3"
+    }
+   ]
+  }
+ ],
+ "breakpoints": [
+  {
+   "address": "0x153844",
+   "enabled": false,
+   "oldbytes": "0xF7E8",
+   "type": 0,
+   "titantype": "0x0",
+   "name": "",
+   "module": "wechatwin.dll",
+   "breakCondition": "",
+   "logText": "",
+   "logCondition": "",
+   "commandText": "",
+   "commandCondition": "",
+   "fastResume": false,
+   "silent": false
+  },
+  {
+   "address": "0x441FBF",
+   "enabled": false,
+   "oldbytes": "0x5CE8",
+   "type": 0,
+   "titantype": "0x0",
+   "name": "",
+   "module": "wechatwin.dll",
+   "breakCondition": "",
+   "logText": "",
+   "logCondition": "",
+   "commandText": "",
+   "commandCondition": "",
+   "fastResume": false,
+   "silent": false
+  },
+  {
+   "address": "0x46B420",
+   "enabled": false,
+   "oldbytes": "0x8B55",
+   "type": 0,
+   "titantype": "0x0",
+   "name": "",
+   "module": "wechatwin.dll",
+   "breakCondition": "",
+   "logText": "",
+   "logCondition": "",
+   "commandText": "",
+   "commandCondition": "",
+   "fastResume": false,
+   "silent": false
+  },
+  {
+   "address": "0x46B886",
+   "enabled": false,
+   "oldbytes": "0x5E8",
+   "type": 0,
+   "titantype": "0x0",
+   "name": "",
+   "module": "wechatwin.dll",
+   "breakCondition": "",
+   "logText": "",
+   "logCondition": "",
+   "commandText": "",
+   "commandCondition": "",
+   "fastResume": false,
+   "silent": false
+  },
+  {
+   "address": "0x46BF93",
+   "enabled": false,
+   "oldbytes": "0xE3D",
+   "type": 0,
+   "titantype": "0x0",
+   "name": "",
+   "module": "wechatwin.dll",
+   "breakCondition": "",
+   "logText": "",
+   "logCondition": "",
+   "commandText": "",
+   "commandCondition": "",
+   "fastResume": false,
+   "silent": false
+  },
+  {
+   "address": "0x471500",
+   "enabled": false,
+   "oldbytes": "0x8B55",
+   "type": 0,
+   "titantype": "0x0",
+   "name": "",
+   "module": "wechatwin.dll",
+   "breakCondition": "",
+   "logText": "",
+   "logCondition": "",
+   "commandText": "",
+   "commandCondition": "",
+   "fastResume": false,
+   "silent": false
+  },
+  {
+   "address": "0xCAEA40",
+   "enabled": false,
+   "oldbytes": "0x8B55",
+   "type": 0,
+   "titantype": "0x0",
+   "name": "",
+   "module": "wechatwin.dll",
+   "breakCondition": "([esp+8]==0x0100 && [esp+C] == 0x0D)",
+   "logText": "",
+   "logCondition": "",
+   "commandText": "",
+   "commandCondition": "",
+   "fastResume": false,
+   "silent": false
+  }
+ ],
+ "hashAlgorithm": "murmurhash",
+ "hash": "0x8CF282F1"
+}

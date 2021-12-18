@@ -1,0 +1,8 @@
+[wrap-file]
+directory = lua-5.4.3
+source_url = https://gitee.com/phantom27/wxbox-public-storage/attach_files/917653/download/lua-5.4.3.zip
+source_filename = lua-5.4.3.zip
+source_hash = B4183A2BD1C6E137E7C806FDC74071A42A657D4276C01FAF9F99A6014DCEFA65
+
+[provide]
+lua-5.4 = lua_dep

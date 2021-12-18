@@ -1,0 +1,5 @@
+[wrap-file]
+directory = grpc-windows-x86-v1.44.0-dev-debug
+source_url = https://gitee.com/phantom27/wxbox-public-storage/attach_files/917618/download/grpc-windows-x86-v1.44.0-dev-debug.tar.xz
+source_filename = grpc-windows-x86-v1.44.0-dev-debug.tar.xz
+source_hash = EB7F41175B093457B80BCB5D127E37D0C683BB7FA7E470948028F93E32EE1B24
