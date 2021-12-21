@@ -1,7 +1,7 @@
 project('WxBox', ['c', 'cpp'],
-  version : '0.1.0',
-  default_options : ['warning_level=3',
-                     'cpp_std=c++14']
+    version : '0.1.0',
+    default_options : ['warning_level=3',
+                        'cpp_std=c++14']
 )
 
 host_os = host_machine.system()

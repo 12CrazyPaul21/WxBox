@@ -153,7 +153,7 @@ meson compile -C build/release
 
 ```bash
 # 以Visual Studio为backend创建工程
-meson setup build/vsdebug --buildtype debug --backend vs
+meson setup build/vsdebug --buildtype debug --backend vs -Dbackend_startup_project=wxbox
 
 # 构建vs工程完成后，就可以打开build/vsdebug/WxBox.sln工程，然后把“wxbox@exe”修改为启动项目，接着就可以开发调试了
 ```
