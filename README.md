@@ -156,6 +156,9 @@ meson compile -C build/release
 meson setup build/vsdebug --buildtype debug --backend vs -Dbackend_startup_project=wxbox
 
 # 构建vs工程完成后，就可以打开build/vsdebug/WxBox.sln工程，然后把“wxbox@exe”修改为启动项目，接着就可以开发调试了
+
+# 另外在IDE环境开发时，如果加入某些新源文件、修改的项目的配置，可以用以下命令reconfigure
+meson build/vsdebug --reconfigure
 ```
 
 ### Mac OS下使用xcode IDE来开发并调试

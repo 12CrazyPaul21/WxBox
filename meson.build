@@ -10,6 +10,7 @@ build_type = get_option('buildtype')
 source_root = 'src'
 wxbox_root = join_paths(source_root, 'WxBox')
 wxbot_root = join_paths(source_root, 'WxBot')
+utils_root = join_paths(source_root, 'utils')
 assets_root = 'assets'
 
 #
@@ -79,9 +80,18 @@ qt_processed = qt5.preprocess(
     qresources: qt_resources
 )
 
+utils_inc = [
+    utils_root
+]
+
+utils_src = [
+    join_paths(utils_root, 'process.cpp')
+]
+
 wxbox_src = [
     join_paths(wxbox_root, 'main.cpp'),
     join_paths(wxbox_root, 'mainwindow.cpp'),
+    utils_src
 ]
 
 # resources
@@ -93,8 +103,8 @@ elif host_os == 'darwin'
 endif
 
 # add wxbox executable
-exe = executable('wxbox', sources: [wxbox_src, qt_processed],
-  install : true, dependencies: [qt5_dep, spdlog_dep, grpc_dep], gui_app: true)
+exe = executable('wxbox', sources: [wxbox_src, qt_processed], include_directories: utils_inc,
+    install : true, dependencies: [qt5_dep, spdlog_dep, grpc_dep], gui_app: true)
 
 test('basic', exe)
 
