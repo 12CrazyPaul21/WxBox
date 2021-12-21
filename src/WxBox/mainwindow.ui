@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../assets/wxbox.qrc">
+   <iconset resource="../../assets/wxbox.qrc">
     <normaloff>:/icon/app.ico</normaloff>:/icon/app.ico</iconset>
   </property>
   <widget class="QWidget" name="centralWidget"/>

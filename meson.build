@@ -7,8 +7,9 @@ project('WxBox', ['c', 'cpp'],
 host_os = host_machine.system()
 build_type = get_option('buildtype')
 
-wxbox_root = 'WxBox'
-wxbot_root = 'WxBot'
+source_root = 'src'
+wxbox_root = join_paths(source_root, 'WxBox')
+wxbot_root = join_paths(source_root, 'WxBot')
 assets_root = 'assets'
 
 #
