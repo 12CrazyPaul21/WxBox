@@ -14,6 +14,23 @@ utils_root = join_paths(source_root, 'utils')
 assets_root = 'assets'
 
 #
+# config.h
+#
+
+conf_data = configuration_data()
+conf_data.set('version', meson.project_version())
+if host_os == 'windows'
+    conf_data.set('os', 'WXBOX_WINDOWS_OS')
+elif host_os == 'darwin'
+    conf_data.set('os', 'WXBOX_MAC_OS')
+else
+    conf_data.set('os', 'WXBOX_UNSUPPORT_OS')
+endif
+conf_data.set('wxbox_module_version', get_option('wxbox_module_version'))
+conf_data.set('wxbot_module_version', get_option('wxbot_module_version'))
+configure_file(input: 'config.h.in', output: 'config.h', configuration: conf_data)
+
+#
 # clang_format
 #
 

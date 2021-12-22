@@ -1,0 +1,8 @@
+#define WXBOX_UNSUPPORT_OS 0
+#define WXBOX_WINDOWS_OS 1
+#define WXBOX_MAC_OS 2
+
+#define WXBOX_VERSION "@version@"
+#define WXBOX_MODULE_VERSION "@wxbox_module_version@"
+#define WXBOT_MODULE_VERSION "@wxbot_module_version@"
+#define WXBOX_PLATFORM @os@
