@@ -40,7 +40,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../assets/wxbox.qrc"/>
+  <include location="../../assets/wxbox.qrc"/>
  </resources>
  <connections/>
 </ui>
