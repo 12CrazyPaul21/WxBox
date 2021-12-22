@@ -3,6 +3,7 @@
 
 MainWindow::MainWindow(QWidget* parent)
   : QMainWindow(parent)
+  , aboutDialog(this)
   , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -11,4 +12,9 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::OpenAboutDialog()
+{
+    aboutDialog.show();
 }

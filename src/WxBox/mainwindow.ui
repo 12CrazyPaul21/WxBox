@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>565</width>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,10 +23,23 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>565</width>
      <height>23</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_F">
+    <property name="title">
+     <string>文件(&amp;F)</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_H">
+    <property name="title">
+     <string>帮助(&amp;H)</string>
+    </property>
+    <addaction name="action_AboutWxBox"/>
+   </widget>
+   <addaction name="menu_F"/>
+   <addaction name="menu_H"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -37,10 +50,35 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="action_AboutWxBox">
+   <property name="text">
+    <string>关于 WxBox</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
   <include location="../../assets/wxbox.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>action_AboutWxBox</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>OpenAboutDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OpenAboutDialog()</slot>
+ </slots>
 </ui>

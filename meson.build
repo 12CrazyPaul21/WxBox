@@ -84,9 +84,9 @@ lua_dep = lua_proj.get_variable('lua_dep')
 # WxBox
 #
 
-moc_headers = [join_paths(wxbox_root, 'mainwindow.h')]
-moc_sources = [join_paths(wxbox_root, 'mainwindow.cpp')]
-ui_files = [join_paths(wxbox_root, 'mainwindow.ui')]
+moc_headers = [join_paths(wxbox_root, 'mainwindow.h'), join_paths(wxbox_root, 'about.h')]
+moc_sources = [join_paths(wxbox_root, 'mainwindow.cpp'), join_paths(wxbox_root, 'about.cpp')]
+ui_files = [join_paths(wxbox_root, 'mainwindow.ui'), join_paths(wxbox_root, 'about.ui')]
 qt_resources = [join_paths(assets_root, 'wxbox.qrc')]
 
 # process about qt
@@ -108,6 +108,7 @@ utils_src = [
 wxbox_src = [
     join_paths(wxbox_root, 'main.cpp'),
     join_paths(wxbox_root, 'mainwindow.cpp'),
+    join_paths(wxbox_root, 'about.cpp'),
     utils_src
 ]
 
