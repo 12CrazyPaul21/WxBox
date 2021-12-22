@@ -1,8 +1,8 @@
 Language: Cpp
 Standard: Cpp11
 UseTab: Never
-TabWidth: 40
-IndentWidth: 40
+TabWidth: 4
+IndentWidth: 4
 #AccessModifierOffset: 2
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
