@@ -2,6 +2,8 @@
 
 ## 第三方依赖
 
+​	注意：以下部分库存在编译好的版本或者我们自己编译过的Windows版本放在这个仓库上：https://gitee.com/phantom27/wxbox-public-storage
+
 - gRPC
 - protobuf
 - frida-gum
@@ -11,6 +13,8 @@
 - cmake
 - pkg-config
 - lua
+- googletest
+
 
 ## 构建方法
 
@@ -61,8 +65,6 @@ index a9c4d56..2004cfb 100644
 -  version: meson.project_version(),
 -  soversion: lua_versions[0] + '.' + lua_versions[1],
 ```
-
-
 
 ### 构建依赖
 
@@ -145,9 +147,19 @@ meson compile -C build/release
 
 ​	note: 暂时还不清楚
 
+## 关于测试
+
+​	测试使用的框架是googletest，详细文档可以看：https://google.github.io/googletest/
+
+```bash
+# 执行测试（以debug版本为例子）
+meson compile -C build/debug
+meson test -C build/debug
+```
+
 ## 开发时的调试方法
 
-​	开发调试不使用ninja作为backend，也不使用vscode作为编辑器，而是切为IDE，在Windows下用Visual Studio，在Mac OS下用xcode。
+​	开发调试不使用ninja作为backend，也不使用vscode作为编辑器，而是切为IDE，在Windows下用Visual Studio，在Mac OS下用xcode。另外下面Windows版本中，Visual Studio指定了wxbox为启动项目，在使用Visual Studio写测试用例时可以改为测试用例为启动项目。
 
 ### Windows下使用Visual Studio IDE来开发并调试
 

@@ -7,11 +7,14 @@ project('WxBox', ['c', 'cpp'],
 host_os = host_machine.system()
 build_type = get_option('buildtype')
 
-source_root = 'src'
-wxbox_root = join_paths(source_root, 'WxBox')
-wxbot_root = join_paths(source_root, 'WxBot')
+proj_root = meson.current_source_dir()
+source_root = join_paths(proj_root, 'src')
+tests_root = join_paths(proj_root, 'tests')
+assets_root = join_paths(proj_root, 'assets')
+
+wxbox_root = join_paths(source_root, 'wxbox')
+wxbot_root = join_paths(source_root, 'wxbot')
 utils_root = join_paths(source_root, 'utils')
-assets_root = 'assets'
 
 #
 # config.h
@@ -102,7 +105,10 @@ utils_inc = [
 ]
 
 utils_src = [
-    join_paths(utils_root, 'process.cpp')
+    join_paths(utils_root, 'process.h'),
+    join_paths(utils_root, 'process.cpp'),
+    join_paths(utils_root, 'wx.h'),
+    join_paths(utils_root, 'wx.cpp')
 ]
 
 wxbox_src = [
@@ -124,13 +130,17 @@ endif
 exe = executable('wxbox', sources: [wxbox_src, qt_processed], include_directories: utils_inc,
     install : true, dependencies: [qt5_dep, spdlog_dep, grpc_dep], gui_app: true)
 
-test('basic', exe)
-
 #
 # WxBot
 #
 
-subdir(wxbot_root)
+subdir('src/wxbot')
+
+#
+# tests
+#
+
+subdir('tests')
 
 #
 # add clang-format target

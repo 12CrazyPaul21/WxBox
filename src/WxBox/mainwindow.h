@@ -6,7 +6,7 @@
 #include "about.h"
 
 namespace Ui {
-	class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -23,7 +23,6 @@ private:
 
 public slots:
     void OpenAboutDialog();
-
 };
 
 #endif  // MAINWINDOW_H
