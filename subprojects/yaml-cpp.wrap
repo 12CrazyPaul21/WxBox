@@ -1,0 +1,5 @@
+[wrap-git]
+directory = yaml-cpp
+url = https://github.com/jbeder/yaml-cpp.git
+revision = master
+depth = 1

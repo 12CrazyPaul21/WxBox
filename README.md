@@ -14,7 +14,7 @@
 - pkg-config
 - lua
 - googletest
-
+- yaml-cpp
 
 ## 构建方法
 

@@ -32,6 +32,7 @@ endif
 conf_data.set('wxbox_module_version', get_option('wxbox_module_version'))
 conf_data.set('wxbot_module_version', get_option('wxbot_module_version'))
 configure_file(input: 'config.h.in', output: 'config.h', configuration: conf_data)
+configuration_inc =include_directories('.')
 
 #
 # clang_format
@@ -83,22 +84,26 @@ endif
 lua_proj = subproject('lua')
 lua_dep = lua_proj.get_variable('lua_dep')
 
-#
-# WxBox
-#
+# yaml-cpp
+yaml_cpp_dep = dependency('yaml-cpp', required: false)
+if not yaml_cpp_dep.found()
+    cmake = import('cmake')
+    yaml_cpp_proj_opt_var = cmake.subproject_options()
+    yaml_cpp_proj_opt_var.add_cmake_defines({
+        'CMAKE_BUILD_TYPE': build_type,
+        'CMAKE_POSITION_INDEPENDENT_CODE': 'ON',
+        'YAML_CPP_BUILD_TOOLS': 'OFF',
+        'YAML_CPP_BUILD_TESTS': 'OFF',
+        'YAML_CPP_BUILD_CONTRIB': 'OFF',
+        'BUILD_SHARED_LIBS': 'OFF'})
+    yaml_cpp_proj = cmake.subproject('yaml-cpp', options: yaml_cpp_proj_opt_var)
+    yaml_cpp_dep = declare_dependency(dependencies: [yaml_cpp_proj.dependency('yaml-cpp')],
+                            compile_args: '/DYAML_CPP_STATIC_DEFINE')
+endif
 
-moc_headers = [join_paths(wxbox_root, 'mainwindow.h'), join_paths(wxbox_root, 'about.h')]
-moc_sources = [join_paths(wxbox_root, 'mainwindow.cpp'), join_paths(wxbox_root, 'about.cpp')]
-ui_files = [join_paths(wxbox_root, 'mainwindow.ui'), join_paths(wxbox_root, 'about.ui')]
-qt_resources = [join_paths(assets_root, 'wxbox.qrc')]
-
-# process about qt
-qt_processed = qt5.preprocess(
-    moc_headers: moc_headers,
-    # moc_sources: moc_sources,
-    ui_files: ui_files,
-    qresources: qt_resources
-)
+#
+# utils
+#
 
 utils_inc = [
     utils_root
@@ -111,24 +116,12 @@ utils_src = [
     join_paths(utils_root, 'wx.cpp')
 ]
 
-wxbox_src = [
-    join_paths(wxbox_root, 'main.cpp'),
-    join_paths(wxbox_root, 'mainwindow.cpp'),
-    join_paths(wxbox_root, 'about.cpp'),
-    utils_src
-]
+#
+# WxBox
+#
 
-# resources
-if host_os == 'windows'
-    windows = import('windows')
-    wxbox_src += windows.compile_resources(join_paths(assets_root, 'wxbox.rc'))
-elif host_os == 'darwin'
-    # 暂时不管苹果
-endif
+subdir('src/wxbox')
 
-# add wxbox executable
-exe = executable('wxbox', sources: [wxbox_src, qt_processed], include_directories: utils_inc,
-    install : true, dependencies: [qt5_dep, spdlog_dep, grpc_dep], gui_app: true)
 
 #
 # WxBot
