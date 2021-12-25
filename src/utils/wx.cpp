@@ -1,10 +1,6 @@
-#include "config.h"
-#include <wx.h>
+#include <utils/wx.h>
 
 #if WXBOX_IN_WINDOWS_OS
-
-#include <Windows.h>
-#include <memory>
 
 #define WX_INSTALLATION_PATH_REGISTER_SUB_KEY "SOFTWARE\\Tencent\\WeChat"
 #define WX_INSTALLATION_PATH_REGISTER_VALUE_NAME "InstallPath"

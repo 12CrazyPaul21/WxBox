@@ -106,10 +106,11 @@ endif
 #
 
 utils_inc = [
-    utils_root
+    source_root
 ]
 
 utils_src = [
+    join_paths(utils_root, 'common.h'),
     join_paths(utils_root, 'process.h'),
     join_paths(utils_root, 'process.cpp'),
     join_paths(utils_root, 'wx.h'),
