@@ -1,4 +1,4 @@
-#include <utils/wx.h>
+#include <utils/common.h>
 
 #if WXBOX_IN_WINDOWS_OS
 

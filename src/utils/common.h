@@ -13,4 +13,9 @@
 
 #endif
 
+#include <utils/process.h>
+#include <utils/wx.h>
+#include <utils/file.h>
+#include <utils/config.hpp>
+
 #endif // #ifndef __WXBOX_UTILS_COMMON_H

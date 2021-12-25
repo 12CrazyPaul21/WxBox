@@ -1,6 +1,5 @@
 #include <test_common.h>
-
-#include <utils/wx.h>
+#include <utils/common.h>
 
 TEST(wxbox_utils, wx)
 {

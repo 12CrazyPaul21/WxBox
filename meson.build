@@ -114,7 +114,10 @@ utils_src = [
     join_paths(utils_root, 'process.h'),
     join_paths(utils_root, 'process.cpp'),
     join_paths(utils_root, 'wx.h'),
-    join_paths(utils_root, 'wx.cpp')
+    join_paths(utils_root, 'wx.cpp'),
+    join_paths(utils_root, 'file.h'),
+    join_paths(utils_root, 'file.cpp'),
+    join_paths(utils_root, 'config.hpp')
 ]
 
 #
