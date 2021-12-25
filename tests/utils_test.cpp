@@ -3,5 +3,5 @@
 
 TEST(wxbox_utils, wx)
 {
-    EXPECT_NE("", wxbox::util::GetWxInstallationPath());
+    EXPECT_NE("", wxbox::util::wx::GetWxInstallationPath());
 }

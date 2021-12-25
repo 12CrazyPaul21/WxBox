@@ -4,8 +4,10 @@
 #include <string>
 
 namespace wxbox {
-    namespace util {
-        std::string GetWxInstallationPath();
+    namespace util{
+		namespace wx {
+            std::string GetWxInstallationPath();
+		}
     }
 }
 

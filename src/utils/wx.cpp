@@ -46,7 +46,7 @@ static inline std::string GetWxInstallationPath_Mac()
 
 #endif
 
-std::string wxbox::util::GetWxInstallationPath()
+std::string wxbox::util::wx::GetWxInstallationPath()
 {
     std::string wxInstalllationPath = "";
 
