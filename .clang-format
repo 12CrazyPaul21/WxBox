@@ -32,7 +32,7 @@ BreakBeforeBraces: Custom # or Allman
 BraceWrapping:
   # AfterCaseLabel: true
   AfterClass: true
-  AfterControlStatement: true
+  AfterControlStatement: false
   AfterEnum: true
   AfterFunction: true
   AfterNamespace: false
