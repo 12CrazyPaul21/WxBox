@@ -4,5 +4,5 @@
 
 TEST(wxbox_utils, wx)
 {
-    EXPECT_EQ("is stub", wxbox::util::GetWxInstallationPath());
+    EXPECT_NE("", wxbox::util::GetWxInstallationPath());
 }
