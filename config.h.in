@@ -6,3 +6,6 @@
 #define WXBOX_MODULE_VERSION "@wxbox_module_version@"
 #define WXBOT_MODULE_VERSION "@wxbot_module_version@"
 #define WXBOX_PLATFORM @os@
+
+#define WXBOX_IN_WINDOWS_OS (WXBOX_PLATFORM == WXBOX_WINDOWS_OS)
+#define WXBOX_IN_MAC_OS (WXBOX_PLATFORM == WXBOX_MAC_OS)

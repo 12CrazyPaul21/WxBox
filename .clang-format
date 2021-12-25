@@ -1,23 +1,23 @@
 Language: Cpp
 Standard: Cpp11
-UseTab: Never
+# UseTab: Never
 TabWidth: 4
 IndentWidth: 4
-#AccessModifierOffset: 2
+# AccessModifierOffset: 2
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
-#AlignConsecutiveBitFields: false
+# AlignConsecutiveBitFields: false
 AlignConsecutiveDeclarations: false
 # AlignConsecutiveMacros: false
 AlignEscapedNewlines: Right
-#AlignOperands: AlignAfterOperator
+# AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
 # AllowAllArgumentsOnNextLine: false
 # AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
-#AllowShortEnumsOnASingleLine: true
+# AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: false
 # AllowShortLambdasOnASingleLine: Empty
@@ -27,7 +27,7 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
 BinPackParameters: false
-#BitFieldColonSpacing: Both
+# BitFieldColonSpacing: Both
 BreakBeforeBraces: Custom # or Allman
 BraceWrapping:
   # AfterCaseLabel: true
@@ -41,8 +41,8 @@ BraceWrapping:
   AfterExternBlock: false
   BeforeCatch: true
   BeforeElse: true
-  #BeforeLambdaBody: false
-  #BeforeWhile: false
+  # BeforeLambdaBody: false
+  # BeforeWhile: false
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
@@ -56,7 +56,7 @@ Cpp11BracedListStyle: true
 PointerAlignment: Left
 FixNamespaceComments: true
 IncludeBlocks: Preserve
-#IndentCaseBlocks: false
+# IndentCaseBlocks: false
 IndentCaseLabels: true
 # IndentGotoLabels: false
 # IndentPPDirectives: BeforeHash

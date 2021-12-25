@@ -32,7 +32,7 @@ endif
 conf_data.set('wxbox_module_version', get_option('wxbox_module_version'))
 conf_data.set('wxbot_module_version', get_option('wxbot_module_version'))
 configure_file(input: 'config.h.in', output: 'config.h', configuration: conf_data)
-configuration_inc =include_directories('.')
+configuration_inc = include_directories('.')
 
 #
 # clang_format
