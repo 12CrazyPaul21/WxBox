@@ -13,5 +13,5 @@ test_src = [
     utils_src
 ]
 
-test_exe = executable('test_all', test_src, include_directories: test_inc, dependencies: [gtest_dep, gmock_dep])
+test_exe = executable('test_all', test_src, include_directories: test_inc, dependencies: [gtest_dep, gmock_dep, spdlog_dep])
 test('test_all', test_exe)

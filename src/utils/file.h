@@ -4,7 +4,7 @@
 namespace wxbox {
     namespace util {
         namespace file {
-
+            std::string GetWxBoxRootPath();
         }
     }
 }
