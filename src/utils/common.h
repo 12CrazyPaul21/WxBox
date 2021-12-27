@@ -11,8 +11,11 @@
 
 #include <Windows.h>
 #include <Shlwapi.h>
+#include <TlHelp32.h>
+#include <Psapi.h>
 
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Psapi.lib")
 
 #elif WXBOX_IN_MAC_OS
 
@@ -21,12 +24,15 @@
 
 #endif
 
+
 //
 // C/C++ header
 //
 
 #include <experimental/filesystem>
 #include <memory>
+#include <vector>
+
 
 //
 // WxBox utils header
@@ -36,5 +42,14 @@
 #include <utils/wx.h>
 #include <utils/file.h>
 #include <utils/config.hpp>
+
+
+//
+// Short namespace
+//
+
+namespace wb_process = wxbox::util::process;
+namespace wb_wx      = wxbox::util::wx;
+namespace wb_file    = wxbox::util::file;
 
 #endif // #ifndef __WXBOX_UTILS_COMMON_H

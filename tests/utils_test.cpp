@@ -31,3 +31,10 @@ TEST(wbox_utils, file)
 #endif
     spdlog::info("joined path : {}", joinedPath);
 }
+
+TEST(wbox_utils, process)
+{
+    auto processLists = wxbox::util::process::GetProcessList();
+    EXPECT_NE(size_t(0), processLists.size());
+    spdlog::info("prcoess count : {}", processLists.size());
+}
