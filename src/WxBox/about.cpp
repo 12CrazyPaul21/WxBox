@@ -13,3 +13,14 @@ AboutWxBoxDialog::~AboutWxBoxDialog()
 {
     delete ui;
 }
+
+void AboutWxBoxDialog::changeEvent(QEvent* event)
+{
+    switch (event->type()) {
+        case QEvent::LanguageChange:
+            ui->retranslateUi(this);
+            break;
+        default:
+            QWidget::changeEvent(event);
+    }
+}

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>WxBox</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../assets/wxbox.qrc">
@@ -55,6 +55,16 @@
     <string>关于 WxBox</string>
    </property>
   </action>
+  <action name="actionzh_cn">
+   <property name="text">
+    <string>zh_cn</string>
+   </property>
+  </action>
+  <action name="actionen">
+   <property name="text">
+    <string>en</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
@@ -77,8 +87,42 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionzh_cn</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zhcn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionen</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>en()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>OpenAboutDialog()</slot>
+  <slot>zhcn()</slot>
+  <slot>en()</slot>
  </slots>
 </ui>

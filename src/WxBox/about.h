@@ -15,6 +15,8 @@ public:
     explicit AboutWxBoxDialog(QWidget* parent = nullptr);
 	~AboutWxBoxDialog();
 
+	virtual void changeEvent(QEvent* event) override;
+
 private:
     Ui::AboutWxBoxDialog* ui;
 };

@@ -16,6 +16,26 @@
 - googletest
 - yaml-cpp
 
+## i18n支持
+
+​	项目中以简体中文为原始语言，如果加入新的文本还有翻译，需要手动更新assets/translations/下的zh_cn.ts和en.ts，可以配合Linguist做调整，然后执行以下命令，生成对应的qm文件，并touch wxbox.qrc使编译器知道资源文件更新了。
+
+```bash
+# Windows
+.\scripts\update_i18n.bat
+
+# Mac OS
+./scripts/update_i18n
+```
+
+​	另外由于采用的原始语言是英文，而在一些编辑器上，特别是中文环境的Visual Studio IDE上，默认的编码可能用的是gbk，直接使用中文文本这就有可能导致跟ts文件的对不上，所以在非.ui文件上，也就是在.cpp或者.h上的文本尽量使用英文，然后在zh_cn.ts上转成中文，zh_cn.ts和en.ts用的都是utf8。
+
+​	或者用转义的方式（utf8一般一个汉字三个字节）也可以，例如：
+
+```c++
+QMessageBox::information(this, tr("Title"), tr("\345\205\263\344\272\216 WxBox"));
+```
+
 ## 构建方法
 
 ​	首先需要安装meson+ninja构建工具，可以到以下路径下载：https://github.com/mesonbuild/meson/releases。

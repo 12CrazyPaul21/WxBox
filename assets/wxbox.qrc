@@ -2,4 +2,8 @@
   <qresource prefix="icon">
     <file>app.ico</file>
   </qresource>
+  <qresource prefix="/">
+    <file>translations/en.qm</file>
+    <file>translations/zh_cn.qm</file>
+  </qresource>
 </RCC>

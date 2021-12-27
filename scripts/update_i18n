@@ -1,0 +1,4 @@
+#!/bin/bash
+lrelease assets/translations/en.ts
+lrelease assets/translations/zh_cn.ts
+touch assets/wxbox.qrc
