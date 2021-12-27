@@ -1,13 +1,13 @@
 Language: Cpp
 Standard: Cpp11
-# UseTab: Never
+UseTab: Never
 TabWidth: 4
 IndentWidth: 4
 # AccessModifierOffset: 2
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: false
+AlignConsecutiveAssignments: true
 # AlignConsecutiveBitFields: false
-AlignConsecutiveDeclarations: false
+AlignConsecutiveDeclarations: true
 # AlignConsecutiveMacros: false
 AlignEscapedNewlines: Right
 # AlignOperands: AlignAfterOperator
@@ -62,7 +62,7 @@ IndentCaseLabels: true
 # IndentPPDirectives: BeforeHash
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 1
-NamespaceIndentation: None
+NamespaceIndentation: All
 ReflowComments: false
 SortIncludes: true
 SortUsingDeclarations: true

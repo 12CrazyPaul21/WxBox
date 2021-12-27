@@ -3,15 +3,34 @@
 
 #include "config.h"
 
+//
+// Platform related header
+//
+
 #if WXBOX_IN_WINDOWS_OS
 
 #include <Windows.h>
-#include <memory>
+#include <Shlwapi.h>
+
+#pragma comment(lib, "Shlwapi.lib")
 
 #elif WXBOX_IN_MAC_OS
 
+#include <unistd.h>
+#include <sys/stat.h>
 
 #endif
+
+//
+// C/C++ header
+//
+
+#include <experimental/filesystem>
+#include <memory>
+
+//
+// WxBox utils header
+//
 
 #include <utils/process.h>
 #include <utils/wx.h>

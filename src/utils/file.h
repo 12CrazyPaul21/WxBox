@@ -4,7 +4,11 @@
 namespace wxbox {
     namespace util {
         namespace file {
-            std::string GetWxBoxRootPath();
+            bool        IsPathExists(const std::string& path);
+            bool        IsDirectory(const std::string& path);
+            std::string ToDirectoryPath(const std::string& path);
+            std::string JoinPath(const std::string& dirPath, const std::string& fileName);
+            std::string GetProcessRootPath();
         }
     }
 }

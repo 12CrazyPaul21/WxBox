@@ -8,7 +8,7 @@
 static inline std::string GetWxInstallationPath_Windows()
 {
     LSTATUS status = ERROR_SUCCESS;
-    DWORD cbData = 0;
+    DWORD   cbData = 0;
 
 	// calc installation path string buffer bytes count
     status = RegGetValueA(HKEY_CURRENT_USER,
@@ -33,7 +33,7 @@ static inline std::string GetWxInstallationPath_Windows()
     if (status != ERROR_SUCCESS) {
         return "";
     }
-
+ 
     return std::move(std::string(tmp.get()));
 }
 
