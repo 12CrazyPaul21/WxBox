@@ -2,27 +2,26 @@
 #define __WXBOX_UTILS_PROCESS_H
 
 namespace wxbox {
-	namespace util {
-		namespace process {
+    namespace util {
+        namespace process {
 
-			//
-			// typedef
-			//
+            //
+            // typedef
+            //
 
-			typedef struct _ProcessInfo
-			{
+            typedef struct _ProcessInfo
+            {
                 std::string abspath;
                 std::string filename;
                 std::string dirpath;
                 uint32_t    pid;
 
-				_ProcessInfo()
+                _ProcessInfo()
                   : pid(0)
-				{
+                {
+                }
 
-				}
-
-				_ProcessInfo(const _ProcessInfo& other)
+                _ProcessInfo(const _ProcessInfo& other)
                 {
                     abspath  = other.abspath;
                     filename = other.filename;
@@ -38,7 +37,7 @@ namespace wxbox {
                     pid      = other.pid;
                 }
 
-				_ProcessInfo(_ProcessInfo&& other)
+                _ProcessInfo(_ProcessInfo&& other)
                 {
                     abspath  = std::move(other.abspath);
                     filename = std::move(other.filename);
@@ -53,15 +52,30 @@ namespace wxbox {
                     dirpath  = std::move(other.dirpath);
                     pid      = other.pid;
                 }
-			} ProcessInfo, PProcessInfo;
+            } ProcessInfo, PProcessInfo;
 
-			//
-			// Function
-			//
+#if WXBOX_IN_WINDOWS_OS
+            typedef HWND  WIN_HANDLE;
+            typedef POINT SCREEN_POINT;
+#elif WXBOX_IN_MAC_OS
+            /*typedef uint64_t WIN_HANDLE;
+			typedef struct
+			{
+                int32_t x;
+                int32_t y;
+			} SCREEN_POINT;*/
+#endif
 
-			std::vector<ProcessInfo> GetProcessList();
-		}
-	}
+            //
+            // Function
+            //
+
+            std::vector<ProcessInfo> GetProcessList();
+
+			WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
+            bool       GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
+        }
+    }
 }
 
 #endif  // #ifndef __WXBOX_UTILS_PROCESS_H

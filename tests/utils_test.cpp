@@ -37,4 +37,13 @@ TEST(wbox_utils, process)
     auto processLists = wxbox::util::process::GetProcessList();
     EXPECT_NE(size_t(0), processLists.size());
     spdlog::info("prcoess count : {}", processLists.size());
+
+    // Get process info from window handle(from screen point)
+    // wb_process::ProcessInfo pi;
+    // wb_process::WIN_HANDLE  hWnd = wb_process::GetWindowHandleFromScreenPoint({-680, 300});
+    // if (hWnd) {
+    //     if (wb_process::GetProcessInfoFromWindowHandle(hWnd, pi)) {
+    //     	// use pi
+    // 	}
+    // }
 }
