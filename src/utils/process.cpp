@@ -113,7 +113,7 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
     pi.abspath  = absFullPath;
     pi.filename = ::PathFindFileNameA(absFullPath);
     pi.dirpath  = std::move(wxbox::util::file::ToDirectoryPath(absFullPath));  
-	pi.pid = pid;
+	pi.pid      = pid;
 
 #elif WXBOX_PLATFORM == WXBOX_MAC_OS
     return false;

@@ -58,3 +58,27 @@ std::string wxbox::util::wx::GetWxInstallationPath()
 
     return wxInstalllationPath;
 }
+
+bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& path)
+{
+    if (path.length() == 0 || !wb_file::IsPathExists(path)) {
+        return false;
+    }
+
+	std::vector<std::string> files = {
+#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+        "WeChat.exe",
+        "WeChatWin.dll"
+#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+		// stub
+#endif
+    };
+
+	for (auto file : files) {
+        if (!wb_file::IsPathExists(wb_file::JoinPath(path, file))) {
+            return false;
+        }
+	}
+
+	return true;
+}

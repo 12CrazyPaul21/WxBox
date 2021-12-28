@@ -15,10 +15,6 @@
         <source>关于 WxBox</source>
         <translation>关于 WxBox</translation>
     </message>
-    <message>
-        <source>hello</source>
-        <translation>你好</translation>
-    </message>
 </context>
 <context>
     <name>AboutWxBoxDialog</name>
