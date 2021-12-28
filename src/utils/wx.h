@@ -7,7 +7,8 @@ namespace wxbox {
     namespace util{
 		namespace wx {
             std::string GetWxInstallationPath();
-            bool        IsWxInstallationPathValid(const std::string& path);
+            bool        IsWxInstallationPathValid(const std::string& installPath);
+            std::string GetWxVersion(const std::string& installPath);
 		}
     }
 }

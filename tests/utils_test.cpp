@@ -11,6 +11,10 @@ TEST(wxbox_utils, wx)
 	auto wxInstallationPathIsValid = wxbox::util::wx::IsWxInstallationPathValid(wxInstallationPath);
     EXPECT_EQ(true, wxInstallationPathIsValid);
     spdlog::info("wx installation path is valid : {}", wxInstallationPathIsValid);
+
+	auto wxVersion = wxbox::util::wx::GetWxVersion(wxInstallationPath);
+    EXPECT_NE("", wxVersion);
+    spdlog::info("wx version : {}", wxVersion);
 }
 
 TEST(wbox_utils, file)

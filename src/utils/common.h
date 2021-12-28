@@ -16,6 +16,7 @@
 
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Psapi.lib")
+#pragma comment(lib, "Version.lib")
 
 #elif WXBOX_IN_MAC_OS
 

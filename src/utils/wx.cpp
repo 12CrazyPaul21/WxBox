@@ -59,9 +59,9 @@ std::string wxbox::util::wx::GetWxInstallationPath()
     return wxInstalllationPath;
 }
 
-bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& path)
+bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& installPath)
 {
-    if (path.length() == 0 || !wb_file::IsPathExists(path)) {
+    if (installPath.length() == 0 || !wb_file::IsPathExists(installPath)) {
         return false;
     }
 
@@ -75,10 +75,42 @@ bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& path)
     };
 
 	for (auto file : files) {
-        if (!wb_file::IsPathExists(wb_file::JoinPath(path, file))) {
+        if (!wb_file::IsPathExists(wb_file::JoinPath(installPath, file))) {
             return false;
         }
 	}
 
 	return true;
+}
+
+std::string wxbox::util::wx::GetWxVersion(const std::string& installPath)
+{
+#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+	// get WeChat version info from WeChatWin.dll
+    std::string weChatWinPath = wb_file::JoinPath(installPath, "WeChatWin.dll");
+
+	DWORD dwHandle = 0;
+    DWORD dwSize   = ::GetFileVersionInfoSizeA(weChatWinPath.c_str(), &dwHandle);
+    if (!dwSize) {
+        return "";
+    }
+
+	std::unique_ptr<uint8_t[]> buf(new uint8_t[dwSize]);
+    if (!::GetFileVersionInfoA(weChatWinPath.c_str(), dwHandle, dwSize, buf.get())) {
+        return "";
+	}
+
+	VS_FIXEDFILEINFO* pvFileInfo    = nullptr;
+    UINT              uFileInfoSize = 0;
+    if (!VerQueryValueA(buf.get(), "\\", (LPVOID*)&pvFileInfo, &uFileInfoSize)) {
+        return "";
+	}
+
+	char strFileVersion[MAX_PATH] = {0};
+    ::sprintf_s(strFileVersion, MAX_PATH, "%hu.%hu.%hu.%hu", HIWORD(pvFileInfo->dwFileVersionMS), LOWORD(pvFileInfo->dwFileVersionMS), HIWORD(pvFileInfo->dwFileVersionLS), LOWORD(pvFileInfo->dwFileVersionLS));
+    return strFileVersion;
+
+#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+    
+#endif
 }
