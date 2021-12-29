@@ -27,16 +27,16 @@ uint32_t ScanMemoryRev_Windows(wxbox::util::process::PROCESS_HANDLE hProcess, co
     ULONG_PTR lastMatched     = 0;
 
 	// rev scan pattern
-	while (uLastMemSize > 0) {
+    while (uLastMemSize > 0) {
         uint32_t matched = wb_memory::ScanMemory(hProcess, pSearchCursor, (uint32_t)uLastMemSize, (LPVOID)pPattern, uPatternSize);
         if (!matched) {
             break;
-		}
+        }
 
-		lastMatched   = matched;
+        lastMatched   = matched;
         pSearchCursor = (LPVOID)(matched + 1);
         uLastMemSize  = (int64_t)pSearchMemEnd - (int64_t)pSearchCursor;
-	}
+    }
 
     return lastMatched;
 }
