@@ -15,9 +15,18 @@ TEST(wxbox_utils, wx)
 	auto wxVersion = wxbox::util::wx::GetWxVersion(wxInstallationPath);
     EXPECT_NE("", wxVersion);
     spdlog::info("wx version : {}", wxVersion);
+
+	wb_wx::WeChatEnvironmentInfo wxEnvInfo;
+	auto resolveSuccess = wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo);
+    EXPECT_EQ(true, resolveSuccess);
+    spdlog::info("wechat environment success : {}", resolveSuccess);
+
+	auto wxMultiBoxingSuccess = wxbox::util::wx::OpenWxWithMultiBoxing(wxEnvInfo);
+    EXPECT_EQ(true, wxMultiBoxingSuccess);
+    spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
 }
 
-TEST(wbox_utils, file)
+TEST(wxbox_utils, file)
 {
     auto processPath = wxbox::util::file::GetProcessRootPath();
     EXPECT_NE("", processPath);
@@ -40,7 +49,16 @@ TEST(wbox_utils, file)
     spdlog::info("joined path : {}", joinedPath);
 }
 
-TEST(wbox_utils, process)
+TEST(wxbox_utils, string)
+{
+    std::string  str1 = "from string";
+    std::wstring str2 = L"from wstring";
+
+	EXPECT_EQ(0, wb_string::ToWString(str1).compare(L"from string"));
+    EXPECT_EQ(0, wb_string::ToString(str2).compare("from wstring"));
+}
+
+TEST(wxbox_utils, process)
 {
     auto processLists = wxbox::util::process::GetProcessList();
     EXPECT_NE(size_t(0), processLists.size());

@@ -52,18 +52,24 @@ namespace wxbox {
                     dirpath  = std::move(other.dirpath);
                     pid      = other.pid;
                 }
-            } ProcessInfo, PProcessInfo;
+            } ProcessInfo, *PProcessInfo;
 
 #if WXBOX_IN_WINDOWS_OS
-            typedef HWND  WIN_HANDLE;
-            typedef POINT SCREEN_POINT;
+            typedef HWND   WIN_HANDLE;
+            typedef POINT  SCREEN_POINT;
+            typedef DWORD  PID;
+            typedef HANDLE PROCESS_HANDLE;
 #elif WXBOX_IN_MAC_OS
-            /*typedef uint64_t WIN_HANDLE;
+            /*
+			typedef uint64_t WIN_HANDLE;
 			typedef struct
 			{
                 int32_t x;
                 int32_t y;
-			} SCREEN_POINT;*/
+			} SCREEN_POINT;
+			typedef uint32_t PID;
+			typedef uint32_t PROCESS_HANDLE;
+			*/
 #endif
 
             //
@@ -74,6 +80,7 @@ namespace wxbox {
 
 			WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
             bool       GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
+            PID        StartProcessAndAttach(const std::string& binFilePath);
         }
     }
 }

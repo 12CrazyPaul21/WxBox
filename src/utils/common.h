@@ -33,6 +33,15 @@
 #include <experimental/filesystem>
 #include <memory>
 #include <vector>
+#include <string>
+#include <algorithm>
+
+//
+// third party
+//
+
+#include <frida-gum.h>
+#include <TitanEngine.h>
 
 
 //
@@ -42,6 +51,8 @@
 #include <utils/process.h>
 #include <utils/wx.h>
 #include <utils/file.h>
+#include <utils/string.h>
+#include <utils/memory.h>
 #include <utils/config.hpp>
 
 
@@ -52,5 +63,7 @@
 namespace wb_process = wxbox::util::process;
 namespace wb_wx      = wxbox::util::wx;
 namespace wb_file    = wxbox::util::file;
+namespace wb_string  = wxbox::util::string;
+namespace wb_memory  = wxbox::util::memory;
 
 #endif // #ifndef __WXBOX_UTILS_COMMON_H

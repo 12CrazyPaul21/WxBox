@@ -73,7 +73,7 @@ if not grpc_dep.found()
     grpc_dep = grpc_proj.get_variable('grpc_dep')
 endif
 
-# frida-gum(only for WxBot)
+# frida-gum
 frida_gum_dep = dependency('frida-gum', required: false)
 if not frida_gum_dep.found()
     frida_gum_proj = subproject('frida-gum')
@@ -101,6 +101,11 @@ if not yaml_cpp_dep.found()
                             compile_args: '/DYAML_CPP_STATIC_DEFINE')
 endif
 
+# TitanEngine
+TitanEngine_proj = subproject('TitanEngine')
+TitanEngine_dep = TitanEngine_proj.get_variable('TitanEngine_dep')
+TitanEngine_bin_root = TitanEngine_proj.get_variable('TitanEngine_bin_root')
+
 #
 # utils
 #
@@ -117,6 +122,10 @@ utils_src = [
     join_paths(utils_root, 'wx.cpp'),
     join_paths(utils_root, 'file.h'),
     join_paths(utils_root, 'file.cpp'),
+    join_paths(utils_root, 'string.h'),
+    join_paths(utils_root, 'string.cpp'),
+    join_paths(utils_root, 'memory.h'),
+    join_paths(utils_root, 'memory.cpp'),
     join_paths(utils_root, 'config.hpp')
 ]
 

@@ -6,7 +6,7 @@ shlib = shared_library('wxbot', 'wxbot.cpp',
   install : true,
   cpp_args : lib_args,
   gnu_symbol_visibility : 'hidden',
-  dependencies: [spdlog_dep, grpc_dep, frida_gum_dep, lua_dep]
+  dependencies: [spdlog_dep, grpc_dep, frida_gum_dep, TitanEngine_dep, lua_dep]
 )
 
 # Test wxbot

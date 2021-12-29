@@ -33,9 +33,9 @@ bool wxbox::util::file::IsPathExists(const std::string& path)
         return false;
     }
 
-#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+#if WXBOX_IN_WINDOWS_OS
     return ::PathFileExistsA(path.c_str());
-#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+#elif WXBOX_IN_MAC_OS
     struct stat sbuf = {0};
     if (stat(path.c_str(), &sbuf)) {
         return ENOENT != errno;
@@ -50,15 +50,24 @@ bool wxbox::util::file::IsDirectory(const std::string& path)
         return false;
     }
 
-#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+#if WXBOX_IN_WINDOWS_OS
     return ::PathIsDirectoryA(path.c_str());
-#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+#elif WXBOX_IN_MAC_OS
     struct stat sbuf = {0};
     if (stat(path.c_str(), &sbuf)) {
         return false;
     }
     return S_ISDIR(sbuf.st_mode);
 #endif
+}
+
+std::string wxbox::util::file::ToFileName(const std::string& path)
+{
+    if (path.length() == 0) {
+        return "";
+    }
+
+	return std::move(std::experimental::filesystem::path(path).filename().string());
 }
 
 std::string wxbox::util::file::ToDirectoryPath(const std::string& path)
@@ -76,11 +85,11 @@ std::string wxbox::util::file::ToDirectoryPath(const std::string& path)
 
 std::string wxbox::util::file::JoinPath(const std::string& dirPath, const std::string& fileName)
 {
-#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+#if WXBOX_IN_WINDOWS_OS
     char dest[MAX_PATH] = {0};
     PathCombineA(dest, dirPath.c_str(), fileName.c_str());
     return dest;
-#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+#elif WXBOX_IN_MAC_OS
     namespace fs = std::experimental::filesystem;
     return std::move((fs::path(dirPath) / fs::path(fileName)).string());
 #endif
@@ -90,9 +99,9 @@ std::string wxbox::util::file::GetProcessRootPath()
 {
     std::string processRootPath = "";
 
-#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+#if WXBOX_IN_WINDOWS_OS
     processRootPath = GetProcessRootPath_Windows();
-#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+#elif WXBOX_IN_MAC_OS
     processRootPath = GetProcessRootPath_Mac();
 #endif
 

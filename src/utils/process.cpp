@@ -49,6 +49,32 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Windows()
     return std::move(vt);
 }
 
+static inline wb_process::PID StartProcessAndAttach_Windows(const std::string& binFilePath)
+{
+    BOOL                status = FALSE;
+    PROCESS_INFORMATION pi     = {0};
+    STARTUPINFOA        si     = {0};
+
+    si.cb  = sizeof(si);
+    status = ::CreateProcessA(binFilePath.c_str(),
+                              nullptr,
+                              nullptr,
+                              nullptr,
+                              FALSE,
+                              CREATE_NEW_CONSOLE | DEBUG_ONLY_THIS_PROCESS,
+                              nullptr,
+                              nullptr,
+                              &si,
+                              &pi);
+    if (!status) {
+        return 0;
+    }
+	
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+    return pi.dwProcessId;
+}
+
 #elif WXBOX_IN_MAC_OS
 
 static inline std::vector<wb_process::ProcessInfo> GetProcessList_Mac()
@@ -57,22 +83,27 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Mac()
     return std::move(vt);
 }
 
+static inline wb_process::PID StartProcessAndAttach_Mac(const std::string& binFilePath)
+{
+    return 0;
+}
+
 #endif
 
 std::vector<wb_process::ProcessInfo> wxbox::util::process::GetProcessList()
 {
-#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+#if WXBOX_IN_WINDOWS_OS
     return std::move(GetProcessList_Windows());
-#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+#elif WXBOX_IN_MAC_OS
     return std::move(GetProcessList_Mac());
 #endif
 }
 
 wb_process::WIN_HANDLE wxbox::util::process::GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt)
 {
-#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
+#if WXBOX_IN_WINDOWS_OS
     return (WIN_HANDLE)::WindowFromPoint((POINT)pt);
-#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+#elif WXBOX_IN_MAC_OS
     return nullptr;
 #endif
 }
@@ -83,9 +114,9 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
         return false;
     }
 
-#if WXBOX_PLATFORM == WXBOX_WINDOWS_OS
-    
-	DWORD  pid                   = 0;
+#if WXBOX_IN_WINDOWS_OS
+
+    DWORD  pid                   = 0;
     HANDLE hProcess              = NULL;
     char   fullPath[MAX_PATH]    = {0};
     char   absFullPath[MAX_PATH] = {0};
@@ -95,7 +126,7 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
         return false;
     }
 
-	hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+    hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if (!hProcess) {
         return false;
     }
@@ -112,12 +143,21 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
 
     pi.abspath  = absFullPath;
     pi.filename = ::PathFindFileNameA(absFullPath);
-    pi.dirpath  = std::move(wxbox::util::file::ToDirectoryPath(absFullPath));  
-	pi.pid      = pid;
+    pi.dirpath  = std::move(wxbox::util::file::ToDirectoryPath(absFullPath));
+    pi.pid      = pid;
 
-#elif WXBOX_PLATFORM == WXBOX_MAC_OS
+#elif WXBOX_IN_MAC_OS
     return false;
 #endif
 
     return true;
+}
+
+wb_process::PID wxbox::util::process::StartProcessAndAttach(const std::string& binFilePath)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return StartProcessAndAttach_Windows(binFilePath);
+#elif WXBOX_IN_MAC_OS
+    return StartProcessAndAttach_Mac(binFilePath);
+#endif
 }

@@ -33,4 +33,4 @@ endif
 
 # add wxbox executable
 executable('wxbox', sources: [wxbox_src, qt_processed], include_directories: wxbox_inc,
-    install : true, dependencies: [qt5_dep, spdlog_dep, grpc_dep, yaml_cpp_dep], gui_app: true)
+    install : true, dependencies: [qt5_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep, grpc_dep, yaml_cpp_dep], gui_app: true)
