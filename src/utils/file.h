@@ -4,6 +4,11 @@
 namespace wxbox {
     namespace util {
         namespace file {
+
+			//
+			// Function
+			//
+
             bool        IsPathExists(const std::string& path);
             bool        IsDirectory(const std::string& path);
             std::string ToFileName(const std::string& path);

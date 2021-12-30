@@ -87,8 +87,13 @@ std::string wxbox::util::file::JoinPath(const std::string& dirPath, const std::s
 {
 #if WXBOX_IN_WINDOWS_OS
     char dest[MAX_PATH] = {0};
-    PathCombineA(dest, dirPath.c_str(), fileName.c_str());
-    return dest;
+    char full[MAX_PATH] = {0};
+
+    if (::PathCombineA(dest, dirPath.c_str(), fileName.c_str())) {
+        ::GetFullPathNameA(dest, MAX_PATH, full, nullptr);
+	}
+
+    return full;
 #elif WXBOX_IN_MAC_OS
     namespace fs = std::experimental::filesystem;
     return std::move((fs::path(dirPath) / fs::path(fileName)).string());
