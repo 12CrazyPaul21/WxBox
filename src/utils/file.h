@@ -23,11 +23,15 @@ namespace wxbox {
                 // Build Number
                 uint32_t build;
 
+				// Raw String
+                std::string str;
+
                 _VersionNumber()
                   : major(0)
                   , minor(0)
                   , revision(0)
                   , build(0)
+                  , str("")
                 {
                 }
 

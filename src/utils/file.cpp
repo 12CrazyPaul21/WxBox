@@ -185,6 +185,7 @@ bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::u
     versionNumber.minor    = parts[1];
     versionNumber.revision = parts[2];
     versionNumber.build    = parts[3];
+    versionNumber.str      = version;
 
     return true;
 }

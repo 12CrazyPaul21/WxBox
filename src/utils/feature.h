@@ -385,7 +385,7 @@ namespace wxbox {
                 // Method
                 //
 
-                void Reset()
+                inline void Reset()
                 {
                     platform           = "";
                     featureFileAbsPath = "";
@@ -393,7 +393,7 @@ namespace wxbox {
                     mapWxHookPointFeatures.clear();
                 }
 
-                bool GetWxAbsoluteHookInfoWithVersion(const std::string& version, WxAbsoluteHookInfo& wxAbsoluteHookInfo)
+                inline bool GetWxAbsoluteHookInfoWithVersion(const std::string& version, WxAbsoluteHookInfo& wxAbsoluteHookInfo)
                 {
                     if (mapWxAbsoluteHookInfo.find(version) == mapWxAbsoluteHookInfo.end()) {
                         return false;
@@ -401,6 +401,64 @@ namespace wxbox {
 
                     wxAbsoluteHookInfo = mapWxAbsoluteHookInfo[version];
 
+                    return true;
+                }
+
+                inline bool GetWxHookPointFeaturesWithVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
+                {
+                    if (mapWxHookPointFeatures.find(version) == mapWxHookPointFeatures.end()) {
+                        return false;
+                    }
+
+                    wxHookPointFeatures = mapWxHookPointFeatures[version];
+
+                    return true;
+                }
+
+                inline bool GetWxHookPointFeaturesWithSimilarVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
+                {
+                    if (mapWxHookPointFeatures.empty()) {
+                        return false;
+                    }
+
+                    wxbox::util::file::VersionNumber versionNumber;
+                    if (!wxbox::util::file::UnwindVersionNumber(version, versionNumber)) {
+                        return false;
+                    }
+
+                    if (GetWxHookPointFeaturesWithVersion(version, wxHookPointFeatures)) {
+                        return true;
+                    }
+
+                    std::vector<wxbox::util::file::VersionNumber> vtVersions;
+                    for (auto pair : mapWxHookPointFeatures) {
+                        wxbox::util::file::VersionNumber vn;
+                        if (!wxbox::util::file::UnwindVersionNumber(pair.first, vn)) {
+                            continue;
+                        }
+                        vtVersions.emplace_back(vn);
+                    }
+
+                    if (vtVersions.size() == 0) {
+                        return false;
+                    }
+
+                    // sort version number
+                    std::sort(vtVersions.begin(), vtVersions.end());
+
+                    // find similar
+                    wxbox::util::file::PVersionNumber similar = nullptr;
+                    for (size_t i = 0; i < vtVersions.size(); i++) {
+                        if (vtVersions[i] >= versionNumber) {
+                            similar = &vtVersions[i];
+                            break;
+                        }
+                    }
+
+                    if (!similar) {
+                        similar = &vtVersions[vtVersions.size() - 1];
+                    }
+                    wxHookPointFeatures = mapWxHookPointFeatures[similar->str];
                     return true;
                 }
 

@@ -21,9 +21,9 @@ TEST(wxbox_utils, wx)
     EXPECT_EQ(true, resolveSuccess);
     spdlog::info("wechat environment success : {}", resolveSuccess);
 
-    auto wxMultiBoxingSuccess = wxbox::util::wx::OpenWxWithMultiBoxing(wxEnvInfo);
-    EXPECT_EQ(true, wxMultiBoxingSuccess);
-    spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
+    //auto wxMultiBoxingSuccess = wxbox::util::wx::OpenWxWithMultiBoxing(wxEnvInfo);
+    //EXPECT_EQ(true, wxMultiBoxingSuccess);
+    //spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
 }
 
 TEST(wxbox_utils, file)
@@ -83,6 +83,32 @@ TEST(wxbox_utils, file)
     wxbox::util::file::UnwindVersionNumber("0.1.", versionNumber);
     EXPECT_EQ(true, versionNumber.major == 0 && versionNumber.minor == 0 && versionNumber.revision == 0 && versionNumber.build == 0);
     spdlog::info("unwind version[0.1.] number : {}.{}.{}.{}", versionNumber.major, versionNumber.minor, versionNumber.revision, versionNumber.build);
+
+	//
+	// compare version
+	//
+
+	wxbox::util::file::VersionNumber versionNumber1, versionNumber2, versionNumber3, versionNumber4;
+    wxbox::util::file::UnwindVersionNumber("3.2.6", versionNumber1);
+    wxbox::util::file::UnwindVersionNumber("3.2.6.0", versionNumber2);
+    wxbox::util::file::UnwindVersionNumber("3.2.6.1", versionNumber3);
+    wxbox::util::file::UnwindVersionNumber("2.2.6.1", versionNumber4);
+    EXPECT_EQ(0, versionNumber1.compare(versionNumber1));
+    EXPECT_EQ(0, versionNumber1.compare(versionNumber2));
+    EXPECT_EQ(-1, versionNumber1.compare(versionNumber3));
+    EXPECT_EQ(1, versionNumber1.compare(versionNumber4));
+    EXPECT_EQ(true, versionNumber1 == versionNumber1);
+    EXPECT_EQ(true, versionNumber1 == versionNumber2);
+    EXPECT_EQ(false, versionNumber1 != versionNumber2);
+    EXPECT_EQ(true, versionNumber1 != versionNumber3);
+    EXPECT_EQ(false, versionNumber1 > versionNumber2);
+    EXPECT_EQ(true, versionNumber1 >= versionNumber2);
+    EXPECT_EQ(true, versionNumber1 > versionNumber4);
+    EXPECT_EQ(true, versionNumber3 > versionNumber4);
+    EXPECT_EQ(false, versionNumber3 < versionNumber4);
+    EXPECT_EQ(true, versionNumber1 <= versionNumber2);
+    EXPECT_EQ(true, versionNumber1 <= versionNumber3);
+    EXPECT_EQ(false, versionNumber3 <= versionNumber4);
 }
 
 TEST(wxbox_utils, string)
@@ -203,5 +229,9 @@ TEST(wxbox_utils, feature)
                 }
             }
         }
-    }
+
+		wb_feature::WxHookPointFeatures wxHookPointFeatures1, wxHookPointFeatures2;
+        EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.4.4", wxHookPointFeatures1));
+        EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.5.27", wxHookPointFeatures2));
+	}
 }

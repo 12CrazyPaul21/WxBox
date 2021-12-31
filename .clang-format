@@ -54,7 +54,7 @@ CompactNamespaces: false
 ConstructorInitializerIndentWidth: 2
 Cpp11BracedListStyle: true
 PointerAlignment: Left
-FixNamespaceComments: true
+FixNamespaceComments: false
 IncludeBlocks: Preserve
 # IndentCaseBlocks: false
 IndentCaseLabels: true
