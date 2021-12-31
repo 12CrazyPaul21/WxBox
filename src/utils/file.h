@@ -31,6 +31,53 @@ namespace wxbox {
                 {
                 }
 
+                int compare(const _VersionNumber& right)
+                {
+                    uint32_t leftVersion[4]  = {major, minor, revision, build};
+                    uint32_t rightVersion[4] = {right.major, right.minor, right.revision, right.build};
+
+                    for (int i = 0; i < 4; i++) {
+                        if (leftVersion[i] > rightVersion[i]) {
+                            return 1;
+                        }
+                        else if (leftVersion[i] < rightVersion[i]) {
+                            return -1;
+                        }
+                    }
+
+                    return 0;
+                }
+
+                bool operator==(const _VersionNumber& right)
+                {
+                    return major == right.major && minor == right.minor && revision == right.revision && build == right.build;
+                }
+
+                bool operator!=(const _VersionNumber& right)
+                {
+                    return !operator==(right);
+                }
+
+                bool operator>(const _VersionNumber& right)
+                {
+                    return compare(right) == 1;
+                }
+
+                bool operator>=(const _VersionNumber& right)
+                {
+                    return compare(right) >= 0;
+                }
+
+                bool operator<(const _VersionNumber& right)
+                {
+                    return compare(right) == -1;
+                }
+
+                bool operator<=(const _VersionNumber& right)
+                {
+                    return compare(right) <= 0;
+                }
+
             } VersionNumber, *PVersionNumber;
 
             //
@@ -49,4 +96,4 @@ namespace wxbox {
     }
 }
 
-#endif // #ifndef __WXBOX_UTILS_FILE_H
+#endif  // #ifndef __WXBOX_UTILS_FILE_H
