@@ -5,11 +5,11 @@ namespace wxbox {
     namespace util {
         namespace feature {
 
-			//
-			// Global
-			//
+            //
+            // Global
+            //
 
-			const std::vector<std::string> WX_HOOK_API = {
+            const std::vector<std::string> WX_HOOK_API = {
                 "CheckAppSingleton",
                 "FetchGlobalContactContextAddress",
                 "InitWeChatContactItem",
@@ -22,11 +22,11 @@ namespace wxbox {
                 "FetchGlobalSendMessageContext",
                 "WXSendFileMessage"};
 
-			//
-			// Typedef
-			//
+            //
+            // Typedef
+            //
 
-			typedef struct _WxAbsoluteHookInfo
+            typedef struct _WxAbsoluteHookInfo
             {
                 std::string                               wxVersion;
                 std::unordered_map<std::string, uint32_t> mapApiRva;
@@ -86,7 +86,7 @@ namespace wxbox {
 
             } WxAbsoluteHookInfo, *PWxAbsoluteHookInfo;
 
-			typedef struct _HookPointFeatureInfo
+            typedef struct _HookPointFeatureInfo
             {
                 //
                 // ScanType:
@@ -145,7 +145,7 @@ namespace wxbox {
                 _HookPointFeatureInfo& operator=(const _HookPointFeatureInfo& other)
                 {
                     _copy(other);
-					return *this;
+                    return *this;
                 }
 
                 _HookPointFeatureInfo(_HookPointFeatureInfo&& other)
@@ -156,15 +156,15 @@ namespace wxbox {
                 _HookPointFeatureInfo& operator=(const _HookPointFeatureInfo&& other)
                 {
                     _move(std::move(other));
-					return *this;
+                    return *this;
                 }
 
                 //
                 // Method
                 //
 
-				void _copy(const _HookPointFeatureInfo& other)
-				{
+                void _copy(const _HookPointFeatureInfo& other)
+                {
                     //
                     // scan info
                     //
@@ -196,10 +196,10 @@ namespace wxbox {
 
                     // for 'backMultiTimes'
                     locateActionExecuteTimes = other.locateActionExecuteTimes;
-				}
+                }
 
-				void _move(const _HookPointFeatureInfo&& other)
-				{
+                void _move(const _HookPointFeatureInfo&& other)
+                {
                     //
                     // scan info
                     //
@@ -231,7 +231,7 @@ namespace wxbox {
 
                     // for 'backMultiTimes'
                     locateActionExecuteTimes = other.locateActionExecuteTimes;
-				}
+                }
 
                 void Reset()
                 {
@@ -325,14 +325,14 @@ namespace wxbox {
                         return false;
                     }
 
-					hookPointFeatureInfo = mapApiFeature[api];
+                    hookPointFeatureInfo = mapApiFeature[api];
 
                     return true;
                 }
 
             } WxHookPointFeatures, *PWxHookPointFeatures;
 
-			typedef struct _WxApiHookInfo
+            typedef struct _WxApiHookInfo
             {
                 std::string                                          platform;
                 std::string                                          featureFileAbsPath;
@@ -415,4 +415,4 @@ namespace wxbox {
     }
 }
 
-#endif  // #ifndef __WXBOX_UTILS_FEATURE_H
+#endif // #ifndef __WXBOX_UTILS_FEATURE_H

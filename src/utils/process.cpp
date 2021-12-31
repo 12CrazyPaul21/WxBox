@@ -69,7 +69,7 @@ static inline wb_process::PID StartProcessAndAttach_Windows(const std::string& b
     if (!status) {
         return 0;
     }
-	
+
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
     return pi.dwProcessId;

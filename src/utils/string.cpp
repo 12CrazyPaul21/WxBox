@@ -50,9 +50,9 @@ static inline std::wstring ToWString_Mac(const std::string& str)
 
 std::string wxbox::util::string::ToString(const std::wstring& str)
 {
-	//
+    //
     // utf8 wstring to utf8 string
-	//
+    //
 
 #if WXBOX_IN_WINDOWS_OS
     return std::move(ToString_Windows(str));
@@ -63,9 +63,9 @@ std::string wxbox::util::string::ToString(const std::wstring& str)
 
 std::wstring wxbox::util::string::ToWString(const std::string& str)
 {
-	//
+    //
     // utf8 string to utf8 wstring
-	//
+    //
 
 #if WXBOX_IN_WINDOWS_OS
     return std::move(ToWString_Windows(str));

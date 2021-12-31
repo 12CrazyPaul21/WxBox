@@ -108,31 +108,31 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
         return false;
     }
 
-	wchar_t feature[] = L"_WeChat_App_Instance_Identity_Mutex_Name";
+    wchar_t feature[] = L"_WeChat_App_Instance_Identity_Mutex_Name";
 
-	// locate feature string address
+    // locate feature string address
     ULONG_PTR featAddress = wb_memory::ScanMemory(hProcess, pBaseAddr, dwModuleSize, (LPVOID)feature, sizeof(feature));
     if (!featAddress) {
         return false;
     }
 
-	// locate feature ref address
+    // locate feature ref address
     ULONG_PTR featRefAddress = wb_memory::ScanMemory(hProcess, pBaseAddr, dwModuleSize, (LPVOID)&featAddress, sizeof(featAddress));
     if (!featRefAddress) {
         return false;
-	}
+    }
 
-	// locate CheckAppSingleton function entry address
+    // locate CheckAppSingleton function entry address
     uint8_t  funcEntryFeature_CheckAppSingleton[] = {0xCC, 0xCC, 0x55, 0x8B, 0xEC};
     uint32_t checkAppSingletonEntryAddr           = wb_memory::ScanMemoryRev(hProcess, (LPVOID)featRefAddress, 0x20, funcEntryFeature_CheckAppSingleton, sizeof(funcEntryFeature_CheckAppSingleton));
     if (!checkAppSingletonEntryAddr) {
         return false;
-	}
+    }
     checkAppSingletonEntryAddr += 2;
 
-	//
-	// asm 'ret' code. [0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3](mov eax, 0; ret) can be used directly, but frida-gum's GumX86Writer is still used for assembly here
-	//
+    //
+    // asm 'ret' code. [0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3](mov eax, 0; ret) can be used directly, but frida-gum's GumX86Writer is still used for assembly here
+    //
 
     GumX86Writer x86Writer;
     guint8       x86MachineInstruction[32] = {0};
@@ -145,11 +145,11 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
     ::gum_x86_writer_put_ret(&x86Writer);
     uInstructionSize = ::gum_x86_writer_offset(&x86Writer);
 
-	//
-	// crack wechat
-	//
+    //
+    // crack wechat
+    //
 
-	SIZE_T uNumberOfBytesWritten = 0;
+    SIZE_T uNumberOfBytesWritten = 0;
     return ::MemoryWriteSafe(hProcess, (LPVOID)checkAppSingletonEntryAddr, (LPVOID)x86MachineInstruction, (SIZE_T)uInstructionSize, &uNumberOfBytesWritten);
 }
 

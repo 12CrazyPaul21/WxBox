@@ -67,7 +67,7 @@ std::string wxbox::util::file::ToFileName(const std::string& path)
         return "";
     }
 
-	return std::move(std::experimental::filesystem::path(path).filename().string());
+    return std::move(std::experimental::filesystem::path(path).filename().string());
 }
 
 std::string wxbox::util::file::ToDirectoryPath(const std::string& path)
@@ -91,7 +91,7 @@ std::string wxbox::util::file::JoinPath(const std::string& dirPath, const std::s
 
     if (::PathCombineA(dest, dirPath.c_str(), fileName.c_str())) {
         ::GetFullPathNameA(dest, MAX_PATH, full, nullptr);
-	}
+    }
 
     return full;
 #elif WXBOX_IN_MAC_OS
@@ -139,17 +139,17 @@ bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::u
     versionNumber.build    = 0;
 
     //
-	// note: c++11's regex doesn't support lookbehind
-	// ^([0-9]+(\\.)?){1,4}(?<=[^\\.])$
-	//
-	// ^(([0-9]+)\\.){0,3}([0-9]+){1}$
-	// ^([0-9]+)?\\.?([0-9]+)?\\.?([0-9]+)?\\.?([0-9]+)$
-	// ^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$
-	//
+    // note: c++11's regex doesn't support lookbehind
+    // ^([0-9]+(\\.)?){1,4}(?<=[^\\.])$
+    //
+    // ^(([0-9]+)\\.){0,3}([0-9]+){1}$
+    // ^([0-9]+)?\\.?([0-9]+)?\\.?([0-9]+)?\\.?([0-9]+)$
+    // ^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$
+    //
 
-    std::regex  matchPattern("^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$");
+    std::regex matchPattern("^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$");
 
-	std::smatch result;
+    std::smatch result;
     if (!std::regex_match(version.begin(), version.end(), result, matchPattern)) {
         return false;
     }
@@ -157,14 +157,14 @@ bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::u
         return false;
     }
 
-	//
-	// split version number
-	//
+    //
+    // split version number
+    //
 
-	uint32_t parts[4]  = {0, 0, 0, 0};
-    int partIndex = 0;
+    uint32_t parts[4]  = {0, 0, 0, 0};
+    int      partIndex = 0;
 
-	for (size_t i = 1; i < 5; i++) {
+    for (size_t i = 1; i < 5; i++) {
         if (!result[i].matched) {
             continue;
         }
@@ -175,16 +175,16 @@ bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::u
 
         uint32_t number    = (uint32_t)_atoi64(result[i].str().c_str());
         parts[partIndex++] = number;
-	}
+    }
 
-	//
-	// fill version info
-	//
+    //
+    // fill version info
+    //
 
-	versionNumber.major    = parts[0];
+    versionNumber.major    = parts[0];
     versionNumber.minor    = parts[1];
     versionNumber.revision = parts[2];
     versionNumber.build    = parts[3];
 
-	return true;
+    return true;
 }

@@ -3,13 +3,13 @@
 
 namespace wxbox {
     namespace util {
-		namespace wx {
+        namespace wx {
 
-			//
-			// Typedef
-			//
+            //
+            // Typedef
+            //
 
-			typedef struct _WeChatEnvironmentInfo
+            typedef struct _WeChatEnvironmentInfo
             {
                 std::string installPath;
                 std::string executeFileName;
@@ -66,7 +66,7 @@ namespace wxbox {
             std::string GetWxVersion(const std::string& installPath);
             bool        ResolveWxEnvInfo(const std::string& installPath, PWeChatEnvironmentInfo pWxEnvInfo);
             bool        OpenWxWithMultiBoxing(const WeChatEnvironmentInfo& wxEnvInfo);
-		}
+        }
     }
 }
 

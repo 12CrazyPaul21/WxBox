@@ -3,16 +3,16 @@
 
 namespace wxbox {
     namespace util {
-		namespace string {
+        namespace string {
 
-			//
-			// Function
-			//
+            //
+            // Function
+            //
 
             std::string  ToString(const std::wstring& str);
             std::wstring ToWString(const std::string& str);
-		}
+        }
     }
 }
 
-#endif  // #ifndef __WXBOX_UTILS_STRING_H
+#endif // #ifndef __WXBOX_UTILS_STRING_H

@@ -1,6 +1,6 @@
+#include <spdlog/spdlog.h>
 #include <test_common.h>
 #include <utils/common.h>
-#include <spdlog/spdlog.h>
 
 TEST(wxbox_utils, wx)
 {
@@ -48,11 +48,11 @@ TEST(wxbox_utils, file)
 #endif
     spdlog::info("joined path : {}", joinedPath);
 
-	wb_file::VersionNumber versionNumber;
+    wb_file::VersionNumber versionNumber;
 
-	//
-	// valid version number
-	//
+    //
+    // valid version number
+    //
 
     wxbox::util::file::UnwindVersionNumber("0.1.55", versionNumber);
     EXPECT_EQ(true, versionNumber.major == 0 && versionNumber.minor == 1 && versionNumber.revision == 55 && versionNumber.build == 0);
@@ -70,11 +70,11 @@ TEST(wxbox_utils, file)
     EXPECT_EQ(true, versionNumber.major == 5 && versionNumber.minor == 1 && versionNumber.revision == 0 && versionNumber.build == 111);
     spdlog::info("unwind version[5.1.0.111] number : {}.{}.{}.{}", versionNumber.major, versionNumber.minor, versionNumber.revision, versionNumber.build);
 
-	//
-	// invalid version number
-	//
+    //
+    // invalid version number
+    //
 
-	wxbox::util::file::UnwindVersionNumber("5.1.0.111.", versionNumber);
+    wxbox::util::file::UnwindVersionNumber("5.1.0.111.", versionNumber);
     EXPECT_EQ(true, versionNumber.major == 0 && versionNumber.minor == 0 && versionNumber.revision == 0 && versionNumber.build == 0);
     spdlog::info("unwind version[5.1.0.111.] number : {}.{}.{}.{}", versionNumber.major, versionNumber.minor, versionNumber.revision, versionNumber.build);
     wxbox::util::file::UnwindVersionNumber("0.", versionNumber);
@@ -115,11 +115,11 @@ TEST(wxbox_utils, feature)
     auto processPath = wxbox::util::file::GetProcessRootPath();
     EXPECT_NE("", processPath);
 
-	auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
+    auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
     EXPECT_NE("", processPath);
     spdlog::info("feature conf path : {}", featConfPath);
 
-	wb_feature::WxApiHookInfo wxApiHookInfo;
+    wb_feature::WxApiHookInfo wxApiHookInfo;
     auto                      unwindSuccess = wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
     EXPECT_EQ(true, unwindSuccess);
     spdlog::info("feature conf unwind success : {}", unwindSuccess);
@@ -148,20 +148,20 @@ TEST(wxbox_utils, feature)
                 if (!hookPointFeatures.GetApiHookFeature(api, hookFeatureInfo)) {
                     continue;
                 }
-                
-				spdlog::info("        ScanType : {}", hookFeatureInfo.scanType);
+
+                spdlog::info("        ScanType : {}", hookFeatureInfo.scanType);
                 if (!hookFeatureInfo.scanType.compare("ref")) {
                     if (hookFeatureInfo.refFeatureStream.size()) {
                         spdlog::info("        RefFeatureStream :");
                         PrintUInt8Vector(hookFeatureInfo.refFeatureStream);
                     }
 
-					if (hookFeatureInfo.refBackExtralInstruction.size()) {
+                    if (hookFeatureInfo.refBackExtralInstruction.size()) {
                         spdlog::info("        RefBackExtralInstruction :");
                         PrintUInt8Vector(hookFeatureInfo.refBackExtralInstruction);
                     }
 
-					if (hookFeatureInfo.refFrontExtralInstruction.size()) {
+                    if (hookFeatureInfo.refFrontExtralInstruction.size()) {
                         spdlog::info("        RefFrontExtralInstruction :");
                         PrintUInt8Vector(hookFeatureInfo.refFrontExtralInstruction);
                     }
@@ -172,11 +172,11 @@ TEST(wxbox_utils, feature)
                         PrintUInt8Vector(hookFeatureInfo.pushInstruction);
                     }
 
-					if (hookFeatureInfo.refFeatureStreams.size()) {
+                    if (hookFeatureInfo.refFeatureStreams.size()) {
                         spdlog::info("        RefFeatureStreams :");
                         for (auto refFeatureStream : hookFeatureInfo.refFeatureStreams) {
                             PrintUInt8Vector(refFeatureStream);
-                        }                        
+                        }
                     }
                 }
                 else if (!hookFeatureInfo.scanType.compare("instruction")) {
@@ -184,9 +184,9 @@ TEST(wxbox_utils, feature)
                         spdlog::info("        InstructionFeatureStream :");
                         PrintUInt8Vector(hookFeatureInfo.instructionFeatureStream);
                     }
-				}
+                }
 
-				spdlog::info("        LocateAction : {}", hookFeatureInfo.locateAction);
+                spdlog::info("        LocateAction : {}", hookFeatureInfo.locateAction);
                 if (hookFeatureInfo.locateActionFeatureStream.size()) {
                     spdlog::info("        LocateActionFeatureStream :");
                     PrintUInt8Vector(hookFeatureInfo.locateActionFeatureStream);
@@ -203,5 +203,5 @@ TEST(wxbox_utils, feature)
                 }
             }
         }
-    }    
+    }
 }

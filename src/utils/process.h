@@ -82,11 +82,11 @@ namespace wxbox {
 
             std::vector<ProcessInfo> GetProcessList();
 
-			WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
+            WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
             bool       GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
             PID        StartProcessAndAttach(const std::string& binFilePath);
         }
     }
 }
 
-#endif  // #ifndef __WXBOX_UTILS_PROCESS_H
+#endif // #ifndef __WXBOX_UTILS_PROCESS_H

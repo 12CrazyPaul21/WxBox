@@ -27,14 +27,14 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
 
     hookPointFeatureInfo.Reset();
 
-	// check whether feature exists
+    // check whether feature exists
     if (!featInfo[hookPointName].IsMap()) {
         return false;
     }
 
-	auto hookPointFeatureNode = featInfo[hookPointName];
+    auto hookPointFeatureNode = featInfo[hookPointName];
 
-	// check ScanType and LocateAction exist
+    // check ScanType and LocateAction exist
     if (!hookPointFeatureNode["ScanType"].IsScalar() || !hookPointFeatureNode["LocateAction"].IsScalar()) {
         return false;
     }
@@ -74,18 +74,18 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
     else if (!hookPointFeatureInfo.scanType.compare("multiPushRef")) {
         // for 'multiPushRef'
 
-		if (!hookPointFeatureNode["PushInstruction"].IsSequence()) {
+        if (!hookPointFeatureNode["PushInstruction"].IsSequence()) {
             return false;
         }
         if (!hookPointFeatureNode["RefFeatureStreams"].IsSequence()) {
             return false;
         }
 
-		// PushInstruction
+        // PushInstruction
         hookPointFeatureInfo.pushInstruction = std::move(hookPointFeatureNode["PushInstruction"].as<std::vector<uint8_t>>());
 
-		// RefFeatureStreams
-		auto refFeatureStreamsNode = hookPointFeatureNode["RefFeatureStreams"];
+        // RefFeatureStreams
+        auto refFeatureStreamsNode = hookPointFeatureNode["RefFeatureStreams"];
         for (auto refFeatureStreamsElementNode : refFeatureStreamsNode) {
             if (!refFeatureStreamsElementNode.IsSequence()) {
                 return false;
@@ -100,21 +100,21 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
             return false;
         }
 
-		hookPointFeatureInfo.instructionFeatureStream = std::move(hookPointFeatureNode["InstructionFeatureStream"].as<std::vector<uint8_t>>());
+        hookPointFeatureInfo.instructionFeatureStream = std::move(hookPointFeatureNode["InstructionFeatureStream"].as<std::vector<uint8_t>>());
     }
 
     //
     // collect 'Locate' info
     //
 
-	if (!hookPointFeatureNode["LocateActionFeatureStream"].IsSequence()) {
+    if (!hookPointFeatureNode["LocateActionFeatureStream"].IsSequence()) {
         return false;
     }
     if (!hookPointFeatureNode["HookPointOffset"].IsScalar()) {
         return false;
     }
 
-	hookPointFeatureInfo.locateActionFeatureStream = std::move(hookPointFeatureNode["LocateActionFeatureStream"].as<std::vector<uint8_t>>());
+    hookPointFeatureInfo.locateActionFeatureStream = std::move(hookPointFeatureNode["LocateActionFeatureStream"].as<std::vector<uint8_t>>());
     hookPointFeatureInfo.hookPointOffset           = std::move(hookPointFeatureNode["HookPointOffset"].as<int32_t>());
 
     if (!hookPointFeatureInfo.locateAction.compare("backThenFront")) {
@@ -129,28 +129,27 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
     else if (!hookPointFeatureInfo.locateAction.compare("backMultiTimes")) {
         // for 'backMultiTimes'
 
-		if (!hookPointFeatureNode["LocateActionExecuteTimes"].IsScalar()) {
+        if (!hookPointFeatureNode["LocateActionExecuteTimes"].IsScalar()) {
             return false;
         }
 
         hookPointFeatureInfo.locateActionExecuteTimes = hookPointFeatureNode["LocateActionExecuteTimes"].as<int32_t>();
     }
 
-	return true;
+    return true;
 }
 
 static inline bool UnwindFeatureSecureWrapper(const YAML::Node& featInfo, const std::string& hookPointName, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
 {
     bool result = false;
 
-	try {
+    try {
         result = UnwindFeature(featInfo, hookPointName, hookPointFeatureInfo);
     }
     catch (const std::exception& /*e*/) {
-    
-	}
+    }
 
-	return result;
+    return result;
 }
 
 static inline bool UnwindAbsoluteHookInfo(const std::string& wxVersion, const YAML::Node& hookInfo, wb_feature::WxAbsoluteHookInfo& absoluteHookInfo)
@@ -178,7 +177,7 @@ static inline bool UnwindFeatureInfo(const std::string& wxVersion, const YAML::N
         if (!UnwindFeatureSecureWrapper(featInfo, api, tmpHookPointFeatureInfo)) {
             return false;
         }
-        
+
         wxHookPointFeatures.mapApiFeature[api] = tmpHookPointFeatureInfo;
     }
 
@@ -191,7 +190,7 @@ bool wxbox::util::feature::UnwindFeatureConf(const std::string& confPath, wb_fea
         return false;
     }
 
-	wxApiHookInfo.Reset();
+    wxApiHookInfo.Reset();
     wxApiHookInfo.platform = WXBOX_PLATFORM_NAME;
 
     // load and parse yaml file
@@ -208,21 +207,21 @@ bool wxbox::util::feature::UnwindFeatureConf(const std::string& confPath, wb_fea
         version = root["version"].as<std::string>();
     }
 
-	// get config root path
+    // get config root path
     std::string confRootPath = wb_file::ToDirectoryPath(confPath);
 
-	// check whether the "platform" is valid
-	if (!root["platform"].IsMap()) {
+    // check whether the "platform" is valid
+    if (!root["platform"].IsMap()) {
         return false;
     }
 
-	//
-	// analyze platform related features
-	//
+    //
+    // analyze platform related features
+    //
 
     if (!root["platform"][wxApiHookInfo.platform].IsScalar()) {
         return false;
-	}
+    }
 
     auto platformFeatureFileName     = root["platform"][wxApiHookInfo.platform].as<std::string>();
     wxApiHookInfo.featureFileAbsPath = wb_file::JoinPath(confRootPath, platformFeatureFileName);
@@ -235,29 +234,29 @@ bool wxbox::util::feature::UnwindFeatureConf(const std::string& confPath, wb_fea
         return false;
     }
 
-	YAML::Node versionAbsoluteHookInfo = platformFeature["absolute"];
-    YAML::Node featureInfo = platformFeature["feature"];
+    YAML::Node versionAbsoluteHookInfo = platformFeature["absolute"];
+    YAML::Node featureInfo             = platformFeature["feature"];
 
-	// parse all absolute version info
+    // parse all absolute version info
     for (auto aVersion : versionAbsoluteHookInfo) {
         std::string wxVersion = aVersion.first.as<std::string>();
         YAML::Node  hookInfo  = aVersion.second;
 
-		if (hookInfo.IsNull()) {
+        if (hookInfo.IsNull()) {
             continue;
         }
 
-		// parse this version's hook info
-		wb_feature::WxAbsoluteHookInfo absoluteHookInfo;
+        // parse this version's hook info
+        wb_feature::WxAbsoluteHookInfo absoluteHookInfo;
         if (!UnwindAbsoluteHookInfo(wxVersion, hookInfo, absoluteHookInfo)) {
             continue;
         }
 
-		// record this version's absolute hook info
+        // record this version's absolute hook info
         wxApiHookInfo.mapWxAbsoluteHookInfo[wxVersion] = std::move(absoluteHookInfo);
     }
 
-	// parse all feature
+    // parse all feature
     for (auto aVersionFeature : featureInfo) {
         std::string wxVersion = aVersionFeature.first.as<std::string>();
         YAML::Node  featInfo  = aVersionFeature.second;
@@ -266,13 +265,13 @@ bool wxbox::util::feature::UnwindFeatureConf(const std::string& confPath, wb_fea
             continue;
         }
 
-		// parse this version's hook feature info
-		wb_feature::WxHookPointFeatures wxHookPointFeatures;
+        // parse this version's hook feature info
+        wb_feature::WxHookPointFeatures wxHookPointFeatures;
         if (!UnwindFeatureInfo(wxVersion, featInfo, wxHookPointFeatures)) {
             continue;
         }
 
-		// record this version's hook feature info
+        // record this version's hook feature info
         wxApiHookInfo.mapWxHookPointFeatures[wxVersion] = std::move(wxHookPointFeatures);
     }
 
