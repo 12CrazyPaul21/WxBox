@@ -13,7 +13,8 @@ test_src = [
     utils_src
 ]
 
-test_exe = executable('test_all', test_src, include_directories: test_inc, dependencies: [gtest_dep, gmock_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep],
+test_exe = executable('test_all', test_src, include_directories: test_inc,
+    dependencies: [gtest_dep, gmock_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep, yaml_cpp_dep],
     build_rpath: TitanEngine_bin_root)
 
 test_env = environment()

@@ -112,3 +112,79 @@ std::string wxbox::util::file::GetProcessRootPath()
 
     return processRootPath;
 }
+
+YAML::Node wxbox::util::file::UnwindYamlFile(const std::string& path)
+{
+    YAML::Node root;
+
+    // load and parse yaml file
+    try {
+        root = YAML::LoadFile(path);
+    }
+    catch (const YAML::BadFile& /*e*/) {
+        // file cannot be loaded
+    }
+    catch (const YAML::ParserException& /*e*/) {
+        // parse failed
+    }
+
+    return std::move(root);
+}
+
+bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::util::file::VersionNumber& versionNumber)
+{
+    versionNumber.major    = 0;
+    versionNumber.minor    = 0;
+    versionNumber.revision = 0;
+    versionNumber.build    = 0;
+
+    //
+	// note: c++11's regex doesn't support lookbehind
+	// ^([0-9]+(\\.)?){1,4}(?<=[^\\.])$
+	//
+	// ^(([0-9]+)\\.){0,3}([0-9]+){1}$
+	// ^([0-9]+)?\\.?([0-9]+)?\\.?([0-9]+)?\\.?([0-9]+)$
+	// ^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$
+	//
+
+    std::regex  matchPattern("^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$");
+
+	std::smatch result;
+    if (!std::regex_match(version.begin(), version.end(), result, matchPattern)) {
+        return false;
+    }
+    if (result.size() != 5) {
+        return false;
+    }
+
+	//
+	// split version number
+	//
+
+	uint32_t parts[4]  = {0, 0, 0, 0};
+    int partIndex = 0;
+
+	for (size_t i = 1; i < 5; i++) {
+        if (!result[i].matched) {
+            continue;
+        }
+
+#if WXBOX_PLATFORM != WXBOX_WINDOWS_OS
+#define _atoi64(val) strtoll(val, nullptr, 100)
+#endif
+
+        uint32_t number    = (uint32_t)_atoi64(result[i].str().c_str());
+        parts[partIndex++] = number;
+	}
+
+	//
+	// fill version info
+	//
+
+	versionNumber.major    = parts[0];
+    versionNumber.minor    = parts[1];
+    versionNumber.revision = parts[2];
+    versionNumber.build    = parts[3];
+
+	return true;
+}

@@ -33,8 +33,13 @@
 #include <experimental/filesystem>
 #include <memory>
 #include <vector>
+#include <map>
+#include <unordered_map>
 #include <string>
 #include <algorithm>
+#include <regex>
+#include <cstdlib>
+
 
 //
 // third party
@@ -42,6 +47,7 @@
 
 #include <frida-gum.h>
 #include <TitanEngine.h>
+#include <yaml-cpp/yaml.h>
 
 
 //
@@ -53,6 +59,7 @@
 #include <utils/file.h>
 #include <utils/string.h>
 #include <utils/memory.h>
+#include <utils/feature.h>
 #include <utils/config.hpp>
 
 
@@ -65,5 +72,6 @@ namespace wb_wx      = wxbox::util::wx;
 namespace wb_file    = wxbox::util::file;
 namespace wb_string  = wxbox::util::string;
 namespace wb_memory  = wxbox::util::memory;
+namespace wb_feature = wxbox::util::feature;
 
 #endif // #ifndef __WXBOX_UTILS_COMMON_H

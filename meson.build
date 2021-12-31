@@ -126,6 +126,8 @@ utils_src = [
     join_paths(utils_root, 'string.cpp'),
     join_paths(utils_root, 'memory.h'),
     join_paths(utils_root, 'memory.cpp'),
+    join_paths(utils_root, 'feature.h'),
+    join_paths(utils_root, 'feature.cpp'),
     join_paths(utils_root, 'config.hpp')
 ]
 

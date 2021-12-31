@@ -131,7 +131,7 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
     checkAppSingletonEntryAddr += 2;
 
 	//
-	// asm 'ret' code. 0xC3(ret) can be used directly, but frida-gum's GumX86Writer is still used for assembly here
+	// asm 'ret' code. [0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3](mov eax, 0; ret) can be used directly, but frida-gum's GumX86Writer is still used for assembly here
 	//
 
     GumX86Writer x86Writer;
@@ -141,6 +141,7 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
     ::gum_x86_writer_init(&x86Writer, x86MachineInstruction);
     ::gum_x86_writer_set_target_cpu(&x86Writer, GUM_CPU_IA32);
     ::gum_x86_writer_set_target_abi(&x86Writer, GUM_ABI_WINDOWS);
+    ::gum_x86_writer_put_mov_reg_u32(&x86Writer, GUM_REG_EAX, 0);
     ::gum_x86_writer_put_ret(&x86Writer);
     uInstructionSize = ::gum_x86_writer_offset(&x86Writer);
 

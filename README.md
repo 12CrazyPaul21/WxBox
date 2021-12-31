@@ -222,7 +222,7 @@ PATH=%PATH%;$(SolutionDir)..\..\subprojects\TitanEngine\bin;$(SolutionDir)..\..\
 meson compile -C build/release pretty_format
 ```
 
-​	另外Visual Studio是支持clang-format的，按下“;”分号或者保存，会触发Visual Studio自动应用项目根目录下的.clang-format文件。并且也有一个LLVM官方的ClangFormat扩展：https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat配合。
+​	另外Visual Studio是支持clang-format的，按下“;”分号或者保存，会触发Visual Studio自动应用项目根目录下的.clang-format文件，另外选中代码然后Ctrl+K,Ctrl+F也可以主动触发。并且也有一个LLVM官方的ClangFormat扩展：https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat配合。
 
 ​	不过Visual Studio对clang-format有些地方支持可能不太好，有些开关会报错，所以这里把一些会报错的开关给注释掉了。
 

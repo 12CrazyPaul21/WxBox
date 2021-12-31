@@ -6,7 +6,7 @@ namespace wxbox {
 		namespace wx {
 
 			//
-			// typedef
+			// Typedef
 			//
 
 			typedef struct _WeChatEnvironmentInfo
@@ -34,6 +34,8 @@ namespace wxbox {
                     executeFileName = other.executeFileName;
                     executeAbsPath  = other.executeAbsPath;
                     version         = other.version;
+
+                    return *this;
                 }
 
                 _WeChatEnvironmentInfo(_WeChatEnvironmentInfo&& other)
@@ -50,6 +52,8 @@ namespace wxbox {
                     executeFileName = std::move(other.executeFileName);
                     executeAbsPath  = std::move(other.executeAbsPath);
                     version         = std::move(other.version);
+
+                    return *this;
                 }
             } WeChatEnvironmentInfo, *PWeChatEnvironmentInfo;
 

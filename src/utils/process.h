@@ -6,7 +6,7 @@ namespace wxbox {
         namespace process {
 
             //
-            // typedef
+            // Typedef
             //
 
             typedef struct _ProcessInfo
@@ -35,6 +35,8 @@ namespace wxbox {
                     filename = other.filename;
                     dirpath  = other.dirpath;
                     pid      = other.pid;
+
+                    return *this;
                 }
 
                 _ProcessInfo(_ProcessInfo&& other)
@@ -51,6 +53,8 @@ namespace wxbox {
                     filename = std::move(other.filename);
                     dirpath  = std::move(other.dirpath);
                     pid      = other.pid;
+
+                    return *this;
                 }
             } ProcessInfo, *PProcessInfo;
 
