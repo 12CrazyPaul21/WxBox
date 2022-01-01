@@ -20,7 +20,7 @@ namespace wxbox {
                 {
                 }
 
-                _WeChatEnvironmentInfo(const _WeChatEnvironmentInfo& other)
+                SETUP_COPY_METHOD(_WeChatEnvironmentInfo, other)
                 {
                     installPath     = other.installPath;
                     executeFileName = other.executeFileName;
@@ -28,17 +28,7 @@ namespace wxbox {
                     version         = other.version;
                 }
 
-                _WeChatEnvironmentInfo& operator=(const _WeChatEnvironmentInfo& other)
-                {
-                    installPath     = other.installPath;
-                    executeFileName = other.executeFileName;
-                    executeAbsPath  = other.executeAbsPath;
-                    version         = other.version;
-
-                    return *this;
-                }
-
-                _WeChatEnvironmentInfo(_WeChatEnvironmentInfo&& other)
+                SETUP_MOVE_METHOD(_WeChatEnvironmentInfo, other)
                 {
                     installPath     = std::move(other.installPath);
                     executeFileName = std::move(other.executeFileName);
@@ -46,15 +36,6 @@ namespace wxbox {
                     version         = std::move(other.version);
                 }
 
-                _WeChatEnvironmentInfo& operator=(const _WeChatEnvironmentInfo&& other)
-                {
-                    installPath     = std::move(other.installPath);
-                    executeFileName = std::move(other.executeFileName);
-                    executeAbsPath  = std::move(other.executeAbsPath);
-                    version         = std::move(other.version);
-
-                    return *this;
-                }
             } WeChatEnvironmentInfo, *PWeChatEnvironmentInfo;
 
             //
@@ -70,4 +51,4 @@ namespace wxbox {
     }
 }
 
-#endif // #ifndef __WXBOX_UTILS_WX_H
+#endif  // #ifndef __WXBOX_UTILS_WX_H

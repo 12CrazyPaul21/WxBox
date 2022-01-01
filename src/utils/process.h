@@ -21,7 +21,7 @@ namespace wxbox {
                 {
                 }
 
-                _ProcessInfo(const _ProcessInfo& other)
+                SETUP_COPY_METHOD(_ProcessInfo, other)
                 {
                     abspath  = other.abspath;
                     filename = other.filename;
@@ -29,17 +29,7 @@ namespace wxbox {
                     pid      = other.pid;
                 }
 
-                _ProcessInfo& operator=(const _ProcessInfo& other)
-                {
-                    abspath  = other.abspath;
-                    filename = other.filename;
-                    dirpath  = other.dirpath;
-                    pid      = other.pid;
-
-                    return *this;
-                }
-
-                _ProcessInfo(_ProcessInfo&& other)
+                SETUP_MOVE_METHOD(_ProcessInfo, other)
                 {
                     abspath  = std::move(other.abspath);
                     filename = std::move(other.filename);
@@ -47,15 +37,6 @@ namespace wxbox {
                     pid      = other.pid;
                 }
 
-                _ProcessInfo& operator=(const _ProcessInfo&& other)
-                {
-                    abspath  = std::move(other.abspath);
-                    filename = std::move(other.filename);
-                    dirpath  = std::move(other.dirpath);
-                    pid      = other.pid;
-
-                    return *this;
-                }
             } ProcessInfo, *PProcessInfo;
 
 #if WXBOX_IN_WINDOWS_OS
@@ -89,4 +70,4 @@ namespace wxbox {
     }
 }
 
-#endif // #ifndef __WXBOX_UTILS_PROCESS_H
+#endif  // #ifndef __WXBOX_UTILS_PROCESS_H

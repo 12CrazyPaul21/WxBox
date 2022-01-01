@@ -21,9 +21,9 @@ TEST(wxbox_utils, wx)
     EXPECT_EQ(true, resolveSuccess);
     spdlog::info("wechat environment success : {}", resolveSuccess);
 
-    //auto wxMultiBoxingSuccess = wxbox::util::wx::OpenWxWithMultiBoxing(wxEnvInfo);
-    //EXPECT_EQ(true, wxMultiBoxingSuccess);
-    //spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
+    auto wxMultiBoxingSuccess = wxbox::util::wx::OpenWxWithMultiBoxing(wxEnvInfo);
+    EXPECT_EQ(true, wxMultiBoxingSuccess);
+    spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
 }
 
 TEST(wxbox_utils, file)

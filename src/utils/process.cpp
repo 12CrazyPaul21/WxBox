@@ -1,5 +1,9 @@
 #include <utils/common.h>
 
+//
+// Functions
+//
+
 #if WXBOX_IN_WINDOWS_OS
 
 static inline std::vector<wb_process::ProcessInfo> GetProcessList_Windows()

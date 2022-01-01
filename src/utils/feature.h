@@ -39,30 +39,16 @@ namespace wxbox {
                 {
                 }
 
-                _WxAbsoluteHookInfo(const _WxAbsoluteHookInfo& other)
+                SETUP_COPY_METHOD(_WxAbsoluteHookInfo, other)
                 {
                     wxVersion = other.wxVersion;
                     mapApiRva = other.mapApiRva;
                 }
 
-                _WxAbsoluteHookInfo& operator=(const _WxAbsoluteHookInfo& other)
-                {
-                    wxVersion = other.wxVersion;
-                    mapApiRva = other.mapApiRva;
-                    return *this;
-                }
-
-                _WxAbsoluteHookInfo(_WxAbsoluteHookInfo&& other)
+                SETUP_MOVE_METHOD(_WxAbsoluteHookInfo, other)
                 {
                     wxVersion = std::move(other.wxVersion);
                     mapApiRva = std::move(other.mapApiRva);
-                }
-
-                _WxAbsoluteHookInfo& operator=(const _WxAbsoluteHookInfo&& other)
-                {
-                    wxVersion = std::move(other.wxVersion);
-                    mapApiRva = std::move(other.mapApiRva);
-                    return *this;
                 }
 
                 //
@@ -75,14 +61,7 @@ namespace wxbox {
                     mapApiRva.clear();
                 }
 
-                uint32_t GetApiRva(const std::string& api)
-                {
-                    if (mapApiRva.find(api) == mapApiRva.end()) {
-                        return 0;
-                    }
-
-                    return mapApiRva[api];
-                }
+                uint32_t GetApiRva(const std::string& api);
 
             } WxAbsoluteHookInfo, *PWxAbsoluteHookInfo;
 
@@ -137,33 +116,7 @@ namespace wxbox {
                 {
                 }
 
-                _HookPointFeatureInfo(const _HookPointFeatureInfo& other)
-                {
-                    _copy(other);
-                }
-
-                _HookPointFeatureInfo& operator=(const _HookPointFeatureInfo& other)
-                {
-                    _copy(other);
-                    return *this;
-                }
-
-                _HookPointFeatureInfo(_HookPointFeatureInfo&& other)
-                {
-                    _move(std::move(other));
-                }
-
-                _HookPointFeatureInfo& operator=(const _HookPointFeatureInfo&& other)
-                {
-                    _move(std::move(other));
-                    return *this;
-                }
-
-                //
-                // Method
-                //
-
-                void _copy(const _HookPointFeatureInfo& other)
+                SETUP_COPY_METHOD(_HookPointFeatureInfo, other)
                 {
                     //
                     // scan info
@@ -198,7 +151,7 @@ namespace wxbox {
                     locateActionExecuteTimes = other.locateActionExecuteTimes;
                 }
 
-                void _move(const _HookPointFeatureInfo&& other)
+                SETUP_MOVE_METHOD(_HookPointFeatureInfo, other)
                 {
                     //
                     // scan info
@@ -232,6 +185,10 @@ namespace wxbox {
                     // for 'backMultiTimes'
                     locateActionExecuteTimes = other.locateActionExecuteTimes;
                 }
+
+                //
+                // Method
+                //
 
                 void Reset()
                 {
@@ -283,30 +240,16 @@ namespace wxbox {
                 {
                 }
 
-                _WxHookPointFeatures(const _WxHookPointFeatures& other)
+                SETUP_COPY_METHOD(_WxHookPointFeatures, other)
                 {
                     wxVersion     = other.wxVersion;
                     mapApiFeature = other.mapApiFeature;
                 }
 
-                _WxHookPointFeatures& operator=(const _WxHookPointFeatures& other)
-                {
-                    wxVersion     = other.wxVersion;
-                    mapApiFeature = other.mapApiFeature;
-                    return *this;
-                }
-
-                _WxHookPointFeatures(_WxHookPointFeatures&& other)
+                SETUP_MOVE_METHOD(_WxHookPointFeatures, other)
                 {
                     wxVersion     = std::move(other.wxVersion);
                     mapApiFeature = std::move(other.mapApiFeature);
-                }
-
-                _WxHookPointFeatures& operator=(const _WxHookPointFeatures&& other)
-                {
-                    wxVersion     = std::move(other.wxVersion);
-                    mapApiFeature = std::move(other.mapApiFeature);
-                    return *this;
                 }
 
                 //
@@ -319,16 +262,7 @@ namespace wxbox {
                     mapApiFeature.clear();
                 }
 
-                bool GetApiHookFeature(const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo)
-                {
-                    if (mapApiFeature.find(api) == mapApiFeature.end()) {
-                        return false;
-                    }
-
-                    hookPointFeatureInfo = mapApiFeature[api];
-
-                    return true;
-                }
+                bool GetApiHookFeature(const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo);
 
             } WxHookPointFeatures, *PWxHookPointFeatures;
 
@@ -347,7 +281,7 @@ namespace wxbox {
                 {
                 }
 
-                _WxApiHookInfo(const _WxApiHookInfo& other)
+                SETUP_COPY_METHOD(_WxApiHookInfo, other)
                 {
                     platform               = other.platform;
                     featureFileAbsPath     = other.featureFileAbsPath;
@@ -355,37 +289,19 @@ namespace wxbox {
                     mapWxHookPointFeatures = other.mapWxHookPointFeatures;
                 }
 
-                _WxApiHookInfo& operator=(const _WxApiHookInfo& other)
-                {
-                    platform               = other.platform;
-                    featureFileAbsPath     = other.featureFileAbsPath;
-                    mapWxAbsoluteHookInfo  = other.mapWxAbsoluteHookInfo;
-                    mapWxHookPointFeatures = other.mapWxHookPointFeatures;
-                    return *this;
-                }
-
-                _WxApiHookInfo(_WxApiHookInfo&& other)
+                SETUP_MOVE_METHOD(_WxApiHookInfo, other)
                 {
                     platform               = std::move(other.platform);
                     featureFileAbsPath     = std::move(other.featureFileAbsPath);
                     mapWxAbsoluteHookInfo  = std::move(other.mapWxAbsoluteHookInfo);
                     mapWxHookPointFeatures = std::move(other.mapWxHookPointFeatures);
-                }
-
-                _WxApiHookInfo& operator=(const _WxApiHookInfo&& other)
-                {
-                    platform               = std::move(other.platform);
-                    featureFileAbsPath     = std::move(other.featureFileAbsPath);
-                    mapWxAbsoluteHookInfo  = std::move(other.mapWxAbsoluteHookInfo);
-                    mapWxHookPointFeatures = std::move(other.mapWxHookPointFeatures);
-                    return *this;
                 }
 
                 //
                 // Method
                 //
 
-                inline void Reset()
+                void Reset()
                 {
                     platform           = "";
                     featureFileAbsPath = "";
@@ -393,74 +309,9 @@ namespace wxbox {
                     mapWxHookPointFeatures.clear();
                 }
 
-                inline bool GetWxAbsoluteHookInfoWithVersion(const std::string& version, WxAbsoluteHookInfo& wxAbsoluteHookInfo)
-                {
-                    if (mapWxAbsoluteHookInfo.find(version) == mapWxAbsoluteHookInfo.end()) {
-                        return false;
-                    }
-
-                    wxAbsoluteHookInfo = mapWxAbsoluteHookInfo[version];
-
-                    return true;
-                }
-
-                inline bool GetWxHookPointFeaturesWithVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
-                {
-                    if (mapWxHookPointFeatures.find(version) == mapWxHookPointFeatures.end()) {
-                        return false;
-                    }
-
-                    wxHookPointFeatures = mapWxHookPointFeatures[version];
-
-                    return true;
-                }
-
-                inline bool GetWxHookPointFeaturesWithSimilarVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
-                {
-                    if (mapWxHookPointFeatures.empty()) {
-                        return false;
-                    }
-
-                    wxbox::util::file::VersionNumber versionNumber;
-                    if (!wxbox::util::file::UnwindVersionNumber(version, versionNumber)) {
-                        return false;
-                    }
-
-                    if (GetWxHookPointFeaturesWithVersion(version, wxHookPointFeatures)) {
-                        return true;
-                    }
-
-                    std::vector<wxbox::util::file::VersionNumber> vtVersions;
-                    for (auto pair : mapWxHookPointFeatures) {
-                        wxbox::util::file::VersionNumber vn;
-                        if (!wxbox::util::file::UnwindVersionNumber(pair.first, vn)) {
-                            continue;
-                        }
-                        vtVersions.emplace_back(vn);
-                    }
-
-                    if (vtVersions.size() == 0) {
-                        return false;
-                    }
-
-                    // sort version number
-                    std::sort(vtVersions.begin(), vtVersions.end());
-
-                    // find similar
-                    wxbox::util::file::PVersionNumber similar = nullptr;
-                    for (size_t i = 0; i < vtVersions.size(); i++) {
-                        if (vtVersions[i] >= versionNumber) {
-                            similar = &vtVersions[i];
-                            break;
-                        }
-                    }
-
-                    if (!similar) {
-                        similar = &vtVersions[vtVersions.size() - 1];
-                    }
-                    wxHookPointFeatures = mapWxHookPointFeatures[similar->str];
-                    return true;
-                }
+                bool GetWxAbsoluteHookInfoWithVersion(const std::string& version, WxAbsoluteHookInfo& wxAbsoluteHookInfo);
+                bool GetWxHookPointFeaturesWithVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures);
+                bool GetWxHookPointFeaturesWithSimilarVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures);
 
             } WxApiHookInfo, *PWxApiHookInfo;
 
@@ -473,4 +324,4 @@ namespace wxbox {
     }
 }
 
-#endif // #ifndef __WXBOX_UTILS_FEATURE_H
+#endif  // #ifndef __WXBOX_UTILS_FEATURE_H

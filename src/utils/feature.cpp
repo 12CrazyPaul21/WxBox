@@ -1,5 +1,111 @@
 #include <utils/common.h>
 
+//
+// Classes or Structures
+//
+
+/**
+ * wxbox::util::feature::WxAbsoluteHookInfo
+ */
+uint32_t wb_feature::_WxAbsoluteHookInfo::GetApiRva(const std::string& api)
+{
+    if (mapApiRva.find(api) == mapApiRva.end()) {
+        return 0;
+    }
+
+    return mapApiRva[api];
+}
+
+/**
+ * wxbox::util::feature::WxHookPointFeatures
+ */
+bool wb_feature::_WxHookPointFeatures::GetApiHookFeature(const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    if (mapApiFeature.find(api) == mapApiFeature.end()) {
+        return false;
+    }
+
+    hookPointFeatureInfo = mapApiFeature[api];
+
+    return true;
+}
+
+/**
+ * wxbox::util::feature::WxApiHookInfo
+ */
+bool wb_feature::_WxApiHookInfo::GetWxAbsoluteHookInfoWithVersion(const std::string& version, WxAbsoluteHookInfo& wxAbsoluteHookInfo)
+{
+    if (mapWxAbsoluteHookInfo.find(version) == mapWxAbsoluteHookInfo.end()) {
+        return false;
+    }
+
+    wxAbsoluteHookInfo = mapWxAbsoluteHookInfo[version];
+
+    return true;
+}
+
+bool wb_feature::_WxApiHookInfo::GetWxHookPointFeaturesWithVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
+{
+    if (mapWxHookPointFeatures.find(version) == mapWxHookPointFeatures.end()) {
+        return false;
+    }
+
+    wxHookPointFeatures = mapWxHookPointFeatures[version];
+
+    return true;
+}
+
+bool wb_feature::_WxApiHookInfo::GetWxHookPointFeaturesWithSimilarVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
+{
+    if (mapWxHookPointFeatures.empty()) {
+        return false;
+    }
+
+    wxbox::util::file::VersionNumber versionNumber;
+    if (!wxbox::util::file::UnwindVersionNumber(version, versionNumber)) {
+        return false;
+    }
+
+    if (GetWxHookPointFeaturesWithVersion(version, wxHookPointFeatures)) {
+        return true;
+    }
+
+    std::vector<wxbox::util::file::VersionNumber> vtVersions;
+    for (auto pair : mapWxHookPointFeatures) {
+        wxbox::util::file::VersionNumber vn;
+        if (!wxbox::util::file::UnwindVersionNumber(pair.first, vn)) {
+            continue;
+        }
+        vtVersions.emplace_back(vn);
+    }
+
+    if (vtVersions.size() == 0) {
+        return false;
+    }
+
+    // sort version number
+    std::sort(vtVersions.begin(), vtVersions.end());
+
+    // find similar
+    wxbox::util::file::PVersionNumber similar = nullptr;
+    for (size_t i = 0; i < vtVersions.size(); i++) {
+        if (vtVersions[i] >= versionNumber) {
+            similar = &vtVersions[i];
+            break;
+        }
+    }
+
+    if (!similar) {
+        similar = &vtVersions[vtVersions.size() - 1];
+    }
+    wxHookPointFeatures = mapWxHookPointFeatures[similar->str];
+    return true;
+}
+
+//
+// Functions
+//
+
 static inline uint32_t UnwindEntryRVA(const YAML::Node& hookInfo, const std::string& funcName)
 {
     uint32_t rva = 0;

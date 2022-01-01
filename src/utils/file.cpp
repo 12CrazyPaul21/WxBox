@@ -1,5 +1,72 @@
 #include <utils/common.h>
 
+//
+// Classes or Structures
+//
+
+/**
+ * wxbox::util::file::VersionNumber
+ */
+wb_file::_VersionNumber::_VersionNumber()
+  : major(0)
+  , minor(0)
+  , revision(0)
+  , build(0)
+  , str("")
+{
+}
+
+int wb_file::_VersionNumber::compare(const _VersionNumber& right)
+{
+    uint32_t leftVersion[4]  = {major, minor, revision, build};
+    uint32_t rightVersion[4] = {right.major, right.minor, right.revision, right.build};
+
+    for (int i = 0; i < 4; i++) {
+        if (leftVersion[i] > rightVersion[i]) {
+            return 1;
+        }
+        else if (leftVersion[i] < rightVersion[i]) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+bool wb_file::_VersionNumber::operator==(const _VersionNumber& right)
+{
+    return major == right.major && minor == right.minor && revision == right.revision && build == right.build;
+}
+
+bool wb_file::_VersionNumber::operator!=(const _VersionNumber& right)
+{
+    return !operator==(right);
+}
+
+bool wb_file::_VersionNumber::operator>(const _VersionNumber& right)
+{
+    return compare(right) == 1;
+}
+
+bool wb_file::_VersionNumber::operator>=(const _VersionNumber& right)
+{
+    return compare(right) >= 0;
+}
+
+bool wb_file::_VersionNumber::operator<(const _VersionNumber& right)
+{
+    return compare(right) == -1;
+}
+
+bool wb_file::_VersionNumber::operator<=(const _VersionNumber& right)
+{
+    return compare(right) <= 0;
+}
+
+//
+// Functions
+//
+
 #if WXBOX_IN_WINDOWS_OS
 
 static inline std::string GetProcessRootPath_Windows()
