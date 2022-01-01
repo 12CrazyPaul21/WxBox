@@ -54,10 +54,11 @@ namespace wxbox {
             // Function
             //
 
-            std::string GetWxInstallationPath();
-            bool        IsWxInstallationPathValid(const std::string& installPath);
-            std::string GetWxVersion(const std::string& installPath);
-            bool        ResolveWxEnvInfo(const std::string& installPath, PWeChatEnvironmentInfo pWxEnvInfo);
+            std::string                                    GetWxInstallationPath();
+            bool                                           IsWxInstallationPathValid(const std::string& installPath);
+            std::string                                    GetWxVersion(const std::string& installPath);
+            bool                                           ResolveWxEnvInfo(const std::string& installPath, PWeChatEnvironmentInfo pWxEnvInfo);
+            std::vector<wxbox::util::process::ProcessInfo> GetWeChatProcessList();
         }
     }
 }

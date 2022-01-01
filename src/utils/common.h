@@ -84,6 +84,15 @@ typedef unsigned ucpulong_t;
 #include <frida-gum.h>
 #include <yaml-cpp/yaml.h>
 
+//
+// Patch
+//
+
+#if !WXBOX_IN_WINDOWS_OS
+#ifdef _stricmp
+#define _stricmp strcmp
+#endif
+#endif
 
 //
 // WxBox utils headers

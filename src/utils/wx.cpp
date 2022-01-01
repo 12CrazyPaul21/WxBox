@@ -142,3 +142,15 @@ bool wxbox::util::wx::ResolveWxEnvInfo(const std::string& installPath, PWeChatEn
 
     return true;
 }
+
+std::vector<wb_process::ProcessInfo> wxbox::util::wx::GetWeChatProcessList()
+{
+    auto processLists = wxbox::util::process::GetProcessList();
+
+    processLists.erase(std::remove_if(processLists.begin(), processLists.end(), [&](const wb_process::ProcessInfo& pi) {
+                           return ::_stricmp(pi.filename.c_str(), WX_WE_CHAT_EXE);
+                       }),
+                       processLists.end());
+
+    return std::move(processLists);
+}

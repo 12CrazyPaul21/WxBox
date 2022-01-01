@@ -232,6 +232,15 @@ TEST(wxbox_utils, wx)
     auto                         resolveSuccess = wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo);
     EXPECT_EQ(true, resolveSuccess);
     spdlog::info("wechat environment success : {}", resolveSuccess);
+
+    auto wxProcessLists = wxbox::util::wx::GetWeChatProcessList();
+    spdlog::info("wechat prcoess count : {}", wxProcessLists.size());
+    for (auto pi : wxProcessLists) {
+        spdlog::info("wechat prcoess(pid:{}) ", pi.pid);
+        spdlog::info("    execute file abspath : {}", pi.abspath);
+        spdlog::info("    execute filename : {}", pi.filename);
+        spdlog::info("    execute dirpath : {}", pi.dirpath);
+    }
 }
 
 TEST(wxbox_utils, crack)
@@ -284,10 +293,9 @@ TEST(wxbox_utils, crack)
 #endif
 
     if (hProcess) {
-
-		//
-		// known wechat version
-		//
+        //
+        // known wechat version
+        //
 
         wb_feature::LocateTargetInfo locateTargetInfo = {hProcess, openResult.pModuleBaseAddr, openResult.uModuleSize};
         for (auto api : wb_feature::WX_HOOK_API) {
@@ -296,11 +304,11 @@ TEST(wxbox_utils, crack)
             spdlog::info("{} VA : 0x{:08X}", api, addr);
         }
 
-		//
-		// unknwon wechat version
-		//
+        //
+        // unknwon wechat version
+        //
 
-		wxEnvInfo.version = "3.2.2";
+        wxEnvInfo.version = "3.2.2";
         for (auto api : wb_feature::WX_HOOK_API) {
             ucpulong_t addr = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
             EXPECT_NE(ucpulong_t(0), addr);
