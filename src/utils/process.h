@@ -14,7 +14,7 @@ namespace wxbox {
                 std::string abspath;
                 std::string filename;
                 std::string dirpath;
-                uint32_t    pid;
+                ucpulong_t  pid;
 
                 _ProcessInfo()
                   : pid(0)
@@ -39,6 +39,14 @@ namespace wxbox {
 
             } ProcessInfo, *PProcessInfo;
 
+            typedef struct _ModuleInfo
+            {
+                std::string moduleName;
+                std::string modulePath;
+                void*       pModuleBaseAddr;
+                ucpulong_t  uModuleSize;
+            } ModuleInfo, *PModuleInfo;
+
 #if WXBOX_IN_WINDOWS_OS
             typedef HWND   WIN_HANDLE;
             typedef POINT  SCREEN_POINT;
@@ -46,14 +54,14 @@ namespace wxbox {
             typedef HANDLE PROCESS_HANDLE;
 #elif WXBOX_IN_MAC_OS
             /*
-			typedef uint64_t WIN_HANDLE;
+			typedef ucpulong_t WIN_HANDLE;
 			typedef struct
 			{
                 int32_t x;
                 int32_t y;
 			} SCREEN_POINT;
-			typedef uint32_t PID;
-			typedef uint32_t PROCESS_HANDLE;
+			typedef ucpulong_t PID;
+			typedef ucpulong_t PROCESS_HANDLE;
 			*/
 #endif
 
@@ -65,7 +73,9 @@ namespace wxbox {
 
             WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
             bool       GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
-            PID        StartProcessAndAttach(const std::string& binFilePath);
+            bool       GetModuleInfo(PID pid, const std::string& moduleName, ModuleInfo& moduleInfo);
+
+            PID StartProcessAndAttach(const std::string& binFilePath);
         }
     }
 }

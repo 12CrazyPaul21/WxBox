@@ -6,6 +6,18 @@ namespace wxbox {
         namespace wx {
 
             //
+            // Macro
+            //
+
+#if WXBOX_IN_WINDOWS_OS
+#define WX_WE_CHAT_EXE "WeChat.exe"
+#define WX_WE_CHAT_CORE_MODULE "WeChatWin.dll"
+#elif WXBOX_IN_MAC_OS
+#define WX_WE_CHAT_EXE ""
+#define WX_WE_CHAT_CORE_MODULE ""
+#endif
+
+            //
             // Typedef
             //
 
@@ -46,7 +58,6 @@ namespace wxbox {
             bool        IsWxInstallationPathValid(const std::string& installPath);
             std::string GetWxVersion(const std::string& installPath);
             bool        ResolveWxEnvInfo(const std::string& installPath, PWeChatEnvironmentInfo pWxEnvInfo);
-            bool        OpenWxWithMultiBoxing(const WeChatEnvironmentInfo& wxEnvInfo);
         }
     }
 }

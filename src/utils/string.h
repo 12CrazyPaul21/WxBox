@@ -15,4 +15,4 @@ namespace wxbox {
     }
 }
 
-#endif // #ifndef __WXBOX_UTILS_STRING_H
+#endif  // #ifndef __WXBOX_UTILS_STRING_H

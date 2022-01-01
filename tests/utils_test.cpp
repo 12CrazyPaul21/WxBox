@@ -1,30 +1,8 @@
+#include <chrono>
 #include <spdlog/spdlog.h>
 #include <test_common.h>
+#include <thread>
 #include <utils/common.h>
-
-TEST(wxbox_utils, wx)
-{
-    auto wxInstallationPath = wxbox::util::wx::GetWxInstallationPath();
-    EXPECT_NE("", wxInstallationPath);
-    spdlog::info("wx installation path : {}", wxInstallationPath);
-
-    auto wxInstallationPathIsValid = wxbox::util::wx::IsWxInstallationPathValid(wxInstallationPath);
-    EXPECT_EQ(true, wxInstallationPathIsValid);
-    spdlog::info("wx installation path is valid : {}", wxInstallationPathIsValid);
-
-    auto wxVersion = wxbox::util::wx::GetWxVersion(wxInstallationPath);
-    EXPECT_NE("", wxVersion);
-    spdlog::info("wx version : {}", wxVersion);
-
-    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
-    auto                         resolveSuccess = wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo);
-    EXPECT_EQ(true, resolveSuccess);
-    spdlog::info("wechat environment success : {}", resolveSuccess);
-
-    auto wxMultiBoxingSuccess = wxbox::util::wx::OpenWxWithMultiBoxing(wxEnvInfo);
-    EXPECT_EQ(true, wxMultiBoxingSuccess);
-    spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
-}
 
 TEST(wxbox_utils, file)
 {
@@ -84,11 +62,11 @@ TEST(wxbox_utils, file)
     EXPECT_EQ(true, versionNumber.major == 0 && versionNumber.minor == 0 && versionNumber.revision == 0 && versionNumber.build == 0);
     spdlog::info("unwind version[0.1.] number : {}.{}.{}.{}", versionNumber.major, versionNumber.minor, versionNumber.revision, versionNumber.build);
 
-	//
-	// compare version
-	//
+    //
+    // compare version
+    //
 
-	wxbox::util::file::VersionNumber versionNumber1, versionNumber2, versionNumber3, versionNumber4;
+    wxbox::util::file::VersionNumber versionNumber1, versionNumber2, versionNumber3, versionNumber4;
     wxbox::util::file::UnwindVersionNumber("3.2.6", versionNumber1);
     wxbox::util::file::UnwindVersionNumber("3.2.6.0", versionNumber2);
     wxbox::util::file::UnwindVersionNumber("3.2.6.1", versionNumber3);
@@ -230,8 +208,109 @@ TEST(wxbox_utils, feature)
             }
         }
 
-		wb_feature::WxHookPointFeatures wxHookPointFeatures1, wxHookPointFeatures2;
+        wb_feature::WxHookPointFeatures wxHookPointFeatures1, wxHookPointFeatures2;
         EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.4.4", wxHookPointFeatures1));
         EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.5.27", wxHookPointFeatures2));
-	}
+    }
+}
+
+TEST(wxbox_utils, wx)
+{
+    auto wxInstallationPath = wxbox::util::wx::GetWxInstallationPath();
+    EXPECT_NE("", wxInstallationPath);
+    spdlog::info("wx installation path : {}", wxInstallationPath);
+
+    auto wxInstallationPathIsValid = wxbox::util::wx::IsWxInstallationPathValid(wxInstallationPath);
+    EXPECT_EQ(true, wxInstallationPathIsValid);
+    spdlog::info("wx installation path is valid : {}", wxInstallationPathIsValid);
+
+    auto wxVersion = wxbox::util::wx::GetWxVersion(wxInstallationPath);
+    EXPECT_NE("", wxVersion);
+    spdlog::info("wx version : {}", wxVersion);
+
+    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
+    auto                         resolveSuccess = wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo);
+    EXPECT_EQ(true, resolveSuccess);
+    spdlog::info("wechat environment success : {}", resolveSuccess);
+}
+
+TEST(wxbox_utils, crack)
+{
+    auto wxInstallationPath = wxbox::util::wx::GetWxInstallationPath();
+    if (wxInstallationPath.empty()) {
+        return;
+    }
+
+    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
+    if (!wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo)) {
+        return;
+    }
+
+    // unwind feature
+    wb_feature::WxApiHookInfo wxApiHookInfo;
+    auto                      processPath  = wxbox::util::file::GetProcessRootPath();
+    auto                      featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
+    wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
+
+    // open wechat with multi boxing
+    wb_crack::OpenWxWithMultiBoxingResult openResult           = {0};
+    auto                                  wxMultiBoxingSuccess = wxbox::util::crack::OpenWxWithMultiBoxing(wxEnvInfo, wxApiHookInfo, &openResult);
+    EXPECT_EQ(true, wxMultiBoxingSuccess);
+    spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
+    if (wxMultiBoxingSuccess) {
+        spdlog::info("wechat new process pid : {}", openResult.pid);
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    // get module info
+    wb_process::ModuleInfo mi;
+    auto                   getModuleInfoSuccess = wxbox::util::process::GetModuleInfo(openResult.pid, WX_WE_CHAT_CORE_MODULE, mi);
+    EXPECT_EQ(true, getModuleInfoSuccess);
+    EXPECT_EQ((ucpulong_t)openResult.pModuleBaseAddr, (ucpulong_t)mi.pModuleBaseAddr);
+    EXPECT_EQ((ucpulong_t)openResult.uModuleSize, (ucpulong_t)mi.uModuleSize);
+    spdlog::info("get module info : {}", getModuleInfoSuccess);
+
+    //
+    // locate all api va
+    //
+
+    wb_process::PROCESS_HANDLE hProcess = NULL;
+
+#if WXBOX_IN_WINDOWS_OS
+    hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, openResult.pid);
+#elif WXBOX_IN_MAC_OS
+
+#endif
+
+    if (hProcess) {
+
+		//
+		// known wechat version
+		//
+
+        wb_feature::LocateTargetInfo locateTargetInfo = {hProcess, openResult.pModuleBaseAddr, openResult.uModuleSize};
+        for (auto api : wb_feature::WX_HOOK_API) {
+            ucpulong_t addr = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
+            EXPECT_NE(ucpulong_t(0), addr);
+            spdlog::info("{} VA : 0x{:08X}", api, addr);
+        }
+
+		//
+		// unknwon wechat version
+		//
+
+		wxEnvInfo.version = "3.2.2";
+        for (auto api : wb_feature::WX_HOOK_API) {
+            ucpulong_t addr = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
+            EXPECT_NE(ucpulong_t(0), addr);
+            spdlog::info("unknwon version(v3.2.2) {} VA : 0x{:08X}", api, addr);
+        }
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    CloseHandle(hProcess);
+#elif WXBOX_IN_MAC_OS
+
+#endif
 }

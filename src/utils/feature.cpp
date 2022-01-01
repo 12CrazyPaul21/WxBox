@@ -7,7 +7,7 @@
 /**
  * wxbox::util::feature::WxAbsoluteHookInfo
  */
-uint32_t wb_feature::_WxAbsoluteHookInfo::GetApiRva(const std::string& api)
+ucpulong_t wb_feature::_WxAbsoluteHookInfo::GetApiRva(const std::string& api)
 {
     if (mapApiRva.find(api) == mapApiRva.end()) {
         return 0;
@@ -44,6 +44,17 @@ bool wb_feature::_WxApiHookInfo::GetWxAbsoluteHookInfoWithVersion(const std::str
     return true;
 }
 
+ucpulong_t wb_feature::_WxApiHookInfo::GetWxAPIAbsoluteHookPointAddressWithVersion(const std::string& version, const std::string& api)
+{
+    WxAbsoluteHookInfo wxAbsoluteHookInfo;
+
+    if (!GetWxAbsoluteHookInfoWithVersion(version, wxAbsoluteHookInfo)) {
+        return 0;
+    }
+
+    return wxAbsoluteHookInfo.GetApiRva(api);
+}
+
 bool wb_feature::_WxApiHookInfo::GetWxHookPointFeaturesWithVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
 {
     if (mapWxHookPointFeatures.find(version) == mapWxHookPointFeatures.end()) {
@@ -53,6 +64,17 @@ bool wb_feature::_WxApiHookInfo::GetWxHookPointFeaturesWithVersion(const std::st
     wxHookPointFeatures = mapWxHookPointFeatures[version];
 
     return true;
+}
+
+bool wb_feature::_WxApiHookInfo::GetWxAPIHookPointFeatureWithVersion(const std::string& version, const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    WxHookPointFeatures wxHookPointFeatures;
+
+    if (!GetWxHookPointFeaturesWithVersion(version, wxHookPointFeatures)) {
+        return false;
+    }
+
+    return wxHookPointFeatures.GetApiHookFeature(api, hookPointFeatureInfo);
 }
 
 bool wb_feature::_WxApiHookInfo::GetWxHookPointFeaturesWithSimilarVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures)
@@ -102,13 +124,24 @@ bool wb_feature::_WxApiHookInfo::GetWxHookPointFeaturesWithSimilarVersion(const 
     return true;
 }
 
+bool wb_feature::_WxApiHookInfo::GetWxAPIHookPointFeatureWithSimilarVersion(const std::string& version, const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    WxHookPointFeatures wxHookPointFeatures;
+
+    if (!GetWxHookPointFeaturesWithSimilarVersion(version, wxHookPointFeatures)) {
+        return false;
+    }
+
+    return wxHookPointFeatures.GetApiHookFeature(api, hookPointFeatureInfo);
+}
+
 //
 // Functions
 //
 
-static inline uint32_t UnwindEntryRVA(const YAML::Node& hookInfo, const std::string& funcName)
+static inline ucpulong_t UnwindEntryRVA(const YAML::Node& hookInfo, const std::string& funcName)
 {
-    uint32_t rva = 0;
+    ucpulong_t rva = 0;
 
     if (!funcName.length()) {
         return rva;
@@ -116,7 +149,7 @@ static inline uint32_t UnwindEntryRVA(const YAML::Node& hookInfo, const std::str
 
     try {
         if (hookInfo[funcName].IsMap() && hookInfo[funcName]["EntryRVA"].IsScalar()) {
-            rva = hookInfo[funcName]["EntryRVA"].as<uint32_t>();
+            rva = hookInfo[funcName]["EntryRVA"].as<ucpulong_t>();
         }
     }
     catch (const std::exception& /*e*/) {
@@ -186,6 +219,9 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         if (!hookPointFeatureNode["RefFeatureStreams"].IsSequence()) {
             return false;
         }
+        if (!hookPointFeatureNode["RefFeatureStreamsOffset"].IsSequence()) {
+            return false;
+        }
 
         // PushInstruction
         hookPointFeatureInfo.pushInstruction = std::move(hookPointFeatureNode["PushInstruction"].as<std::vector<uint8_t>>());
@@ -198,6 +234,9 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
             }
             hookPointFeatureInfo.refFeatureStreams.emplace_back(refFeatureStreamsElementNode.as<std::vector<uint8_t>>());
         }
+
+        // RefFeatureStreamsOffset
+        hookPointFeatureInfo.refFeatureStreamsOffset = std::move(hookPointFeatureNode["RefFeatureStreamsOffset"].as<std::vector<uint8_t>>());
     }
     else if (!hookPointFeatureInfo.scanType.compare("instruction")) {
         // for 'instruction'
@@ -216,12 +255,16 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
     if (!hookPointFeatureNode["LocateActionFeatureStream"].IsSequence()) {
         return false;
     }
+    if (!hookPointFeatureNode["LocateActionRange"].IsScalar()) {
+        return false;
+    }
     if (!hookPointFeatureNode["HookPointOffset"].IsScalar()) {
         return false;
     }
 
     hookPointFeatureInfo.locateActionFeatureStream = std::move(hookPointFeatureNode["LocateActionFeatureStream"].as<std::vector<uint8_t>>());
-    hookPointFeatureInfo.hookPointOffset           = std::move(hookPointFeatureNode["HookPointOffset"].as<int32_t>());
+    hookPointFeatureInfo.locateActionRange         = std::move(hookPointFeatureNode["LocateActionRange"].as<long>());
+    hookPointFeatureInfo.hookPointOffset           = std::move(hookPointFeatureNode["HookPointOffset"].as<long>());
 
     if (!hookPointFeatureInfo.locateAction.compare("backThenFront")) {
         // for 'backThenFront'
@@ -239,7 +282,7 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
             return false;
         }
 
-        hookPointFeatureInfo.locateActionExecuteTimes = hookPointFeatureNode["LocateActionExecuteTimes"].as<int32_t>();
+        hookPointFeatureInfo.locateActionExecuteTimes = hookPointFeatureNode["LocateActionExecuteTimes"].as<long>();
     }
 
     return true;
@@ -261,7 +304,7 @@ static inline bool UnwindFeatureSecureWrapper(const YAML::Node& featInfo, const 
 static inline bool UnwindAbsoluteHookInfo(const std::string& wxVersion, const YAML::Node& hookInfo, wb_feature::WxAbsoluteHookInfo& absoluteHookInfo)
 {
     for (auto api : wb_feature::WX_HOOK_API) {
-        uint32_t rva = UnwindEntryRVA(hookInfo, api);
+        ucpulong_t rva = UnwindEntryRVA(hookInfo, api);
         if (!rva) {
             return false;
         }
@@ -288,6 +331,129 @@ static inline bool UnwindFeatureInfo(const std::string& wxVersion, const YAML::N
     }
 
     return true;
+}
+
+static ucpulong_t LocateWxAPIHookPointVA_Step_Scan_Type_Ref(wb_feature::LocateTargetInfo& locateTargetInfo, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    // find the location of the refFeatureStream
+    ucpulong_t va = wb_memory::ScanMemory(locateTargetInfo.hProcess, locateTargetInfo.pModuleBaseAddr, locateTargetInfo.uModuleSize, hookPointFeatureInfo.refFeatureStream.data(), hookPointFeatureInfo.refFeatureStream.size());
+    if (!va) {
+        return 0;
+    }
+
+    std::vector<uint8_t> scanPattern;
+    scanPattern.insert(scanPattern.end(), hookPointFeatureInfo.refBackExtralInstruction.begin(), hookPointFeatureInfo.refBackExtralInstruction.end());
+    scanPattern.insert(scanPattern.end(), (uint8_t*)&va, (uint8_t*)&va + 4);
+    scanPattern.insert(scanPattern.end(), hookPointFeatureInfo.refFrontExtralInstruction.begin(), hookPointFeatureInfo.refFrontExtralInstruction.end());
+
+    // find the location of the reference address
+    return wb_memory::ScanMemory(locateTargetInfo.hProcess, locateTargetInfo.pModuleBaseAddr, locateTargetInfo.uModuleSize, scanPattern.data(), scanPattern.size());
+}
+
+static ucpulong_t LocateWxAPIHookPointVA_Step_Scan_Type_MultiPushRef(wb_feature::LocateTargetInfo& locateTargetInfo, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    std::vector<uint8_t> scanPattern;
+
+    for (size_t i = 0; i < hookPointFeatureInfo.refFeatureStreams.size(); i++) {
+        // find the location of the featureStream
+        auto       featureStream = hookPointFeatureInfo.refFeatureStreams[i];
+        ucpulong_t va            = wb_memory::ScanMemory(locateTargetInfo.hProcess, locateTargetInfo.pModuleBaseAddr, locateTargetInfo.uModuleSize, featureStream.data(), featureStream.size());
+        if (!va) {
+            return 0;
+        }
+
+        if (i < hookPointFeatureInfo.refFeatureStreamsOffset.size()) {
+            va += hookPointFeatureInfo.refFeatureStreamsOffset[i];
+        }
+
+        scanPattern.insert(scanPattern.end(), hookPointFeatureInfo.pushInstruction.begin(), hookPointFeatureInfo.pushInstruction.end());
+        scanPattern.insert(scanPattern.end(), (uint8_t*)&va, (uint8_t*)&va + 4);
+    }
+
+    // find the location of the reference address
+    return wb_memory::ScanMemory(locateTargetInfo.hProcess, locateTargetInfo.pModuleBaseAddr, locateTargetInfo.uModuleSize, scanPattern.data(), scanPattern.size());
+}
+
+static ucpulong_t LocateWxAPIHookPointVA_Step_Scan_Type_Instruction(wb_feature::LocateTargetInfo& locateTargetInfo, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    return wb_memory::ScanMemory(locateTargetInfo.hProcess, locateTargetInfo.pModuleBaseAddr, locateTargetInfo.uModuleSize, hookPointFeatureInfo.instructionFeatureStream.data(), hookPointFeatureInfo.instructionFeatureStream.size());
+}
+
+static inline ucpulong_t LocateWxAPIHookPointVA_Step_Scan(wb_feature::LocateTargetInfo& locateTargetInfo, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    if (!hookPointFeatureInfo.scanType.compare("ref")) {
+        return LocateWxAPIHookPointVA_Step_Scan_Type_Ref(locateTargetInfo, hookPointFeatureInfo);
+    }
+    else if (!hookPointFeatureInfo.scanType.compare("multiPushRef")) {
+        return LocateWxAPIHookPointVA_Step_Scan_Type_MultiPushRef(locateTargetInfo, hookPointFeatureInfo);
+    }
+    else if (!hookPointFeatureInfo.scanType.compare("instruction")) {
+        return LocateWxAPIHookPointVA_Step_Scan_Type_Instruction(locateTargetInfo, hookPointFeatureInfo);
+    }
+
+    return 0;
+}
+
+static inline ucpulong_t LocateWxAPIHookPointVA_Step_Locate_Action_Back(wb_feature::LocateTargetInfo& locateTargetInfo, ucpulong_t pMemBegin, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    return wb_memory::ScanMemoryRev(locateTargetInfo.hProcess, (void*)pMemBegin, hookPointFeatureInfo.locateActionRange, hookPointFeatureInfo.locateActionFeatureStream.data(), hookPointFeatureInfo.locateActionFeatureStream.size());
+}
+
+static inline ucpulong_t LocateWxAPIHookPointVA_Step_Locate_Action_Front(wb_feature::LocateTargetInfo& locateTargetInfo, ucpulong_t pMemBegin, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    return wb_memory::ScanMemory(locateTargetInfo.hProcess, (void*)pMemBegin, hookPointFeatureInfo.locateActionRange, hookPointFeatureInfo.locateActionFeatureStream.data(), hookPointFeatureInfo.locateActionFeatureStream.size());
+}
+
+static inline ucpulong_t LocateWxAPIHookPointVA_Step_Locate_Action_BackThenFront(wb_feature::LocateTargetInfo& locateTargetInfo, ucpulong_t pMemBegin, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    ucpulong_t step1 = wb_memory::ScanMemoryRev(locateTargetInfo.hProcess, (void*)pMemBegin, hookPointFeatureInfo.locateActionRange, hookPointFeatureInfo.locateActionFeatureStream.data(), hookPointFeatureInfo.locateActionFeatureStream.size());
+    if (!step1) {
+        return 0;
+    }
+
+    return wb_memory::ScanMemory(locateTargetInfo.hProcess, (void*)step1, hookPointFeatureInfo.locateActionRange, hookPointFeatureInfo.thenLocateActionFeatureStream.data(), hookPointFeatureInfo.thenLocateActionFeatureStream.size());
+}
+
+static inline ucpulong_t LocateWxAPIHookPointVA_Step_Locate_Action_BackMultiTimes(wb_feature::LocateTargetInfo& locateTargetInfo, ucpulong_t pMemBegin, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    ucpulong_t addr = pMemBegin;
+
+    for (long i = 0; i < hookPointFeatureInfo.locateActionExecuteTimes; i++) {
+        addr = wb_memory::ScanMemoryRev(locateTargetInfo.hProcess, (void*)addr, hookPointFeatureInfo.locateActionRange, hookPointFeatureInfo.locateActionFeatureStream.data(), hookPointFeatureInfo.locateActionFeatureStream.size());
+        if (!addr) {
+            return 0;
+        }
+    }
+
+    return addr;
+}
+
+static inline ucpulong_t LocateWxAPIHookPointVA_Step_Locate(wb_feature::LocateTargetInfo& locateTargetInfo, ucpulong_t pMemBegin, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
+{
+    if (!pMemBegin) {
+        return 0;
+    }
+
+    ucpulong_t va = 0;
+
+    if (!hookPointFeatureInfo.locateAction.compare("back")) {
+        va = LocateWxAPIHookPointVA_Step_Locate_Action_Back(locateTargetInfo, pMemBegin, hookPointFeatureInfo);
+    }
+    else if (!hookPointFeatureInfo.locateAction.compare("front")) {
+        va = LocateWxAPIHookPointVA_Step_Locate_Action_Front(locateTargetInfo, pMemBegin, hookPointFeatureInfo);
+    }
+    else if (!hookPointFeatureInfo.locateAction.compare("backThenFront")) {
+        va = LocateWxAPIHookPointVA_Step_Locate_Action_BackThenFront(locateTargetInfo, pMemBegin, hookPointFeatureInfo);
+    }
+    else if (!hookPointFeatureInfo.locateAction.compare("backMultiTimes")) {
+        va = LocateWxAPIHookPointVA_Step_Locate_Action_BackMultiTimes(locateTargetInfo, pMemBegin, hookPointFeatureInfo);
+    }
+
+    if (va) {
+        va += hookPointFeatureInfo.hookPointOffset;
+    }
+
+    return va;
 }
 
 bool wxbox::util::feature::UnwindFeatureConf(const std::string& confPath, wb_feature::WxApiHookInfo& wxApiHookInfo)
@@ -382,4 +548,45 @@ bool wxbox::util::feature::UnwindFeatureConf(const std::string& confPath, wb_fea
     }
 
     return true;
+}
+
+ucpulong_t wxbox::util::feature::LocateWxAPIHookPointVA(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api)
+{
+    ucpulong_t va = LocateWxAPIHookPointVAOnlyAbsolute(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
+    if (va) {
+        return va;
+    }
+    return LocateWxAPIHookPointVAOnlyFeature(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
+}
+
+ucpulong_t wxbox::util::feature::LocateWxAPIHookPointVAOnlyAbsolute(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api)
+{
+    ucpulong_t rva = wxApiHookInfo.GetWxAPIAbsoluteHookPointAddressWithVersion(wxEnvInfo.version, api);
+    if (rva) {
+        return (ucpulong_t)locateTargetInfo.pModuleBaseAddr + rva;
+    }
+    return 0;
+}
+
+ucpulong_t wxbox::util::feature::LocateWxAPIHookPointVAOnlyFeature(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api)
+{
+    wb_feature::HookPointFeatureInfo hookPointFeatureInfo;
+    if (!wxApiHookInfo.GetWxAPIHookPointFeatureWithSimilarVersion(wxEnvInfo.version, api, hookPointFeatureInfo)) {
+        return 0;
+    }
+
+    //
+    // step 'Scan'
+    //
+
+    ucpulong_t scanResultAddr = LocateWxAPIHookPointVA_Step_Scan(locateTargetInfo, hookPointFeatureInfo);
+    if (!scanResultAddr) {
+        return 0;
+    }
+
+    //
+    // step 'Locate'
+    //
+
+    return LocateWxAPIHookPointVA_Step_Locate(locateTargetInfo, scanResultAddr, hookPointFeatureInfo);
 }

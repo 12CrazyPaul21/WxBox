@@ -23,12 +23,12 @@ namespace wxbox {
                 // Build Number
                 uint32_t build;
 
-				// Raw String
+                // Raw String
                 std::string str;
 
                 _VersionNumber();
 
-                int compare(const _VersionNumber& right);
+                int  compare(const _VersionNumber& right);
                 bool operator==(const _VersionNumber& right);
                 bool operator!=(const _VersionNumber& right);
                 bool operator>(const _VersionNumber& right);

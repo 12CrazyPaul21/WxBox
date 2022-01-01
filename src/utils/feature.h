@@ -1,6 +1,9 @@
 #ifndef __WXBOX_UTILS_FEATURE_H
 #define __WXBOX_UTILS_FEATURE_H
 
+#include <utils/process.h>
+#include <utils/wx.h>
+
 namespace wxbox {
     namespace util {
         namespace feature {
@@ -28,8 +31,8 @@ namespace wxbox {
 
             typedef struct _WxAbsoluteHookInfo
             {
-                std::string                               wxVersion;
-                std::unordered_map<std::string, uint32_t> mapApiRva;
+                std::string                                 wxVersion;
+                std::unordered_map<std::string, ucpulong_t> mapApiRva;
 
                 //
                 // constructor
@@ -61,7 +64,7 @@ namespace wxbox {
                     mapApiRva.clear();
                 }
 
-                uint32_t GetApiRva(const std::string& api);
+                ucpulong_t GetApiRva(const std::string& api);
 
             } WxAbsoluteHookInfo, *PWxAbsoluteHookInfo;
 
@@ -84,6 +87,7 @@ namespace wxbox {
                 // for 'multiPushRef' scan type
                 std::vector<uint8_t>              pushInstruction;
                 std::vector<std::vector<uint8_t>> refFeatureStreams;
+                std::vector<uint8_t>              refFeatureStreamsOffset;
 
                 // for 'instruction' scan type
                 std::vector<uint8_t> instructionFeatureStream;
@@ -98,13 +102,14 @@ namespace wxbox {
 
                 std::string          locateAction;
                 std::vector<uint8_t> locateActionFeatureStream;
-                int                  hookPointOffset;
+                long                 hookPointOffset;
+                long                 locateActionRange;
 
                 // for 'backThenFront' locate action
                 std::vector<uint8_t> thenLocateActionFeatureStream;
 
                 // for 'backMultiTimes' locate action
-                int locateActionExecuteTimes;
+                long locateActionExecuteTimes;
 
                 //
                 // constructor
@@ -130,8 +135,9 @@ namespace wxbox {
                     refFrontExtralInstruction = other.refFrontExtralInstruction;
 
                     // for 'multiPushRef'
-                    pushInstruction   = other.pushInstruction;
-                    refFeatureStreams = other.refFeatureStreams;
+                    pushInstruction         = other.pushInstruction;
+                    refFeatureStreams       = other.refFeatureStreams;
+                    refFeatureStreamsOffset = other.refFeatureStreamsOffset;
 
                     // for 'instruction'
                     instructionFeatureStream = other.instructionFeatureStream;
@@ -142,6 +148,7 @@ namespace wxbox {
 
                     locateAction              = other.locateAction;
                     locateActionFeatureStream = other.locateActionFeatureStream;
+                    locateActionRange         = other.locateActionRange;
                     hookPointOffset           = other.hookPointOffset;
 
                     // for 'backThenFront'
@@ -165,8 +172,9 @@ namespace wxbox {
                     refFrontExtralInstruction = std::move(other.refFrontExtralInstruction);
 
                     // for 'multiPushRef'
-                    pushInstruction   = std::move(other.pushInstruction);
-                    refFeatureStreams = std::move(other.refFeatureStreams);
+                    pushInstruction         = std::move(other.pushInstruction);
+                    refFeatureStreams       = std::move(other.refFeatureStreams);
+                    refFeatureStreamsOffset = std::move(other.refFeatureStreamsOffset);
 
                     // for 'instruction'
                     instructionFeatureStream = std::move(other.instructionFeatureStream);
@@ -177,6 +185,7 @@ namespace wxbox {
 
                     locateAction              = std::move(other.locateAction);
                     locateActionFeatureStream = std::move(other.locateActionFeatureStream);
+                    locateActionRange         = other.locateActionRange;
                     hookPointOffset           = other.hookPointOffset;
 
                     // for 'backThenFront'
@@ -206,6 +215,7 @@ namespace wxbox {
                     // for 'multiPushRef'
                     pushInstruction.clear();
                     refFeatureStreams.clear();
+                    refFeatureStreamsOffset.clear();
 
                     // for 'instruction'
                     instructionFeatureStream.clear();
@@ -216,7 +226,8 @@ namespace wxbox {
 
                     locateAction.clear();
                     locateActionFeatureStream.clear();
-                    hookPointOffset = 0;
+                    locateActionRange = 0;
+                    hookPointOffset   = 0;
 
                     // for 'backThenFront'
                     thenLocateActionFeatureStream.clear();
@@ -309,17 +320,32 @@ namespace wxbox {
                     mapWxHookPointFeatures.clear();
                 }
 
-                bool GetWxAbsoluteHookInfoWithVersion(const std::string& version, WxAbsoluteHookInfo& wxAbsoluteHookInfo);
+                bool       GetWxAbsoluteHookInfoWithVersion(const std::string& version, WxAbsoluteHookInfo& wxAbsoluteHookInfo);
+                ucpulong_t GetWxAPIAbsoluteHookPointAddressWithVersion(const std::string& version, const std::string& api);
+
                 bool GetWxHookPointFeaturesWithVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures);
+                bool GetWxAPIHookPointFeatureWithVersion(const std::string& version, const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo);
+
                 bool GetWxHookPointFeaturesWithSimilarVersion(const std::string& version, WxHookPointFeatures& wxHookPointFeatures);
+                bool GetWxAPIHookPointFeatureWithSimilarVersion(const std::string& version, const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo);
 
             } WxApiHookInfo, *PWxApiHookInfo;
+
+            typedef struct _LocateTargetInfo
+            {
+                wxbox::util::process::PROCESS_HANDLE hProcess;
+                void*                                pModuleBaseAddr;
+                ucpulong_t                           uModuleSize;
+            } LocateTargetInfo, *PLocateTargetInfo;
 
             //
             // Function
             //
 
-            bool UnwindFeatureConf(const std::string& confPath, WxApiHookInfo& wxApiHookInfo);
+            bool       UnwindFeatureConf(const std::string& confPath, WxApiHookInfo& wxApiHookInfo);
+            ucpulong_t LocateWxAPIHookPointVA(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
+            ucpulong_t LocateWxAPIHookPointVAOnlyAbsolute(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
+            ucpulong_t LocateWxAPIHookPointVAOnlyFeature(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
         }
     }
 }

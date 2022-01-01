@@ -53,6 +53,30 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Windows()
     return std::move(vt);
 }
 
+static bool GetModuleInfo_Windows(wb_process::PID pid, const std::string& moduleName, wb_process::ModuleInfo& moduleInfo)
+{
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+    if (hSnap == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    MODULEENTRY32 modEntry;
+    modEntry.dwSize = sizeof(modEntry);
+
+    if (Module32First(hSnap, &modEntry)) {
+        do {
+            if (!::_stricmp(modEntry.szModule, moduleName.c_str())) {
+                moduleInfo.pModuleBaseAddr = modEntry.modBaseAddr;
+                moduleInfo.uModuleSize     = modEntry.modBaseSize;
+                return true;
+            }
+
+        } while (Module32Next(hSnap, &modEntry));
+    }
+
+    return false;
+}
+
 static inline wb_process::PID StartProcessAndAttach_Windows(const std::string& binFilePath)
 {
     BOOL                status = FALSE;
@@ -85,6 +109,11 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Mac()
 {
     std::vector<wb_process::ProcessInfo> vt;
     return std::move(vt);
+}
+
+static inline bool GetModuleInfo_Mac(wb_process::PID pid, const std::string& moduleName, wb_process::ModuleInfo& moduleInfo)
+{
+    return false;
 }
 
 static inline wb_process::PID StartProcessAndAttach_Mac(const std::string& binFilePath)
@@ -155,6 +184,15 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
 #endif
 
     return true;
+}
+
+bool wxbox::util::process::GetModuleInfo(PID pid, const std::string& moduleName, ModuleInfo& moduleInfo)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return GetModuleInfo_Windows(pid, moduleName, moduleInfo);
+#elif WXBOX_IN_MAC_OS
+    return GetModuleInfo_Mac(pid, moduleName, moduleInfo);
+#endif
 }
 
 wb_process::PID wxbox::util::process::StartProcessAndAttach(const std::string& binFilePath)

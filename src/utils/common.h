@@ -34,6 +34,13 @@
     void __move(TYPE&& OTHER_VAL_NAME)
 
 //
+// Typedef
+//
+
+typedef long     cpulong_t;
+typedef unsigned ucpulong_t;
+
+//
 // Platform related headers
 //
 
@@ -89,6 +96,7 @@
 #include <utils/memory.h>
 #include <utils/string.h>
 #include <utils/wx.h>
+#include <utils/crack.h>
 
 //
 // Short namespace
@@ -100,5 +108,6 @@ namespace wb_file    = wxbox::util::file;
 namespace wb_string  = wxbox::util::string;
 namespace wb_memory  = wxbox::util::memory;
 namespace wb_feature = wxbox::util::feature;
+namespace wb_crack   = wxbox::util::crack;
 
 #endif  // #ifndef __WXBOX_UTILS_COMMON_H
