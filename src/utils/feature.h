@@ -338,6 +338,40 @@ namespace wxbox {
                 ucpulong_t                           uModuleSize;
             } LocateTargetInfo, *PLocateTargetInfo;
 
+            typedef struct _WxAPIHookPointVACollection
+            {
+                std::unordered_map<std::string, ucpulong_t> collection;
+
+                _WxAPIHookPointVACollection()
+                {
+                }
+
+                SETUP_COPY_METHOD(_WxAPIHookPointVACollection, other)
+                {
+                    collection = other.collection;
+                }
+
+                SETUP_MOVE_METHOD(_WxAPIHookPointVACollection, other)
+                {
+                    collection = std::move(other.collection);
+                }
+
+                void set(const std::string& api, ucpulong_t va)
+                {
+                    collection[api] = va;
+                }
+
+                ucpulong_t get(const std::string& api)
+                {
+                    if (collection.find(api) == collection.end()) {
+                        return 0;
+                    }
+
+                    return collection[api];
+                }
+
+            } WxAPIHookPointVACollection, *PWxAPIHookPointVACollection;
+
             //
             // Function
             //
@@ -346,6 +380,7 @@ namespace wxbox {
             ucpulong_t LocateWxAPIHookPointVA(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
             ucpulong_t LocateWxAPIHookPointVAOnlyAbsolute(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
             ucpulong_t LocateWxAPIHookPointVAOnlyFeature(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
+            bool       CollectWeChatProcessHookPointVA(const wxbox::util::process::ProcessInfo& pi, const WxApiHookInfo& wxApiHookInfo, WxAPIHookPointVACollection& vaCollection);
         }
     }
 }

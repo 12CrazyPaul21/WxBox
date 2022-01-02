@@ -66,6 +66,8 @@ static bool GetModuleInfo_Windows(wb_process::PID pid, const std::string& module
     if (Module32First(hSnap, &modEntry)) {
         do {
             if (!::_stricmp(modEntry.szModule, moduleName.c_str())) {
+                moduleInfo.moduleName      = modEntry.szModule;
+                moduleInfo.modulePath      = modEntry.szExePath;
                 moduleInfo.pModuleBaseAddr = modEntry.modBaseAddr;
                 moduleInfo.uModuleSize     = modEntry.modBaseSize;
                 return true;

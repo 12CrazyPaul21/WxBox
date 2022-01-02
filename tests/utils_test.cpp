@@ -233,6 +233,12 @@ TEST(wxbox_utils, wx)
     EXPECT_EQ(true, resolveSuccess);
     spdlog::info("wechat environment success : {}", resolveSuccess);
 
+    // unwind feature
+    wb_feature::WxApiHookInfo wxApiHookInfo;
+    auto                      processPath  = wxbox::util::file::GetProcessRootPath();
+    auto                      featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
+    EXPECT_EQ(true, wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo));
+
     auto wxProcessLists = wxbox::util::wx::GetWeChatProcessList();
     spdlog::info("wechat prcoess count : {}", wxProcessLists.size());
     for (auto pi : wxProcessLists) {
@@ -240,6 +246,17 @@ TEST(wxbox_utils, wx)
         spdlog::info("    execute file abspath : {}", pi.abspath);
         spdlog::info("    execute filename : {}", pi.filename);
         spdlog::info("    execute dirpath : {}", pi.dirpath);
+
+        wb_feature::WxAPIHookPointVACollection vaCollection;
+        auto                                   valid = wxbox::util::feature::CollectWeChatProcessHookPointVA(pi, wxApiHookInfo, vaCollection);
+        spdlog::info("    can hook : {}", valid);
+        if (!valid) {
+            continue;
+        }
+
+		for (auto api : wb_feature::WX_HOOK_API) {
+            spdlog::info("        {} VA : 0x{:08X}", api, vaCollection.get(api));
+        }
     }
 }
 

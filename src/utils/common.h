@@ -99,9 +99,9 @@ typedef unsigned ucpulong_t;
 //
 
 #include <utils/config.hpp>
+#include <utils/process.h>
 #include <utils/feature.h>
 #include <utils/file.h>
-#include <utils/process.h>
 #include <utils/memory.h>
 #include <utils/string.h>
 #include <utils/wx.h>
