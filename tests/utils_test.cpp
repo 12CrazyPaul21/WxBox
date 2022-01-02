@@ -310,6 +310,7 @@ TEST(wxbox_utils, crack)
 #endif
 
     if (hProcess) {
+
         //
         // known wechat version
         //
