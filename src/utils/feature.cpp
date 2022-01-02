@@ -593,6 +593,10 @@ ucpulong_t wxbox::util::feature::LocateWxAPIHookPointVAOnlyFeature(const wxbox::
 
 bool wxbox::util::feature::CollectWeChatProcessHookPointVA(const wxbox::util::process::ProcessInfo& pi, const WxApiHookInfo& wxApiHookInfo, WxAPIHookPointVACollection& vaCollection)
 {
+	//
+	// note: !!! haven't checked whether the wxbot module exists !!!
+	//
+
     wb_wx::WeChatEnvironmentInfo wxEnvInfo;
     if (!wxbox::util::wx::ResolveWxEnvInfo(pi.dirpath, &wxEnvInfo)) {
         return false;
