@@ -590,3 +590,48 @@ ucpulong_t wxbox::util::feature::LocateWxAPIHookPointVAOnlyFeature(const wxbox::
 
     return LocateWxAPIHookPointVA_Step_Locate(locateTargetInfo, scanResultAddr, hookPointFeatureInfo);
 }
+
+bool wxbox::util::feature::CollectWeChatProcessHookPointVA(const wxbox::util::process::ProcessInfo& pi, const WxApiHookInfo& wxApiHookInfo, WxAPIHookPointVACollection& vaCollection)
+{
+    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
+    if (!wxbox::util::wx::ResolveWxEnvInfo(pi.dirpath, &wxEnvInfo)) {
+        return false;
+    }
+
+    wxbox::util::process::ModuleInfo modInfo;
+    if (!wxbox::util::process::GetModuleInfo(pi.pid, WX_WE_CHAT_CORE_MODULE, modInfo)) {
+        return false;
+    }
+
+    wb_process::PROCESS_HANDLE hProcess;
+
+#if WXBOX_IN_WINDOWS_OS
+    hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pi.pid);
+#elif WXBOX_IN_MAC_OS
+
+#endif
+
+	bool                                   bSuccess         = true;
+    wb_feature::LocateTargetInfo           locateTargetInfo = {hProcess, modInfo.pModuleBaseAddr, modInfo.uModuleSize};
+    wb_feature::WxAPIHookPointVACollection collection;
+    for (auto api : wb_feature::WX_HOOK_API) {
+        ucpulong_t va = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, const_cast<WxApiHookInfo&>(wxApiHookInfo), locateTargetInfo, api);
+        if (!va) {
+            bSuccess = false;
+            break;
+        }
+        collection.set(api, va);
+    }
+
+	if (bSuccess) {
+        vaCollection = std::move(collection);
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    CloseHandle(hProcess);
+#elif WXBOX_IN_MAC_OS
+
+#endif
+
+    return bSuccess;
+}
