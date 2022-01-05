@@ -1,5 +1,5 @@
 [wrap-file]
-directory = grpc-windows-x86-v1.44.0-dev-release
-source_url = https://gitee.com/phantom27/wxbox-public-storage/attach_files/917617/download/grpc-windows-x86-v1.44.0-dev-release.tar.xz
-source_filename = grpc-windows-x86-v1.44.0-dev-release.tar.xz
-source_hash = 470B8604A3609B2610C9B9CB7B9EFD2427CC152A216691ADC4D40DAAE484FD74
+directory = grpc-windows-x86-v1.41.1-dev-release
+source_url = https://gitee.com/phantom27/wxbox-public-storage/attach_files/933859/download/grpc-windows-x86-v1.41.1-dev-release.tar.xz
+source_filename = grpc-windows-x86-v1.41.1-dev-release.tar.xz
+source_hash = E02B67BF1853924ABEDB3A3E37B9C18617A9AE11BFD1AF79F48FF9FB946829EF

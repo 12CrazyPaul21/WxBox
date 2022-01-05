@@ -2,16 +2,19 @@
 # not the executables that use the library.
 lib_args = ['-DBUILDING_WXBOT']
 
-shlib = shared_library('wxbot', 'wxbot.cpp',
+shlib = shared_library('wxbot', ['wxbot.cpp', proto_generated],
   install : true,
   cpp_args : lib_args,
   gnu_symbol_visibility : 'hidden',
-  dependencies: [spdlog_dep, grpc_dep, frida_gum_dep, TitanEngine_dep, lua_dep]
+  dependencies: [spdlog_dep, frida_gum_dep, TitanEngine_dep, lua_dep, grpc_dep]
 )
 
 # Test wxbot
 test_exe = executable('wxbot_test', 'wxbot_test.cpp',
   link_with : shlib)
+test_env = environment()
+test_env.prepend('PATH', TitanEngine_bin_root)
+test_env.prepend('PATH', grpc_bin_root)
 test('wxbot', test_exe)
 
 # Make this library usable as a Meson subproject.

@@ -91,7 +91,7 @@ index a9c4d56..2004cfb 100644
 
 #### gRPC构建方法
 
-​	如果在Mac OS环境下能用brew安装gRPC的dev包，那么就不需要，对于Windows已经编译好了一份Debug和一份Release版本的了，它们将放在仓库上，并且已经给gRPC写了一个meson的wrap，在使用meson构建时将会自动下载。
+​	如果在Mac OS环境下能用brew安装gRPC的dev包，那么就不需要，对于Windows已经编译好了一份Debug和一份Release版本的了，它们将放在仓库上，并且已经给gRPC写了一个meson的wrap，在使用meson构建时将会自动下载。（note：这个也可以用vcpkg来构建，不过版本相对有点旧，所以不用vcpkg的port）
 
 ```bash
 # 克隆gRPC
@@ -152,7 +152,9 @@ PKG_CONFIG_PATH=/g/Tutorial/meson/testgrpc/grpc/lib/pkgconfig ./pkg-config.exe g
 ['grpc++', 'grpc', 'address_sorting', 're2', 'upb', 'cares', 'zlib', 'gpr', 'absl_statusor', 'ssl', 'crypto', 'absl_hash', 'absl_raw_hash_set', 'absl_hashtablez_sampler', 'absl_city', 'absl_low_level_hash', 'absl_random_distributions', 'absl_random_seed_sequences', 'absl_random_internal_pool_urbg', 'absl_random_internal_randen', 'absl_random_seed_gen_exception', 'absl_random_internal_randen_hwaes', 'absl_random_internal_randen_slow', 'absl_random_internal_randen_hwaes_impl', 'absl_random_internal_platform', 'absl_random_internal_seed_material', 'absl_status', 'absl_cord', 'absl_cordz_info', 'absl_cord_internal', 'absl_cordz_functions', 'absl_cordz_handle', 'absl_exponential_biased', 'absl_synchronization', 'absl_bad_optional_access', 'absl_str_format_internal', 'absl_graphcycles_internal', 'absl_stacktrace', 'absl_symbolize', 'absl_time', 'absl_debugging_internal', 'absl_demangle_internal', 'absl_malloc_internal', 'absl_civil_time', 'absl_strings', 'absl_time_zone', 'absl_strings_internal', 'absl_int128', 'absl_throw_delegate', 'absl_base', 'absl_spinlock_wait', 'absl_bad_variant_access', 'absl_raw_logging_internal', 'absl_log_severity', 'libprotobuf', 'grpc++_reflection']
 ```
 
+#### 更换为v1.41.1版本
 
+​	由于v1.44.0版本使用时出现崩溃，所以换成了较老的1.41.1版本的gRPC.
 
 ### Windows下构建
 
@@ -208,7 +210,7 @@ meson setup build/xcodedebug --buildtype debug --backend xcode
 ​	这里的例子是包含TianEngine和gRPC的bin目录：
 
 ```bash
-PATH=%PATH%;$(SolutionDir)..\..\subprojects\TitanEngine\bin;$(SolutionDir)..\..\subprojects\grpc-windows-x86-v1.44.0-dev-debug\bin
+PATH=%PATH%;$(SolutionDir)..\..\subprojects\TitanEngine\bin;$(SolutionDir)..\..\subprojects\grpc-windows-x86-v1.41.1-dev-debug\bin
 ```
 
 ​	多个dll查找路径用“;”隔开

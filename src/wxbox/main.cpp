@@ -1,9 +1,5 @@
 #include <QApplication>
-#include <QTranslator>
-#include <spdlog/spdlog.h>
-#include <yaml-cpp/yaml.h>
 #include "mainwindow.h"
-#include "config.h"
 
 int main(int argc, char* argv[])
 {

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package wxbox;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FileOptions {
+    string WxBoxServerURI = 10000;
+}
+
+option (WxBoxServerURI) = "localhost:52333";
+
+service WxBox {
+    rpc SayHello(WxBoxRequest) returns (WxBoxResponse) {}
+}
+
+message WxBoxRequest {
+    string name = 1;
+}
+
+message WxBoxResponse {
+    string message = 1;
+}
