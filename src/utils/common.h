@@ -7,6 +7,42 @@
 // Macro
 //
 
+#define U_OBJ_CONSTRUCTOR(TYPE, MEMBER, MEMBER_TYPE) \
+    if (type == TYPE) {                              \
+        new (&MEMBER) MEMBER_TYPE();                 \
+        return;                                      \
+    }
+
+#define U_OBJ_DESTRUCTOR(TYPE, MEMBER, DESTRUCTOR) \
+    if (type == TYPE) {                            \
+        MEMBER.~DESTRUCTOR();                      \
+        return;                                    \
+    }
+
+#define U_OBJ_COPY(TYPE, MEMBER, MEMBER_TYPE, OTHER) \
+    if (type == TYPE) {                              \
+        new (&MEMBER) MEMBER_TYPE(OTHER.MEMBER);     \
+        return;                                      \
+    }
+
+#define U_OBJ_MOVE(TYPE, MEMBER, MEMBER_TYPE, OTHER)        \
+    if (type == TYPE) {                                     \
+        new (&MEMBER) MEMBER_TYPE(std::move(OTHER.MEMBER)); \
+        return;                                             \
+    }
+
+#define U_SCALAR_CONSTRUCTOR(TYPE, MEMBER, DEFAULT_VALUE) \
+    if (type == TYPE) {                                   \
+        MEMBER = DEFAULT_VALUE;                           \
+        return;                                           \
+    }
+
+#define U_SCALAR_COPY(TYPE, MEMBER, OTHER) \
+    if (type == TYPE) {                    \
+        MEMBER = OTHER.MEMBER;             \
+        return;                            \
+    }
+
 #define SETUP_COPY_METHOD(TYPE, OTHER_VAL_NAME) \
     TYPE(const TYPE& OTHER_VAL_NAME)            \
     {                                           \
@@ -58,6 +94,7 @@ typedef unsigned ucpulong_t;
 #elif WXBOX_IN_MAC_OS
 
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #endif

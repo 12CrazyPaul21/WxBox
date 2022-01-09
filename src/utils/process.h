@@ -70,10 +70,12 @@ namespace wxbox {
             //
 
             std::vector<ProcessInfo> GetProcessList();
+            PID                      GetCurrentProcessId();
 
             WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
             bool       GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
             bool       GetModuleInfo(PID pid, const std::string& moduleName, ModuleInfo& moduleInfo);
+            bool       GetProcessInfoByPID(PID pid, ProcessInfo& pi);
 
             PID StartProcessAndAttach(const std::string& binFilePath);
         }
