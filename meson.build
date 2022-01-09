@@ -1,7 +1,7 @@
 project('WxBox', ['c', 'cpp'],
     version : '0.1.0',
     default_options : ['warning_level=3',
-                        'cpp_std=c++14']
+                        'cpp_std=c++17']
 )
 
 host_os = host_machine.system()
@@ -45,6 +45,30 @@ if not clang_format.found() and host_os == 'windows'
 endif
 
 #
+# protoc
+#
+
+protoc = find_program('protoc', required: false)
+if not protoc.found() and host_os == 'windows'
+    protoc = find_program(['protoc', join_paths(meson.current_source_dir(), 'wintools/bin/protoc')], required: true)
+endif
+if not protoc.found()
+    error('protoc is required...')
+endif
+
+#
+# grpc_cpp_plugin
+#
+
+grpc_cpp_plugin = find_program('grpc_cpp_plugin', required: false)
+if not grpc_cpp_plugin.found() and host_os == 'windows'
+    grpc_cpp_plugin = find_program(['grpc_cpp_plugin', join_paths(meson.current_source_dir(), 'wintools/bin/grpc_cpp_plugin')], required: true)
+endif
+if not grpc_cpp_plugin.found()
+    error('grpc_cpp_plugin is required...')
+endif
+
+#
 # handle dependency
 #
 
@@ -64,13 +88,19 @@ endif
 
 # gRPC(contain protobuf)
 grpc_dep = dependency('grpc', required: false)
-if not grpc_dep.found()
+grpc_bin_root = ''
+if not grpc_dep.found() and host_os == 'windows'
     if build_type == 'debug'
         grpc_proj = subproject('grpc_debug')
+        # grpc_proj = subproject('grpc')
     else
         grpc_proj = subproject('grpc')
     endif
     grpc_dep = grpc_proj.get_variable('grpc_dep')
+    grpc_bin_root = grpc_proj.get_variable('grpc_bin_root')
+endif
+if not grpc_dep.found()
+    error('grpc devkit is required...')
 endif
 
 # frida-gum
@@ -105,6 +135,25 @@ endif
 TitanEngine_proj = subproject('TitanEngine')
 TitanEngine_dep = TitanEngine_proj.get_variable('TitanEngine_dep')
 TitanEngine_bin_root = TitanEngine_proj.get_variable('TitanEngine_bin_root')
+
+#
+# generate protobuf
+#
+
+protoc_gen_grpc_plugin = '--plugin=protoc-gen-grpc=' + grpc_cpp_plugin.full_path()
+proto_generator = generator(protoc,
+                    output: [
+                        '@BASENAME@.pb.h',
+                        '@BASENAME@.pb.cc',
+                        '@BASENAME@.grpc.pb.h',
+                        '@BASENAME@.grpc.pb.cc'],
+                    arguments: [
+                        protoc_gen_grpc_plugin,
+                        '--grpc_out=@BUILD_DIR@',
+                        '--proto_path=@CURRENT_SOURCE_DIR@/protos',
+                        '--cpp_out=@BUILD_DIR@',                                                
+                        '@INPUT@'])
+proto_generated = proto_generator.process('protos/wxbox.proto')
 
 #
 # utils

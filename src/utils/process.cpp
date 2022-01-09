@@ -134,6 +134,15 @@ std::vector<wb_process::ProcessInfo> wxbox::util::process::GetProcessList()
 #endif
 }
 
+wxbox::util::process::PID wxbox::util::process::GetCurrentProcessId()
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ::GetCurrentProcessId();
+#elif WXBOX_IN_MAC_OS
+    return getpid();
+#endif
+}
+
 wb_process::WIN_HANDLE wxbox::util::process::GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt)
 {
 #if WXBOX_IN_WINDOWS_OS
@@ -151,15 +160,35 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
 
 #if WXBOX_IN_WINDOWS_OS
 
-    DWORD  pid                   = 0;
-    HANDLE hProcess              = NULL;
-    char   fullPath[MAX_PATH]    = {0};
-    char   absFullPath[MAX_PATH] = {0};
-
+    DWORD pid = 0;
     ::GetWindowThreadProcessId((HWND)hWnd, &pid);
     if (!pid) {
         return false;
     }
+
+    return wb_process::GetProcessInfoByPID(pid, pi);
+
+#elif WXBOX_IN_MAC_OS
+    return false;
+#endif
+}
+
+bool wxbox::util::process::GetModuleInfo(PID pid, const std::string& moduleName, ModuleInfo& moduleInfo)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return GetModuleInfo_Windows(pid, moduleName, moduleInfo);
+#elif WXBOX_IN_MAC_OS
+    return GetModuleInfo_Mac(pid, moduleName, moduleInfo);
+#endif
+}
+
+bool wxbox::util::process::GetProcessInfoByPID(PID pid, ProcessInfo& pi)
+{
+#if WXBOX_IN_WINDOWS_OS
+
+    HANDLE hProcess              = NULL;
+    char   fullPath[MAX_PATH]    = {0};
+    char   absFullPath[MAX_PATH] = {0};
 
     hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if (!hProcess) {
@@ -181,19 +210,10 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
     pi.dirpath  = std::move(wxbox::util::file::ToDirectoryPath(absFullPath));
     pi.pid      = pid;
 
+    return true;
+
 #elif WXBOX_IN_MAC_OS
     return false;
-#endif
-
-    return true;
-}
-
-bool wxbox::util::process::GetModuleInfo(PID pid, const std::string& moduleName, ModuleInfo& moduleInfo)
-{
-#if WXBOX_IN_WINDOWS_OS
-    return GetModuleInfo_Windows(pid, moduleName, moduleInfo);
-#elif WXBOX_IN_MAC_OS
-    return GetModuleInfo_Mac(pid, moduleName, moduleInfo);
 #endif
 }
 
