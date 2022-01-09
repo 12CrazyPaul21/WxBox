@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+static wb_process::PID last_client_pid = 0;
+static uint64_t        total_clients   = 0;
+static uint64_t        current_clients = 0;
+
 MainWindow::MainWindow(QWidget* parent)
   : QMainWindow(parent)
   , aboutDialog(this)
@@ -13,11 +17,11 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     // ---------------------------------------
-    //             click to test
+    //           trigger to test
     // ---------------------------------------
 
     auto button = new QPushButton("test", ui->centralWidget);
-    connect(button, SIGNAL(clicked()), this, SLOT(clickTest()));
+    connect(button, SIGNAL(clicked()), this, SLOT(triggerTest()));
 }
 
 MainWindow::~MainWindow()
@@ -99,6 +103,27 @@ void MainWindow::WxBoxServerStatusChange(const WxBoxServerStatus oldStatus, cons
     }
 }
 
+void MainWindow::WxBoxServerEvent(wxbox::WxBoxMessage message)
+{
+    switch (message.type) {
+        case wxbox::WxBoxMessageType::WxBoxClientConnected:
+            last_client_pid = message.pid;
+            total_clients++;
+            current_clients++;
+            setWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
+            break;
+        case wxbox::WxBoxMessageType::WxBoxClientDone:
+            last_client_pid = 0;
+            current_clients--;
+            setWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
+            break;
+        case wxbox::WxBoxMessageType::WxBotRequestOrResponse: {
+            ProfileResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_profileresponse());
+            break;
+        }
+    }
+}
+
 //
 // Methods
 //
@@ -136,7 +161,8 @@ void MainWindow::startWxBoxServer()
     QObject::connect(&worker, SIGNAL(finished()), server, SLOT(deleteLater()));
     QObject::connect(&worker, SIGNAL(shutdown()), server, SLOT(shutdown()), Qt::DirectConnection);
     QObject::connect(server, &wxbox::WxBoxServer::WxBoxServerStatusChange, this, &MainWindow::WxBoxServerStatusChange, Qt::QueuedConnection);
-    QObject::connect(this, &MainWindow::WxBoxServerEvent, server, &wxbox::WxBoxServer::WxBoxServerEvent, Qt::QueuedConnection);
+    QObject::connect(this, &MainWindow::PushMessageAsync, server, &wxbox::WxBoxServer::PushMessageAsync, Qt::DirectConnection);
+    QObject::connect(server, &wxbox::WxBoxServer::WxBoxServerEvent, this, &MainWindow::WxBoxServerEvent, Qt::QueuedConnection);
 
     // start WxBoxServer
     worker.startServer(server);
@@ -152,13 +178,38 @@ void MainWindow::stopWxBoxServer()
     }
 }
 
+//
+// WxBoxServer Wrapper Request Methods
+//
+
+void MainWindow::RequestProfile(wb_process::PID clientPID)
+{
+    if (!clientPID) {
+        return;
+    }
+
+    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
+    msg.pid = clientPID;
+    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::PROFILE_REQUEST);
+    PushMessageAsync(std::move(msg));
+}
+
+//
+// WxBoxServer Response Handler
+//
+
+void MainWindow::ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response)
+{
+    std::string wxid = response->wxid();
+    last_client_pid  = clientPID;
+    QMessageBox::information(this, "tips", QString("profile<%1> : %2").arg(last_client_pid).arg(QString::fromStdString(wxid.c_str())));
+}
+
 // ---------------------------------------
-//             click to test
+//           trigger to test
 // ---------------------------------------
 
-void MainWindow::clickTest()
+void MainWindow::triggerTest()
 {
-    //emit WxBoxServerEvent();
-    stopWxBoxServer();
-    //startWxBoxServer();
+    RequestProfile(last_client_pid);
 }

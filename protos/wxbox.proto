@@ -8,16 +8,53 @@ extend google.protobuf.FileOptions {
     string WxBoxServerURI = 10000;
 }
 
+// default WxBoxServer URI
 option (WxBoxServerURI) = "localhost:52333";
 
 service WxBox {
-    rpc SayHello(WxBoxRequest) returns (WxBoxResponse) {}
+    rpc Ping(WxBoxHelloRequest) returns (WxBoxHelloResponse) {}
+    rpc Communication(stream WxBotControlPacket) returns (stream WxBoxControlPacket) {}
 }
 
-message WxBoxRequest {
-    string name = 1;
+message WxBoxHelloRequest {
+    uint64 pid = 1;
 }
 
-message WxBoxResponse {
-    string message = 1;
+message WxBoxHelloResponse {
+    bool pong = 1;
+}
+
+enum ControlPacketType {
+    HANDSHAKE_REQUEST = 0;
+    HANDSHAKE_RESPONSE = 1;
+    PROFILE_REQUEST = 2;
+    PROFILE_RESPONSE = 3;
+}
+
+message HandshakeRequest {
+    
+}
+
+message HandshakeResponse {
+    bool success = 1;
+}
+
+message ProfileResponse {
+    string wxid = 1;
+}
+
+message WxBotControlPacket {
+    ControlPacketType type = 1;
+    uint64 pid = 2;
+    oneof packet {
+        HandshakeRequest handshakeRequest = 10;
+        ProfileResponse profileResponse = 11;
+    }
+}
+
+message WxBoxControlPacket {
+    ControlPacketType type = 1;
+    oneof packet {
+        HandshakeResponse handshakeResponse = 10;
+    }
 }

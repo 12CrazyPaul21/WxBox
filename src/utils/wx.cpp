@@ -154,3 +154,13 @@ std::vector<wb_process::ProcessInfo> wxbox::util::wx::GetWeChatProcessList()
 
     return std::move(processLists);
 }
+
+bool wxbox::util::wx::CheckWeChatProcessValid(wxbox::util::process::PID pid)
+{
+    wb_process::ProcessInfo pi;
+    if (!wb_process::GetProcessInfoByPID(pid, pi)) {
+        return false;
+    }
+
+    return !::_stricmp(pi.filename.c_str(), WX_WE_CHAT_EXE);
+}

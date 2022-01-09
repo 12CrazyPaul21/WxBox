@@ -11,6 +11,8 @@ qt_processed = qt5.preprocess(
     qresources: qt_resources
 )
 
+wxbox_internal = join_paths(wxbox_root, 'internal')
+
 wxbox_inc = [
     utils_inc,
     configuration_inc
@@ -20,6 +22,8 @@ wxbox_src = [
     join_paths(wxbox_root, 'main.cpp'),
     join_paths(wxbox_root, 'mainwindow.cpp'),
     join_paths(wxbox_root, 'about.cpp'),
+    join_paths(wxbox_root, 'wxbox_server.cpp'),
+    join_paths(wxbox_internal, 'threadpool.hpp'),
     utils_src
 ]
 

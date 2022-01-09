@@ -1,74 +1,135 @@
-#include <frida-gum.h>
-#include <lua.hpp>
-#include <spdlog/spdlog.h>
 #include <wxbot.hpp>
+#include <wxbox_client.hpp>
 
-#include <memory>
-#include <string>
+#include <spdlog/spdlog.h>
 
-#include <grpcpp/grpcpp.h>
-
-#include <wxbox.grpc.pb.h>
-
-using grpc::Channel;
-using grpc::ClientContext;
-using grpc::Status;
-using wxbox::WxBox;
-using wxbox::WxBoxRequest;
-using wxbox::WxBoxResponse;
-
-class WxBoxClient
+std::string ParseStatus(wxbot::WxBoxClientStatus status)
 {
-  public:
-    WxBoxClient(std::shared_ptr<Channel> channel)
-      : stub(WxBox::NewStub(channel))
-    {
+    switch (status) {
+        case wxbot::WxBoxClientStatus::Uninit:
+            return "Uninit";
+
+        case wxbot::WxBoxClientStatus::Started:
+            return "Started";
+
+        case wxbot::WxBoxClientStatus::ConnectWxBoxServerFailed:
+            return "ConnectWxBoxServerFailed";
+
+        case wxbot::WxBoxClientStatus::ConnectWxBoxServerSuccess:
+            return "ConnectWxBoxServerSuccess";
+
+        case wxbot::WxBoxClientStatus::ConnectionLost:
+            return "ConnectionLost";
+
+        case wxbot::WxBoxClientStatus::Stopped:
+            return "Stopped";
+
+        case wxbot::WxBoxClientStatus::DoReConnect:
+            return "DoReConnect";
+
+        default:
+            return "";
     }
-
-    std::string SayHello(const std::string& user)
-    {
-        WxBoxRequest request;
-        request.set_name(user);
-
-        WxBoxResponse response;
-        ClientContext context;
-
-        Status status = stub->SayHello(&context, request, &response);
-        if (status.ok()) {
-            return response.message();
-        }
-        else {
-            return "failed";
-        }
-    }
-
-    static std::string WxBoxServerURI()
-    {
-        std::string uri = wxbox::WxBoxRequest::descriptor()->file()->options().GetExtension(wxbox::WxBoxServerURI);
-        return uri.empty() ? "localhost:52333" : uri;
-    }
-
-  private:
-    std::unique_ptr<WxBox::Stub> stub;
-};
+}
 
 namespace wxbot {
 
-    Wxbot::Wxbot()
+    WxBot::WxBot()
+      : client(nullptr)
     {
-        number = 6;
-        spdlog::info("build wxbot");
-        gum_init_embedded();
-        lua_State* lua = luaL_newstate();
     }
 
-    int Wxbot::get_number() const
+    WxBot::~WxBot()
     {
-        std::string name = "wxbot";
-        WxBoxClient client(grpc::CreateChannel(WxBoxClient::WxBoxServerURI(), grpc::InsecureChannelCredentials()));
-        std::string reply = client.SayHello(name);
-        spdlog::info("response {}", reply);
-        return number;
+        StopWxBoxClient();
+        Wait();
+        DestroyWxBoxClient();
     }
 
-}  // namespace wxbot
+    bool WxBot::Ping()
+    {
+        if (!client) {
+            return false;
+        }
+
+        return client->Ping();
+    }
+
+    bool WxBot::BuildWxBoxClient()
+    {
+        if (client) {
+            return false;
+        }
+
+        client = new wxbot::WxBoxClient(wxbot::WxBoxClient::WxBoxServerURI());
+        return !!client;
+    }
+
+    void WxBot::DestroyWxBoxClient()
+    {
+        if (client) {
+            delete client;
+            client = nullptr;
+        }
+    }
+
+    bool WxBot::StartWxBoxClient()
+    {
+        if (!client) {
+            return false;
+        }
+
+        client->RegisterWxBotCallback(std::bind(&WxBot::WxBoxClientEvent, this, std::placeholders::_1));
+        return client->Start();
+    }
+
+    void WxBot::StopWxBoxClient()
+    {
+        if (!client) {
+            return;
+        }
+
+        client->Stop();
+    }
+
+    void WxBot::Wait()
+    {
+        if (!client) {
+            return;
+        }
+
+        client->Wait();
+    }
+
+    void WxBot::Shutdown()
+    {
+        google::protobuf::ShutdownProtobufLibrary();
+    }
+
+    void WxBot::WxBoxClientEvent(wxbot::WxBotMessage message)
+    {
+        if (message.type == wxbot::WxBotMessageType::WxBoxClientStatusChange) {
+            spdlog::info("WxBoxClient status change, oldStatus<{}>, newStatus<{}>", ParseStatus(message.u.wxBoxClientStatus.oldStatus), ParseStatus(message.u.wxBoxClientStatus.newStatus));
+        }
+        else if (message.type == wxbot::WxBotMessageType::WxBoxRequestOrResponse) {
+            if (message.u.wxBoxControlPacket.type() == wxbox::ControlPacketType::PROFILE_REQUEST) {
+                spdlog::info("WxBoxServer request profile");
+                ResponseProfile();
+            }
+        }
+    }
+
+    //
+    // WxBoxClient Wrapper Response Methods
+    //
+
+	void WxBot::ResponseProfile()
+	{
+        wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+        msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::PROFILE_RESPONSE);
+        msg.u.wxBotControlPacket.mutable_profileresponse()->set_wxid("<is a wxid for test>");
+        if (client) {
+            client->PushMessageAsync(std::move(msg));
+        }
+	}
+}

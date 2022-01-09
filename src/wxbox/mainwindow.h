@@ -55,15 +55,28 @@ class MainWindow : public QMainWindow
     void ignoreForClose();
     void readyForClose(const bool canCloseWhenZero = true);
 
+    //
+    // WxBoxServer Wrapper Request Methods
+    //
+
+    void RequestProfile(wb_process::PID clientPID);
+
+    //
+    // WxBoxServer Response Handler
+    //
+
+    void ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response);
+
   signals:
-    void WxBoxServerEvent();
+    void PushMessageAsync(wxbox::WxBoxMessage message);
 
   public slots:
     void InitWxBox();
     void DeinitWxBox();
     void OpenAboutDialog();
     void WxBoxServerStatusChange(const WxBoxServerStatus oldStatus, const WxBoxServerStatus newStatus);
-    void clickTest();
+    void WxBoxServerEvent(wxbox::WxBoxMessage message);
+    void triggerTest();
 
   private:
     bool                    init;
