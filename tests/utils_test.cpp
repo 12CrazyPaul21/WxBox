@@ -340,7 +340,7 @@ TEST(wxbox_utils, crack)
 #endif
 }
 
-TEST(_wbox_utils, inject)
+TEST(wbox_utils, inject)
 {
     auto processPath = wxbox::util::file::GetProcessRootPath();
     EXPECT_NE(true, processPath.empty());
