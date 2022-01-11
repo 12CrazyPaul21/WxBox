@@ -158,7 +158,7 @@ void wxbox::util::process::CloseProcessHandle(PROCESS_HANDLE handle)
 #if WXBOX_IN_WINDOWS_OS
     CloseHandleSafe(handle);
 #elif WXBOX_IN_MAC_OS
-    
+
 #endif
 }
 

@@ -13,9 +13,9 @@ namespace wxbox {
 
             typedef struct _RemoteCallParameter
             {
-				//
-				// note: pFuncName must be a __cdecl function
-				//
+                //
+                // note: pFuncName must be a __cdecl function
+                //
 
                 char* pModuleName;
                 char* pFuncName;

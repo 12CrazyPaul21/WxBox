@@ -139,14 +139,14 @@ static bool UnInjectModuleFromProcess_Windows(wxbox::util::process::PID pid, con
     if (!pid) {
         return false;
     }
-	
-	bool                               retval           = false;
-    HMODULE                            hKernel32        = NULL;
-    FARPROC                            funcFreeLibrary = nullptr;
-    HANDLE                             hRemoteThread    = NULL;
-    wb_process::ModuleInfo             remoteModuleInfo;
 
-	// get forhook.dll module handle
+    bool                   retval          = false;
+    HMODULE                hKernel32       = NULL;
+    FARPROC                funcFreeLibrary = nullptr;
+    HANDLE                 hRemoteThread   = NULL;
+    wb_process::ModuleInfo remoteModuleInfo;
+
+    // get forhook.dll module handle
     if (!wb_process::GetModuleInfo(pid, moduleName, remoteModuleInfo)) {
         return retval;
     }
@@ -236,7 +236,7 @@ static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE
     remoteCallParameter.pFuncGetModuleHandleA = funcGetModuleHandleA;
     remoteCallParameter.pFuncGetProcAddress   = funcGetProcAddress;
 
-	// handle method calling parameter
+    // handle method calling parameter
     if (parameter) {
         switch (parameter->type) {
             case wb_inject::MethodCallingParameterType::CpuWordLongScalarValue:
@@ -245,9 +245,9 @@ static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE
             case wb_inject::MethodCallingParameterType::BufferPointer: {
                 wb_memory::RemoteWrittenMemoryInfo parameterMemoryInfo = wb_memory::WriteByteStreamToProcess(hProcess, dataPageInfo, reinterpret_cast<const uint8_t* const>(parameter->value), parameter->size);
                 if (!parameterMemoryInfo.addr) {
-					// maybe space not enough
+                    // maybe space not enough
                     return false;
-				}
+                }
                 remoteCallParameter.pArg = parameterMemoryInfo.addr;
                 break;
             }

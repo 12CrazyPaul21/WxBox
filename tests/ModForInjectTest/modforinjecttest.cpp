@@ -14,7 +14,7 @@ void SayHiInject(char* str)
     }
     else {
         MessageBoxA(NULL, "Hello Inject...", "ModForInjectTest", MB_OK);
-	}
+    }
 }
 
 #else
@@ -28,7 +28,7 @@ void SayHiInject(char* str)
     }
     else {
         std::cout << "Hello Inject..." << std::endl;
-    }    
+    }
 }
 
 #endif

@@ -357,10 +357,10 @@ TEST(wbox_utils, inject)
     auto modulePath   = wxbox::util::file::JoinPath(processPath, "/ModForInjectTest/ModForInjectTest.so");
 #endif
 
-	char                              message[] = "Inject";
+    char                              message[] = "Inject";
     wb_inject::MethodCallingParameter parameter = wb_inject::MethodCallingParameter::BuildBufferValue(message, sizeof(message));
 
-	EXPECT_EQ(true, wb_inject::InjectModuleToProcess(pid, modulePath, callFuncName, &parameter));
+    EXPECT_EQ(true, wb_inject::InjectModuleToProcess(pid, modulePath, callFuncName, &parameter));
     EXPECT_EQ(true, wb_inject::UnInjectModuleFromProcess(pid, moduleName));
 }
 

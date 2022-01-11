@@ -177,11 +177,11 @@ bool wxbox::util::memory::FreeRemoteProcessPage(wxbox::util::process::PROCESS_HA
         return false;
     }
 
-	void*      addr = pageInfo.addr;
+    void*      addr = pageInfo.addr;
     ucpulong_t size = pageInfo.size;
 
-	pageInfo.addr = nullptr;
-    pageInfo.size = 0;
+    pageInfo.addr   = nullptr;
+    pageInfo.size   = 0;
     pageInfo.cursor = nullptr;
     pageInfo.end    = nullptr;
     pageInfo.free   = 0;
