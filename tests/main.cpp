@@ -1,6 +1,6 @@
 #include <test_common.h>
 
-#define DISABLE_WXBOX_UTILS_TEST
+//#define DISABLE_WXBOX_UTILS_TEST
 
 int main(int argc, char* argv[])
 {
