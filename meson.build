@@ -5,6 +5,7 @@ project('WxBox', ['c', 'cpp'],
 )
 
 host_os = host_machine.system()
+host_cpu_family = host_machine.cpu_family()
 build_type = get_option('buildtype')
 
 proj_root = meson.current_source_dir()
@@ -15,6 +16,12 @@ assets_root = join_paths(proj_root, 'assets')
 wxbox_root = join_paths(source_root, 'wxbox')
 wxbot_root = join_paths(source_root, 'wxbot')
 utils_root = join_paths(source_root, 'utils')
+
+#
+# compiler
+#
+
+ignore_warnings = ['/wd4125', '/wd4702']
 
 #
 # config.h
@@ -29,6 +36,21 @@ elif host_os == 'darwin'
 else
     conf_data.set('os', 'WXBOX_UNSUPPORT_OS')
 endif
+
+if host_machine.endian() == 'big'
+    conf_data.set('endian', 'WXBOX_CPU_BIG_ENDIAN')
+else
+    conf_data.set('endian', 'WXBOX_CPU_LITTLE_ENDIAN')
+endif
+
+if host_cpu_family == 'x86'
+    conf_data.set('cpu_family', 'WXBOX_CPU_X86')
+elif host_cpu_family == 'x86_64'
+    conf_data.set('cpu_family', 'WXBOX_CPU_X86_64')
+else
+    conf_data.set('cpu_family', 'WXBOX_CPU_UNSUPPORT')
+endif
+
 conf_data.set('wxbox_module_version', get_option('wxbox_module_version'))
 conf_data.set('wxbot_module_version', get_option('wxbot_module_version'))
 configure_file(input: 'config.h.in', output: 'config.h', configuration: conf_data)
@@ -92,7 +114,6 @@ grpc_bin_root = ''
 if not grpc_dep.found() and host_os == 'windows'
     if build_type == 'debug'
         grpc_proj = subproject('grpc_debug')
-        # grpc_proj = subproject('grpc')
     else
         grpc_proj = subproject('grpc')
     endif
@@ -179,6 +200,10 @@ utils_src = [
     join_paths(utils_root, 'feature.cpp'),
     join_paths(utils_root, 'crack.h'),
     join_paths(utils_root, 'crack.cpp'),
+    join_paths(utils_root, 'traits.h'),
+    join_paths(utils_root, 'traits.cpp'),
+    join_paths(utils_root, 'inject.h'),
+    join_paths(utils_root, 'inject.cpp'),
     join_paths(utils_root, 'config.hpp')
 ]
 

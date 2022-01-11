@@ -139,6 +139,60 @@ static inline ucpulong_t ScanMemoryRev_Mac(wxbox::util::process::PROCESS_HANDLE 
 
 #endif
 
+wxbox::util::memory::RemotePageInfo wxbox::util::memory::AllocPageToRemoteProcess(wxbox::util::process::PROCESS_HANDLE hProcess, ucpulong_t pageSize, bool canExecute)
+{
+    // at least one page
+    pageSize = std::max<ucpulong_t>(pageSize, RemotePageInfo::MIN_REMOTE_PAGE_SIZE);
+
+    RemotePageInfo pageInfo;
+    std::memset(&pageInfo, 0, sizeof(pageInfo));
+
+    if (!hProcess) {
+        return pageInfo;
+    }
+
+    LPVOID lpAddress = nullptr;
+
+#if WXBOX_IN_WINDOWS_OS
+    lpAddress = VirtualAllocEx(hProcess, nullptr, pageSize, MEM_COMMIT | MEM_RESERVE, canExecute ? PAGE_EXECUTE_READWRITE : PAGE_READWRITE);
+#else
+#endif
+
+    if (!lpAddress) {
+        return pageInfo;
+    }
+
+    pageInfo.addr   = lpAddress;
+    pageInfo.size   = pageSize;
+    pageInfo.cursor = pageInfo.addr;
+    pageInfo.end    = (void*)((ucpulong_t)pageInfo.addr + pageInfo.size);
+    pageInfo.free   = pageSize;
+
+    return pageInfo;
+}
+
+bool wxbox::util::memory::FreeRemoteProcessPage(wxbox::util::process::PROCESS_HANDLE hProcess, RemotePageInfo& pageInfo)
+{
+    if (!pageInfo.addr) {
+        return false;
+    }
+
+	void*      addr = pageInfo.addr;
+    ucpulong_t size = pageInfo.size;
+
+	pageInfo.addr = nullptr;
+    pageInfo.size = 0;
+    pageInfo.cursor = nullptr;
+    pageInfo.end    = nullptr;
+    pageInfo.free   = 0;
+
+#if WXBOX_IN_WINDOWS_OS
+    return VirtualFreeEx(hProcess, addr, size, MEM_DECOMMIT);
+#else
+    return false;
+#endif
+}
+
 bool wxbox::util::memory::ReadMemory(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, uint8_t* pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesRead)
 {
 #if WXBOX_IN_WINDOWS_OS
@@ -155,6 +209,40 @@ bool wxbox::util::memory::WriteMemory(wb_process::PROCESS_HANDLE hProcess, const
 #elif WXBOX_IN_MAC_OS
     return WriteMemory_Mac(hProcess, pBaseAddress, pBuffer, uSize, pNumberOfBytesWritten);
 #endif
+}
+
+wxbox::util::memory::RemoteWrittenMemoryInfo wxbox::util::memory::WriteByteStreamToProcess(wxbox::util::process::PROCESS_HANDLE hProcess, RemotePageInfo& pageInfo, const uint8_t* const byteStream, ucpulong_t size)
+{
+    RemoteWrittenMemoryInfo memInfo;
+
+    if (!hProcess || !pageInfo.addr || pageInfo.free < size || !byteStream || !size) {
+        return memInfo;
+    }
+
+    LPVOID lpAddress            = pageInfo.cursor;
+    DWORD  numberOfBytesWritten = 0;
+
+    if (!wb_memory::WriteMemory(hProcess, lpAddress, byteStream, size, &numberOfBytesWritten)) {
+        VirtualFreeEx(hProcess, lpAddress, size, MEM_DECOMMIT);
+        return memInfo;
+    }
+
+    memInfo.addr = lpAddress;
+    memInfo.size = size;
+
+    pageInfo.cursor = (void*)((ucpulong_t)memInfo.addr + memInfo.size);
+    pageInfo.free   = pageInfo.free - memInfo.size;
+
+    return memInfo;
+}
+
+wxbox::util::memory::RemoteWrittenMemoryInfo wxbox::util::memory::WriteStringToProcess(wxbox::util::process::PROCESS_HANDLE hProcess, RemotePageInfo& pageInfo, const std::string& str)
+{
+    if (!hProcess || !pageInfo.addr || !pageInfo.free || str.empty()) {
+        return RemoteWrittenMemoryInfo();
+    }
+
+    return WriteByteStreamToProcess(hProcess, pageInfo, reinterpret_cast<const uint8_t* const>(str.c_str()), str.length() + 1);
 }
 
 ucpulong_t wxbox::util::memory::ScanMemory(wxbox::util::process::PROCESS_HANDLE hProcess, const void* const pMemBegin, ucpulong_t uMemSize, const void* const pPattern, ucpulong_t uPatternSize)

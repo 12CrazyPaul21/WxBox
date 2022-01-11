@@ -9,6 +9,26 @@ namespace wxbox {
             // Typedef
             //
 
+#if WXBOX_IN_WINDOWS_OS
+            typedef HWND    WIN_HANDLE;
+            typedef POINT   SCREEN_POINT;
+            typedef DWORD   PID;
+            typedef HANDLE  PROCESS_HANDLE;
+            typedef HMODULE MODULE_HANDLE;
+#elif WXBOX_IN_MAC_OS
+            /*
+			typedef ucpulong_t WIN_HANDLE;
+			typedef struct
+			{
+                int32_t x;
+                int32_t y;
+			} SCREEN_POINT;
+			typedef ucpulong_t PID;
+			typedef ucpulong_t PROCESS_HANDLE;
+			typedef ucpulong_t MODULE_HANDLE;
+			*/
+#endif
+
             typedef struct _ProcessInfo
             {
                 std::string abspath;
@@ -41,29 +61,12 @@ namespace wxbox {
 
             typedef struct _ModuleInfo
             {
-                std::string moduleName;
-                std::string modulePath;
-                void*       pModuleBaseAddr;
-                ucpulong_t  uModuleSize;
+                MODULE_HANDLE hModule;
+                std::string   moduleName;
+                std::string   modulePath;
+                void*         pModuleBaseAddr;
+                ucpulong_t    uModuleSize;
             } ModuleInfo, *PModuleInfo;
-
-#if WXBOX_IN_WINDOWS_OS
-            typedef HWND   WIN_HANDLE;
-            typedef POINT  SCREEN_POINT;
-            typedef DWORD  PID;
-            typedef HANDLE PROCESS_HANDLE;
-#elif WXBOX_IN_MAC_OS
-            /*
-			typedef ucpulong_t WIN_HANDLE;
-			typedef struct
-			{
-                int32_t x;
-                int32_t y;
-			} SCREEN_POINT;
-			typedef ucpulong_t PID;
-			typedef ucpulong_t PROCESS_HANDLE;
-			*/
-#endif
 
             //
             // Function
@@ -71,6 +74,9 @@ namespace wxbox {
 
             std::vector<ProcessInfo> GetProcessList();
             PID                      GetCurrentProcessId();
+
+            PROCESS_HANDLE OpenProcessHandle(PID pid);
+            void           CloseProcessHandle(PROCESS_HANDLE handle);
 
             WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
             bool       GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);

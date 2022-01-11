@@ -7,74 +7,31 @@
 // Macro
 //
 
-#define U_OBJ_CONSTRUCTOR(TYPE, MEMBER, MEMBER_TYPE) \
-    if (type == TYPE) {                              \
-        new (&MEMBER) MEMBER_TYPE();                 \
-        return;                                      \
+#if defined(_MSC_VER)
+#define PRAGMA __pragma
+#else
+#define PRAGMA _Pragma
+#endif
+
+#if WXBOX_IN_WINDOWS_OS
+#define CloseHandleSafe(h)    \
+    {                         \
+        if (h) {              \
+            ::CloseHandle(h); \
+            h = NULL;         \
+        }                     \
     }
-
-#define U_OBJ_DESTRUCTOR(TYPE, MEMBER, DESTRUCTOR) \
-    if (type == TYPE) {                            \
-        MEMBER.~DESTRUCTOR();                      \
-        return;                                    \
-    }
-
-#define U_OBJ_COPY(TYPE, MEMBER, MEMBER_TYPE, OTHER) \
-    if (type == TYPE) {                              \
-        new (&MEMBER) MEMBER_TYPE(OTHER.MEMBER);     \
-        return;                                      \
-    }
-
-#define U_OBJ_MOVE(TYPE, MEMBER, MEMBER_TYPE, OTHER)        \
-    if (type == TYPE) {                                     \
-        new (&MEMBER) MEMBER_TYPE(std::move(OTHER.MEMBER)); \
-        return;                                             \
-    }
-
-#define U_SCALAR_CONSTRUCTOR(TYPE, MEMBER, DEFAULT_VALUE) \
-    if (type == TYPE) {                                   \
-        MEMBER = DEFAULT_VALUE;                           \
-        return;                                           \
-    }
-
-#define U_SCALAR_COPY(TYPE, MEMBER, OTHER) \
-    if (type == TYPE) {                    \
-        MEMBER = OTHER.MEMBER;             \
-        return;                            \
-    }
-
-#define SETUP_COPY_METHOD(TYPE, OTHER_VAL_NAME) \
-    TYPE(const TYPE& OTHER_VAL_NAME)            \
-    {                                           \
-        __copy(OTHER_VAL_NAME);                 \
-    }                                           \
-    TYPE& operator=(const TYPE& OTHER_VAL_NAME) \
-    {                                           \
-        __copy(OTHER_VAL_NAME);                 \
-        return *this;                           \
-    }                                           \
-                                                \
-    void __copy(const TYPE& OTHER_VAL_NAME)
-
-#define SETUP_MOVE_METHOD(TYPE, OTHER_VAL_NAME) \
-    TYPE(TYPE&& OTHER_VAL_NAME)                 \
-    {                                           \
-        __move(std::move(OTHER_VAL_NAME));      \
-    }                                           \
-    TYPE& operator=(TYPE&& OTHER_VAL_NAME)      \
-    {                                           \
-        __move(std::move(OTHER_VAL_NAME));      \
-        return *this;                           \
-    }                                           \
-                                                \
-    void __move(TYPE&& OTHER_VAL_NAME)
+#else
+#define CloseHandleSafe(h) \
+    {}
+#endif
 
 //
 // Typedef
 //
 
-typedef long     cpulong_t;
-typedef unsigned ucpulong_t;
+typedef long          cpulong_t;
+typedef unsigned long ucpulong_t;
 
 //
 // Platform related headers
@@ -135,6 +92,7 @@ typedef unsigned ucpulong_t;
 // WxBox utils headers
 //
 
+#include <utils/traits.h>
 #include <utils/config.hpp>
 #include <utils/process.h>
 #include <utils/feature.h>
@@ -143,11 +101,13 @@ typedef unsigned ucpulong_t;
 #include <utils/string.h>
 #include <utils/wx.h>
 #include <utils/crack.h>
+#include <utils/inject.h>
 
 //
 // Short namespace
 //
 
+namespace wb_traits  = wxbox::util::traits;
 namespace wb_process = wxbox::util::process;
 namespace wb_wx      = wxbox::util::wx;
 namespace wb_file    = wxbox::util::file;
@@ -155,5 +115,6 @@ namespace wb_string  = wxbox::util::string;
 namespace wb_memory  = wxbox::util::memory;
 namespace wb_feature = wxbox::util::feature;
 namespace wb_crack   = wxbox::util::crack;
+namespace wb_inject  = wxbox::util::inject;
 
 #endif  // #ifndef __WXBOX_UTILS_COMMON_H

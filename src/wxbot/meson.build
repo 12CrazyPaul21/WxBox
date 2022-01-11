@@ -18,7 +18,7 @@ wxbot_src = [
 shlib = shared_library('wxbot', [wxbot_src, proto_generated],
     include_directories: wxbot_inc,
     install : true,
-    cpp_args : lib_args,
+    cpp_args : [lib_args, ignore_warnings],
     gnu_symbol_visibility : 'hidden',
     dependencies: [spdlog_dep, frida_gum_dep, TitanEngine_dep, lua_dep, grpc_dep, yaml_cpp_dep]
 )
@@ -27,7 +27,8 @@ shlib = shared_library('wxbot', [wxbot_src, proto_generated],
 test_exe = executable('wxbot_test', 'wxbot_test.cpp',
     include_directories: configuration_inc,
     link_with : shlib,
-    dependencies: [spdlog_dep])
+    dependencies: [spdlog_dep],
+    cpp_args: [ignore_warnings])
 test_env = environment()
 test_env.prepend('PATH', TitanEngine_bin_root)
 test_env.prepend('PATH', grpc_bin_root)
