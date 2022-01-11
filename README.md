@@ -43,6 +43,10 @@ QMessageBox::information(this, tr("Title"), tr("\345\205\263\344\272\216 WxBox")
 
 ​	spdbuf需要cmake构建工具。
 
+### 关于构建时出现的Warning
+
+​	在编译时，部分第三方库有非常多的Warning，这些全部忽略它，但是不关闭这些警告。但是主项目构建时出现的所有Warning都要重新检查，对主项目的所有Warning零容忍
+
 ### Qt SDK环境路径
 
 ​	在Windows中要把qmake的路径加入Path中，否则meson识别不到Qt5
@@ -177,6 +181,8 @@ meson compile -C build/release
 meson compile -C build/debug
 meson test -C build/debug
 ```
+
+​	另外测试时要留意是否出现内存泄漏，对内存泄漏零容忍，必须避免。
 
 ## 开发时的调试方法
 

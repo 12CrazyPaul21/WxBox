@@ -462,10 +462,7 @@ namespace wxbox {
             }
 
             ChangeStatus(WxBoxServerStatus::Started);
-
-            // ÏûÏ¢Ñ­»·
             MessageLoop();
-
             ChangeStatus(WxBoxServerStatus::Stopped);
 
         _Finish:

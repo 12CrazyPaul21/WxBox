@@ -254,7 +254,7 @@ TEST(wxbox_utils, wx)
             continue;
         }
 
-		for (auto api : wb_feature::WX_HOOK_API) {
+        for (auto api : wb_feature::WX_HOOK_API) {
             spdlog::info("        {} VA : 0x{:08X}", api, vaCollection.get(api));
         }
     }
@@ -310,7 +310,6 @@ TEST(wxbox_utils, crack)
 #endif
 
     if (hProcess) {
-
         //
         // known wechat version
         //
@@ -339,4 +338,43 @@ TEST(wxbox_utils, crack)
 #elif WXBOX_IN_MAC_OS
 
 #endif
+}
+
+TEST(_wbox_utils, inject)
+{
+    auto processPath = wxbox::util::file::GetProcessRootPath();
+    EXPECT_NE(true, processPath.empty());
+
+    char            callFuncName[] = "SayHiInject";
+    wb_process::PID pid            = GetCurrentProcessId();
+    EXPECT_NE(wb_process::PID(0), pid);
+
+#if WXBOX_IN_WINDOWS_OS
+    char moduleName[] = "ModForInjectTest.dll";
+    auto modulePath   = wxbox::util::file::JoinPath(processPath, "/ModForInjectTest/ModForInjectTest.dll");
+#else
+    char moduleName[] = "ModForInjectTest.so";
+    auto modulePath   = wxbox::util::file::JoinPath(processPath, "/ModForInjectTest/ModForInjectTest.so");
+#endif
+
+	char                              message[] = "Inject";
+    wb_inject::MethodCallingParameter parameter = wb_inject::MethodCallingParameter::BuildBufferValue(message, sizeof(message));
+
+	EXPECT_EQ(true, wb_inject::InjectModuleToProcess(pid, modulePath, callFuncName, &parameter));
+    EXPECT_EQ(true, wb_inject::UnInjectModuleFromProcess(pid, moduleName));
+}
+
+TEST(wbox_utils, DISABLED_use_frida_to_inject)
+{
+    // #include <frida-core.h>
+
+    // frida_init();
+    // FridaInjector* injector = frida_injector_new();
+
+    // GError* error = nullptr;
+    // auto    e     = frida_injector_inject_library_file_sync(injector, 628036, "forhook.dll", "SayHi", "", nullptr, &error);
+
+    // frida_injector_close_sync(injector, nullptr, nullptr);
+    // frida_unref(injector);
+    // frida_deinit();
 }

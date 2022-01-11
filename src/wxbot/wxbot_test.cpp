@@ -110,7 +110,7 @@ int main(int /*argc*/, char** /*argv*/)
     bot.DestroyWxBoxClient();
 
     spdlog::info("============================================");
-    spdlog::info("          step 1 : Regular Testing [Finish]");
+    spdlog::info("      step 1 : Regular Testing [Finish]");
     spdlog::info("============================================");
 
     //
@@ -154,7 +154,7 @@ int main(int /*argc*/, char** /*argv*/)
     }
 
     spdlog::info("============================================");
-    std::cout << "          step 2 : Stress Testing [Finish]" << endl;
+    std::cout << "      step 2 : Stress Testing [Finish]" << endl;
     spdlog::info("============================================");
 
     bot.Shutdown();

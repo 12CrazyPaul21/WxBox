@@ -1,0 +1,408 @@
+#include <utils/common.h>
+
+#if WXBOX_IN_WINDOWS_OS
+
+BEGIN_NAKED_STD_FUNCTION(CallProcessModuleMethodStub, wb_inject::RemoteCallParameter* p)
+{
+#if WXBOX_CPU_IS_X86
+    __asm {
+		push ebp
+		mov ebp, esp
+		push esi
+
+        ;  // check whether the pointer is nullptr
+		mov esi, [ebp+0x8]
+		cmp esi, 0
+		je _Ret
+
+        ;  // check whether the parameter is valid
+		cmp [esi]p.pModuleName, 0
+		je _Ret
+		cmp [esi]p.pFuncName, 0
+		je _Ret
+		cmp [esi]p.pFuncGetProcAddress, 0
+		je _Ret
+		cmp [esi]p.pFuncGetModuleHandleA, 0
+		je _Ret
+
+        ;  // call GetModuleHandleA
+		push [esi]p.pModuleName
+		call [esi]p.pFuncGetModuleHandleA
+		cmp eax, 0
+		je _Ret
+
+        ;  // call GetProcAddress
+		push [esi]p.pFuncName
+		push eax
+		call [esi]p.pFuncGetProcAddress
+		cmp eax, 0
+		je _Ret
+
+        ;  // call target
+		push [esi]p.pArg
+		call eax
+		add esp, 4
+		mov eax, 0
+
+	_Ret:
+		pop esi
+		pop ebp
+		ret 4
+    }
+#endif  // #if WXBOX_CPU_IS_X86
+}
+END_NAKED_STD_FUNCTION(CallProcessModuleMethodStub);
+
+#endif  // #if WXBOX_IN_WINDOWS_OS
+
+static wb_traits::FunctionInfo GetCallProcessModuleMethodStubInfo()
+{
+#if WXBOX_IN_WINDOWS_OS
+    return CallProcessModuleMethodStubInfo();
+#else
+    return wb_traits::FunctionInfo();
+#endif
+}
+
+#if WXBOX_IN_WINDOWS_OS
+
+static bool InjectModuleToProcess_Windows(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, wb_inject::PMethodCallingParameter parameter)
+{
+    if (!pid || !wb_file::IsPathExists(modulePath)) {
+        return false;
+    }
+
+    bool                               retval           = false;
+    HMODULE                            hKernel32        = NULL;
+    FARPROC                            funcLoadLibraryA = nullptr;
+    HANDLE                             hRemoteThread    = NULL;
+    wb_memory::RemotePageInfo          dataPageInfo;
+    wb_memory::RemoteWrittenMemoryInfo modulePathMemoryInfo;
+
+    // open process with all access permission
+    HANDLE hProcess = wb_process::OpenProcessHandle(pid);
+    if (!hProcess) {
+        return retval;
+    }
+
+    // allocate data page to process
+    dataPageInfo = wb_memory::AllocPageToRemoteProcess(hProcess, wb_memory::RemotePageInfo::MIN_REMOTE_PAGE_SIZE * 2);
+    if (!dataPageInfo.addr) {
+        goto _DONE;
+    }
+
+    // write module path to process
+    modulePathMemoryInfo = wb_memory::WriteStringToProcess(hProcess, dataPageInfo, modulePath);
+    if (!modulePathMemoryInfo.addr) {
+        goto _DONE;
+    }
+
+    // get kernel32 module handler
+    hKernel32 = ::GetModuleHandleA("kernel32");
+    if (!hKernel32) {
+        goto _DONE;
+    }
+
+    // get LoadLibraryA address
+    funcLoadLibraryA = ::GetProcAddress(hKernel32, "LoadLibraryA");
+    if (!funcLoadLibraryA) {
+        goto _DONE;
+    }
+
+    // inject dll module
+    hRemoteThread = ::CreateRemoteThread(hProcess, nullptr, 0, (LPTHREAD_START_ROUTINE)funcLoadLibraryA, modulePathMemoryInfo.addr, 0, nullptr);
+    if (!hRemoteThread) {
+        goto _DONE;
+    }
+
+    // wait for module loaded
+    ::WaitForSingleObject(hRemoteThread, INFINITE);
+
+    // inject success
+    retval = true;
+
+    // invoke entry if exist
+    if (entryMethod.empty()) {
+        goto _DONE;
+    }
+    retval = wb_inject::CallProcessModuleMethod(hProcess, dataPageInfo, wb_file::ToFileName(modulePath), entryMethod, parameter);
+
+_DONE:
+    wb_memory::FreeRemoteProcessPage(hProcess, dataPageInfo);
+    CloseHandleSafe(hRemoteThread);
+    wb_process::CloseProcessHandle(hProcess);
+    return retval;
+}
+
+static bool UnInjectModuleFromProcess_Windows(wxbox::util::process::PID pid, const std::string& moduleName)
+{
+    if (!pid) {
+        return false;
+    }
+	
+	bool                               retval           = false;
+    HMODULE                            hKernel32        = NULL;
+    FARPROC                            funcFreeLibrary = nullptr;
+    HANDLE                             hRemoteThread    = NULL;
+    wb_process::ModuleInfo             remoteModuleInfo;
+
+	// get forhook.dll module handle
+    if (!wb_process::GetModuleInfo(pid, moduleName, remoteModuleInfo)) {
+        return retval;
+    }
+
+    // open process with all access permission
+    HANDLE hProcess = wb_process::OpenProcessHandle(pid);
+    if (!hProcess) {
+        return retval;
+    }
+
+    // get kernel32 module handler
+    hKernel32 = ::GetModuleHandleA("kernel32");
+    if (!hKernel32) {
+        goto _DONE;
+    }
+
+    // get FreeLibrary address
+    funcFreeLibrary = ::GetProcAddress(hKernel32, "FreeLibrary");
+    if (!funcFreeLibrary) {
+        goto _DONE;
+    }
+
+    // inject dll module
+    hRemoteThread = ::CreateRemoteThread(hProcess, nullptr, 0, (LPTHREAD_START_ROUTINE)funcFreeLibrary, remoteModuleInfo.hModule, 0, nullptr);
+    if (!hRemoteThread) {
+        goto _DONE;
+    }
+
+    // wait for module loaded
+    ::WaitForSingleObject(hRemoteThread, INFINITE);
+
+    // inject success
+    retval = true;
+
+_DONE:
+    CloseHandleSafe(hRemoteThread);
+    wb_process::CloseProcessHandle(hProcess);
+    return retval;
+}
+
+static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter)
+{
+    if (!hProcess || moduleName.empty() || method.empty()) {
+        return false;
+    }
+
+    HMODULE                            hKernel32            = NULL;
+    FARPROC                            funcGetModuleHandleA = nullptr;
+    FARPROC                            funcGetProcAddress   = nullptr;
+    HANDLE                             hRemoteThread        = NULL;
+    wb_inject::RemoteCallParameter     remoteCallParameter;
+    wb_traits::FunctionInfo            funcCallProcessModuleMethodStubInfo;
+    wb_memory::RemoteWrittenMemoryInfo moduleNameMemoryInfo;
+    wb_memory::RemoteWrittenMemoryInfo methodNameMemoryInfo;
+    wb_memory::RemoteWrittenMemoryInfo remoteCallParameterMemoryInfo;
+    wb_memory::RemoteWrittenMemoryInfo remoteCodeStreamMemoryInfo;
+
+    // get kernel32 module handler
+    hKernel32 = ::GetModuleHandleA("kernel32");
+    if (!hKernel32) {
+        return false;
+    }
+
+    // get GetModuleHandleA address
+    funcGetModuleHandleA = ::GetProcAddress(hKernel32, "GetModuleHandleA");
+    if (!funcGetModuleHandleA) {
+        return false;
+    }
+
+    // get GetProcAddress address
+    funcGetProcAddress = ::GetProcAddress(hKernel32, "GetProcAddress");
+    if (!funcGetProcAddress) {
+        return false;
+    }
+
+    // write string info to process
+    moduleNameMemoryInfo = wb_memory::WriteStringToProcess(hProcess, dataPageInfo, moduleName);
+    methodNameMemoryInfo = wb_memory::WriteStringToProcess(hProcess, dataPageInfo, method);
+    if (!moduleNameMemoryInfo.addr || !methodNameMemoryInfo.addr) {
+        return false;
+    }
+
+    // packaging RemoteCallParameter
+    remoteCallParameter.pModuleName           = (char*)moduleNameMemoryInfo.addr;
+    remoteCallParameter.pFuncName             = (char*)methodNameMemoryInfo.addr;
+    remoteCallParameter.pArg                  = 0;
+    remoteCallParameter.pFuncGetModuleHandleA = funcGetModuleHandleA;
+    remoteCallParameter.pFuncGetProcAddress   = funcGetProcAddress;
+
+	// handle method calling parameter
+    if (parameter) {
+        switch (parameter->type) {
+            case wb_inject::MethodCallingParameterType::CpuWordLongScalarValue:
+                remoteCallParameter.pArg = (void*)parameter->value;
+                break;
+            case wb_inject::MethodCallingParameterType::BufferPointer: {
+                wb_memory::RemoteWrittenMemoryInfo parameterMemoryInfo = wb_memory::WriteByteStreamToProcess(hProcess, dataPageInfo, reinterpret_cast<const uint8_t* const>(parameter->value), parameter->size);
+                if (!parameterMemoryInfo.addr) {
+					// maybe space not enough
+                    return false;
+				}
+                remoteCallParameter.pArg = parameterMemoryInfo.addr;
+                break;
+            }
+        }
+    }
+
+    // write RemoteCallParameter to process
+    remoteCallParameterMemoryInfo = wb_memory::WriteByteStreamToProcess(hProcess, dataPageInfo, reinterpret_cast<const uint8_t* const>(&remoteCallParameter), sizeof(remoteCallParameter));
+    if (!remoteCallParameterMemoryInfo.addr) {
+        return false;
+    }
+
+    // get CallProcessModuleMethodStub info
+    funcCallProcessModuleMethodStubInfo = GetCallProcessModuleMethodStubInfo();
+    if (!funcCallProcessModuleMethodStubInfo.addr) {
+        return false;
+    }
+
+    // write code to process
+    remoteCodeStreamMemoryInfo = wb_memory::WriteByteStreamToProcess(hProcess, codePageInfo, reinterpret_cast<const uint8_t* const>(funcCallProcessModuleMethodStubInfo.addr), funcCallProcessModuleMethodStubInfo.size);
+    if (!remoteCodeStreamMemoryInfo.addr) {
+        return false;
+    }
+
+    // invoke
+    hRemoteThread = ::CreateRemoteThread(hProcess, nullptr, 0, (LPTHREAD_START_ROUTINE)remoteCodeStreamMemoryInfo.addr, remoteCallParameterMemoryInfo.addr, 0, nullptr);
+    if (!hRemoteThread) {
+        return false;
+    }
+
+    // wait for module loaded
+    ::WaitForSingleObject(hRemoteThread, INFINITE);
+
+    CloseHandleSafe(hRemoteThread);
+    return true;
+}
+
+#else
+
+static bool InjectModuleToProcess_Mac(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, wb_inject::PMethodCallingParameter parameter)
+{
+    return false;
+}
+
+static bool UnInjectModuleFromProcess_Mac(wxbox::util::process::PID pid, const std::string& moduleName)
+{
+    return false;
+}
+
+static bool CallProcessModuleMethod_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter)
+{
+    return false;
+}
+
+#endif
+
+bool wxbox::util::inject::InjectModuleToProcess(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, PMethodCallingParameter parameter)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return InjectModuleToProcess_Windows(pid, modulePath, entryMethod, parameter);
+#else
+    return InjectModuleToProcess_Mac(pid, modulePath, entryMethod, parameter);
+#endif
+}
+
+bool wxbox::util::inject::UnInjectModuleFromProcess(wxbox::util::process::PID pid, const std::string& moduleName)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return UnInjectModuleFromProcess_Windows(pid, moduleName);
+#else
+    return UnInjectModuleFromProcess_Mac(pid, moduleName);
+#endif
+}
+
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return CallProcessModuleMethod_Windows(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+#else
+    return CallProcessModuleMethod_Mac(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+#endif
+}
+
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+{
+    bool                       retval   = false;
+    wb_process::PROCESS_HANDLE hProcess = wb_process::OpenProcessHandle(pid);
+    if (!hProcess) {
+        return false;
+    }
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+    wb_process::CloseProcessHandle(hProcess);
+    return retval;
+}
+
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+{
+    if (!hProcess) {
+        return false;
+    }
+
+    wb_traits::FunctionInfo funcCallProcessModuleMethodStubInfo = GetCallProcessModuleMethodStubInfo();
+    if (!funcCallProcessModuleMethodStubInfo.addr) {
+        return false;
+    }
+
+    bool retval = false;
+
+    wb_memory::RemotePageInfo codePageInfo = wb_memory::AllocPageToRemoteProcess(hProcess, funcCallProcessModuleMethodStubInfo.size, true);
+    if (!codePageInfo.addr) {
+        return false;
+    }
+
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+    wb_memory::FreeRemoteProcessPage(hProcess, codePageInfo);
+    return retval;
+}
+
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+{
+    bool                       retval   = false;
+    wb_process::PROCESS_HANDLE hProcess = wb_process::OpenProcessHandle(pid);
+    if (!hProcess) {
+        return false;
+    }
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, moduleName, method, parameter);
+    wb_process::CloseProcessHandle(hProcess);
+    return retval;
+}
+
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+{
+    if (!hProcess) {
+        return false;
+    }
+
+    bool                      retval       = false;
+    wb_memory::RemotePageInfo dataPageInfo = wb_memory::AllocPageToRemoteProcess(hProcess);
+    if (!dataPageInfo.addr) {
+        return false;
+    }
+
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, moduleName, method, parameter);
+    wb_memory::FreeRemoteProcessPage(hProcess, dataPageInfo);
+    return retval;
+}
+
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+{
+    bool                       retval   = false;
+    wb_process::PROCESS_HANDLE hProcess = wb_process::OpenProcessHandle(pid);
+    if (!hProcess) {
+        return false;
+    }
+    retval = CallProcessModuleMethod(hProcess, moduleName, method, parameter);
+    wb_process::CloseProcessHandle(hProcess);
+    return retval;
+}

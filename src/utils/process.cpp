@@ -66,6 +66,7 @@ static bool GetModuleInfo_Windows(wb_process::PID pid, const std::string& module
     if (Module32First(hSnap, &modEntry)) {
         do {
             if (!::_stricmp(modEntry.szModule, moduleName.c_str())) {
+                moduleInfo.hModule         = modEntry.hModule;
                 moduleInfo.moduleName      = modEntry.szModule;
                 moduleInfo.modulePath      = modEntry.szExePath;
                 moduleInfo.pModuleBaseAddr = modEntry.modBaseAddr;
@@ -140,6 +141,24 @@ wxbox::util::process::PID wxbox::util::process::GetCurrentProcessId()
     return ::GetCurrentProcessId();
 #elif WXBOX_IN_MAC_OS
     return getpid();
+#endif
+}
+
+wxbox::util::process::PROCESS_HANDLE wxbox::util::process::OpenProcessHandle(PID pid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+#elif WXBOX_IN_MAC_OS
+    return 0;
+#endif
+}
+
+void wxbox::util::process::CloseProcessHandle(PROCESS_HANDLE handle)
+{
+#if WXBOX_IN_WINDOWS_OS
+    CloseHandleSafe(handle);
+#elif WXBOX_IN_MAC_OS
+    
 #endif
 }
 
