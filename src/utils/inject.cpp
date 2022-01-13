@@ -195,14 +195,14 @@ static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE
 
     HMODULE                            hKernel32            = NULL;
     FARPROC                            funcGetModuleHandleA = nullptr;
-    FARPROC                            funcGetProcAddress   = nullptr;
+    decltype(funcGetModuleHandleA)     funcGetProcAddress   = nullptr;
     HANDLE                             hRemoteThread        = NULL;
     wb_inject::RemoteCallParameter     remoteCallParameter;
     wb_traits::FunctionInfo            funcCallProcessModuleMethodStubInfo;
     wb_memory::RemoteWrittenMemoryInfo moduleNameMemoryInfo;
-    wb_memory::RemoteWrittenMemoryInfo methodNameMemoryInfo;
-    wb_memory::RemoteWrittenMemoryInfo remoteCallParameterMemoryInfo;
-    wb_memory::RemoteWrittenMemoryInfo remoteCodeStreamMemoryInfo;
+    decltype(moduleNameMemoryInfo)     methodNameMemoryInfo;
+    decltype(moduleNameMemoryInfo)     remoteCallParameterMemoryInfo;
+    decltype(moduleNameMemoryInfo)     remoteCodeStreamMemoryInfo;
 
     // get kernel32 module handler
     hKernel32 = ::GetModuleHandleA("kernel32");

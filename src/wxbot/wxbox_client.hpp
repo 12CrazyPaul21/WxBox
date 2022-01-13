@@ -49,20 +49,20 @@ namespace wxbot {
 #define WXBOX_SERVER_DEFAULT_URI "localhost:52333"
 #define WXBOX_CLIENT_CONNECT_RETRY_INTERVAL_MS 500
 
-    typedef enum _MessageLoopResult
+    typedef enum class _MessageLoopResult
     {
         Done = 0,
         ReConnect
     } MessageLoopResult;
 
-    typedef enum _MsgRole
+    typedef enum class _MsgRole
     {
         UnknownRole = 0,
         WxBox,
         WxBot
     } MsgRole;
 
-    typedef enum _WxBotMessageType
+    typedef enum class _WxBotMessageType
     {
         UnknownMsgType = 0,
         WxBoxRequestOrResponse,
@@ -73,7 +73,7 @@ namespace wxbot {
         WxBoxClientStatusChange
     } WxBotMessageType;
 
-    typedef enum _WxBoxClientStatus
+    typedef enum class _WxBoxClientStatus
     {
         Uninit = 0,
         Started,
@@ -126,40 +126,40 @@ namespace wxbot {
 
             void constructor(const WxBotMessageType type)
             {
-                U_OBJ_CONSTRUCTOR(WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket);
-                U_OBJ_CONSTRUCTOR(WxBotRequest, wxBotControlPacket, WxBotControlPacket);
-                U_OBJ_CONSTRUCTOR(WxBotResponse, wxBotControlPacket, WxBotControlPacket);
-                U_SCALAR_CONSTRUCTOR(WxBoxClientStatusChange, wxBoxClientStatus, WxBoxClientStatusChangeInfo(WxBoxClientStatus::Uninit, WxBoxClientStatus::Uninit));
+                U_OBJ_CONSTRUCTOR(WxBotMessageType::WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket);
+                U_OBJ_CONSTRUCTOR(WxBotMessageType::WxBotRequest, wxBotControlPacket, WxBotControlPacket);
+                U_OBJ_CONSTRUCTOR(WxBotMessageType::WxBotResponse, wxBotControlPacket, WxBotControlPacket);
+                U_SCALAR_CONSTRUCTOR(WxBotMessageType::WxBoxClientStatusChange, wxBoxClientStatus, WxBoxClientStatusChangeInfo(WxBoxClientStatus::Uninit, WxBoxClientStatus::Uninit));
             }
 
             void destructor(const WxBotMessageType type)
             {
-                U_OBJ_DESTRUCTOR(WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket);
-                U_OBJ_DESTRUCTOR(WxBotRequest, wxBotControlPacket, WxBotControlPacket);
-                U_OBJ_DESTRUCTOR(WxBotResponse, wxBotControlPacket, WxBotControlPacket);
+                U_OBJ_DESTRUCTOR(WxBotMessageType::WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket);
+                U_OBJ_DESTRUCTOR(WxBotMessageType::WxBotRequest, wxBotControlPacket, WxBotControlPacket);
+                U_OBJ_DESTRUCTOR(WxBotMessageType::WxBotResponse, wxBotControlPacket, WxBotControlPacket);
             }
 
             void copy(const WxBotMessageType type, const _u& other)
             {
-                U_OBJ_COPY(WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket, other);
-                U_OBJ_COPY(WxBotRequest, wxBotControlPacket, WxBotControlPacket, other);
-                U_OBJ_COPY(WxBotResponse, wxBotControlPacket, WxBotControlPacket, other);
-                U_SCALAR_COPY(WxBoxClientStatusChange, wxBoxClientStatus, other);
+                U_OBJ_COPY(WxBotMessageType::WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket, other);
+                U_OBJ_COPY(WxBotMessageType::WxBotRequest, wxBotControlPacket, WxBotControlPacket, other);
+                U_OBJ_COPY(WxBotMessageType::WxBotResponse, wxBotControlPacket, WxBotControlPacket, other);
+                U_SCALAR_COPY(WxBotMessageType::WxBoxClientStatusChange, wxBoxClientStatus, other);
             }
 
             void move(const WxBotMessageType type, _u&& other)
             {
-                U_OBJ_MOVE(WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket, other);
-                U_OBJ_MOVE(WxBotRequest, wxBotControlPacket, WxBotControlPacket, other);
-                U_OBJ_MOVE(WxBotResponse, wxBotControlPacket, WxBotControlPacket, other);
-                U_SCALAR_COPY(WxBoxClientStatusChange, wxBoxClientStatus, other);
+                U_OBJ_MOVE(WxBotMessageType::WxBoxRequestOrResponse, wxBoxControlPacket, WxBoxControlPacket, other);
+                U_OBJ_MOVE(WxBotMessageType::WxBotRequest, wxBotControlPacket, WxBotControlPacket, other);
+                U_OBJ_MOVE(WxBotMessageType::WxBotResponse, wxBotControlPacket, WxBotControlPacket, other);
+                U_SCALAR_COPY(WxBotMessageType::WxBoxClientStatusChange, wxBoxClientStatus, other);
             }
         } u;
 
         _WxBotMessage()
-          : role(UnknownRole)
-          , type(UnknownMsgType)
-          , u(UnknownMsgType)
+          : role(MsgRole::UnknownRole)
+          , type(WxBotMessageType::UnknownMsgType)
+          , u(WxBotMessageType::UnknownMsgType)
         {
         }
 
@@ -192,11 +192,11 @@ namespace wxbot {
         void Clear()
         {
             switch (type) {
-                case WxBoxRequestOrResponse:
+                case WxBotMessageType::WxBoxRequestOrResponse:
                     u.wxBoxControlPacket.Clear();
                     break;
-                case WxBotRequest:
-                case WxBotResponse:
+                case WxBotMessageType::WxBotRequest:
+                case WxBotMessageType::WxBotResponse:
                     u.wxBotControlPacket.Clear();
                     break;
             }
@@ -204,7 +204,7 @@ namespace wxbot {
 
     } WxBotMessage, *PWxBotMessage;
 
-    typedef std::function<void(WxBotMessage)> WxBoxClientCallback;
+    using WxBoxClientCallback = std::function<void(WxBotMessage)>;
 
     class WxBoxEndPoint final : public grpc::ClientBidiReactor<WxBotControlPacket, WxBoxControlPacket>
     {

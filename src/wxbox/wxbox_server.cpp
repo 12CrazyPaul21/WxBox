@@ -229,7 +229,7 @@ bool wxbox::WxBoxServer::HandleWxBoxClientRequest(WxBotEndPoint* endpoint, wxbox
 
 void wxbox::WxBoxServer::Wait()
 {
-    WxBoxMessage msg(UnknownRole, UnknownMsgType);
+    WxBoxMessage msg(MsgRole::UnknownRole, WxBoxMessageType::UnknownMsgType);
 
     // wait for connection empty
     while (!IsConnectionEmpty()) {
@@ -247,7 +247,7 @@ void wxbox::WxBoxServer::Wait()
         }
 
         switch (msg.type) {
-            case WxBoxClientDone:
+            case WxBoxMessageType::WxBoxClientDone:
                 PutMessageToWxBox(msg);
                 break;
         }
@@ -261,7 +261,7 @@ void wxbox::WxBoxServer::Wait()
 
 void wxbox::WxBoxServer::MessageLoop()
 {
-    WxBoxMessage msg(UnknownRole, UnknownMsgType);
+    WxBoxMessage msg(MsgRole::UnknownRole, WxBoxMessageType::UnknownMsgType);
 
     for (;;) {
         //
@@ -286,19 +286,19 @@ void wxbox::WxBoxServer::MessageLoop()
         //
 
         switch (msg.type) {
-            case WxBoxResponse:
+            case WxBoxMessageType::WxBoxResponse:
                 SendPacket(msg.pid, msg.u.wxBoxControlPacket);
                 break;
-            case WxBoxRequest:
+            case WxBoxMessageType::WxBoxRequest:
                 SendPacket(msg.pid, msg.u.wxBoxControlPacket);
                 break;
-            case WxBotRequestOrResponse:
+            case WxBoxMessageType::WxBotRequestOrResponse:
                 PutMessageToWxBox(msg);
                 break;
-            case WxBoxClientConnected:
+            case WxBoxMessageType::WxBoxClientConnected:
                 PutMessageToWxBox(msg);
                 break;
-            case WxBoxClientDone:
+            case WxBoxMessageType::WxBoxClientDone:
                 PutMessageToWxBox(msg);
                 break;
         }

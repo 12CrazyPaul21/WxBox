@@ -214,7 +214,7 @@ bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::u
     // ^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$
     //
 
-    std::regex matchPattern("^(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?(?:([0-9]+)\\.)?([0-9]+)$");
+    std::regex matchPattern(R"(^(?:([0-9]+)\.)?(?:([0-9]+)\.)?(?:([0-9]+)\.)?([0-9]+)$)");
 
     std::smatch result;
     if (!std::regex_match(version.begin(), version.end(), result, matchPattern)) {

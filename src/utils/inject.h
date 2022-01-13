@@ -33,7 +33,7 @@ namespace wxbox {
                 }
             } RemoteCallParameter, *PRemoteCallParameter;
 
-            typedef enum _MethodCallingParameterType
+            typedef enum class _MethodCallingParameterType
             {
                 CpuWordLongScalarValue = 0,
                 BufferPointer
@@ -46,7 +46,7 @@ namespace wxbox {
                 ucpulong_t                 size;
 
                 _MethodCallingParameter()
-                  : type(CpuWordLongScalarValue)
+                  : type(MethodCallingParameterType::CpuWordLongScalarValue)
                   , value(0)
                   , size(sizeof(ucpulong_t))
                 {

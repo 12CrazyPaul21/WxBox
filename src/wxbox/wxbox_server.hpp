@@ -62,7 +62,7 @@ namespace wxbox {
 
 #define WXBOX_SERVER_DEFAULT_URI "localhost:52333"
 
-    typedef enum _WxBoxServerStatus
+    typedef enum class _WxBoxServerStatus
     {
         Uninit = 0,
         Started,
@@ -71,14 +71,14 @@ namespace wxbox {
         Stopped
     } WxBoxServerStatus;
 
-    typedef enum _MsgRole
+    typedef enum class _MsgRole
     {
         UnknownRole = 0,
         WxBox,
         WxBot
     } MsgRole;
 
-    typedef enum _WxBoxMessageType
+    typedef enum class _WxBoxMessageType
     {
         UnknownMsgType = 0,
         WxBotRequestOrResponse,
@@ -114,38 +114,38 @@ namespace wxbox {
 
             void constructor(const WxBoxMessageType type)
             {
-                U_OBJ_CONSTRUCTOR(WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket);
-                U_OBJ_CONSTRUCTOR(WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket);
-                U_OBJ_CONSTRUCTOR(WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket);
+                U_OBJ_CONSTRUCTOR(WxBoxMessageType::WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket);
+                U_OBJ_CONSTRUCTOR(WxBoxMessageType::WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket);
+                U_OBJ_CONSTRUCTOR(WxBoxMessageType::WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket);
             }
 
             void destructor(const WxBoxMessageType type)
             {
-                U_OBJ_DESTRUCTOR(WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket);
-                U_OBJ_DESTRUCTOR(WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket);
-                U_OBJ_DESTRUCTOR(WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket);
+                U_OBJ_DESTRUCTOR(WxBoxMessageType::WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket);
+                U_OBJ_DESTRUCTOR(WxBoxMessageType::WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket);
+                U_OBJ_DESTRUCTOR(WxBoxMessageType::WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket);
             }
 
             void copy(const WxBoxMessageType type, const _u& other)
             {
-                U_OBJ_COPY(WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket, other);
-                U_OBJ_COPY(WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket, other);
-                U_OBJ_COPY(WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket, other);
+                U_OBJ_COPY(WxBoxMessageType::WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket, other);
+                U_OBJ_COPY(WxBoxMessageType::WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket, other);
+                U_OBJ_COPY(WxBoxMessageType::WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket, other);
             }
 
             void move(const WxBoxMessageType type, _u&& other)
             {
-                U_OBJ_MOVE(WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket, other);
-                U_OBJ_MOVE(WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket, other);
-                U_OBJ_MOVE(WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket, other);
+                U_OBJ_MOVE(WxBoxMessageType::WxBotRequestOrResponse, wxBotControlPacket, WxBotControlPacket, other);
+                U_OBJ_MOVE(WxBoxMessageType::WxBoxRequest, wxBoxControlPacket, WxBoxControlPacket, other);
+                U_OBJ_MOVE(WxBoxMessageType::WxBoxResponse, wxBoxControlPacket, WxBoxControlPacket, other);
             }
         } u;
 
         _WxBoxMessage()
-          : role(UnknownRole)
-          , type(UnknownMsgType)
+          : role(MsgRole::UnknownRole)
+          , type(WxBoxMessageType::UnknownMsgType)
           , pid(0)
-          , u(UnknownMsgType)
+          , u(WxBoxMessageType::UnknownMsgType)
         {
         }
 
@@ -181,11 +181,11 @@ namespace wxbox {
         void Clear()
         {
             switch (type) {
-                case WxBotRequestOrResponse:
+                case WxBoxMessageType::WxBotRequestOrResponse:
                     u.wxBotControlPacket.Clear();
                     break;
-                case WxBoxRequest:
-                case WxBoxResponse:
+                case WxBoxMessageType::WxBoxRequest:
+                case WxBoxMessageType::WxBoxResponse:
                     u.wxBoxControlPacket.Clear();
                     break;
             }

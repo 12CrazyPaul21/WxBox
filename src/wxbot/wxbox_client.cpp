@@ -177,7 +177,7 @@ bool wxbot::WxBoxClient::HandleWxBoxServerRequest(WxBoxControlPacket packet)
         case wxbox::ControlPacketType::HANDSHAKE_RESPONSE:
             if (packet.mutable_handshakeresponse()->success()) {
                 endpoint->HandshakeSuccess();
-                ChangeStatus(ConnectWxBoxServerSuccess);
+                ChangeStatus(WxBoxClientStatus::ConnectWxBoxServerSuccess);
             }
             return true;
         default: {
@@ -197,7 +197,7 @@ void wxbot::WxBoxClient::WaitForEndPointFinish()
         return;
     }
 
-    WxBotMessage msg(UnknownRole, UnknownMsgType);
+    WxBotMessage msg(MsgRole::UnknownRole, WxBotMessageType::UnknownMsgType);
 
     for (;;) {
         if (!endpoint->IsFinish()) {
@@ -216,7 +216,7 @@ void wxbot::WxBoxClient::WaitForEndPointFinish()
 
         msg.Clear();
 
-        if (msg.type == WxBotConnectionLost) {
+        if (msg.type == WxBotMessageType::WxBotConnectionLost) {
             endpoint = nullptr;
             ChangeStatus(WxBoxClientStatus::ConnectionLost);
             break;
@@ -228,7 +228,7 @@ wxbot::MessageLoopResult wxbot::WxBoxClient::MessageLoop()
 {
     bool                     isTimeToExit = false;
     wxbot::MessageLoopResult result       = wxbot::MessageLoopResult::Done;
-    WxBotMessage             msg(UnknownRole, UnknownMsgType);
+    WxBotMessage             msg(MsgRole::UnknownRole, WxBotMessageType::UnknownMsgType);
 
     for (;;) {
         //
@@ -255,13 +255,13 @@ wxbot::MessageLoopResult wxbot::WxBoxClient::MessageLoop()
             break;
         }
 
-        if (msg.type == WxBotRetryConnect) {
+        if (msg.type == WxBotMessageType::WxBotRetryConnect) {
             std::this_thread::sleep_for(msRetryInterval);
             result = IsTimeToExit() ? wxbot::MessageLoopResult::Done : wxbot::MessageLoopResult::ReConnect;
             msg.Clear();
             break;
         }
-        else if (msg.type == WxBotConnectionLost) {
+        else if (msg.type == WxBotMessageType::WxBotConnectionLost) {
             if (endpoint) {
                 endpoint = nullptr;
             }
@@ -272,13 +272,13 @@ wxbot::MessageLoopResult wxbot::WxBoxClient::MessageLoop()
         }
 
         switch (msg.type) {
-            case WxBotRequest:
+            case WxBotMessageType::WxBotRequest:
                 SendPacket(msg.u.wxBotControlPacket);
                 break;
-            case WxBotResponse:
+            case WxBotMessageType::WxBotResponse:
                 SendPacket(msg.u.wxBotControlPacket);
                 break;
-            case WxBoxRequestOrResponse:
+            case WxBotMessageType::WxBoxRequestOrResponse:
                 PutMessageToWxBot(msg);
                 break;
         }
