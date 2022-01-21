@@ -8,6 +8,8 @@ void ExitHandler()
 
 int main(int argc, char* argv[])
 {
+    wb_process::AppSingleton singleton("____WxBox_App_Singleton_Mutex____", true);
+
     Q_INIT_RESOURCE(wxbox);
     QApplication app(argc, argv);
     MainWindow   window;

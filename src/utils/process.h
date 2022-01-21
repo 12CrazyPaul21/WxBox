@@ -15,6 +15,7 @@ namespace wxbox {
             typedef DWORD   PID;
             typedef HANDLE  PROCESS_HANDLE;
             typedef HMODULE MODULE_HANDLE;
+            typedef HANDLE  MUTEX_HANDLE;
 #elif WXBOX_IN_MAC_OS
             /*
 			typedef ucpulong_t WIN_HANDLE;
@@ -26,6 +27,7 @@ namespace wxbox {
 			typedef ucpulong_t PID;
 			typedef ucpulong_t PROCESS_HANDLE;
 			typedef ucpulong_t MODULE_HANDLE;
+			typedef ucpulong_t MUTEX_HANDLE;
 			*/
 #endif
 
@@ -67,6 +69,22 @@ namespace wxbox {
                 void*         pModuleBaseAddr;
                 ucpulong_t    uModuleSize;
             } ModuleInfo, *PModuleInfo;
+
+            class AppSingleton final
+            {
+                AppSingleton() = delete;
+
+              public:
+                AppSingleton(const std::string& name, bool immediately = false);
+                ~AppSingleton();
+
+                bool TryLock();
+                void Release();
+
+              private:
+                std::string  name;
+                MUTEX_HANDLE mutex;
+            };
 
             //
             // Function

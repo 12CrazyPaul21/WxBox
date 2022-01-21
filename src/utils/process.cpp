@@ -1,6 +1,67 @@
 #include <utils/common.h>
 
 //
+// AppSingleton
+//
+
+wb_process::AppSingleton::AppSingleton(const std::string& name, bool immediately)
+  : name(name)
+  , mutex(nullptr)
+{
+    if (!immediately) {
+        return;
+    }
+
+    if (!TryLock()) {
+        std::exit(0);
+    }
+}
+
+wb_process::AppSingleton::~AppSingleton()
+{
+    if (mutex) {
+        Release();
+    }
+}
+
+bool wb_process::AppSingleton::TryLock()
+{
+    if (mutex) {
+        return false;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    auto hMutex = ::CreateMutexA(NULL, TRUE, name.c_str());
+    if (!hMutex) {
+        return false;
+    }
+
+    if (::GetLastError() == ERROR_ALREADY_EXISTS) {
+        CloseHandleSafe(hMutex);
+        return false;
+    }
+
+    mutex = hMutex;
+    return true;
+#else
+    return false;
+#endif
+}
+void wb_process::AppSingleton::Release()
+{
+    if (!mutex) {
+        return;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    ::CloseHandle(mutex);
+    mutex = nullptr;
+#else
+    return;
+#endif
+}
+
+//
 // Functions
 //
 
