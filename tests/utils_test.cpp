@@ -1,8 +1,8 @@
-#include <chrono>
-#include <spdlog/spdlog.h>
 #include <test_common.h>
-#include <thread>
-#include <utils/common.h>
+
+//
+// wxbox_utils
+//
 
 TEST(wxbox_utils, file)
 {
@@ -340,7 +340,7 @@ TEST(wxbox_utils, crack)
 #endif
 }
 
-TEST(wbox_utils, inject)
+TEST(wxbox_utils, inject)
 {
     auto processPath = wxbox::util::file::GetProcessRootPath();
     EXPECT_NE(true, processPath.empty());
@@ -364,7 +364,7 @@ TEST(wbox_utils, inject)
     EXPECT_EQ(true, wb_inject::UnInjectModuleFromProcess(pid, moduleName));
 }
 
-TEST(wbox_utils, DISABLED_use_frida_to_inject)
+TEST(wxbox_utils, DISABLED_use_frida_to_inject)
 {
     // #include <frida-core.h>
 
@@ -377,4 +377,44 @@ TEST(wbox_utils, DISABLED_use_frida_to_inject)
     // frida_injector_close_sync(injector, nullptr, nullptr);
     // frida_unref(injector);
     // frida_deinit();
+}
+
+TEST(wxbox_utils, list_file)
+{
+    auto utilsSrcPath = wb_file::JoinPath(wb_file::GetProcessRootPath(), "../../../src/utils");
+    auto cppFileList  = wb_file::ListFilesInDirectoryWithExt(utilsSrcPath, "cpp");
+    EXPECT_NE(size_t(0), cppFileList.size());
+    spdlog::info("{} all cpp files : ", utilsSrcPath.c_str());
+    for (auto cpp : cppFileList) {
+        spdlog::info("    {}", cpp.c_str());
+    }
+}
+
+TEST(wxbox_utils, DISABLED_folder_monitor)
+{
+    auto path = wb_file::GetProcessRootPath();
+    EXPECT_EQ(true, wb_file::OpenFolderFilesChangeMonitor(path, [](wb_file::FileChangeMonitorReport report) {
+                  std::stringstream ss;
+                  ss << "dirpath : " << report.dirpath;
+
+                  switch (report.type) {
+                      case wb_file::FileChangeType::Added:
+                          ss << "  [add] : " << report.filename << std::endl;
+                          break;
+                      case wb_file::FileChangeType::Removed:
+                          ss << "  [remove] : " << report.filename << std::endl;
+                          break;
+                      case wb_file::FileChangeType::Modified:
+                          ss << "  [modify] : " << report.filename << std::endl;
+                          break;
+                      case wb_file::FileChangeType::Renamed:
+                          ss << "  [rename] : " << report.oldname << " -> " << report.filename << std::endl;
+                          break;
+                  }
+
+                  std::cout << ss.str();
+              }));
+
+    WaitForPressAnyKey("<<<<< Monitor Folder, Press Any Key to Stop Monitor... >>>>>");
+    wb_file::CloseFolderFilesChangeMonitor(path);
 }
