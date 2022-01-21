@@ -33,6 +33,19 @@ static bool                                 UnLoadPlugin(wxbox::plugin::PPluginV
 static void                                 UnLoadAllPlugin(wxbox::plugin::PPluginVirtualMachine vm);
 static bool                                 ReloadPlugin(wxbox::plugin::PPluginVirtualMachine vm, const std::string& pluginFileName);
 static void                                 RefreshPlugins(wxbox::plugin::PPluginVirtualMachine vm);
+static void                                 PluginVirtualMachinePluginsChangeMonitor(wxbox::plugin::PPluginVirtualMachine vm, wb_file::FileChangeMonitorReport report);
+static inline bool                          PluginVirtualMachineTimeToStop(wxbox::plugin::PPluginVirtualMachine vm);
+static inline void                          DispatchPluginVirtualMachineEvent(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineEventPtr event);
+static inline void                          DispatchPluginEvent(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginEventModelPtr pluginEvent);
+static bool                                 IsModuleRegistered(wxbox::plugin::PPluginVirtualMachine vm, const std::string& moduleName);
+static const char*                          VerifyCommandInfo(wxbox::plugin::PPluginVirtualMachine vm, wb_plugin::CommandExecuteInfoPtr commandInfo);
+static void                                 ExecuteCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::CommandParseResultPtr parseResult, bool fromFilehelper);
+static void                                 HandleEvalCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandEvalPtr command);
+static void                                 HandleReceiveWxChatTextMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandReceiveWxChatTextMessagePtr command);
+static void                                 HandleSendWxChatTextMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandSendWxChatTextMessagePtr command);
+static void                                 HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandPtr command);
+static void                                 PluginVirtualMachineMessageLoop(wxbox::plugin::PPluginVirtualMachine vm);
+static void                                 PluginVirtualMachineRoutine(wxbox::plugin::PPluginVirtualMachine vm);
 
 //
 // Functions
