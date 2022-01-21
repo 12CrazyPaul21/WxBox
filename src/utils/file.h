@@ -129,7 +129,7 @@ namespace wxbox {
 
             std::time_t GetFileModifyTimestamp(const std::string& path);
 
-			YAML::Node UnwindYamlFile(const std::string& path);
+            YAML::Node UnwindYamlFile(const std::string& path);
             bool       UnwindVersionNumber(const std::string& version, VersionNumber& versionNumber);
         }
     }

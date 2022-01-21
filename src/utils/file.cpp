@@ -361,11 +361,11 @@ std::pair<std::string, std::string> wxbox::util::file::ExtractFileNameAndExt(con
         return result;
     }
 
-    result.first  = filename;
+    result.first = filename;
 
-	if (extname[0] == '.') {
+    if (extname[0] == '.') {
         result.second = &extname[1];
-	}
+    }
 
 #elif WXBOX_IN_MAC_OS
     char* duplicate = strdup(path.c_str());
