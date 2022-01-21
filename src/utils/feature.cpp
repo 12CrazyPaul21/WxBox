@@ -593,9 +593,9 @@ ucpulong_t wxbox::util::feature::LocateWxAPIHookPointVAOnlyFeature(const wxbox::
 
 bool wxbox::util::feature::CollectWeChatProcessHookPointVA(const wxbox::util::process::ProcessInfo& pi, const WxApiHookInfo& wxApiHookInfo, WxAPIHookPointVACollection& vaCollection)
 {
-	//
-	// note: !!! haven't checked whether the wxbot module exists !!!
-	//
+    //
+    // note: !!! haven't checked whether the wxbot module exists !!!
+    //
 
     wb_wx::WeChatEnvironmentInfo wxEnvInfo;
     if (!wxbox::util::wx::ResolveWxEnvInfo(pi.dirpath, &wxEnvInfo)) {
@@ -615,7 +615,7 @@ bool wxbox::util::feature::CollectWeChatProcessHookPointVA(const wxbox::util::pr
 
 #endif
 
-	bool                                   bSuccess         = true;
+    bool                                   bSuccess         = true;
     wb_feature::LocateTargetInfo           locateTargetInfo = {hProcess, modInfo.pModuleBaseAddr, modInfo.uModuleSize};
     wb_feature::WxAPIHookPointVACollection collection;
     for (auto api : wb_feature::WX_HOOK_API) {
@@ -627,7 +627,7 @@ bool wxbox::util::feature::CollectWeChatProcessHookPointVA(const wxbox::util::pr
         collection.set(api, va);
     }
 
-	if (bSuccess) {
+    if (bSuccess) {
         vaCollection = std::move(collection);
     }
 

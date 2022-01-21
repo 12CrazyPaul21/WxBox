@@ -72,6 +72,8 @@ namespace wxbox {
             // Function
             //
 
+            std::time_t GetCurrentTimestamp(bool ms = true);
+
             std::vector<ProcessInfo> GetProcessList();
             PID                      GetCurrentProcessId();
 
@@ -84,6 +86,17 @@ namespace wxbox {
             bool       GetProcessInfoByPID(PID pid, ProcessInfo& pi);
 
             PID StartProcessAndAttach(const std::string& binFilePath);
+
+            //
+            // Async
+            //
+
+            // if want to wait for the result, use std::async
+            template<typename _FunctionType, typename... _ArgTypes>
+            inline void async_task(_FunctionType&& func, _ArgTypes&&... args)
+            {
+                std::thread(std::forward<_FunctionType>(func), std::forward<_ArgTypes>(args)...).detach();
+            }
         }
     }
 }

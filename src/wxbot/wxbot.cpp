@@ -123,13 +123,13 @@ namespace wxbot {
     // WxBoxClient Wrapper Response Methods
     //
 
-	void WxBot::ResponseProfile()
-	{
+    void WxBot::ResponseProfile()
+    {
         wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
         msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::PROFILE_RESPONSE);
         msg.u.wxBotControlPacket.mutable_profileresponse()->set_wxid("<is a wxid for test>");
         if (client) {
             client->PushMessageAsync(std::move(msg));
         }
-	}
+    }
 }

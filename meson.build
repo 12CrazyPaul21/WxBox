@@ -16,12 +16,14 @@ assets_root = join_paths(proj_root, 'assets')
 wxbox_root = join_paths(source_root, 'wxbox')
 wxbot_root = join_paths(source_root, 'wxbot')
 utils_root = join_paths(source_root, 'utils')
+plugin_root = join_paths(source_root, 'plugin')
+interact_root = join_paths(source_root, 'interact')
 
 #
 # compiler
 #
 
-ignore_warnings = ['/wd4125', '/wd4702']
+ignore_warnings = ['/wd4125', '/wd4702', '/wd4505']
 
 #
 # config.h
@@ -207,12 +209,42 @@ utils_src = [
     join_paths(utils_root, 'config.hpp')
 ]
 
+
+#
+# plugin
+#
+
+plugin_inc = [
+    source_root
+]
+
+plugin_src = [
+    join_paths(plugin_root, 'plugin.h'),
+    join_paths(plugin_root, 'plugin.cpp'),
+    join_paths(plugin_root, 'plugin_virtual_machine.h'),
+    join_paths(plugin_root, 'plugin_virtual_machine.cpp'),
+    join_paths(plugin_root, 'plugin_command_parser.h'),
+    join_paths(plugin_root, 'plugin_command_parser.cpp'),
+    join_paths(plugin_root, 'internal/plugin_internal_functions.h'),
+    join_paths(plugin_root, 'internal/plugin_internal_functions.cpp'),
+    join_paths(plugin_root, 'internal/plugin_internal_modules.h'),
+    join_paths(plugin_root, 'internal/plugin_internal_modules.cpp'),
+    join_paths(plugin_root, 'internal/module/module_wxbox.h'),
+    join_paths(plugin_root, 'internal/module/module_wxbox.cpp'),
+    join_paths(plugin_root, 'internal/module/model_wechat_contact.h'),
+    join_paths(plugin_root, 'internal/module/model_wechat_contact.cpp'),
+    join_paths(plugin_root, 'internal/module/model_event.h'),
+    join_paths(plugin_root, 'internal/module/model_event.cpp'),
+    join_paths(plugin_root, 'internal/module/model_host_event.h'),
+    join_paths(plugin_root, 'internal/module/model_host_event.cpp')
+]
+
+
 #
 # WxBox
 #
 
 subdir('src/wxbox')
-
 
 #
 # WxBot
@@ -221,10 +253,17 @@ subdir('src/wxbox')
 subdir('src/wxbot')
 
 #
+# interact
+#
+
+subdir('src/interact')
+
+#
 # tests
 #
 
 subdir('tests')
+
 
 #
 # add clang-format target

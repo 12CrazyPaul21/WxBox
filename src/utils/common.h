@@ -53,6 +53,7 @@ typedef unsigned long ucpulong_t;
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #endif
 
@@ -69,6 +70,9 @@ typedef unsigned long ucpulong_t;
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <future>
+#include <cstring>
+#include <utility>
 
 //
 // Third party headers

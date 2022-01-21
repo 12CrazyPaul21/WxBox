@@ -1,6 +1,4 @@
 #ifndef __WXBOX_UTILS_CONFIG_HPP
 #define __WXBOX_UTILS_CONFIG_HPP
 
-
-
-#endif // #ifndef __WXBOX_UTILS_CONFIG_HPP
+#endif  // #ifndef __WXBOX_UTILS_CONFIG_HPP

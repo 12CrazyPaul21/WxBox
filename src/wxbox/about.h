@@ -4,20 +4,20 @@
 #include <QDialog>
 
 namespace Ui {
-	class AboutWxBoxDialog;
+    class AboutWxBoxDialog;
 }
 
 class AboutWxBoxDialog : public QDialog
 {
     Q_OBJECT
 
-public:
+  public:
     explicit AboutWxBoxDialog(QWidget* parent = nullptr);
-	~AboutWxBoxDialog();
+    ~AboutWxBoxDialog();
 
-	virtual void changeEvent(QEvent* event) override;
+    virtual void changeEvent(QEvent* event) override;
 
-private:
+  private:
     Ui::AboutWxBoxDialog* ui;
 };
 

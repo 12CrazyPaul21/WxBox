@@ -105,7 +105,7 @@ void wxbot::WxBoxClient::PushMessage(WxBotMessage message)
 
 void wxbot::WxBoxClient::PushMessageAsync(WxBotMessage message)
 {
-    std::async(std::launch::async, std::bind(&WxBoxClient::PushMessage, this, std::placeholders::_1), message);
+    wb_process::async_task(std::bind(&WxBoxClient::PushMessage, this, std::placeholders::_1), message);
 }
 
 void wxbot::WxBoxClient::ClearMessageQueue()
@@ -117,7 +117,7 @@ void wxbot::WxBoxClient::ClearMessageQueue()
 void wxbot::WxBoxClient::PutMessageToWxBot(const wxbot::WxBotMessage& message)
 {
     if (wxbotCallback) {
-        std::async(std::launch::async, wxbotCallback, message) /*.wait()*/;
+        wb_process::async_task(wxbotCallback, message);
     }
 }
 
