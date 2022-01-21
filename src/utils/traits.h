@@ -102,18 +102,21 @@ namespace wxbox {
     PRAGMA(code_seg(push, DEFINE_NAKED_STD_FUNCTION_BACK, NAKED_FUNCTION_SEG_NAME)) \
     void __declspec(naked) __stdcall FUNC_NAME(__VA_ARGS__)
 
-#define END_NAKED_STD_FUNCTION(FUNC_NAME)                                                                    \
-    void __declspec(naked) __stdcall FUNC_NAME##End()                                                        \
-    {                                                                                                        \
-        __asm {                                                                                              \
-            /*_emit 0x91*/                                                                                   \
-        	ret                                                                                              \
-        }                                                                                                    \
-    }                                                                                                        \
-    wxbox::util::traits::FunctionInfo FUNC_NAME##Info(bool ignoreFilledInt3 = false)                         \
-    {                                                                                                        \
-        return wxbox::util::traits::FetchFunctionInfo(&FUNC_NAME, &FUNC_NAME##End, ignoreFilledInt3);        \
-    }                                                                                                        \
+#define __ASM() __asm
+
+#define END_NAKED_STD_FUNCTION(FUNC_NAME)                                                             \
+    void __declspec(naked) __stdcall FUNC_NAME##End()                                                 \
+    {                                                                                                 \
+        __ASM()                                                                                       \
+        {                                                                                             \
+            /*_emit 0x91*/                                                                            \
+            ret                                                                                       \
+        }                                                                                             \
+    }                                                                                                 \
+    wxbox::util::traits::FunctionInfo FUNC_NAME##Info(bool ignoreFilledInt3 = false)                  \
+    {                                                                                                 \
+        return wxbox::util::traits::FetchFunctionInfo(&FUNC_NAME, &FUNC_NAME##End, ignoreFilledInt3); \
+    }                                                                                                 \
     PRAGMA(code_seg(pop, DEFINE_NAKED_STD_FUNCTION_BACK))
 
 #endif  // #ifndef __WXBOX_UTILS_TRAITS_H

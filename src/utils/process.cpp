@@ -126,6 +126,18 @@ static inline wb_process::PID StartProcessAndAttach_Mac(const std::string& binFi
 
 #endif
 
+std::time_t wxbox::util::process::GetCurrentTimestamp(bool ms)
+{
+    auto t = std::chrono::system_clock::now().time_since_epoch();
+
+    if (ms) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(t).count();
+    }
+    else {
+        return std::chrono::duration_cast<std::chrono::seconds>(t).count();
+    }
+}
+
 std::vector<wb_process::ProcessInfo> wxbox::util::process::GetProcessList()
 {
 #if WXBOX_IN_WINDOWS_OS

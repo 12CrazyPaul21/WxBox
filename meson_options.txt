@@ -1,2 +1,4 @@
 option('wxbox_module_version', type: 'string', value: '0.1.0')
 option('wxbot_module_version', type: 'string', value: '0.1.0')
+option('disable_wxbox_utils_test', type: 'boolean', value: false)
+option('disable_wxbox_plugin_test', type: 'boolean', value: false)

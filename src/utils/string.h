@@ -15,4 +15,6 @@ namespace wxbox {
     }
 }
 
+#define IS_MULTI_BYTES_CHAR_CODE(c) ((0x80 & c) != 0)
+
 #endif  // #ifndef __WXBOX_UTILS_STRING_H
