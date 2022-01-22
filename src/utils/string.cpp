@@ -73,3 +73,44 @@ std::wstring wxbox::util::string::ToWString(const std::string& str)
     return std::move(ToWString_Mac(str));
 #endif
 }
+
+std::vector<std::string> wxbox::util::string::SplitString(const std::string& str, const std::string& delim)
+{
+    std::vector<std::string> result;
+
+#if WXBOX_IN_WINDOWS_OS
+    char* tmp = _strdup(str.c_str());
+#else
+    char* tmp = strdup(str.c_str());
+#endif
+
+    if (!tmp) {
+        return std::move(result);
+    }
+
+    char* token     = nullptr;
+    char* nextToken = nullptr;
+
+#if WXBOX_IN_WINDOWS_OS
+    for (token = strtok_s(tmp, delim.c_str(), &nextToken); token; token = strtok_s(nullptr, delim.c_str(), &nextToken)) {
+#else
+    for (token = strtok_r(tmp, delim.c_str(), &nextToken); token; token = strtok_r(nullptr, delim.c_str(), &nextToken)) {
+#endif
+        result.push_back(token);
+    }
+
+    free(tmp);
+    return std::move(result);
+}
+
+std::string wxbox::util::string::JoinString(const std::vector<std::string>& vt, const std::string& delim)
+{
+    std::stringstream path;
+    for (auto p = vt.begin(); p != vt.end();) {
+        path << *p;
+        if (++p != vt.end()) {
+            path << delim;
+        }
+    }
+    return path.str();
+}

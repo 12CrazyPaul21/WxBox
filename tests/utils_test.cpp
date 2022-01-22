@@ -418,3 +418,55 @@ TEST(wxbox_utils, DISABLED_folder_monitor)
     WaitForPressAnyKey("<<<<< Monitor Folder, Press Any Key to Stop Monitor... >>>>>");
     wb_file::CloseFolderFilesChangeMonitor(path);
 }
+
+TEST(wxbox_utils, config)
+{
+    static constexpr char TEST_CONFIG_NAME[] = "test_config.yml";
+    wb_config::Config     config(TEST_CONFIG_NAME);
+
+    // load config
+    EXPECT_EQ(true, config.load(TEST_CONFIG_NAME));
+
+    config["/wxbox/foo"_conf] = 1;
+    config["/wxbox/bar"_conf] = "2";
+    config["/wx/list"_conf]   = std::vector<std::string>({"hello", "world"});
+    config.submit();
+    config.close();
+
+    config.load();
+    EXPECT_EQ(1, config[R"(/wxbox/foo)"_conf].safe_as<int>());
+    EXPECT_EQ(0, config[R"(/wxbox/bar)"_conf].safe_as<std::string>().compare("2"));
+    EXPECT_EQ(0, config["/wx/list"_conf][0].safe_as<std::string>().compare("hello"));
+    EXPECT_EQ(0, config["/wx/list"_conf][1].safe_as<std::string>().compare("world"));
+
+    for (auto item : config["/wx/list"_conf]) {
+        spdlog::info("{}", item.safe_as<std::string>());
+    }
+}
+
+TEST(wxbox_utils, app_config)
+{
+    static constexpr char TEST_CONFIG_NAME[] = "test_config.yml";
+    AppConfig&            config             = AppConfig::singleton();
+
+    // load config
+    EXPECT_EQ(true, config.load(TEST_CONFIG_NAME));
+
+    // print default config
+    spdlog::info("default config : ");
+    spdlog::info("    /wxbox/plugins_relpath : {}", config[WXBOX_PLUGINS_RELPATH_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/language : {}", config[WXBOX_LANGUAGE_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/plugins_relpath : {}", config[WXBOX_COREDUMP_PATH_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/wechat_installation_dir : {}", config[WXBOX_WECHAT_INSTALLATION_DIR_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/wechat_multi_bloxing_quota : {}", config[WXBOX_WECHAT_MULTI_BLOXING_QUOTA_KEY].safe_as<std::string>());
+
+    config["/wxbox/foo"_conf] = 1;
+    config["/wxbox/bar"_conf] = "2";
+    config["/wx/list"_conf]   = std::vector<std::string>({"hello", "world"});
+    config.submit();
+    config.close();
+
+    config.load();
+    EXPECT_EQ(1, config[R"(/wxbox/foo)"_conf].safe_as<int>());
+    EXPECT_EQ(0, config[R"(/wxbox/bar)"_conf].safe_as<std::string>().compare("2"));
+}

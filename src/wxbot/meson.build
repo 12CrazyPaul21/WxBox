@@ -18,7 +18,7 @@ wxbot_src = [
 shlib = shared_library('wxbot', [wxbot_src, proto_generated],
     include_directories: wxbot_inc,
     install : true,
-    cpp_args : [lib_args, ignore_warnings],
+    cpp_args : [lib_args, ignore_warnings, config_macro_flags],
     gnu_symbol_visibility : 'hidden',
     dependencies: [spdlog_dep, frida_gum_dep, TitanEngine_dep, lua_dep, grpc_dep, yaml_cpp_dep]
 )

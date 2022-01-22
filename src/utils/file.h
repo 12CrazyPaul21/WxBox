@@ -131,6 +131,8 @@ namespace wxbox {
 
             YAML::Node UnwindYamlFile(const std::string& path);
             bool       UnwindVersionNumber(const std::string& version, VersionNumber& versionNumber);
+
+            int ExposeFileStreamFD(std::filebuf* fb);
         }
     }
 }

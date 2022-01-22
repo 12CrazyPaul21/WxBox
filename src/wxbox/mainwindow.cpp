@@ -71,6 +71,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::InitWxBox()
 {
+    AppConfig::singleton().load(wb_file::JoinPath(wb_file::GetProcessRootPath(), AppConfig::APP_CONFIG_NAME));
     startWxBoxServer();
 }
 

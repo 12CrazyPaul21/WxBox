@@ -28,9 +28,7 @@ namespace wxbox {
                 std::string executeAbsPath;
                 std::string version;
 
-                _WeChatEnvironmentInfo()
-                {
-                }
+                _WeChatEnvironmentInfo() = default;
 
                 SETUP_COPY_METHOD(_WeChatEnvironmentInfo, other)
                 {

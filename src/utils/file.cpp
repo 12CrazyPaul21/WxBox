@@ -535,3 +535,26 @@ std::time_t wxbox::util::file::GetFileModifyTimestamp(const std::string& path)
 
     return std::chrono::duration_cast<std::chrono::seconds>(std::experimental::filesystem::last_write_time(path).time_since_epoch()).count();
 }
+
+int wxbox::util::file::ExposeFileStreamFD(std::filebuf* fb)
+{
+    if (!fb) {
+        return -1;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    return -1;
+#else
+
+    class FileDescriptorExpose : public std::filebuf
+    {
+      public:
+        int fd()
+        {
+            return _M_file.fd();
+        }
+    };
+
+    return static_cast<FileDescriptorExpose*>(fb)->fd();
+#endif
+}

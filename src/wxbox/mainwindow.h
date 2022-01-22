@@ -12,6 +12,7 @@
 
 #include "about.h"
 #include "wxbox_server.hpp"
+#include "app_config.hpp"
 
 namespace Ui {
     class MainWindow;

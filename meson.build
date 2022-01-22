@@ -1,7 +1,8 @@
 project('WxBox', ['c', 'cpp'],
     version : '0.1.0',
     default_options : ['warning_level=3',
-                        'cpp_std=c++17']
+                        'cpp_std=c++17',
+                        'backend_startup_project=wxbox']
 )
 
 host_os = host_machine.system()
@@ -57,6 +58,37 @@ conf_data.set('wxbox_module_version', get_option('wxbox_module_version'))
 conf_data.set('wxbot_module_version', get_option('wxbot_module_version'))
 configure_file(input: 'config.h.in', output: 'config.h', configuration: conf_data)
 configuration_inc = include_directories('.')
+
+#
+# collect default wxbox config
+#
+
+all_default_config = {
+    '/wxbox/plugins_relpath': true,
+    '/wxbox/language': true,
+    '/wxbox/coredump_path': true,
+    '/wxbox/wechat_installation_dir': true,
+    '/wxbox/wechat_multi_bloxing_quota': false
+}
+config_macro_flags = []
+foreach config_key, quotation : all_default_config
+    real_key = config_key.strip('/').replace('/', '_')
+    option_key = 'default_' + real_key
+    config_value = get_option(option_key)
+
+    config_key_macro = real_key.to_upper()
+    config_value_macro = option_key.to_upper() + '_VALUE'
+
+    if quotation
+        config_value = '"' + config_value + '"'
+    endif
+
+    config_macro_flags += '-D@0@="@1@"'.format(config_key_macro, config_key)
+    config_macro_flags += '-D@0@=@1@'.format(config_value_macro, config_value)
+endforeach
+
+message('wxbox default config macro : ')
+message(config_macro_flags)
 
 #
 # clang_format
@@ -206,7 +238,8 @@ utils_src = [
     join_paths(utils_root, 'traits.cpp'),
     join_paths(utils_root, 'inject.h'),
     join_paths(utils_root, 'inject.cpp'),
-    join_paths(utils_root, 'config.hpp')
+    join_paths(utils_root, 'config.hpp'),
+    join_paths(utils_root, 'config.cpp')
 ]
 
 

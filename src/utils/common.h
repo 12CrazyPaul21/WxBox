@@ -43,6 +43,7 @@ typedef unsigned long ucpulong_t;
 #include <Psapi.h>
 #include <Shlwapi.h>
 #include <TlHelp32.h>
+#include <share.h>
 
 #pragma comment(lib, "Psapi.lib")
 #pragma comment(lib, "Shlwapi.lib")
@@ -52,6 +53,7 @@ typedef unsigned long ucpulong_t;
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/file.h>
 #include <unistd.h>
 #include <libgen.h>
 
@@ -73,6 +75,7 @@ typedef unsigned long ucpulong_t;
 #include <future>
 #include <cstring>
 #include <utility>
+#include <fstream>
 
 //
 // Third party headers
@@ -97,7 +100,6 @@ typedef unsigned long ucpulong_t;
 //
 
 #include <utils/traits.h>
-#include <utils/config.hpp>
 #include <utils/process.h>
 #include <utils/feature.h>
 #include <utils/file.h>
@@ -106,6 +108,7 @@ typedef unsigned long ucpulong_t;
 #include <utils/wx.h>
 #include <utils/crack.h>
 #include <utils/inject.h>
+#include <utils/config.hpp>
 
 //
 // Short namespace
@@ -120,5 +123,6 @@ namespace wb_memory  = wxbox::util::memory;
 namespace wb_feature = wxbox::util::feature;
 namespace wb_crack   = wxbox::util::crack;
 namespace wb_inject  = wxbox::util::inject;
+namespace wb_config  = wxbox::util::config;
 
 #endif  // #ifndef __WXBOX_UTILS_COMMON_H

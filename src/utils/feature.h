@@ -38,9 +38,7 @@ namespace wxbox {
                 // constructor
                 //
 
-                _WxAbsoluteHookInfo()
-                {
-                }
+                _WxAbsoluteHookInfo() = default;
 
                 SETUP_COPY_METHOD(_WxAbsoluteHookInfo, other)
                 {
@@ -247,9 +245,7 @@ namespace wxbox {
                 // constructor
                 //
 
-                _WxHookPointFeatures()
-                {
-                }
+                _WxHookPointFeatures() = default;
 
                 SETUP_COPY_METHOD(_WxHookPointFeatures, other)
                 {
@@ -288,9 +284,7 @@ namespace wxbox {
                 // constructor
                 //
 
-                _WxApiHookInfo()
-                {
-                }
+                _WxApiHookInfo() = default;
 
                 SETUP_COPY_METHOD(_WxApiHookInfo, other)
                 {
@@ -342,9 +336,7 @@ namespace wxbox {
             {
                 std::unordered_map<std::string, ucpulong_t> collection;
 
-                _WxAPIHookPointVACollection()
-                {
-                }
+                _WxAPIHookPointVACollection() = default;
 
                 SETUP_COPY_METHOD(_WxAPIHookPointVACollection, other)
                 {

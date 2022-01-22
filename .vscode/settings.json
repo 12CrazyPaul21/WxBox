@@ -1,3 +1,6 @@
 {
-    "mesonbuild.configureOnOpen": true
+    "mesonbuild.configureOnOpen": true,
+    "files.associations": {
+        "*.in": "cpp"
+    }
 }

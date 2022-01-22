@@ -23,6 +23,7 @@ wxbox_src = [
     join_paths(wxbox_root, 'mainwindow.cpp'),
     join_paths(wxbox_root, 'about.cpp'),
     join_paths(wxbox_root, 'wxbox_server.cpp'),
+    join_paths(wxbox_root, 'app_config.hpp'),
     join_paths(wxbox_internal, 'threadpool.hpp'),
     utils_src
 ]
@@ -36,5 +37,10 @@ elif host_os == 'darwin'
 endif
 
 # add wxbox executable
-executable('wxbox', sources: [wxbox_src, qt_processed, proto_generated], include_directories: wxbox_inc,
-    install : true, dependencies: [qt5_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep, grpc_dep, yaml_cpp_dep], gui_app: true, cpp_args: [ignore_warnings])
+executable('wxbox',
+    sources: [wxbox_src, qt_processed, proto_generated],
+    include_directories: wxbox_inc,
+    gui_app: true,
+    install : true,
+    dependencies: [qt5_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep, grpc_dep, yaml_cpp_dep],
+    cpp_args: [ignore_warnings, config_macro_flags])

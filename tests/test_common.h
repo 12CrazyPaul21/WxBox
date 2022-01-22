@@ -15,6 +15,8 @@
 #include <utils/common.h>
 #include <plugin/plugin.h>
 
+#include <wxbox/app_config.hpp>
+
 #ifdef WXBOX_IN_WINDOWS_OS
 #include <conio.h>
 #else

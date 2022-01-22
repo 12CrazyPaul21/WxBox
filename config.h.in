@@ -32,4 +32,3 @@
 #else
 #define WXBOX_PLATFORM_NAME ""
 #endif
-

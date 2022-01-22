@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
     ADD_DISABLE_FILTER("wxbox_plugin");
 #endif
 
-    ::testing::GTEST_FLAG(filter) = filters.str().c_str();
+	if (!filters.str().empty()) {
+        ::testing::GTEST_FLAG(filter) = filters.str().c_str();
+	}
     return RUN_ALL_TESTS();
 }
