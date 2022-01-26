@@ -4,6 +4,8 @@
 
 BEGIN_NAKED_STD_FUNCTION(CallProcessModuleMethodStub, wb_inject::RemoteCallParameter* p)
 {
+    WXBOX_UNREF(p);
+
 #if WXBOX_CPU_IS_X86
     __asm {
 		push ebp

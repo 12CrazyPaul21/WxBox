@@ -90,6 +90,8 @@ void MainWindow::OpenAboutDialog()
 
 void MainWindow::WxBoxServerStatusChange(const WxBoxServerStatus oldStatus, const WxBoxServerStatus newStatus)
 {
+    WXBOX_UNREF(oldStatus);
+
     switch (newStatus) {
         case WxBoxServerStatus::Started:
             break;

@@ -6,6 +6,8 @@
 
 void wxbot::WxBoxEndPoint::OnDone(const Status& status)
 {
+    WXBOX_UNREF(status);
+
     if (!client) {
         return;
     }

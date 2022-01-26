@@ -29,24 +29,32 @@ static int __plugin_on_load_stub(lua_State* L)
 
 static int __plugin_on_prereload_stub(lua_State* L)
 {
+    WXBOX_UNREF(L);
+
     // do nothing
     return 0;
 }
 
 static int __plugin_on_unload_stub(lua_State* L)
 {
+    WXBOX_UNREF(L);
+
     // do nothing
     return 0;
 }
 
 static int __plugin_on_receive_text_message_stub(lua_State* L)
 {
+    WXBOX_UNREF(L);
+
     // do nothing
     return 0;
 }
 
 static int __plugin_on_send_text_message_stub(lua_State* L)
 {
+    WXBOX_UNREF(L);
+
     // do nothing
     return 0;
 }

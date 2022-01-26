@@ -26,6 +26,8 @@
     {}
 #endif
 
+#define WXBOX_UNREF(P) (P)
+
 //
 // Typedef
 //
@@ -95,7 +97,7 @@ typedef unsigned long long ucpulong_t;
 //
 
 // #include <TitanEngine.h>
-#include <frida-gum.h>
+// #include <frida-gum.h>
 #include <yaml-cpp/yaml.h>
 
 //

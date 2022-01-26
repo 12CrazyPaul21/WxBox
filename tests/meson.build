@@ -19,12 +19,11 @@ test_inc = [
 test_src = [
     join_paths(tests_root, 'main.cpp'),
     join_paths(tests_root, 'utils_test.cpp'),
-    join_paths(tests_root, 'plugin_test.cpp'),
-    join_paths(wxbox_root, 'app_config.hpp')
+    join_paths(tests_root, 'plugin_test.cpp')
 ]
 
 test_exe = executable('test_all', test_src, include_directories: test_inc,
-    dependencies: [gtest_dep, gmock_dep, frida_gum_dep, spdlog_dep, yaml_cpp_dep, lua_dep],
+    dependencies: [gtest_dep, gmock_dep, spdlog_dep, yaml_cpp_dep, lua_dep],
     # build_rpath: TitanEngine_bin_root,
     cpp_args: [ignore_warnings, config_macro_flags, test_options],
     link_with: [utils_static_lib, plugin_static_lib]

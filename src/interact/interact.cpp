@@ -5,6 +5,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+    WXBOX_UNREF(argc);
+    WXBOX_UNREF(argv);
+
     auto pluginPath = wb_file::JoinPath(wb_file::GetProcessRootPath(), "/plugins");
     if (!wb_file::IsPathExists(pluginPath)) {
         pluginPath = wb_file::JoinPath(wb_file::GetProcessRootPath(), "../../../../plugins");

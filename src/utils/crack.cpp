@@ -1,4 +1,5 @@
 #include <utils/common.h>
+#include <frida-gum.h>
 
 #if WXBOX_IN_WINDOWS_OS
 

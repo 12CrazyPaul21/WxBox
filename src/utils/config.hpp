@@ -266,6 +266,8 @@ namespace wxbox {
 
                 virtual SafeYamlNode default_config(const std::string& keyPath) const
                 {
+                    WXBOX_UNREF(keyPath);
+
                     SafeYamlNode value;
 
                     //
@@ -486,6 +488,8 @@ struct YAML::convert<wxbox::util::config::SafeYamlNode>
 
 inline std::vector<std::string> operator"" _conf(const char* path, std::size_t n)
 {
+    WXBOX_UNREF(n);
+
     return std::move(wxbox::util::string::SplitString(path, "/"));
 }
 

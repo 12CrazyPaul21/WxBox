@@ -297,7 +297,7 @@ plugin_src = [
 plugin_static_lib = static_library('plugin',
                         sources: [plugin_src],
                         include_directories: [utils_inc, plugin_inc, configuration_inc],
-                        dependencies: [lua_dep, frida_gum_dep, yaml_cpp_dep],
+                        dependencies: [lua_dep, yaml_cpp_dep],
                         cpp_args: [ignore_warnings])
 
 #

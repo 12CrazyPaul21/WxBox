@@ -19,14 +19,7 @@ crashdumper_inc = [
 crashdumper_src = [
     join_paths(crashdumper_root, 'crashdumper.h'),
     join_paths(crashdumper_root, 'crashdumper.cpp'),
-    join_paths(crashdumper_root, 'crashdumper_dialog.cpp'),
-    join_paths(utils_root, 'platform.cpp'),
-    join_paths(utils_root, 'process.cpp'),
-    join_paths(utils_root, 'file.cpp'),
-    join_paths(utils_root, 'string.cpp'),
-    join_paths(utils_root, 'coredump.cpp'),
-    join_paths(utils_root, 'hook.cpp'),
-    join_paths(utils_root, 'memory.cpp')
+    join_paths(crashdumper_root, 'crashdumper_dialog.cpp')
 ]
 
 # resources
@@ -42,6 +35,7 @@ executable('crashdumper',
     sources: [crashdumper_src, crashdumper_qt_processed],
     include_directories: crashdumper_inc,
     gui_app: true,
-    dependencies: [qt5_dep, frida_gum_dep, yaml_cpp_dep],
-    cpp_args: [ignore_warnings]
+    dependencies: [qt5_dep, yaml_cpp_dep],
+    cpp_args: [ignore_warnings],
+    link_with: [utils_static_lib]
 )

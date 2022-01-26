@@ -53,6 +53,8 @@ static void                                 PluginVirtualMachineRoutine(wxbox::p
 
 static int PluginVirtualMachinePanicHandler(lua_State* L)
 {
+    WXBOX_UNREF(L);
+
     WXBOX_LUA_EXCEPTION_THROW(1);
     return 0;
 }
@@ -917,6 +919,8 @@ void wxbox::plugin::DispatchPluginToHostEvent(wxbox::plugin::HostEventModelPtr h
 
 void wxbox::plugin::internal::PluginVirtualMachineHookHandler(lua_State* L, lua_Debug* debugInfo)
 {
+    WXBOX_UNREF(debugInfo);
+
     lua_sethook(L, NULL, 0, 0);
     luaL_error(L, "plugin virtual machine long task timeout");
 }

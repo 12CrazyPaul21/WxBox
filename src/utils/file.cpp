@@ -122,6 +122,10 @@ static inline std::vector<std::string> ListFilesInDirectoryWithExt_Windows(const
 
 void WINAPI FolderFilesChangeMonitorCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered, LPOVERLAPPED lpOverlapped)
 {
+    WXBOX_UNREF(dwErrorCode);
+    WXBOX_UNREF(dwNumberOfBytesTransfered);
+    WXBOX_UNREF(lpOverlapped);
+
     // do nothing
 }
 
