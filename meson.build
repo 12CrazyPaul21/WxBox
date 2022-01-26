@@ -26,7 +26,16 @@ interact_root = join_paths(source_root, 'interact')
 # compiler
 #
 
-ignore_warnings = ['/wd4125', '/wd4702', '/wd4505']
+if host_os == 'windows'
+    ignore_warnings = ['/wd4125', '/wd4702', '/wd4505']
+    subproject_ignore_warnings = ['/wd4244', '/wd4702']
+else
+    ignore_warnings = []
+    subproject_ignore_warnings = ['-w']
+endif
+
+# add_global_arguments([ignore_warnings, subproject_ignore_warnings], language: 'c')
+# add_global_arguments([ignore_warnings, subproject_ignore_warnings], language: 'cpp')
 
 #
 # config.h
@@ -172,7 +181,7 @@ endif
 # frida-gum
 frida_gum_dep = dependency('frida-gum', required: false)
 if not frida_gum_dep.found()
-    frida_gum_proj = subproject('frida-gum')
+    frida_gum_proj = subproject('frida-gum', default_options: ['warning_level=0', 'werror=false'])
     frida_gum_dep = frida_gum_proj.get_variable('frida_gum_dep')
 endif
 
@@ -192,6 +201,8 @@ if not yaml_cpp_dep.found()
         'YAML_CPP_BUILD_TESTS': 'OFF',
         'YAML_CPP_BUILD_CONTRIB': 'OFF',
         'BUILD_SHARED_LIBS': 'OFF'})
+    yaml_cpp_proj_opt_var.append_compile_args('c', subproject_ignore_warnings)
+    yaml_cpp_proj_opt_var.append_compile_args('cpp', subproject_ignore_warnings)
     yaml_cpp_proj = cmake.subproject('yaml-cpp', options: yaml_cpp_proj_opt_var)
     yaml_cpp_dep = declare_dependency(dependencies: [yaml_cpp_proj.dependency('yaml-cpp')],
                             compile_args: '/DYAML_CPP_STATIC_DEFINE')
