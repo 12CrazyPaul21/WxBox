@@ -11,8 +11,7 @@ wxbot_src = [
     join_paths(wxbot_root, 'wxbot.hpp'),
     join_paths(wxbot_root, 'wxbot.cpp'),
     join_paths(wxbot_root, 'wxbox_client.hpp'),
-    join_paths(wxbot_root, 'wxbox_client.cpp'),
-    utils_src
+    join_paths(wxbot_root, 'wxbox_client.cpp')
 ]
 
 shlib = shared_library('wxbot', [wxbot_src, proto_generated],
@@ -20,7 +19,8 @@ shlib = shared_library('wxbot', [wxbot_src, proto_generated],
     install : true,
     cpp_args : [lib_args, ignore_warnings, config_macro_flags],
     gnu_symbol_visibility : 'hidden',
-    dependencies: [spdlog_dep, frida_gum_dep, TitanEngine_dep, lua_dep, grpc_dep, yaml_cpp_dep]
+    dependencies: [spdlog_dep, frida_gum_dep, TitanEngine_dep, lua_dep, grpc_dep, yaml_cpp_dep],
+    link_with: utils_static_lib
 )
 
 # Test wxbot
@@ -28,7 +28,8 @@ test_exe = executable('wxbot_test', 'wxbot_test.cpp',
     include_directories: configuration_inc,
     link_with : shlib,
     dependencies: [spdlog_dep],
-    cpp_args: [ignore_warnings])
+    cpp_args: [ignore_warnings]
+)
 test_env = environment()
 test_env.prepend('PATH', TitanEngine_bin_root)
 test_env.prepend('PATH', grpc_bin_root)

@@ -11,11 +11,13 @@
 
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 
 #include <utils/common.h>
 #include <plugin/plugin.h>
 
 #include <wxbox/app_config.hpp>
+#include <wxbox/app_log.hpp>
 
 #ifdef WXBOX_IN_WINDOWS_OS
 #include <conio.h>

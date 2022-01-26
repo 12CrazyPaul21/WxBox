@@ -43,6 +43,8 @@ QMessageBox::information(this, tr("Title"), tr("\345\205\263\344\272\216 WxBox")
 
 ​	spdbuf需要cmake构建工具。
 
+​	编译器需要C++17以上标准。
+
 ### 关于构建时出现的Warning
 
 ​	在编译时，部分第三方库有非常多的Warning，这些全部忽略它，但是不关闭这些警告。但是主项目构建时出现的所有Warning都要重新检查，对主项目的所有Warning零容忍
@@ -170,7 +172,7 @@ meson compile -C build/release
 
 ### Mac OS下构建
 
-​	note: 暂时还不清楚
+​	......
 
 ## 关于测试
 
@@ -318,3 +320,7 @@ meson compile -C build/release pretty_format
 ## install与打包方法
 
 ​	先不考虑，开发得差不多再说。
+
+## 运行环境
+
+​	Windows 7以上

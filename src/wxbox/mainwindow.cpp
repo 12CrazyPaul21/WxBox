@@ -9,12 +9,16 @@ MainWindow::MainWindow(QWidget* parent)
   : QMainWindow(parent)
   , aboutDialog(this)
   , ui(new Ui::MainWindow)
+  , config(AppConfig::singleton())
   , init(false)
   , wantToClose(false)
   , readyForCloseCounter(0)
 {
-    changeLanguage("zh_cn");
+    changeLanguage(config.language());
     ui->setupUi(this);
+
+    // set thread name
+    wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxMain");
 
     // ---------------------------------------
     //           trigger to test
@@ -71,7 +75,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::InitWxBox()
 {
-    AppConfig::singleton().load(wb_file::JoinPath(wb_file::GetProcessRootPath(), AppConfig::APP_CONFIG_NAME));
     startWxBoxServer();
 }
 
@@ -129,10 +132,36 @@ void MainWindow::WxBoxServerEvent(wxbox::WxBoxMessage message)
 // Methods
 //
 
+std::vector<std::pair<std::string, std::string>> MainWindow::i18ns()
+{
+    std::vector<std::pair<std::string, std::string>> result;
+    auto                                             i18nPath = config.i18n_path();
+
+    if (!wb_file::IsDirectory(i18nPath)) {
+        return std::move(result);
+    }
+
+    for (auto qm : wb_file::ListFilesInDirectoryWithExt(i18nPath, "qm")) {
+        QTranslator trans;
+        if (trans.load(wb_file::JoinPath(config.i18n_path(), qm).c_str())) {
+            result.emplace_back(std::make_pair<std::string, std::string>(wb_file::ExtractFileNameAndExt(qm).first,
+                                                                         trans.translate("MainWindow", "English").toUtf8().toStdString()));
+        }
+    }
+
+    return std::move(result);
+}
+
 void MainWindow::changeLanguage(const std::string& language)
 {
-    // zh_cn or en
-    if (translator.load(QString().asprintf(":/translations/%s.qm", language.c_str()))) {
+    wb_coredump::ChangeDumperLanguage(language);
+
+    auto languagePath = wb_file::JoinPath(config.i18n_path(), language + ".qm");
+    if (!wb_file::IsPathExists(languagePath)) {
+        return;
+    }
+
+    if (translator.load(QString::fromLocal8Bit(languagePath.c_str()))) {
         qApp->installTranslator(&translator);
     }
 }
@@ -170,6 +199,8 @@ void MainWindow::startWxBoxServer()
 
     // prevent the window from being closed before the service ends
     ignoreForClose();
+
+    spdlog::info("WxBox Server is running");
 }
 
 void MainWindow::stopWxBoxServer()
@@ -177,6 +208,8 @@ void MainWindow::stopWxBoxServer()
     if (worker.isRunning()) {
         worker.stopServer();
     }
+
+    spdlog::info("WxBox Server is already stop");
 }
 
 //
@@ -212,5 +245,9 @@ void MainWindow::ProfileResponseHandler(wb_process::PID clientPID, wxbox::Profil
 
 void MainWindow::triggerTest()
 {
+    SPDLOG_DEBUG("trigger test button");
+
+    char* p = nullptr;
+    *p      = 2;
     RequestProfile(last_client_pid);
 }

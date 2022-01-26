@@ -1,8 +1,8 @@
 #ifndef __MAINWINDOW_H
 #define __MAINWINDOW_H
 
-#include <QMainWindow>
 #include <QApplication>
+#include <QMainWindow>
 #include <QTranslator>
 #include <QCloseEvent>
 #include <QAtomicInteger>
@@ -10,9 +10,15 @@
 #include <QMessageBox>
 #include <QTimer>
 
-#include "about.h"
-#include "wxbox_server.hpp"
+#undef signals
+#include <utils/common.h>
+#define signals Q_SIGNALS
+
+#include "app_log.hpp"
 #include "app_config.hpp"
+#include "wxbox_server.hpp"
+
+#include "about.h"
 
 namespace Ui {
     class MainWindow;
@@ -44,9 +50,10 @@ class MainWindow : public QMainWindow
     // Public Methods
     //
 
-    void changeLanguage(const std::string& language);
-    void startWxBoxServer();
-    void stopWxBoxServer();
+    std::vector<std::pair<std::string, std::string>> i18ns();
+    void                                             changeLanguage(const std::string& language);
+    void                                             startWxBoxServer();
+    void                                             stopWxBoxServer();
 
   private:
     //
@@ -85,6 +92,7 @@ class MainWindow : public QMainWindow
     QAtomicInteger<int32_t> readyForCloseCounter;
 
     Ui::MainWindow*          ui;
+    AppConfig&               config;
     QTranslator              translator;
     AboutWxBoxDialog         aboutDialog;
     wxbox::WxBoxServerWorker worker;

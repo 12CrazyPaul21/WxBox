@@ -23,9 +23,9 @@ wxbox_src = [
     join_paths(wxbox_root, 'mainwindow.cpp'),
     join_paths(wxbox_root, 'about.cpp'),
     join_paths(wxbox_root, 'wxbox_server.cpp'),
+    join_paths(wxbox_root, 'app_log.hpp'),
     join_paths(wxbox_root, 'app_config.hpp'),
-    join_paths(wxbox_internal, 'threadpool.hpp'),
-    utils_src
+    join_paths(wxbox_internal, 'threadpool.hpp')
 ]
 
 # resources
@@ -33,7 +33,7 @@ if host_os == 'windows'
     windows = import('windows')
     wxbox_src += windows.compile_resources(join_paths(assets_root, 'wxbox.rc'))
 elif host_os == 'darwin'
-    # 暂时不管苹果
+    # apple
 endif
 
 # add wxbox executable
@@ -43,4 +43,6 @@ executable('wxbox',
     gui_app: true,
     install : true,
     dependencies: [qt5_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep, grpc_dep, yaml_cpp_dep],
-    cpp_args: [ignore_warnings, config_macro_flags])
+    cpp_args: [ignore_warnings, config_macro_flags],
+    link_with: utils_static_lib
+)

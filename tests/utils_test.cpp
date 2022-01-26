@@ -470,3 +470,87 @@ TEST(wxbox_utils, app_config)
     EXPECT_EQ(1, config[R"(/wxbox/foo)"_conf].safe_as<int>());
     EXPECT_EQ(0, config[R"(/wxbox/bar)"_conf].safe_as<std::string>().compare("2"));
 }
+
+TEST(wxbox_utils, timestamp_to_date)
+{
+    auto ts_ms = wb_process::GetCurrentTimestamp();
+    auto ts_s  = wb_process::GetCurrentTimestamp(false);
+    spdlog::info("date : {}", wb_process::TimeStampToDate<std::chrono::milliseconds>(ts_ms));
+    spdlog::info("date : {}", wb_process::TimeStampToDate<std::chrono::seconds>(ts_s));
+}
+
+TEST(wxbox_utils, platform)
+{
+    spdlog::info("is 64 system : {}", wb_platform::Is64System());
+    spdlog::info("is 64 process : {}", wb_process::Is64Process(wb_process::GetCurrentProcessHandle()));
+    spdlog::info("system product description : {}", wb_platform::GetSystemVersionDescription());
+    spdlog::info("cpu product description : {}", wb_platform::GetCPUProductBrandDescription());
+}
+
+TEST(wxbox_utils, module_infos)
+{
+    auto moduleInfos = wb_process::CollectModuleInfos(wb_process::GetCurrentProcessId());
+    EXPECT_NE(size_t(0), moduleInfos.size());
+}
+
+std::string before_hook()
+{
+    return "before hook";
+}
+
+std::string after_hook()
+{
+    return "after hook";
+}
+
+TEST(wxbox_utils, hook)
+{
+    EXPECT_EQ(0, before_hook().compare("before hook"));
+    wb_hook::InProcessDummyHook(before_hook, after_hook);
+    EXPECT_EQ(0, before_hook().compare("after hook"));
+    wb_hook::RevokeInProcessHook(before_hook);
+    EXPECT_EQ(0, before_hook().compare("before hook"));
+}
+
+TEST(wxbox_utils, log)
+{
+    AppConfig& config = AppConfig::singleton();
+    config.load(AppConfig::APP_CONFIG_NAME);
+
+    AppConfig::RegisterLogger();
+
+    auto log_path                    = config.log_file_path();
+    auto log_name                    = config.log_name();
+    auto log_max_rotating_file_count = config.log_max_rotating_file_count();
+    auto log_max_single_file_size    = config.log_max_single_file_size();
+    auto log_auto_flush_interval_sec = config.log_auto_flush_interval_sec();
+    auto log_level                   = config.log_level();
+    auto log_pattern                 = config.log_pattern();
+
+    spdlog::info(log_path);
+    spdlog::info(log_name);
+    spdlog::info(log_max_rotating_file_count);
+    spdlog::info(log_max_single_file_size);
+    spdlog::info(log_auto_flush_interval_sec);
+    spdlog::info(log_level);
+    spdlog::info(log_pattern);
+
+    spdlog::debug("is a debug log");
+    SPDLOG_DEBUG("is a DEBUG LOG");
+    SPDLOG_TRACE("is a TRACE LOG");
+
+    auto t1 = std::thread([]() {
+        for (int i = 0; i < 100; i++) {
+            spdlog::info(i);
+        }
+    });
+
+    auto t2 = std::thread([]() {
+        for (int i = 0; i < 100; i++) {
+            spdlog::info(i);
+        }
+    });
+
+    t1.join();
+    t2.join();
+}

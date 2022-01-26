@@ -815,6 +815,10 @@ static void PluginVirtualMachineMessageLoop(wxbox::plugin::PPluginVirtualMachine
 static void PluginVirtualMachineRoutine(wxbox::plugin::PPluginVirtualMachine vm)
 {
     assert(vm != nullptr && vm->state != nullptr);
+
+    // set thread name
+    wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxPluginVirtualMachine");
+
     PluginVirtualMachineMessageLoop(vm);
     vm->doneSignal.set_value();
 }

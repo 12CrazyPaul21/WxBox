@@ -1,11 +1,25 @@
 #ifndef __WXBOX_APP_CONFIG_HPP
 #define __WXBOX_APP_CONFIG_HPP
 
-REGISTER_CONFIG_KEY(WXBOX_PLUGINS_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_LANGUAGE);
+REGISTER_CONFIG_KEY(WXBOX_I18N_PATH);
+REGISTER_CONFIG_KEY(WXBOX_PLUGINS_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PATH);
+REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PREFIX);
+REGISTER_CONFIG_KEY(WXBOX_CRASHDUMPER);
+REGISTER_CONFIG_KEY(WXBOX_LOG_PATH);
+REGISTER_CONFIG_KEY(WXBOX_LOG_BASENAME);
+REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_ROTATING_FILE_COUNT);
+REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
+REGISTER_CONFIG_KEY(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_INSTALLATION_DIR);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
+
+#if WXBOX_IN_WINDOWS_OS
+static constexpr auto DUMPER_EXT_NAME = ".exe";
+#else
+static constexpr auto DUMPER_EXT_NAME = "";
+#endif
 
 class AppConfig final : public wb_config::Config
 {
@@ -33,19 +47,175 @@ class AppConfig final : public wb_config::Config
         }                                  \
     }
 
-        CHECK_DEFAULT_CONFIG(WXBOX_PLUGINS_RELPATH);
         CHECK_DEFAULT_CONFIG(WXBOX_LANGUAGE);
+        CHECK_DEFAULT_CONFIG(WXBOX_I18N_PATH);
+        CHECK_DEFAULT_CONFIG(WXBOX_PLUGINS_RELPATH);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PATH);
+        CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PREFIX);
+        CHECK_DEFAULT_CONFIG(WXBOX_CRASHDUMPER);
+        CHECK_DEFAULT_CONFIG(WXBOX_LOG_PATH);
+        CHECK_DEFAULT_CONFIG(WXBOX_LOG_BASENAME);
+        CHECK_DEFAULT_CONFIG(WXBOX_LOG_MAX_ROTATING_FILE_COUNT);
+        CHECK_DEFAULT_CONFIG(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
+        CHECK_DEFAULT_CONFIG(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_INSTALLATION_DIR);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
 
         return std::move(value);
     }
 
+    //
+    // i18n
+    //
+
+    std::string language()
+    {
+        return this->operator[](WXBOX_LANGUAGE_KEY).safe_as<std::string>();
+    }
+
+    std::string i18n_path()
+    {
+        auto i18nSubPath = this->operator[](WXBOX_I18N_PATH_KEY).safe_as<std::string>();
+        if (i18nSubPath.empty()) {
+            return "";
+        }
+
+        auto rootPath = wxbox::util::file::GetProcessRootPath();
+        auto i18nPath = wxbox::util::file::JoinPath(rootPath, i18nSubPath);
+
+#if _DEBUG
+        if (!wb_file::IsPathExists(i18nPath)) {
+            i18nPath = wb_file::JoinPath(rootPath, "/../../../../assets/translations");
+        }
+#endif
+
+        return i18nPath;
+    }
+
+    //
+    // coredump
+    //
+
+    std::string coredump_path() const
+    {
+        auto coredumpPath = this->operator[](WXBOX_COREDUMP_PATH_KEY).safe_as<std::string>();
+        if (coredumpPath.empty()) {
+            return "";
+        }
+
+        return wxbox::util::file::JoinPath(wxbox::util::file::GetProcessRootPath(), coredumpPath);
+    }
+
+    std::string coredump_prefix() const
+    {
+        return this->operator[](WXBOX_COREDUMP_PREFIX_KEY).safe_as<std::string>();
+    }
+
+    std::string crashdumper() const
+    {
+        auto crashdumper = this->operator[](WXBOX_CRASHDUMPER_KEY).safe_as<std::string>();
+        if (crashdumper.empty()) {
+            return "";
+        }
+
+        auto rootPath        = wxbox::util::file::GetProcessRootPath();
+        auto crashdumperPath = wxbox::util::file::JoinPath(rootPath, crashdumper) + DUMPER_EXT_NAME;
+
+#if _DEBUG
+        if (!wb_file::IsPathExists(crashdumperPath)) {
+            crashdumperPath = wb_file::JoinPath(wb_file::JoinPath(rootPath, "/../crashdumper"), crashdumper) + DUMPER_EXT_NAME;
+        }
+#endif
+
+        return crashdumperPath;
+    }
+
+    //
+    // logger
+    //
+
+    std::string log_file_path() const
+    {
+        auto rootPath = wxbox::util::file::GetProcessRootPath();
+        auto subPath  = log_sub_path();
+        auto logName  = log_name();
+        return wb_file::JoinPath(wb_file::JoinPath(rootPath, subPath), logName) + ".log";
+    }
+
+    std::string log_sub_path() const
+    {
+        return this->operator[](WXBOX_LOG_PATH_KEY).safe_as<std::string>();
+    }
+
+    std::string log_name() const
+    {
+        auto logName = this->operator[](WXBOX_LOG_BASENAME_KEY).safe_as<std::string>();
+        return logName.empty() ? "WxBox" : logName;
+    }
+
+    int log_max_rotating_file_count() const
+    {
+        return this->operator[](WXBOX_LOG_MAX_ROTATING_FILE_COUNT_KEY).safe_as<int>();
+    }
+
+    int log_max_single_file_size() const
+    {
+        return this->operator[](WXBOX_LOG_MAX_SINGLE_FILE_SIZE_KEY).safe_as<int>();
+    }
+
+    int log_auto_flush_interval_sec() const
+    {
+        return this->operator[](WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC_KEY).safe_as<int>();
+    }
+
+    spdlog::level::level_enum log_level() const
+    {
+#ifdef _DEBUG
+        return spdlog::level::debug;
+#else
+        return spdlog::level::info;
+#endif
+    }
+
+    std::string log_pattern() const
+    {
+        return "[thread %t] %+";
+    }
+
+    //
+    // Static Methods
+    //
+
     static AppConfig& singleton()
     {
         static AppConfig s_app_config;
         return s_app_config;
+    }
+
+    static bool RegisterLogger()
+    {
+        bool       retval = false;
+        AppConfig& config = singleton();
+
+        try {
+            auto sinker = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(config.log_file_path(), config.log_max_single_file_size(), config.log_max_rotating_file_count());
+            auto logger = std::make_shared<spdlog::logger>(config.log_name(), sinker);
+
+            spdlog::register_logger(logger);
+            spdlog::set_default_logger(logger);
+
+            spdlog::flush_every(std::chrono::seconds(config.log_auto_flush_interval_sec()));
+            spdlog::set_level(config.log_level());
+            spdlog::set_pattern(config.log_pattern());
+
+            retval = true;
+        }
+        catch (const spdlog::spdlog_ex& /*e*/) {
+        }
+        catch (const std::exception& /*e*/) {
+        }
+
+        return retval;
     }
 
     static constexpr char APP_CONFIG_NAME[] = "config.yml";

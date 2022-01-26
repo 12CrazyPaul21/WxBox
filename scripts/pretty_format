@@ -1,3 +1,3 @@
 #!/bin/bash
 [[ -z "${MESON_SOURCE_ROOT}" ]] && MESON_SOURCE_ROOT=$(cd $(dirname $(readlink -f "$0"))/..; pwd)
-find ${MESON_SOURCE_ROOT}/src -regextype posix-extended -regex ".*\.(c|cpp|cc|cxx|h|hpp)" -print | xargs clang-format -i
+find ${MESON_SOURCE_ROOT}/src -regextype posix-extended -regex ".*\.(c|cpp|cc|cxx|h|hpp)" -print | xargs -i sh -c 'echo {}; clang-format -i {}'

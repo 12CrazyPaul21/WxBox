@@ -294,6 +294,9 @@ void wxbot::WxBoxClient::Routine()
 {
     ChangeStatus(WxBoxClientStatus::Started);
 
+    // set thread name
+    wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxClient");
+
 _RECONNECT:
     if (!TryConnectWxBoxServer()) {
         ChangeStatus(WxBoxClientStatus::ConnectWxBoxServerFailed);

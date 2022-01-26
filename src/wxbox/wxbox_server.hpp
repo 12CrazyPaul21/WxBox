@@ -461,6 +461,9 @@ namespace wxbox {
                 goto _Finish;
             }
 
+            // set thread name
+            wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxServer");
+
             ChangeStatus(WxBoxServerStatus::Started);
             MessageLoop();
             ChangeStatus(WxBoxServerStatus::Stopped);

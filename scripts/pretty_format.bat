@@ -9,4 +9,4 @@ set MESON_SOURCE_ROOT=%cd%
 popd
 
 :Begin
-for /r %MESON_SOURCE_ROOT%\src %%i in (*.c, *.cpp, *.cc, *.cxx, *.h, *.hpp) do (%MESON_SOURCE_ROOT%\wintools\bin\clang-format.exe -i %%i)
+for /r %MESON_SOURCE_ROOT%\src %%i in (*.c, *.cpp, *.cc, *.cxx, *.h, *.hpp) do (echo %%i && %MESON_SOURCE_ROOT%\wintools\bin\clang-format.exe -i %%i)

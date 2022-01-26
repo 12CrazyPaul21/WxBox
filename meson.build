@@ -13,10 +13,12 @@ proj_root = meson.current_source_dir()
 source_root = join_paths(proj_root, 'src')
 tests_root = join_paths(proj_root, 'tests')
 assets_root = join_paths(proj_root, 'assets')
+crashdumper_assets_root = join_paths(assets_root, 'crashdumper')
 
 wxbox_root = join_paths(source_root, 'wxbox')
 wxbot_root = join_paths(source_root, 'wxbot')
 utils_root = join_paths(source_root, 'utils')
+crashdumper_root = join_paths(source_root, 'crashdumper')
 plugin_root = join_paths(source_root, 'plugin')
 interact_root = join_paths(source_root, 'interact')
 
@@ -64,12 +66,21 @@ configuration_inc = include_directories('.')
 #
 
 all_default_config = {
-    '/wxbox/plugins_relpath': true,
     '/wxbox/language': true,
+    '/wxbox/i18n/path': true,
+    '/wxbox/plugins_relpath': true,
     '/wxbox/coredump_path': true,
+    '/wxbox/coredump_prefix': true,
+    '/wxbox/crashdumper': true,
+    '/wxbox/log/path': true,
+    '/wxbox/log/basename': true,
+    '/wxbox/log/max_rotating_file_count': false,
+    '/wxbox/log/max_single_file_size': false,
+    '/wxbox/log/auto_flush_interval_sec': false,
     '/wxbox/wechat_installation_dir': true,
     '/wxbox/wechat_multi_bloxing_quota': false
 }
+
 config_macro_flags = []
 foreach config_key, quotation : all_default_config
     real_key = config_key.strip('/').replace('/', '_')
@@ -238,10 +249,21 @@ utils_src = [
     join_paths(utils_root, 'traits.cpp'),
     join_paths(utils_root, 'inject.h'),
     join_paths(utils_root, 'inject.cpp'),
+    join_paths(utils_root, 'hook.h'),
+    join_paths(utils_root, 'hook.cpp'),
+    join_paths(utils_root, 'platform.h'),
+    join_paths(utils_root, 'platform.cpp'),
+    join_paths(utils_root, 'coredump.h'),
+    join_paths(utils_root, 'coredump.cpp'),
     join_paths(utils_root, 'config.hpp'),
     join_paths(utils_root, 'config.cpp')
 ]
 
+utils_static_lib = static_library('utils',
+                        sources: [utils_src],
+                        include_directories: [utils_inc, configuration_inc],
+                        dependencies: [frida_gum_dep, TitanEngine_dep, yaml_cpp_dep],
+                        cpp_args: [ignore_warnings])
 
 #
 # plugin
@@ -272,6 +294,11 @@ plugin_src = [
     join_paths(plugin_root, 'internal/module/model_host_event.cpp')
 ]
 
+plugin_static_lib = static_library('plugin',
+                        sources: [plugin_src],
+                        include_directories: [utils_inc, plugin_inc, configuration_inc],
+                        dependencies: [lua_dep, frida_gum_dep, TitanEngine_dep, yaml_cpp_dep],
+                        cpp_args: [ignore_warnings])
 
 #
 # WxBox
@@ -284,6 +311,12 @@ subdir('src/wxbox')
 #
 
 subdir('src/wxbot')
+
+#
+# crashdumper
+#
+
+subdir('src/crashdumper')
 
 #
 # interact
