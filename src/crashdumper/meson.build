@@ -42,6 +42,6 @@ executable('crashdumper',
     sources: [crashdumper_src, crashdumper_qt_processed],
     include_directories: crashdumper_inc,
     gui_app: true,
-    dependencies: [qt5_dep, frida_gum_dep, TitanEngine_dep, yaml_cpp_dep],
+    dependencies: [qt5_dep, frida_gum_dep, yaml_cpp_dep],
     cpp_args: [ignore_warnings]
 )

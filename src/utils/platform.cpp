@@ -212,4 +212,46 @@ const char* wxbox::util::platform::ExceptionDescription(const DWORD code)
     return "UNKNOWN EXCEPTION";
 }
 
+ucpulong_t wxbox::util::platform::GetPEModuleImageSize(const std::string& path)
+{
+    ucpulong_t imageSize = 0;
+
+    if (!wb_file::IsPathExists(path)) {
+        return imageSize;
+    }
+
+    // open file
+    HANDLE hFile = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+
+    // create file mapping
+    HANDLE hFileMapping = CreateFileMappingA(hFile, NULL, PAGE_READONLY, 0, GetFileSize(hFile, NULL), NULL);
+    if (!hFileMapping) {
+        CloseHandle(hFile);
+        return imageSize;
+    }
+
+    // map memory
+    LPVOID lpFileBaseAddress = MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
+    if (!lpFileBaseAddress) {
+        CloseHandle(hFileMapping);
+        CloseHandle(hFile);
+        return imageSize;
+    }
+
+    // fetch size of image
+    PIMAGE_NT_HEADERS pImageNtHeaders = ImageNtHeader(lpFileBaseAddress);
+    if (pImageNtHeaders) {
+        imageSize = pImageNtHeaders->OptionalHeader.SizeOfImage;
+    }
+
+    UnmapViewOfFile(lpFileBaseAddress);
+    CloseHandle(hFileMapping);
+    CloseHandle(hFile);
+
+    return imageSize;
+}
+
 #endif

@@ -42,7 +42,7 @@ executable('wxbox',
     include_directories: wxbox_inc,
     gui_app: true,
     install : true,
-    dependencies: [qt5_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep, grpc_dep, yaml_cpp_dep],
+    dependencies: [qt5_dep, frida_gum_dep, spdlog_dep, grpc_dep, yaml_cpp_dep],
     cpp_args: [ignore_warnings, config_macro_flags],
     link_with: utils_static_lib
 )

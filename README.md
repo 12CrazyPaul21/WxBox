@@ -7,7 +7,7 @@
 - gRPC
 - protobuf
 - frida-gum
-- TitanEngine
+- TitanEngine(弃用)
 - Qt5
 - spdlog
 - meson+ninja

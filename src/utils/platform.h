@@ -21,6 +21,7 @@ namespace wxbox {
             bool        EnableDebugPrivilege(bool bEnablePrivilege = true);
             std::string GetStringValueInRegister(HKEY hKey, const char* subKey, const char* valueName);
             const char* ExceptionDescription(const DWORD code);
+            ucpulong_t  GetPEModuleImageSize(const std::string& path);
 #endif
         }
     }

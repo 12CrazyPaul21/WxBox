@@ -52,14 +52,8 @@ static inline bool OpenWxWithMultiBoxing_CheckWeChatWinModule(HANDLE hProcess, c
         return false;
     }
 
-    // get pe info
-    if (pdwModuleSize) {
-        PE32Struct pe32Struct = {0};
-        if (!GetPE32DataEx(moduleAbsPath.c_str(), &pe32Struct)) {
-            return false;
-        }
-        *pdwModuleSize = pe32Struct.NtSizeOfImage;
-    }
+    // get size of module
+    *pdwModuleSize = wb_platform::GetPEModuleImageSize(moduleAbsPath);
 
     return true;
 }

@@ -24,14 +24,14 @@ test_src = [
 ]
 
 test_exe = executable('test_all', test_src, include_directories: test_inc,
-    dependencies: [gtest_dep, gmock_dep, frida_gum_dep, TitanEngine_dep, spdlog_dep, yaml_cpp_dep, lua_dep],
-    build_rpath: TitanEngine_bin_root,
+    dependencies: [gtest_dep, gmock_dep, frida_gum_dep, spdlog_dep, yaml_cpp_dep, lua_dep],
+    # build_rpath: TitanEngine_bin_root,
     cpp_args: [ignore_warnings, config_macro_flags, test_options],
     link_with: [utils_static_lib, plugin_static_lib]
 )
 
 test_env = environment()
-test_env.prepend('PATH', TitanEngine_bin_root)
+# test_env.prepend('PATH', TitanEngine_bin_root)
 test('test_all', test_exe, env: test_env)
 
 subdir('ModForInjectTest')

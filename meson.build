@@ -198,9 +198,9 @@ if not yaml_cpp_dep.found()
 endif
 
 # TitanEngine
-TitanEngine_proj = subproject('TitanEngine')
-TitanEngine_dep = TitanEngine_proj.get_variable('TitanEngine_dep')
-TitanEngine_bin_root = TitanEngine_proj.get_variable('TitanEngine_bin_root')
+# TitanEngine_proj = subproject('TitanEngine')
+# TitanEngine_dep = TitanEngine_proj.get_variable('TitanEngine_dep')
+# TitanEngine_bin_root = TitanEngine_proj.get_variable('TitanEngine_bin_root')
 
 #
 # generate protobuf
@@ -262,7 +262,7 @@ utils_src = [
 utils_static_lib = static_library('utils',
                         sources: [utils_src],
                         include_directories: [utils_inc, configuration_inc],
-                        dependencies: [frida_gum_dep, TitanEngine_dep, yaml_cpp_dep],
+                        dependencies: [frida_gum_dep, yaml_cpp_dep],
                         cpp_args: [ignore_warnings])
 
 #
@@ -297,7 +297,7 @@ plugin_src = [
 plugin_static_lib = static_library('plugin',
                         sources: [plugin_src],
                         include_directories: [utils_inc, plugin_inc, configuration_inc],
-                        dependencies: [lua_dep, frida_gum_dep, TitanEngine_dep, yaml_cpp_dep],
+                        dependencies: [lua_dep, frida_gum_dep, yaml_cpp_dep],
                         cpp_args: [ignore_warnings])
 
 #
