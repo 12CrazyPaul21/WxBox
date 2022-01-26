@@ -289,16 +289,19 @@ static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE
 
 static bool InjectModuleToProcess_Mac(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, wb_inject::PMethodCallingParameter parameter)
 {
+    throw std::exception("InjectModuleToProcess_Mac stub");
     return false;
 }
 
 static bool UnInjectModuleFromProcess_Mac(wxbox::util::process::PID pid, const std::string& moduleName)
 {
+    throw std::exception("UnInjectModuleFromProcess_Mac stub");
     return false;
 }
 
 static bool CallProcessModuleMethod_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter)
 {
+    throw std::exception("CallProcessModuleMethod_Mac stub");
     return false;
 }
 

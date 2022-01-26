@@ -38,11 +38,13 @@ static inline std::wstring ToWString_Windows(const std::string& str)
 
 static inline std::string ToString_Mac(const std::wstring& str)
 {
+    throw std::exception("ToString_Mac stub");
     return "";
 }
 
 static inline std::wstring ToWString_Mac(const std::string& str)
 {
+    throw std::exception("ToWString_Mac stub");
     return L"";
 }
 

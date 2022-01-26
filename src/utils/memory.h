@@ -49,7 +49,7 @@ namespace wxbox {
             bool           FreeRemoteProcessPage(wxbox::util::process::PROCESS_HANDLE hProcess, RemotePageInfo& pageInfo);
 
             bool ReadMemory(wxbox::util::process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, uint8_t* pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesRead);
-            bool WriteMemory(wxbox::util::process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten);
+            bool WriteMemory(wxbox::util::process::PROCESS_HANDLE hProcess, void* pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten);
 
             RemoteWrittenMemoryInfo WriteByteStreamToProcess(wxbox::util::process::PROCESS_HANDLE hProcess, RemotePageInfo& pageInfo, const uint8_t* const byteStream, ucpulong_t size);
             RemoteWrittenMemoryInfo WriteStringToProcess(wxbox::util::process::PROCESS_HANDLE hProcess, RemotePageInfo& pageInfo, const std::string& str);

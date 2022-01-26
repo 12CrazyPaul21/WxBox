@@ -11,7 +11,7 @@ wxbox::util::traits::FunctionInfo wxbox::util::traits::FetchFunctionInfo(void* p
     long funcBegin = (long)pFunc;
     long funcEnd   = (long)pFuncEnd;
 
-    // 0xC3 == ret, 0xE9 is prefix of JMP instruction
+    // 0xC3 == ret, 0xE9 is prefix of JMP far instruction
     if (((uint8_t*)funcEnd)[0] != 0xC3 && ((uint8_t*)funcEnd)[0] != 0xE9) {
         return info;
     }

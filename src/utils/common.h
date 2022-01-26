@@ -30,8 +30,13 @@
 // Typedef
 //
 
+#if WXBOX_CPU_IS_X86
 typedef long          cpulong_t;
 typedef unsigned long ucpulong_t;
+#else
+typedef long long          cpulong_t;
+typedef unsigned long long ucpulong_t;
+#endif
 
 //
 // Platform related headers
@@ -44,10 +49,15 @@ typedef unsigned long ucpulong_t;
 #include <Shlwapi.h>
 #include <TlHelp32.h>
 #include <share.h>
+#include <intrin.h>
+#include <DbgHelp.h>
+#include <shellapi.h>
 
 #pragma comment(lib, "Psapi.lib")
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "DbgHelp.lib")
 #pragma comment(lib, "Version.lib")
+#pragma comment(lib, "Shell32.lib")
 
 #elif WXBOX_IN_MAC_OS
 
@@ -76,6 +86,9 @@ typedef unsigned long ucpulong_t;
 #include <cstring>
 #include <utility>
 #include <fstream>
+#include <csignal>
+#include <iomanip>
+#include <sstream>
 
 //
 // Third party headers
@@ -100,6 +113,7 @@ typedef unsigned long ucpulong_t;
 //
 
 #include <utils/traits.h>
+#include <utils/platform.h>
 #include <utils/process.h>
 #include <utils/feature.h>
 #include <utils/file.h>
@@ -108,21 +122,26 @@ typedef unsigned long ucpulong_t;
 #include <utils/wx.h>
 #include <utils/crack.h>
 #include <utils/inject.h>
+#include <utils/hook.h>
+#include <utils/coredump.h>
 #include <utils/config.hpp>
 
 //
 // Short namespace
 //
 
-namespace wb_traits  = wxbox::util::traits;
-namespace wb_process = wxbox::util::process;
-namespace wb_wx      = wxbox::util::wx;
-namespace wb_file    = wxbox::util::file;
-namespace wb_string  = wxbox::util::string;
-namespace wb_memory  = wxbox::util::memory;
-namespace wb_feature = wxbox::util::feature;
-namespace wb_crack   = wxbox::util::crack;
-namespace wb_inject  = wxbox::util::inject;
-namespace wb_config  = wxbox::util::config;
+namespace wb_traits   = wxbox::util::traits;
+namespace wb_platform = wxbox::util::platform;
+namespace wb_process  = wxbox::util::process;
+namespace wb_wx       = wxbox::util::wx;
+namespace wb_file     = wxbox::util::file;
+namespace wb_string   = wxbox::util::string;
+namespace wb_memory   = wxbox::util::memory;
+namespace wb_feature  = wxbox::util::feature;
+namespace wb_crack    = wxbox::util::crack;
+namespace wb_inject   = wxbox::util::inject;
+namespace wb_hook     = wxbox::util::hook;
+namespace wb_coredump = wxbox::util::coredump;
+namespace wb_config   = wxbox::util::config;
 
 #endif  // #ifndef __WXBOX_UTILS_COMMON_H

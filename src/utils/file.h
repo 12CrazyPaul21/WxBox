@@ -127,12 +127,14 @@ namespace wxbox {
             void CloseFolderFilesChangeMonitor(const std::string& dirPath);
             void CloseFolderFilesChangeMonitor();
 
+            std::string GetFileVersion(const std::string& path);
             std::time_t GetFileModifyTimestamp(const std::string& path);
 
             YAML::Node UnwindYamlFile(const std::string& path);
             bool       UnwindVersionNumber(const std::string& version, VersionNumber& versionNumber);
 
-            int ExposeFileStreamFD(std::filebuf* fb);
+            int  ExposeFileStreamFD(std::filebuf* fb);
+            void OpenFolderInExplorer(const std::string& path);
         }
     }
 }

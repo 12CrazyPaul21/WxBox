@@ -5,7 +5,7 @@
 static inline bool ReadMemory_Windows(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, uint8_t* pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesRead)
 {
     SIZE_T numberOfBytesRead = 0;
-    bool   retval            = ::MemoryReadSafe(hProcess, const_cast<LPVOID>(pBaseAddress), pBuffer, uSize, &numberOfBytesRead);
+    bool   retval            = ::ReadProcessMemory(hProcess, pBaseAddress, pBuffer, uSize, &numberOfBytesRead);
 
     if (pNumberOfBytesRead) {
         *pNumberOfBytesRead = numberOfBytesRead;
@@ -14,10 +14,10 @@ static inline bool ReadMemory_Windows(wb_process::PROCESS_HANDLE hProcess, const
     return retval;
 }
 
-static inline bool WriteMemory_Windows(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten)
+static inline bool WriteMemory_Windows(wb_process::PROCESS_HANDLE hProcess, void* pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten)
 {
     SIZE_T numberOfBytesWritten = 0;
-    bool   retval               = ::MemoryWriteSafe(hProcess, const_cast<LPVOID>(pBaseAddress), pBuffer, uSize, &numberOfBytesWritten);
+    bool   retval               = ::WriteProcessMemory(hProcess, pBaseAddress, pBuffer, uSize, &numberOfBytesWritten);
 
     if (pNumberOfBytesWritten) {
         *pNumberOfBytesWritten = numberOfBytesWritten;
@@ -119,21 +119,25 @@ static inline ucpulong_t ScanMemoryRev_Windows(wxbox::util::process::PROCESS_HAN
 
 static inline bool ReadMemory_Mac(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, uint8_t* pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesRead)
 {
+    throw std::exception("ReadMemory_Mac stub");
     return false;
 }
 
-static inline bool WriteMemory_Mac(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten)
+static inline bool WriteMemory_Mac(wb_process::PROCESS_HANDLE hProcess, void* pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten)
 {
+    throw std::exception("WriteMemory_Mac stub");
     return false;
 }
 
 static inline ucpulong_t ScanMemory_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, const void* const pMemBegin, ucpulong_t uMemSize, const void* const pPattern, ucpulong_t uPatternSize)
 {
+    throw std::exception("ScanMemory_Mac stub");
     return 0;
 }
 
 static inline ucpulong_t ScanMemoryRev_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, const void* const pMemRevBegin, ucpulong_t uMemSize, const void* const pPattern, ucpulong_t uPatternSize)
 {
+    throw std::exception("ScanMemoryRev_Mac stub");
     return 0;
 }
 
@@ -156,6 +160,7 @@ wxbox::util::memory::RemotePageInfo wxbox::util::memory::AllocPageToRemoteProces
 #if WXBOX_IN_WINDOWS_OS
     lpAddress = VirtualAllocEx(hProcess, nullptr, pageSize, MEM_COMMIT | MEM_RESERVE, canExecute ? PAGE_EXECUTE_READWRITE : PAGE_READWRITE);
 #else
+    throw std::exception("AllocPageToRemoteProcess stub");
 #endif
 
     if (!lpAddress) {
@@ -189,6 +194,7 @@ bool wxbox::util::memory::FreeRemoteProcessPage(wxbox::util::process::PROCESS_HA
 #if WXBOX_IN_WINDOWS_OS
     return VirtualFreeEx(hProcess, addr, size, MEM_DECOMMIT);
 #else
+    throw std::exception("FreeRemoteProcessPage stub");
     return false;
 #endif
 }
@@ -202,7 +208,7 @@ bool wxbox::util::memory::ReadMemory(wb_process::PROCESS_HANDLE hProcess, const 
 #endif
 }
 
-bool wxbox::util::memory::WriteMemory(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten)
+bool wxbox::util::memory::WriteMemory(wb_process::PROCESS_HANDLE hProcess, void* pBaseAddress, const uint8_t* const pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesWritten)
 {
 #if WXBOX_IN_WINDOWS_OS
     return WriteMemory_Windows(hProcess, pBaseAddress, pBuffer, uSize, pNumberOfBytesWritten);

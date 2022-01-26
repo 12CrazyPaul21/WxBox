@@ -256,16 +256,19 @@ static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, con
 
 static inline std::string GetProcessRootPath_Mac()
 {
+    throw std::exception("GetProcessRootPath_Mac stub");
     return "";
 }
 
 static inline std::vector<std::string> ListFilesInDirectoryWithExt_Mac(const std::string& dirPath, const std::string& ext)
 {
+    throw std::exception("ListFilesInDirectoryWithExt_Mac stub");
     return std::move(std::vector<std::string>());
 }
 
 static bool OpenFolderFilesChangeMonitor_Mac(const std::string& dirPath, const wb_file::FileChangeMonitorCallback& callback)
 {
+    throw std::exception("OpenFolderFilesChangeMonitor_Mac stub");
     return false;
 }
 
@@ -338,7 +341,7 @@ std::string wxbox::util::file::JoinPath(const std::string& dirPath, const std::s
     }
 
     return full;
-#elif WXBOX_IN_MAC_OS
+#else
     namespace fs = std::experimental::filesystem;
     return std::move((fs::path(dirPath) / fs::path(fileName)).string());
 #endif
@@ -367,7 +370,7 @@ std::pair<std::string, std::string> wxbox::util::file::ExtractFileNameAndExt(con
         result.second = &extname[1];
     }
 
-#elif WXBOX_IN_MAC_OS
+#else
     char* duplicate = strdup(path.c_str());
     if (!duplicate) {
         return result;
@@ -527,6 +530,37 @@ void wxbox::util::file::CloseFolderFilesChangeMonitor()
     g_fileMonitorRecords.clear();
 }
 
+std::string wxbox::util::file::GetFileVersion(const std::string& path)
+{
+#if WXBOX_IN_WINDOWS_OS
+
+    DWORD dwHandle = 0;
+    DWORD dwSize   = ::GetFileVersionInfoSizeA(path.c_str(), &dwHandle);
+    if (!dwSize) {
+        return "";
+    }
+
+    std::unique_ptr<uint8_t[]> buf(new uint8_t[dwSize]);
+    if (!::GetFileVersionInfoA(path.c_str(), dwHandle, dwSize, buf.get())) {
+        return "";
+    }
+
+    VS_FIXEDFILEINFO* pvFileInfo    = nullptr;
+    UINT              uFileInfoSize = 0;
+    if (!VerQueryValueA(buf.get(), "\\", (LPVOID*)&pvFileInfo, &uFileInfoSize)) {
+        return "";
+    }
+
+    char strFileVersion[MAX_PATH] = {0};
+    ::sprintf_s(strFileVersion, MAX_PATH, "%hu.%hu.%hu.%hu", HIWORD(pvFileInfo->dwFileVersionMS), LOWORD(pvFileInfo->dwFileVersionMS), HIWORD(pvFileInfo->dwFileVersionLS), LOWORD(pvFileInfo->dwFileVersionLS));
+    return strFileVersion;
+
+#else
+    throw std::exception("GetFileVersion stub");
+    return "";
+#endif
+}
+
 std::time_t wxbox::util::file::GetFileModifyTimestamp(const std::string& path)
 {
     if (!IsPathExists(path)) {
@@ -556,5 +590,16 @@ int wxbox::util::file::ExposeFileStreamFD(std::filebuf* fb)
     };
 
     return static_cast<FileDescriptorExpose*>(fb)->fd();
+#endif
+}
+
+void wxbox::util::file::OpenFolderInExplorer(const std::string& path)
+{
+#if WXBOX_IN_WINDOWS_OS
+    ::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    ::ShellExecuteA(NULL, "open", path.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+    ::CoUninitialize();
+#else
+    throw std::exception("OpenFolderInExplorer stub");
 #endif
 }

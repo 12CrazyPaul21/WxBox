@@ -44,6 +44,7 @@ bool wb_process::AppSingleton::TryLock()
     mutex = hMutex;
     return true;
 #else
+    throw std::exception("AppSingleton::TryLock stub");
     return false;
 #endif
 }
@@ -57,6 +58,7 @@ void wb_process::AppSingleton::Release()
     ::CloseHandle(mutex);
     mutex = nullptr;
 #else
+    throw std::exception("AppSingleton::Release stub");
     return;
 #endif
 }
@@ -76,27 +78,28 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Windows()
     char                                 fullPath[MAX_PATH]    = {0};
     char                                 absFullPath[MAX_PATH] = {0};
 
-    hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
         return vt;
     }
 
     pe32.dwSize = sizeof(PROCESSENTRY32);
-    if (!Process32First(hSnapshot, &pe32)) {
-        CloseHandle(hSnapshot);
+    if (!::Process32First(hSnapshot, &pe32)) {
+        ::CloseHandle(hSnapshot);
+        return vt;
     }
 
     do {
-        hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID);
+        hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID);
         if (!hProcess) {
             continue;
         }
 
         if (!::GetModuleFileNameExA(hProcess, NULL, fullPath, MAX_PATH)) {
-            CloseHandle(hProcess);
+            ::CloseHandle(hProcess);
             continue;
         }
-        CloseHandle(hProcess);
+        ::CloseHandle(hProcess);
 
         if (!::GetFullPathNameA(fullPath, MAX_PATH, absFullPath, nullptr)) {
             continue;
@@ -108,23 +111,53 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Windows()
         pi.dirpath  = std::move(wxbox::util::file::ToDirectoryPath(absFullPath));
         pi.pid      = pe32.th32ProcessID;
         vt.push_back(std::move(pi));
-    } while (Process32Next(hSnapshot, &pe32));
+    } while (::Process32Next(hSnapshot, &pe32));
 
-    CloseHandle(hSnapshot);
+    ::CloseHandle(hSnapshot);
     return std::move(vt);
+}
+
+static bool Is64Process_Windows(wb_process::PROCESS_HANDLE hProcess)
+{
+    using FnIsWow64Process = BOOL(WINAPI*)(HANDLE hProcess, PBOOL Wow64Process);
+
+    if (!wb_platform::Is64System()) {
+        return false;
+    }
+
+    if (!hProcess) {
+        return false;
+    }
+
+    HMODULE hKernel32 = GetModuleHandleA("kernel32.dll");
+    if (!hKernel32) {
+        return false;
+    }
+
+    FnIsWow64Process fnIsWow64Process = (FnIsWow64Process)GetProcAddress(hKernel32, "IsWow64Process");
+    if (!fnIsWow64Process) {
+        return false;
+    }
+
+    BOOL isWow64Process = FALSE;
+    if (!fnIsWow64Process(hProcess, &isWow64Process)) {
+        return false;
+    }
+
+    return !isWow64Process;
 }
 
 static bool GetModuleInfo_Windows(wb_process::PID pid, const std::string& moduleName, wb_process::ModuleInfo& moduleInfo)
 {
-    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
-    if (hSnap == INVALID_HANDLE_VALUE) {
+    HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
         return false;
     }
 
     MODULEENTRY32 modEntry;
     modEntry.dwSize = sizeof(modEntry);
 
-    if (Module32First(hSnap, &modEntry)) {
+    if (::Module32First(hSnapshot, &modEntry)) {
         do {
             if (!::_stricmp(modEntry.szModule, moduleName.c_str())) {
                 moduleInfo.hModule         = modEntry.hModule;
@@ -132,20 +165,55 @@ static bool GetModuleInfo_Windows(wb_process::PID pid, const std::string& module
                 moduleInfo.modulePath      = modEntry.szExePath;
                 moduleInfo.pModuleBaseAddr = modEntry.modBaseAddr;
                 moduleInfo.uModuleSize     = modEntry.modBaseSize;
+                ::CloseHandle(hSnapshot);
                 return true;
             }
 
-        } while (Module32Next(hSnap, &modEntry));
+        } while (::Module32Next(hSnapshot, &modEntry));
     }
 
+    ::CloseHandle(hSnapshot);
     return false;
 }
 
-static inline wb_process::PID StartProcessAndAttach_Windows(const std::string& binFilePath)
+static std::vector<wb_process::ModuleInfo> CollectModuleInfos_Windows(wb_process::PID pid)
+{
+    std::vector<wb_process::ModuleInfo> results;
+
+    HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return std::move(results);
+    }
+
+    MODULEENTRY32 modEntry;
+    modEntry.dwSize = sizeof(modEntry);
+
+    if (::Module32First(hSnapshot, &modEntry)) {
+        do {
+            wb_process::ModuleInfo moduleInfo;
+            moduleInfo.hModule         = modEntry.hModule;
+            moduleInfo.moduleName      = modEntry.szModule;
+            moduleInfo.modulePath      = modEntry.szExePath;
+            moduleInfo.pModuleBaseAddr = modEntry.modBaseAddr;
+            moduleInfo.uModuleSize     = modEntry.modBaseSize;
+            results.emplace_back(std::move(moduleInfo));
+        } while (::Module32Next(hSnapshot, &modEntry));
+    }
+
+    ::CloseHandle(hSnapshot);
+    return std::move(results);
+}
+
+static inline wb_process::PID StartProcess_Windows(const std::string& binFilePath, bool isAttach)
 {
     BOOL                status = FALSE;
     PROCESS_INFORMATION pi     = {0};
     STARTUPINFOA        si     = {0};
+    DWORD               dwFlag = CREATE_NEW_CONSOLE;
+
+    if (isAttach) {
+        dwFlag |= DEBUG_ONLY_THIS_PROCESS;
+    }
 
     si.cb  = sizeof(si);
     status = ::CreateProcessA(binFilePath.c_str(),
@@ -153,7 +221,7 @@ static inline wb_process::PID StartProcessAndAttach_Windows(const std::string& b
                               nullptr,
                               nullptr,
                               FALSE,
-                              CREATE_NEW_CONSOLE | DEBUG_ONLY_THIS_PROCESS,
+                              dwFlag,
                               nullptr,
                               nullptr,
                               &si,
@@ -162,9 +230,40 @@ static inline wb_process::PID StartProcessAndAttach_Windows(const std::string& b
         return 0;
     }
 
-    CloseHandle(pi.hThread);
-    CloseHandle(pi.hProcess);
+    ::CloseHandle(pi.hThread);
+    ::CloseHandle(pi.hProcess);
     return pi.dwProcessId;
+}
+
+static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID tid)
+{
+    HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, pid);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    THREADENTRY32 threadEntry;
+    threadEntry.dwSize = sizeof(threadEntry);
+
+    if (!::Thread32First(hSnapshot, &threadEntry)) {
+        ::CloseHandle(hSnapshot);
+        return false;
+    }
+
+    do {
+        if (threadEntry.th32OwnerProcessID == pid && threadEntry.th32ThreadID != tid) {
+            HANDLE hThread = ::OpenThread(THREAD_ALL_ACCESS, FALSE, threadEntry.th32ThreadID);
+            if (hThread) {
+                ::SuspendThread(hThread);
+                ::CloseHandle(hThread);
+            }
+        }
+
+    } while (::Thread32Next(hSnapshot, &threadEntry));
+
+    ::CloseHandle(hSnapshot);
+    return true;
+    return false;
 }
 
 #elif WXBOX_IN_MAC_OS
@@ -172,17 +271,38 @@ static inline wb_process::PID StartProcessAndAttach_Windows(const std::string& b
 static inline std::vector<wb_process::ProcessInfo> GetProcessList_Mac()
 {
     std::vector<wb_process::ProcessInfo> vt;
+    throw std::exception("GetProcessList_Mac stub");
     return std::move(vt);
+}
+
+static bool Is64Process_Mac(wb_process::PROCESS_HANDLE hProcess)
+{
+    throw std::exception("Is64Process_Mac stub");
+    return false;
 }
 
 static inline bool GetModuleInfo_Mac(wb_process::PID pid, const std::string& moduleName, wb_process::ModuleInfo& moduleInfo)
 {
+    throw std::exception("GetModuleInfo_Mac stub");
     return false;
 }
 
-static inline wb_process::PID StartProcessAndAttach_Mac(const std::string& binFilePath)
+static std::vector<wb_process::ModuleInfo> CollectModuleInfos_Mac(wb_process::PID pid)
 {
+    throw std::exception("CollectModuleInfos_Mac stub");
+    return std::move(std::vector<wb_process::ModuleInfo>());
+}
+
+static inline wb_process::PID StartProcess_Mac(const std::string& binFilePath, bool isAttach)
+{
+    throw std::exception("StartProcess_Mac stub");
     return 0;
+}
+
+static bool SuspendAllOtherThread_Mac(wb_process::PID pid, wb_process::TID tid)
+{
+    throw std::exception("SuspendAllOtherThread_Mac stub");
+    return false;
 }
 
 #endif
@@ -217,11 +337,50 @@ wxbox::util::process::PID wxbox::util::process::GetCurrentProcessId()
 #endif
 }
 
+wxbox::util::process::PROCESS_HANDLE wxbox::util::process::GetCurrentProcessHandle()
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ::GetCurrentProcess();
+#elif WXBOX_IN_MAC_OS
+    throw std::exception("GetCurrentProcessHandle stub");
+    return 0;
+#endif
+}
+
+wxbox::util::process::TID wxbox::util::process::GetCurrentThreadId()
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ::GetCurrentThreadId();
+#elif WXBOX_IN_MAC_OS
+    return gettid();
+#endif
+}
+
+wxbox::util::process::THREAD_HANDLE wxbox::util::process::GetCurrentThreadHandle()
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ::GetCurrentThread();
+#elif WXBOX_IN_MAC_OS
+    throw std::exception("GetCurrentThreadHandle stub");
+    return 0;
+#endif
+}
+
+bool wxbox::util::process::Is64Process(PROCESS_HANDLE hProcess)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return Is64Process_Windows(hProcess);
+#elif WXBOX_IN_MAC_OS
+    return Is64Process_Mac(hProcess);
+#endif
+}
+
 wxbox::util::process::PROCESS_HANDLE wxbox::util::process::OpenProcessHandle(PID pid)
 {
 #if WXBOX_IN_WINDOWS_OS
     return ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 #elif WXBOX_IN_MAC_OS
+    throw std::exception("OpenProcessHandle stub");
     return 0;
 #endif
 }
@@ -231,7 +390,7 @@ void wxbox::util::process::CloseProcessHandle(PROCESS_HANDLE handle)
 #if WXBOX_IN_WINDOWS_OS
     CloseHandleSafe(handle);
 #elif WXBOX_IN_MAC_OS
-
+    throw std::exception("CloseProcessHandle stub");
 #endif
 }
 
@@ -240,6 +399,7 @@ wb_process::WIN_HANDLE wxbox::util::process::GetWindowHandleFromScreenPoint(cons
 #if WXBOX_IN_WINDOWS_OS
     return (WIN_HANDLE)::WindowFromPoint((POINT)pt);
 #elif WXBOX_IN_MAC_OS
+    throw std::exception("GetWindowHandleFromScreenPoint stub");
     return nullptr;
 #endif
 }
@@ -261,6 +421,7 @@ bool wxbox::util::process::GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd
     return wb_process::GetProcessInfoByPID(pid, pi);
 
 #elif WXBOX_IN_MAC_OS
+    throw std::exception("GetProcessInfoFromWindowHandle stub");
     return false;
 #endif
 }
@@ -271,6 +432,15 @@ bool wxbox::util::process::GetModuleInfo(PID pid, const std::string& moduleName,
     return GetModuleInfo_Windows(pid, moduleName, moduleInfo);
 #elif WXBOX_IN_MAC_OS
     return GetModuleInfo_Mac(pid, moduleName, moduleInfo);
+#endif
+}
+
+std::vector<wb_process::ModuleInfo> wxbox::util::process::CollectModuleInfos(PID pid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return std::move(CollectModuleInfos_Windows(pid));
+#elif WXBOX_IN_MAC_OS
+    return std::move(CollectModuleInfos_Mac(pid));
 #endif
 }
 
@@ -305,15 +475,62 @@ bool wxbox::util::process::GetProcessInfoByPID(PID pid, ProcessInfo& pi)
     return true;
 
 #elif WXBOX_IN_MAC_OS
+    throw std::exception("GetProcessInfoByPID stub");
     return false;
 #endif
 }
 
-wb_process::PID wxbox::util::process::StartProcessAndAttach(const std::string& binFilePath)
+wb_process::PID wxbox::util::process::StartProcess(const std::string& binFilePath, bool isAttach)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return StartProcessAndAttach_Windows(binFilePath);
+    return StartProcess_Windows(binFilePath, isAttach);
 #elif WXBOX_IN_MAC_OS
-    return StartProcessAndAttach_Mac(binFilePath);
+    return StartProcess_Mac(binFilePath, isAttach);
+#endif
+}
+
+bool wxbox::util::process::SuspendAllOtherThread(PID pid, TID tid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return SuspendAllOtherThread_Windows(pid, tid);
+#elif WXBOX_IN_MAC_OS
+    return SuspendAllOtherThread_Mac(pid, tid);
+#endif
+}
+
+void wxbox::util::process::SetThreadName(THREAD_HANDLE hThread, const std::string& threadName)
+{
+    if (!hThread) {
+        return;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    ::SetThreadDescription(hThread, wb_string::ToWString(threadName).c_str());
+#elif WXBOX_IN_MAC_OS
+    throw std::exception("SetThreadName stub");
+#endif
+}
+
+std::string wxbox::util::process::GetThreadName(THREAD_HANDLE hThread)
+{
+    if (!hThread) {
+        return "";
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+
+    std::string threadName;
+    wchar_t*    threadDescription = nullptr;
+
+    if (SUCCEEDED(::GetThreadDescription(hThread, &threadDescription))) {
+        threadName = std::move(wb_string::ToString(threadDescription));
+        ::LocalFree(threadDescription);
+    }
+
+    return std::move(threadName);
+
+#elif WXBOX_IN_MAC_OS
+    throw std::exception("GetThreadName stub");
+    return "";
 #endif
 }

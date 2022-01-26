@@ -13,7 +13,9 @@ namespace wxbox {
             typedef HWND    WIN_HANDLE;
             typedef POINT   SCREEN_POINT;
             typedef DWORD   PID;
+            typedef DWORD   TID;
             typedef HANDLE  PROCESS_HANDLE;
+            typedef HANDLE  THREAD_HANDLE;
             typedef HMODULE MODULE_HANDLE;
             typedef HANDLE  MUTEX_HANDLE;
 #elif WXBOX_IN_MAC_OS
@@ -24,8 +26,10 @@ namespace wxbox {
                 int32_t x;
                 int32_t y;
 			} SCREEN_POINT;
-			typedef ucpulong_t PID;
+			typedef pid_t PID;
+			typedef pid_t TID;
 			typedef ucpulong_t PROCESS_HANDLE;
+			typedef ucpulong_t THREAD_HANDLE;
 			typedef ucpulong_t MODULE_HANDLE;
 			typedef ucpulong_t MUTEX_HANDLE;
 			*/
@@ -93,17 +97,28 @@ namespace wxbox {
             std::time_t GetCurrentTimestamp(bool ms = true);
 
             std::vector<ProcessInfo> GetProcessList();
-            PID                      GetCurrentProcessId();
 
+            PID            GetCurrentProcessId();
+            PROCESS_HANDLE GetCurrentProcessHandle();
+
+            TID           GetCurrentThreadId();
+            THREAD_HANDLE GetCurrentThreadHandle();
+
+            bool           Is64Process(PROCESS_HANDLE hProcess);
             PROCESS_HANDLE OpenProcessHandle(PID pid);
             void           CloseProcessHandle(PROCESS_HANDLE handle);
 
-            WIN_HANDLE GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
-            bool       GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
-            bool       GetModuleInfo(PID pid, const std::string& moduleName, ModuleInfo& moduleInfo);
-            bool       GetProcessInfoByPID(PID pid, ProcessInfo& pi);
+            WIN_HANDLE              GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
+            bool                    GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
+            bool                    GetModuleInfo(PID pid, const std::string& moduleName, ModuleInfo& moduleInfo);
+            std::vector<ModuleInfo> CollectModuleInfos(PID pid);
+            bool                    GetProcessInfoByPID(PID pid, ProcessInfo& pi);
 
-            PID StartProcessAndAttach(const std::string& binFilePath);
+            PID  StartProcess(const std::string& binFilePath, bool isAttach);
+            bool SuspendAllOtherThread(PID pid, TID tid);
+
+            void        SetThreadName(THREAD_HANDLE hThread, const std::string& threadName);
+            std::string GetThreadName(THREAD_HANDLE hThread);
 
             //
             // Async
@@ -114,6 +129,35 @@ namespace wxbox {
             inline void async_task(_FunctionType&& func, _ArgTypes&&... args)
             {
                 std::thread(std::forward<_FunctionType>(func), std::forward<_ArgTypes>(args)...).detach();
+            }
+
+            //
+            // Template Functions
+            //
+
+            template<typename TimeType = std::chrono::seconds>
+            std::string TimeStampToDate(std::time_t timestamp, bool standard = true)
+            {
+                auto              timePoint = std::chrono::time_point<std::chrono::system_clock, TimeType>(TimeType(timestamp));
+                auto              tt        = std::chrono::system_clock::to_time_t(timePoint);
+                std::stringstream ss;
+
+                char      buffer[100] = {0};
+                struct tm timeInfo    = {0};
+
+#if WXBOX_IN_WINDOWS_OS
+                localtime_s(&timeInfo, &tt);
+#else
+                localtime_r(&timeInfo, &tt);
+#endif
+
+                if (standard) {
+                    strftime(buffer, sizeof(buffer), "%Y-%m-%d %X", &timeInfo);
+                }
+                else {
+                    strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", &timeInfo);
+                }
+                return buffer;
             }
         }
     }

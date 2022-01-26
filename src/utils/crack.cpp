@@ -165,7 +165,7 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
     }
 
     // create process and attach it
-    wb_process::PID pid = wb_process::StartProcessAndAttach(wxEnvInfo.executeAbsPath);
+    wb_process::PID pid = wb_process::StartProcess(wxEnvInfo.executeAbsPath, true);
     if (!pid) {
         return false;
     }
@@ -182,6 +182,7 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
 
 static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiHookInfo& wxApiHookInfo, wb_crack::POpenWxWithMultiBoxingResult pResult)
 {
+    throw std::exception("OpenWxWithMultiBoxing_Mac stub");
     return false;
 }
 
