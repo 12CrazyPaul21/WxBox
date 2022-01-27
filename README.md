@@ -19,7 +19,7 @@
 
 ## i18n支持
 
-​	项目中以简体中文为原始语言，如果加入新的文本还有翻译，需要手动更新assets/translations/下的zh_cn.ts和en.ts，可以配合Linguist做调整，然后执行以下命令，生成对应的qm文件，并touch wxbox.qrc使编译器知道资源文件更新了。
+​	项目中以简体中文为原始语言，如果加入新的文本还有翻译，需要手动更新assets/translations/下的zh_cn.ts和en.ts，可以配合Linguist做调整，然后执行以下命令，生成对应的qm文件，并touch wxbox.qrc使编译器知道资源文件更新了（如果执行githooks/setup_hook可以安装一个git的pre-commit钩子，在commit前会自动检查更新）
 
 ```bash
 # Windows
@@ -245,6 +245,8 @@ meson compile -C build/release pretty_format
 ​	另外Visual Studio是支持clang-format的，按下“;”分号或者保存，会触发Visual Studio自动应用项目根目录下的.clang-format文件，另外选中代码然后Ctrl+K,Ctrl+F也可以主动触发。并且也有一个LLVM官方的ClangFormat扩展：https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat配合。
 
 ​	不过Visual Studio 2015自带的clang-format版本比较老，有些开关不支持，会报错，所以这里把一些会报错的开关给注释掉了。
+
+​	果执行githooks/setup_hook可以安装一个git的pre-commit钩子，在commit前会自动检查执行pretty_format
 
 ## Plugins
 

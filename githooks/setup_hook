@@ -1,0 +1,3 @@
+#!/bin/bash
+current_folder=$(dirname $(readlink -f "$0"))
+cp -r ${current_folder}/pre-commit ${current_folder}/../.git/hooks/

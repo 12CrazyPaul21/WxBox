@@ -1,0 +1,33 @@
+#!/bin/sh
+
+wxbox_proj_root=$(pwd)
+staged_file_list=$(git diff --cached --name-only HEAD 2>/dev/null)
+
+[[ -z "$staged_file_list" ]] && exit 0
+
+pretty_format_command=${wxbox_proj_root}/scripts/pretty_format
+update_i18n_command=${wxbox_proj_root}/scripts/update_i18n
+
+is_dirty=0
+is_unix=1
+[[ -n $(uname -s | grep -iE "cygwin|mingw") ]] && pretty_format_command="${pretty_format_command}.bat" && update_i18n_command="${update_i18n_command}.bat" && is_unix=0
+
+#
+# pretty format
+#
+
+if [[ "0" -ne "$(echo "${staged_file_list}" | grep ^src/ | wc -l)" ]]; then
+    [[ $is_unix = 0 || $(type clang-format 2>/dev/null) ]] && is_dirty=1 && ${pretty_format_command}
+fi
+
+#
+# update qt i18n
+#
+
+if [[ "0" -ne "$(echo "${staged_file_list}" | grep ^assets/translations/ | wc -l)" ]]; then
+    type lrelease 2>/dev/null 1>&2 && is_dirty=1 && ${update_i18n_command}
+fi
+
+[[ "$is_dirty" = "1" ]] && git add src/ assets/translations
+
+exit 0
