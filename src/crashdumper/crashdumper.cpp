@@ -134,7 +134,7 @@ static CrashDumpReportPtr AnalysisCrashDumpReport(wb_coredump::PCrashDumperReque
     }
 
     // collect module info
-    dumpReport->moduleInfos = std::move(wb_process::CollectModuleInfos(wb_process::PID(report->pid)));
+    dumpReport->moduleInfos = wb_process::CollectModuleInfos(wb_process::PID(report->pid));
 
     free(symbolInfo);
     SymCleanup(hProcess);
@@ -387,7 +387,7 @@ static int main_Windows(int argc, char* argv[])
     CrashExceptionInfo crashExceptionInfo;
     CrashDumpReportPtr dumpReport = nullptr;
     if (crashExceptionInfo.CollectionException(report.exception, hProcess, hThread)) {
-        dumpReport = std::move(AnalysisCrashDumpReport(&report, &crashExceptionInfo, hProcess, hThread));
+        dumpReport = AnalysisCrashDumpReport(&report, &crashExceptionInfo, hProcess, hThread);
     }
 
     // resume crash thread

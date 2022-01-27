@@ -28,8 +28,8 @@ wb_file::_VersionNumber::_VersionNumber()
 
 int wb_file::_VersionNumber::compare(const _VersionNumber& right)
 {
-    uint32_t leftVersion[4]  = {major, minor, revision, build};
-    uint32_t rightVersion[4] = {right.major, right.minor, right.revision, right.build};
+    const uint32_t leftVersion[4]  = {major, minor, revision, build};
+    const uint32_t rightVersion[4] = {right.major, right.minor, right.revision, right.build};
 
     for (int i = 0; i < 4; i++) {
         if (leftVersion[i] > rightVersion[i]) {
@@ -92,7 +92,7 @@ static inline std::string GetProcessRootPath_Windows()
         return "";
     }
 
-    return std::move(wxbox::util::file::ToDirectoryPath(absFullPath));
+    return wxbox::util::file::ToDirectoryPath(absFullPath);
 }
 
 static inline std::vector<std::string> ListFilesInDirectoryWithExt_Windows(const std::string& dirPath, const std::string& ext)
@@ -100,13 +100,13 @@ static inline std::vector<std::string> ListFilesInDirectoryWithExt_Windows(const
     std::vector<std::string> result;
 
     if (!wb_file::IsDirectory(dirPath)) {
-        return std::move(result);
+        return result;
     }
 
     WIN32_FIND_DATAA findFileData = {0};
     HANDLE           hFind        = ::FindFirstFileA(wb_file::JoinPath(dirPath, R"(*.)" + ext).c_str(), &findFileData);
     if (hFind == INVALID_HANDLE_VALUE) {
-        return std::move(result);
+        return result;
     }
 
     do {
@@ -117,7 +117,7 @@ static inline std::vector<std::string> ListFilesInDirectoryWithExt_Windows(const
         result.emplace_back(std::string(findFileData.cFileName));
     } while (::FindNextFileA(hFind, &findFileData));
 
-    return std::move(result);
+    return result;
 }
 
 void WINAPI FolderFilesChangeMonitorCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered, LPOVERLAPPED lpOverlapped)
@@ -164,7 +164,7 @@ static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, con
     // run monitor in async task
     wb_file::FileChangeMonitorContext context;
     context.dirpath      = dirPath;
-    context.finishFuture = std::move(std::async(
+    context.finishFuture = std::async(
         std::launch::async, [dirPath, callback, hDirectory](std::future<void> closeFuture) {
             uint8_t                  notifyBuf[FOLDER_FILES_CHANGE_MONITOR_BUFFER_SIZE];
             FILE_NOTIFY_INFORMATION* pNotifyInfo        = (FILE_NOTIFY_INFORMATION*)notifyBuf;
@@ -248,7 +248,7 @@ static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, con
 
             ::CloseHandle(hDirectory);
         },
-        std::move(context.closeSignal.get_future())));
+        context.closeSignal.get_future());
 
     // record
     g_fileMonitorRecords[dirPath] = std::move(context);
@@ -267,7 +267,7 @@ static inline std::string GetProcessRootPath_Mac()
 static inline std::vector<std::string> ListFilesInDirectoryWithExt_Mac(const std::string& dirPath, const std::string& ext)
 {
     throw std::exception("ListFilesInDirectoryWithExt_Mac stub");
-    return std::move(std::vector<std::string>());
+    return std::vector<std::string>();
 }
 
 static bool OpenFolderFilesChangeMonitor_Mac(const std::string& dirPath, const wb_file::FileChangeMonitorCallback& callback)
@@ -318,7 +318,7 @@ std::string wxbox::util::file::ToFileName(const std::string& path)
         return "";
     }
 
-    return std::move(std::experimental::filesystem::path(path).filename().string());
+    return std::experimental::filesystem::path(path).filename().string();
 }
 
 std::string wxbox::util::file::ToDirectoryPath(const std::string& path)
@@ -331,7 +331,7 @@ std::string wxbox::util::file::ToDirectoryPath(const std::string& path)
         return path;
     }
 
-    return std::move(std::experimental::filesystem::path(path).parent_path().string());
+    return std::experimental::filesystem::path(path).parent_path().string();
 }
 
 std::string wxbox::util::file::JoinPath(const std::string& dirPath, const std::string& fileName)
@@ -347,7 +347,7 @@ std::string wxbox::util::file::JoinPath(const std::string& dirPath, const std::s
     return full;
 #else
     namespace fs = std::experimental::filesystem;
-    return std::move((fs::path(dirPath) / fs::path(fileName)).string());
+    return (fs::path(dirPath) / fs::path(fileName)).string();
 #endif
 }
 
@@ -393,7 +393,7 @@ std::pair<std::string, std::string> wxbox::util::file::ExtractFileNameAndExt(con
     free(duplicate);
 #endif
 
-    return std::move(result);
+    return result;
 }
 
 std::string wxbox::util::file::GetProcessRootPath()
@@ -424,7 +424,7 @@ YAML::Node wxbox::util::file::UnwindYamlFile(const std::string& path)
         // parse failed
     }
 
-    return std::move(root);
+    return root;
 }
 
 bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::util::file::VersionNumber& versionNumber)
@@ -489,9 +489,9 @@ bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::u
 std::vector<std::string> wxbox::util::file::ListFilesInDirectoryWithExt(const std::string& dirPath, const std::string& ext)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return std::move(ListFilesInDirectoryWithExt_Windows(dirPath, ext));
+    return ListFilesInDirectoryWithExt_Windows(dirPath, ext);
 #elif WXBOX_IN_MAC_OS
-    return std::move(ListFilesInDirectoryWithExt_Mac(dirPath, ext));
+    return ListFilesInDirectoryWithExt_Mac(dirPath, ext);
 #endif
 }
 

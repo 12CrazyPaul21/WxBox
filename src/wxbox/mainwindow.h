@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QOperatingSystemVersion>
 #include <QMainWindow>
+#include <QStyleFactory>
 #include <QTranslator>
 #include <QCloseEvent>
 #include <QAtomicInteger>

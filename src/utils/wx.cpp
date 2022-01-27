@@ -15,7 +15,7 @@
 
 static inline std::string GetWxInstallationPath_Windows()
 {
-    return std::move(wb_platform::GetStringValueInRegister(HKEY_CURRENT_USER, WX_INSTALLATION_PATH_REGISTER_SUB_KEY, WX_INSTALLATION_PATH_REGISTER_VALUE_NAME));
+    return wb_platform::GetStringValueInRegister(HKEY_CURRENT_USER, WX_INSTALLATION_PATH_REGISTER_SUB_KEY, WX_INSTALLATION_PATH_REGISTER_VALUE_NAME);
 }
 
 #elif WXBOX_IN_MAC_OS
@@ -106,7 +106,7 @@ std::vector<wb_process::ProcessInfo> wxbox::util::wx::GetWeChatProcessList()
                        }),
                        processLists.end());
 
-    return std::move(processLists);
+    return processLists;
 }
 
 bool wxbox::util::wx::CheckWeChatProcessValid(wxbox::util::process::PID pid)

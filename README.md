@@ -246,7 +246,9 @@ meson compile -C build/release pretty_format
 
 ​	不过Visual Studio 2015自带的clang-format版本比较老，有些开关不支持，会报错，所以这里把一些会报错的开关给注释掉了。
 
-​	果执行githooks/setup_hook可以安装一个git的pre-commit钩子，在commit前会自动检查执行pretty_format
+​	果执行githooks/setup_hook可以安装一个git的pre-commit钩子，在commit前会自动检查执行pretty_format。
+
+​	lint可以用cppcheck。
 
 ## Plugins
 

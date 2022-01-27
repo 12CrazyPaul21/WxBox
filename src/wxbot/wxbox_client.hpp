@@ -336,7 +336,7 @@ namespace wxbot {
         WxBoxClient* operator=(WxBoxClient&&) = delete;
 
       public:
-        explicit WxBoxClient(const std::string uri)
+        explicit WxBoxClient(const std::string& uri)
           : clientStatus(WxBoxClientStatus::Uninit)
           , serverURI(uri)
           , channel(nullptr)

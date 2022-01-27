@@ -411,7 +411,7 @@ static void RefreshPlugins(wxbox::plugin::PPluginVirtualMachine vm)
     // fetch all plugin's filename
     auto pluginLists = wb_file::ListFilesInDirectoryWithExt(vm->pluginPath, WXBOX_PLUGIN_FILE_EXT);
 
-    // added¡¢ removed and modified plugin list
+    // addedï¿½ï¿½ removed and modified plugin list
     std::vector<std::string>  addedPluginList;
     decltype(addedPluginList) removedPluginList;
     decltype(addedPluginList) modifiedPluginList;
@@ -508,13 +508,9 @@ static bool IsModuleRegistered(wxbox::plugin::PPluginVirtualMachine vm, const st
         return true;
     }
 
-    for (auto plugin : vm->plugins) {
-        if (!plugin.second->name.compare(moduleName)) {
-            return true;
-        }
-    }
-
-    return false;
+    return std::any_of(vm->plugins.begin(), vm->plugins.end(), [&moduleName](auto plugin) {
+        return !plugin.second->name.compare(moduleName);
+    });
 }
 
 static const char* VerifyCommandInfo(wxbox::plugin::PPluginVirtualMachine vm, wb_plugin::CommandExecuteInfoPtr commandInfo)
@@ -844,7 +840,7 @@ bool wxbox::plugin::StartPluginVirtualMachine(PPluginVirtualMachineStartupInfo s
     }
 
     // running plugin virtual machine
-    ::g_vm_signleton->worker = std::move(std::thread(std::bind(&PluginVirtualMachineRoutine, ::g_vm_signleton)));
+    ::g_vm_signleton->worker = std::thread(std::bind(&PluginVirtualMachineRoutine, ::g_vm_signleton));
     ::g_vm_signleton->worker.detach();
 
     // start plugin folder file change monitor

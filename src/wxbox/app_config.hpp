@@ -29,7 +29,7 @@ class AppConfig final : public wb_config::Config
     {
     }
 
-    AppConfig(const std::string& configPath)
+    explicit AppConfig(const std::string& configPath)
       : wb_config::Config(configPath)
     {
     }
@@ -43,7 +43,7 @@ class AppConfig final : public wb_config::Config
     {                                      \
         if (!keyPath.compare(KEY)) {       \
             value = DEFAULT_##KEY##_VALUE; \
-            return std::move(value);       \
+            return value;                  \
         }                                  \
     }
 
@@ -61,7 +61,7 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_INSTALLATION_DIR);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
 
-        return std::move(value);
+        return value;
     }
 
     //
@@ -194,8 +194,8 @@ class AppConfig final : public wb_config::Config
 
     static bool RegisterLogger()
     {
-        bool       retval = false;
-        AppConfig& config = singleton();
+        const AppConfig& config = singleton();
+        bool             retval = false;
 
         try {
             auto sinker = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(config.log_file_path(), config.log_max_single_file_size(), config.log_max_rotating_file_count());

@@ -32,7 +32,7 @@ typedef struct CrashExceptionInfo
         }
     }
 
-    bool CollectionException(EXCEPTION_POINTERS* remoteExceptionPointers, HANDLE hProcess, HANDLE hThread)
+    bool CollectionException(EXCEPTION_POINTERS* remoteExceptionPointers, const HANDLE hProcess, const HANDLE hThread)
     {
         if (!remoteExceptionPointers || !hProcess || !hThread) {
             return false;

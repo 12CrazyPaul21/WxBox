@@ -60,7 +60,7 @@ bool wxbot::WxBoxClient::Start()
     doneFuture = doneSignal.get_future();
     endpoint   = nullptr;
 
-    worker = std::move(std::thread(std::bind(&wxbot::WxBoxClient::Routine, this)));
+    worker = std::thread(std::bind(&wxbot::WxBoxClient::Routine, this));
     worker.detach();
     return true;
 }
@@ -164,7 +164,7 @@ bool wxbot::WxBoxClient::IsTimeToExit()
 
 void wxbot::WxBoxClient::HandleWxBoxEndPointFinish()
 {
-    PushMessage(std::move(wxbot::WxBotMessage(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotConnectionLost)));
+    PushMessage(wxbot::WxBotMessage(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotConnectionLost));
 }
 
 bool wxbot::WxBoxClient::HandleWxBoxServerRequest(WxBoxControlPacket packet)

@@ -66,7 +66,7 @@ namespace wxbox {
             template<typename T>
             struct SafeYamlNodeDefaultValue
             {
-                static T default_value() { return std::move(T); }
+                static T default_value() { T; }
             };
 
             template<typename T>
@@ -136,33 +136,33 @@ namespace wxbox {
                 template<typename Key>
                 const SafeYamlNode operator[](const Key& key) const
                 {
-                    return std::move(YAML::Node::operator[](std::forward<const Key&>(key)));
+                    return YAML::Node::operator[](std::forward<const Key&>(key));
                 }
 
                 template<typename Key>
                 SafeYamlNode operator[](const Key& key)
                 {
-                    return std::move(YAML::Node::operator[](std::forward<const Key&>(key)));
+                    return YAML::Node::operator[](std::forward<const Key&>(key));
                 }
 
                 const SafeYamlNode operator[](const YAML::Node& key) const
                 {
-                    return std::move(YAML::Node::operator[](std::forward<const YAML::Node&>(key)));
+                    return YAML::Node::operator[](std::forward<const YAML::Node&>(key));
                 }
 
                 SafeYamlNode operator[](const YAML::Node& key)
                 {
-                    return std::move(YAML::Node::operator[](std::forward<const YAML::Node&>(key)));
+                    return YAML::Node::operator[](std::forward<const YAML::Node&>(key));
                 }
 
                 const SafeYamlNode operator[](const SafeYamlNode& key) const
                 {
-                    return std::move(YAML::Node::operator[](std::forward<const SafeYamlNode&>(key)));
+                    return YAML::Node::operator[](std::forward<const SafeYamlNode&>(key));
                 }
 
                 SafeYamlNode operator[](const SafeYamlNode& key)
                 {
-                    return std::move(YAML::Node::operator[](std::forward<const SafeYamlNode&>(key)));
+                    return YAML::Node::operator[](std::forward<const SafeYamlNode&>(key));
                 }
 
                 //
@@ -224,14 +224,14 @@ namespace wxbox {
 
                     try {
                         if (!IsNull()) {
-                            result = std::move(YAML::Node::as<T>());
+                            result = YAML::Node::as<T>();
                         }
                     }
                     catch (const std::exception& /*e*/) {
                         noerror = false;
                     }
 
-                    return std::move(result);
+                    return result;
                 }
             };
 
@@ -276,7 +276,7 @@ namespace wxbox {
 
                     // ......
 
-                    return std::move(value);
+                    return value;
                 }
 
                 inline SafeYamlNode get(const std::vector<std::string>& keyPath) const
@@ -285,7 +285,7 @@ namespace wxbox {
                     std::vector<SafeYamlNode> subpath;
 
                     if (keyPath.empty()) {
-                        return std::move(SafeYamlNode());
+                        return SafeYamlNode();
                     }
 
                     std::lock_guard<std::mutex> lock(mutex);
@@ -296,7 +296,7 @@ namespace wxbox {
 
                             if (subpath.empty()) {
                                 if (!root[key].IsDefined()) {
-                                    root[key] = std::move(SafeYamlNode());
+                                    root[key] = SafeYamlNode();
                                 }
                                 subpath.emplace_back(root[key]);
                             }
@@ -307,7 +307,7 @@ namespace wxbox {
                             auto& node = subpath[subpath.size() - 1];
                             if (node.IsDefined() && !node.IsNull() && !node.IsMap()) {
                                 if (p + 1 != keyPath.end()) {
-                                    node = std::move(SafeYamlNode());
+                                    node = SafeYamlNode();
                                 }
                             }
                         }
@@ -317,7 +317,7 @@ namespace wxbox {
                     }
 
                     auto fullPath = join_key_path(keyPath);
-                    auto result   = std::move((noeror ? subpath[subpath.size() - 1] : SafeYamlNode()));
+                    auto result   = (noeror ? subpath[subpath.size() - 1] : SafeYamlNode());
                     if (!result.IsDefined()) {
                         auto value = default_config(fullPath);
                         if (!value.IsNull()) {
@@ -334,12 +334,12 @@ namespace wxbox {
 
                 inline const SafeYamlNode operator[](const std::vector<std::string>& keyPath) const
                 {
-                    return std::move(get(keyPath));
+                    return get(keyPath);
                 }
 
                 inline SafeYamlNode operator[](const std::vector<std::string>& keyPath)
                 {
-                    return std::move(get(keyPath));
+                    return get(keyPath);
                 }
 
                 bool load(const std::string& path = "")
@@ -375,7 +375,7 @@ namespace wxbox {
 #endif
 
                     try {
-                        root = std::move(YAML::Load(stream));
+                        root = YAML::Load(stream);
                     }
                     catch (const YAML::ParserException& /*e*/) {
                         // parse failed
@@ -392,7 +392,7 @@ namespace wxbox {
 
                     bool retval = root.IsNull() || root.IsMap();
                     if (!retval) {
-                        root.reset(std::move(YAML::Node()));
+                        root.reset(YAML::Node());
                     }
 
                     root.SetStyle(YAML::EmitterStyle::Block);
@@ -457,7 +457,7 @@ namespace wxbox {
                     }
 
                     std::lock_guard<std::mutex> lock(mutex);
-                    root.reset(std::move(SafeYamlNode()));
+                    root.reset(SafeYamlNode());
                     dirty = false;
                 }
 
@@ -490,7 +490,7 @@ inline std::vector<std::string> operator"" _conf(const char* path, std::size_t n
 {
     WXBOX_UNREF(n);
 
-    return std::move(wxbox::util::string::SplitString(path, "/"));
+    return wxbox::util::string::SplitString(path, "/");
 }
 
 #define REGISTER_CONFIG_KEY(CONFIG_NAME) const auto CONFIG_NAME##_KEY = UNWIND_MACRO_STRING_LITERAL(CONFIG_NAME) ""_conf;

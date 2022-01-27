@@ -76,6 +76,8 @@ int main(int argc, char* argv[])
                     wb_plugin::PushPluginVirtualMachineCommand(command);
                     command->signal.get_future().wait();
                 }
+
+                break;
             }
         }
     };

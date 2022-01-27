@@ -20,6 +20,9 @@ MainWindow::MainWindow(QWidget* parent)
     // set thread name
     wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxMain");
 
+    // change style
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+
     // ---------------------------------------
     //           trigger to test
     // ---------------------------------------
@@ -159,7 +162,7 @@ std::vector<std::pair<std::string, std::string>> MainWindow::i18ns()
     auto                                             i18nPath = config.i18n_path();
 
     if (!wb_file::IsDirectory(i18nPath)) {
-        return std::move(result);
+        return result;
     }
 
     for (auto qm : wb_file::ListFilesInDirectoryWithExt(i18nPath, "qm")) {
@@ -170,7 +173,7 @@ std::vector<std::pair<std::string, std::string>> MainWindow::i18ns()
         }
     }
 
-    return std::move(result);
+    return result;
 }
 
 void MainWindow::changeLanguage(const std::string& language)
@@ -264,7 +267,7 @@ void MainWindow::ProfileResponseHandler(wb_process::PID clientPID, wxbox::Profil
 //           trigger to test
 // ---------------------------------------
 
-void MainWindow::triggerTest()
+[[deprecated("just a test trigger")]] void MainWindow::triggerTest()
 {
     SPDLOG_DEBUG("trigger test button");
 

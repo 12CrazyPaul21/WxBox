@@ -203,7 +203,7 @@ namespace wxbox {
         friend class WxBoxServer;
 
       public:
-        WxBotEndPoint(WxBoxServer* server)
+        explicit WxBotEndPoint(WxBoxServer* server)
           : server(server)
           , hold(false)
           , finished(false)

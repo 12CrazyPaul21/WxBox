@@ -200,14 +200,14 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         if (!hookPointFeatureNode["RefFeatureStream"].IsSequence()) {
             return false;
         }
-        hookPointFeatureInfo.refFeatureStream = std::move(hookPointFeatureNode["RefFeatureStream"].as<std::vector<uint8_t>>());
+        hookPointFeatureInfo.refFeatureStream = hookPointFeatureNode["RefFeatureStream"].as<std::vector<uint8_t>>();
 
         if (hookPointFeatureNode["RefBackExtralInstruction"].IsSequence()) {
-            hookPointFeatureInfo.refBackExtralInstruction = std::move(hookPointFeatureNode["RefBackExtralInstruction"].as<std::vector<uint8_t>>());
+            hookPointFeatureInfo.refBackExtralInstruction = hookPointFeatureNode["RefBackExtralInstruction"].as<std::vector<uint8_t>>();
         }
 
         if (hookPointFeatureNode["RefFrontExtralInstruction"].IsSequence()) {
-            hookPointFeatureInfo.refFrontExtralInstruction = std::move(hookPointFeatureNode["RefFrontExtralInstruction"].as<std::vector<uint8_t>>());
+            hookPointFeatureInfo.refFrontExtralInstruction = hookPointFeatureNode["RefFrontExtralInstruction"].as<std::vector<uint8_t>>();
         }
     }
     else if (!hookPointFeatureInfo.scanType.compare("multiPushRef")) {
@@ -224,7 +224,7 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         }
 
         // PushInstruction
-        hookPointFeatureInfo.pushInstruction = std::move(hookPointFeatureNode["PushInstruction"].as<std::vector<uint8_t>>());
+        hookPointFeatureInfo.pushInstruction = hookPointFeatureNode["PushInstruction"].as<std::vector<uint8_t>>();
 
         // RefFeatureStreams
         auto refFeatureStreamsNode = hookPointFeatureNode["RefFeatureStreams"];
@@ -236,7 +236,7 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         }
 
         // RefFeatureStreamsOffset
-        hookPointFeatureInfo.refFeatureStreamsOffset = std::move(hookPointFeatureNode["RefFeatureStreamsOffset"].as<std::vector<uint8_t>>());
+        hookPointFeatureInfo.refFeatureStreamsOffset = hookPointFeatureNode["RefFeatureStreamsOffset"].as<std::vector<uint8_t>>();
     }
     else if (!hookPointFeatureInfo.scanType.compare("instruction")) {
         // for 'instruction'
@@ -245,7 +245,7 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
             return false;
         }
 
-        hookPointFeatureInfo.instructionFeatureStream = std::move(hookPointFeatureNode["InstructionFeatureStream"].as<std::vector<uint8_t>>());
+        hookPointFeatureInfo.instructionFeatureStream = hookPointFeatureNode["InstructionFeatureStream"].as<std::vector<uint8_t>>();
     }
 
     //
@@ -262,9 +262,9 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         return false;
     }
 
-    hookPointFeatureInfo.locateActionFeatureStream = std::move(hookPointFeatureNode["LocateActionFeatureStream"].as<std::vector<uint8_t>>());
-    hookPointFeatureInfo.locateActionRange         = std::move(hookPointFeatureNode["LocateActionRange"].as<long>());
-    hookPointFeatureInfo.hookPointOffset           = std::move(hookPointFeatureNode["HookPointOffset"].as<long>());
+    hookPointFeatureInfo.locateActionFeatureStream = hookPointFeatureNode["LocateActionFeatureStream"].as<std::vector<uint8_t>>();
+    hookPointFeatureInfo.locateActionRange         = hookPointFeatureNode["LocateActionRange"].as<long>();
+    hookPointFeatureInfo.hookPointOffset           = hookPointFeatureNode["HookPointOffset"].as<long>();
 
     if (!hookPointFeatureInfo.locateAction.compare("backThenFront")) {
         // for 'backThenFront'
@@ -273,7 +273,7 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
             return false;
         }
 
-        hookPointFeatureInfo.thenLocateActionFeatureStream = std::move(hookPointFeatureNode["ThenLocateActionFeatureStream"].as<std::vector<uint8_t>>());
+        hookPointFeatureInfo.thenLocateActionFeatureStream = hookPointFeatureNode["ThenLocateActionFeatureStream"].as<std::vector<uint8_t>>();
     }
     else if (!hookPointFeatureInfo.locateAction.compare("backMultiTimes")) {
         // for 'backMultiTimes'

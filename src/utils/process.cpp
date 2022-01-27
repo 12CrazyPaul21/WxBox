@@ -108,13 +108,13 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Windows()
         wb_process::ProcessInfo pi;
         pi.abspath  = absFullPath;
         pi.filename = pe32.szExeFile;
-        pi.dirpath  = std::move(wxbox::util::file::ToDirectoryPath(absFullPath));
+        pi.dirpath  = wxbox::util::file::ToDirectoryPath(absFullPath);
         pi.pid      = pe32.th32ProcessID;
-        vt.push_back(std::move(pi));
+        vt.emplace_back(std::move(pi));
     } while (::Process32Next(hSnapshot, &pe32));
 
     ::CloseHandle(hSnapshot);
-    return std::move(vt);
+    return vt;
 }
 
 static bool Is64Process_Windows(wb_process::PROCESS_HANDLE hProcess)
@@ -182,7 +182,7 @@ static std::vector<wb_process::ModuleInfo> CollectModuleInfos_Windows(wb_process
 
     HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
-        return std::move(results);
+        return results;
     }
 
     MODULEENTRY32 modEntry;
@@ -201,7 +201,7 @@ static std::vector<wb_process::ModuleInfo> CollectModuleInfos_Windows(wb_process
     }
 
     ::CloseHandle(hSnapshot);
-    return std::move(results);
+    return results;
 }
 
 static inline wb_process::PID StartProcess_Windows(const std::string& binFilePath, bool isAttach)
@@ -272,7 +272,7 @@ static inline std::vector<wb_process::ProcessInfo> GetProcessList_Mac()
 {
     std::vector<wb_process::ProcessInfo> vt;
     throw std::exception("GetProcessList_Mac stub");
-    return std::move(vt);
+    return vt;
 }
 
 static bool Is64Process_Mac(wb_process::PROCESS_HANDLE hProcess)
@@ -290,7 +290,7 @@ static inline bool GetModuleInfo_Mac(wb_process::PID pid, const std::string& mod
 static std::vector<wb_process::ModuleInfo> CollectModuleInfos_Mac(wb_process::PID pid)
 {
     throw std::exception("CollectModuleInfos_Mac stub");
-    return std::move(std::vector<wb_process::ModuleInfo>());
+    return std::vector<wb_process::ModuleInfo>();
 }
 
 static inline wb_process::PID StartProcess_Mac(const std::string& binFilePath, bool isAttach)
@@ -322,9 +322,9 @@ std::time_t wxbox::util::process::GetCurrentTimestamp(bool ms)
 std::vector<wb_process::ProcessInfo> wxbox::util::process::GetProcessList()
 {
 #if WXBOX_IN_WINDOWS_OS
-    return std::move(GetProcessList_Windows());
+    return GetProcessList_Windows();
 #elif WXBOX_IN_MAC_OS
-    return std::move(GetProcessList_Mac());
+    return GetProcessList_Mac();
 #endif
 }
 
@@ -438,9 +438,9 @@ bool wxbox::util::process::GetModuleInfo(PID pid, const std::string& moduleName,
 std::vector<wb_process::ModuleInfo> wxbox::util::process::CollectModuleInfos(PID pid)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return std::move(CollectModuleInfos_Windows(pid));
+    return CollectModuleInfos_Windows(pid);
 #elif WXBOX_IN_MAC_OS
-    return std::move(CollectModuleInfos_Mac(pid));
+    return CollectModuleInfos_Mac(pid);
 #endif
 }
 
@@ -469,7 +469,7 @@ bool wxbox::util::process::GetProcessInfoByPID(PID pid, ProcessInfo& pi)
 
     pi.abspath  = absFullPath;
     pi.filename = ::PathFindFileNameA(absFullPath);
-    pi.dirpath  = std::move(wxbox::util::file::ToDirectoryPath(absFullPath));
+    pi.dirpath  = wxbox::util::file::ToDirectoryPath(absFullPath);
     pi.pid      = pid;
 
     return true;
@@ -523,11 +523,11 @@ std::string wxbox::util::process::GetThreadName(THREAD_HANDLE hThread)
     wchar_t*    threadDescription = nullptr;
 
     if (SUCCEEDED(::GetThreadDescription(hThread, &threadDescription))) {
-        threadName = std::move(wb_string::ToString(threadDescription));
+        threadName = wb_string::ToString(threadDescription);
         ::LocalFree(threadDescription);
     }
 
-    return std::move(threadName);
+    return threadName;
 
 #elif WXBOX_IN_MAC_OS
     throw std::exception("GetThreadName stub");

@@ -3,7 +3,7 @@
 
 #include <spdlog/spdlog.h>
 
-std::string ParseStatus(wxbot::WxBoxClientStatus status)
+const char* ParseStatus(wxbot::WxBoxClientStatus status)
 {
     switch (status) {
         case wxbot::WxBoxClientStatus::Uninit:

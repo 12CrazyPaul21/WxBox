@@ -13,7 +13,7 @@ toWString(const char* str)
     std::wstring wstr;
 
     if(!str || !*str) {
-        return wstr;
+        return move(wstr;
     }
 
     int required = MultiByteToWideChar(CP_UTF8, 0, str, -1, nullptr, 0);
@@ -24,7 +24,7 @@ toWString(const char* str)
         }
     }
 
-    return std::move(wstr);
+    return wstr;
 }
 
 static inline std::vector<std::string>
@@ -34,16 +34,16 @@ split(const std::string& str, const char& sep)
     std::string::size_type pos1 = 0, pos2 = str.find(sep);
 
     while (pos2 != std::string::npos) {
-        result.push_back(std::move(str.substr(pos1, pos2 - pos1)));
+        result.emplace_back(str.substr(pos1, pos2 - pos1));
         pos1 = pos2 + 1;
         pos2 = str.find(sep, pos1);
     }
 
     if (pos1 != str.length()) {
-        result.push_back(std::move(str.substr(pos1)));
+        result.emplace_back(str.substr(pos1));
     }
 
-    return std::move(result);
+    return result;
 }
 
 static inline bool

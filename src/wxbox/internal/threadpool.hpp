@@ -11,7 +11,7 @@ namespace wxbox {
           public:
             typedef std::function<void(void)> TaskFunc;
 
-            TaskInThreadPool(TaskFunc func)
+            explicit TaskInThreadPool(TaskFunc func)
               : func(func)
             {
             }

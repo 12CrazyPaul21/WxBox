@@ -15,7 +15,7 @@ static inline std::string ToString_Windows(const std::wstring& str)
     }
 
     ::WideCharToMultiByte(CP_UTF8, 0, str.c_str(), -1, buffer.get(), len, nullptr, nullptr);
-    return std::move(std::string(buffer.get()));
+    return std::string(buffer.get());
 }
 
 static inline std::wstring ToWString_Windows(const std::string& str)
@@ -31,7 +31,7 @@ static inline std::wstring ToWString_Windows(const std::string& str)
     }
 
     ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buffer.get(), len);
-    return std::move(std::wstring(buffer.get()));
+    return std::wstring(buffer.get());
 }
 
 #elif WXBOX_IN_MAC_OS
@@ -57,9 +57,9 @@ std::string wxbox::util::string::ToString(const std::wstring& str)
     //
 
 #if WXBOX_IN_WINDOWS_OS
-    return std::move(ToString_Windows(str));
+    return ToString_Windows(str);
 #elif WXBOX_IN_MAC_OS
-    return std::move(ToString_Mac(str));
+    return ToString_Mac(str);
 #endif
 }
 
@@ -70,9 +70,9 @@ std::wstring wxbox::util::string::ToWString(const std::string& str)
     //
 
 #if WXBOX_IN_WINDOWS_OS
-    return std::move(ToWString_Windows(str));
+    return ToWString_Windows(str);
 #elif WXBOX_IN_MAC_OS
-    return std::move(ToWString_Mac(str));
+    return ToWString_Mac(str);
 #endif
 }
 
@@ -87,7 +87,7 @@ std::vector<std::string> wxbox::util::string::SplitString(const std::string& str
 #endif
 
     if (!tmp) {
-        return std::move(result);
+        return result;
     }
 
     char* token     = nullptr;
@@ -102,7 +102,7 @@ std::vector<std::string> wxbox::util::string::SplitString(const std::string& str
     }
 
     free(tmp);
-    return std::move(result);
+    return result;
 }
 
 std::string wxbox::util::string::JoinString(const std::vector<std::string>& vt, const std::string& delim)

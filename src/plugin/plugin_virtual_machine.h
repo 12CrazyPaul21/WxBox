@@ -250,7 +250,7 @@ namespace wxbox {
                     }                                                                                                      \
                 }                                                                                                          \
             },                                                                                                             \
-            std::move(__task_complete_signal.get_future()));
+            __task_complete_signal.get_future());
 
 #define CANCEL_PLUGIN_VIRTUAL_MACHINE_LONG_TASK(vm) \
     {                                               \

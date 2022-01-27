@@ -162,7 +162,7 @@ std::string wxbox::util::platform::GetStringValueInRegister(HKEY hKey, const cha
         return "";
     }
 
-    return std::move(std::string(tmp.get()));
+    return std::string(tmp.get());
 }
 
 const char* wxbox::util::platform::ExceptionDescription(const DWORD code)
