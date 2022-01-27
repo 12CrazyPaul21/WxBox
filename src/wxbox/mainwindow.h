@@ -2,6 +2,7 @@
 #define __MAINWINDOW_H
 
 #include <QApplication>
+#include <QOperatingSystemVersion>
 #include <QMainWindow>
 #include <QTranslator>
 #include <QCloseEvent>
@@ -50,6 +51,7 @@ class MainWindow : public QMainWindow
     // Public Methods
     //
 
+    bool                                             checkSystemVersionSupported();
     std::vector<std::pair<std::string, std::string>> i18ns();
     void                                             changeLanguage(const std::string& language);
     void                                             startWxBoxServer();

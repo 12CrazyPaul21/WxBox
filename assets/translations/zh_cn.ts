@@ -16,6 +16,14 @@
         <translation>帮助(&amp;H)</translation>
     </message>
     <message>
+        <source>Only systems above Windows 7 are supported.</source>
+        <translation>只运行在Windows 7以上版本的操作系统</translation>
+    </message>
+    <message>
+        <source>Only systems above Mac OS Sierra are supported.</source>
+        <translation>只运行在Mac OS Sierra以上版本的操作系统</translation>
+    </message>
+    <message>
         <source>关于 WxBox</source>
         <translation>关于 WxBox</translation>
     </message>

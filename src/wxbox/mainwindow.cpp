@@ -134,6 +134,25 @@ void MainWindow::WxBoxServerEvent(wxbox::WxBoxMessage message)
 // Methods
 //
 
+bool MainWindow::checkSystemVersionSupported()
+{
+    bool isSupported = false;
+
+#if WXBOX_IN_WINDOWS_OS
+    static QString msg = tr("Only systems above Windows 7 are supported.");
+    isSupported        = QOperatingSystemVersion::current() >= QOperatingSystemVersion::Windows7;
+#else
+    static QString msg = tr("Only systems above Mac OS Sierra are supported.");
+    isSupported        = QOperatingSystemVersion::current() >= QOperatingSystemVersion::MacOSSierra;
+#endif
+
+    if (!isSupported) {
+        QMessageBox::information(this, tr(""), msg);
+    }
+
+    return isSupported;
+}
+
 std::vector<std::pair<std::string, std::string>> MainWindow::i18ns()
 {
     std::vector<std::pair<std::string, std::string>> result;

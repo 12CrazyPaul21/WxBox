@@ -19,6 +19,14 @@
         <source>关于 WxBox</source>
         <translation>About WxBox</translation>
     </message>
+    <message>
+        <source>Only systems above Windows 7 are supported.</source>
+        <translation>Only systems above Windows 7 are supported.</translation>
+    </message>
+    <message>
+        <source>Only systems above Mac OS Sierra are supported.</source>
+        <translation>Only systems above Mac OS Sierra are supported.</translation>
+    </message>
 </context>
 <context>
     <name>AboutWxBoxDialog</name>

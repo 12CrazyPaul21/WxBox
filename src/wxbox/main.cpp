@@ -35,6 +35,11 @@ int main(int argc, char* argv[])
     Q_INIT_RESOURCE(wxbox);
     QApplication app(argc, argv);
     MainWindow   window;
+
+    if (!window.checkSystemVersionSupported()) {
+        return 0;
+    }
+
     window.show();
     return app.exec();
 }
