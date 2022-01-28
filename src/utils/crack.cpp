@@ -61,7 +61,7 @@ static inline bool OpenWxWithMultiBoxing_CheckWeChatWinModule(HANDLE hProcess, c
 
 /**
  *
- * The instructions after crack are as follows£º
+ * The instructions after crack are as follows:
  *
  *     void _declspec(naked) CheckAppSingleton_Crack()
  *     {

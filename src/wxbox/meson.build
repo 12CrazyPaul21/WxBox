@@ -1,7 +1,7 @@
-moc_headers = [join_paths(wxbox_root, 'mainwindow.h'), join_paths(wxbox_root, 'about.h'), join_paths(wxbox_root, 'wxbox_server.hpp')]
-moc_sources = [join_paths(wxbox_root, 'mainwindow.cpp'), join_paths(wxbox_root, 'about.cpp')]
-ui_files = [join_paths(wxbox_root, 'mainwindow.ui'), join_paths(wxbox_root, 'about.ui')]
-qt_resources = [join_paths(assets_root, 'wxbox.qrc')]
+moc_headers = files([join_paths(wxbox_root, 'mainwindow.h'), join_paths(wxbox_root, 'about.h'), join_paths(wxbox_root, 'wxbox_server.hpp')])
+moc_sources = files([join_paths(wxbox_root, 'mainwindow.cpp'), join_paths(wxbox_root, 'about.cpp')])
+ui_files = files([join_paths(wxbox_root, 'mainwindow.ui'), join_paths(wxbox_root, 'about.ui')])
+qt_resources = files([join_paths(assets_root, 'wxbox.qrc')])
 
 # process about qt
 qt_processed = qt5.preprocess(
@@ -18,7 +18,7 @@ wxbox_inc = [
     configuration_inc
 ]
 
-wxbox_src = [
+wxbox_src = files([
     join_paths(wxbox_root, 'main.cpp'),
     join_paths(wxbox_root, 'mainwindow.cpp'),
     join_paths(wxbox_root, 'about.cpp'),
@@ -26,7 +26,7 @@ wxbox_src = [
     join_paths(wxbox_root, 'app_log.hpp'),
     join_paths(wxbox_root, 'app_config.hpp'),
     join_paths(wxbox_internal, 'threadpool.hpp')
-]
+])
 
 # resources
 if host_os == 'windows'
@@ -42,6 +42,7 @@ executable('wxbox',
     include_directories: wxbox_inc,
     gui_app: true,
     install : true,
+    install_dir: project_install_root,
     dependencies: [qt5_dep, spdlog_dep, grpc_dep, yaml_cpp_dep],
     cpp_args: [ignore_warnings, config_macro_flags],
     link_with: utils_static_lib

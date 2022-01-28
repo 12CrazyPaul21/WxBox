@@ -246,7 +246,7 @@ static void _cdecl AbortSignalHandler(int sig)
 static BOOL EnableCrashingOnCrashes()
 {
     // ensure that the program crash request of the system is turned on
-    // from article <When Even Crashing Doesn¡¯t Work>
+    // from article <When Even Crashing Doesn't Work>
     // link: https://randomascii.wordpress.com/2012/07/05/when-even-crashing-doesnt-work/
 
     static constexpr DWORD EXCEPTION_SWALLOWING = 0x1;

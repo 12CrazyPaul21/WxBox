@@ -505,7 +505,25 @@ void wxbox::util::process::SetThreadName(THREAD_HANDLE hThread, const std::strin
     }
 
 #if WXBOX_IN_WINDOWS_OS
-    ::SetThreadDescription(hThread, wb_string::ToWString(threadName).c_str());
+
+    //
+    // SetThreadDescription only for Windows 10 and above
+    //
+
+    using FnSetThreadDescription = HRESULT(WINAPI*)(HANDLE hThread, PCWSTR lpThreadDescription);
+
+    HMODULE hKernel32 = GetModuleHandleA("kernel32.dll");
+    if (!hKernel32) {
+        return;
+    }
+
+    FnSetThreadDescription fnSetThreadDescription = (FnSetThreadDescription)GetProcAddress(hKernel32, "SetThreadDescription");
+    if (!fnSetThreadDescription) {
+        return;
+    }
+
+    fnSetThreadDescription(hThread, wb_string::ToWString(threadName).c_str());
+
 #elif WXBOX_IN_MAC_OS
     throw std::exception("SetThreadName stub");
 #endif
@@ -519,10 +537,26 @@ std::string wxbox::util::process::GetThreadName(THREAD_HANDLE hThread)
 
 #if WXBOX_IN_WINDOWS_OS
 
+    //
+    // GetThreadDescription only for Windows 10 and above
+    //
+
+    using FnGetThreadDescription = HRESULT(WINAPI*)(HANDLE hThread, PWSTR * ppszThreadDescription);
+
+    HMODULE hKernel32 = GetModuleHandleA("kernel32.dll");
+    if (!hKernel32) {
+        return "";
+    }
+
+    FnGetThreadDescription fnGetThreadDescription = (FnGetThreadDescription)GetProcAddress(hKernel32, "GetThreadDescription");
+    if (!fnGetThreadDescription) {
+        return "";
+    }
+
     std::string threadName;
     wchar_t*    threadDescription = nullptr;
 
-    if (SUCCEEDED(::GetThreadDescription(hThread, &threadDescription))) {
+    if (SUCCEEDED(fnGetThreadDescription(hThread, &threadDescription))) {
         threadName = wb_string::ToString(threadDescription);
         ::LocalFree(threadDescription);
     }

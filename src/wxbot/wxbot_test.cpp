@@ -4,8 +4,6 @@
 
 #include "config.h"
 
-using namespace std;
-
 #if WXBOX_IN_WINDOWS_OS
 
 #include <Windows.h>
@@ -43,10 +41,10 @@ void RegisterSignal()
 
 void help()
 {
-    cout << "Usage:" << endl;
-    cout << "[q] shutdown" << endl;
-    cout << "[p] ping" << endl;
-    cout << " > ";
+    std::cout << "Usage:" << std::endl;
+    std::cout << "[q] shutdown" << std::endl;
+    std::cout << "[p] ping" << std::endl;
+    std::cout << " > ";
 }
 
 void ping(wxbot::WxBot& bot)
@@ -90,8 +88,8 @@ int main(int /*argc*/, char** /*argv*/)
     for (;;) {
         help();
 
-        int command = cin.get();
-        cin.ignore();
+        int command = std::cin.get();
+        std::cin.ignore();
 
         if (command == 'q') {
             spdlog::info("Stop WxBoxClient");
@@ -118,7 +116,7 @@ int main(int /*argc*/, char** /*argv*/)
     //
 
     spdlog::info("============================================");
-    std::cout << "          step 2 : Stress Testing" << endl;
+    std::cout << "          step 2 : Stress Testing" << std::endl;
     spdlog::info("============================================");
 
 #define RECONSTRUCT_TIMES 1000
@@ -154,7 +152,7 @@ int main(int /*argc*/, char** /*argv*/)
     }
 
     spdlog::info("============================================");
-    std::cout << "      step 2 : Stress Testing [Finish]" << endl;
+    std::cout << "      step 2 : Stress Testing [Finish]" << std::endl;
     spdlog::info("============================================");
 
     bot.Shutdown();

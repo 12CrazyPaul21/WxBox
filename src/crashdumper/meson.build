@@ -1,7 +1,7 @@
-crashdumper_moc_headers = [join_paths(crashdumper_root, 'crashdumper_dialog.h')]
-crashdumper_moc_sources = [join_paths(crashdumper_root, 'crashdumper_dialog.cpp')]
-crashdumper_ui_files = [join_paths(crashdumper_root, 'crashdumper_dialog.ui')]
-crashdumper_qt_resources = [join_paths(crashdumper_assets_root, 'crashdumper.qrc')]
+crashdumper_moc_headers = files([join_paths(crashdumper_root, 'crashdumper_dialog.h')])
+crashdumper_moc_sources = files([join_paths(crashdumper_root, 'crashdumper_dialog.cpp')])
+crashdumper_ui_files = files([join_paths(crashdumper_root, 'crashdumper_dialog.ui')])
+crashdumper_qt_resources = files([join_paths(crashdumper_assets_root, 'crashdumper.qrc')])
 
 # process about qt
 crashdumper_qt_processed = qt5.preprocess(
@@ -16,11 +16,11 @@ crashdumper_inc = [
     configuration_inc
 ]
 
-crashdumper_src = [
+crashdumper_src = files([
     join_paths(crashdumper_root, 'crashdumper.h'),
     join_paths(crashdumper_root, 'crashdumper.cpp'),
     join_paths(crashdumper_root, 'crashdumper_dialog.cpp')
-]
+])
 
 # resources
 if host_os == 'windows'
@@ -36,6 +36,7 @@ executable('crashdumper',
     include_directories: crashdumper_inc,
     gui_app: true,
     install: true,
+    install_dir: project_install_root,
     dependencies: [qt5_dep, yaml_cpp_dep],
     cpp_args: [ignore_warnings],
     link_with: [utils_static_lib]

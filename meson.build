@@ -1,10 +1,11 @@
 project('WxBox', ['c', 'cpp'],
     version: '0.1.0',
-    default_options: ['warning_level=3',
-                        'cpp_std=c++17',
-                        'backend_startup_project=wxbox']
+    default_options: ['warning_level=3', 'cpp_std=c++17']
 )
-wxbot_project_version = meson.project_version()
+
+# version info
+wxbox_project_version = meson.project_version()
+wxbot_project_version = wxbox_project_version
 
 # host info
 host_os = host_machine.system()
@@ -18,6 +19,7 @@ build_type = get_option('buildtype')
 proj_root = meson.current_source_dir()
 source_root = join_paths(proj_root, 'src')
 tests_root = join_paths(proj_root, 'tests')
+protos_root = join_paths(proj_root, 'protos')
 
 assets_root = join_paths(proj_root, 'assets')
 wxbot_assets_root = join_paths(assets_root, 'wxbot')
@@ -32,19 +34,38 @@ plugin_root = join_paths(source_root, 'plugin')
 interact_root = join_paths(source_root, 'interact')
 
 #
+# install info
+#
+
+project_build_root = join_paths(proj_root, 'build')
+project_dist_root = join_paths(project_build_root, 'dist')
+project_install_sink_root = join_paths(project_build_root, 'install')
+project_install_mode_root = join_paths(project_install_sink_root, build_type)
+project_install_root = join_paths(project_install_mode_root, 'wxbox-' + wxbox_project_version)
+project_install_script = 'scripts/install_wxbox'
+if host_os == 'windows'
+    project_install_script = 'scripts/install_wxbox' + '.bat'    
+endif
+
+#
 # compiler
 #
 
 if host_os == 'windows'
     ignore_warnings = ['/wd4125', '/wd4702', '/wd4505']
     subproject_ignore_warnings = ['/wd4244', '/wd4702']
+
+    add_global_arguments(['/Zi'], language: 'c')
+    add_global_arguments(['/Zi'], language: 'cpp')
+    add_global_link_arguments(['/DEBUG:FULL', '/ignore:4099'], language: 'c')
+    add_global_link_arguments(['/DEBUG:FULL', '/ignore:4099'], language: 'cpp')
 else
     ignore_warnings = []
     subproject_ignore_warnings = ['-w']
-endif
 
-# add_global_arguments([ignore_warnings, subproject_ignore_warnings], language: 'c')
-# add_global_arguments([ignore_warnings, subproject_ignore_warnings], language: 'cpp')
+    add_global_arguments('-g', language: 'c')
+    add_global_arguments('-g', language: 'cpp')
+endif
 
 #
 # config.h
@@ -160,6 +181,16 @@ if not grpc_cpp_plugin.found()
 endif
 
 #
+# qt deploy tool
+#
+
+if host_os == 'windows'
+    find_program('windeployqt', required: true)
+elif host_os == 'darwin'
+    find_program('macdeployqt', required: true)
+endif
+
+#
 # handle dependency
 #
 
@@ -173,6 +204,7 @@ if not spdlog_dep.found()
     cmake = import('cmake')
     spdlog_proj_opt_var = cmake.subproject_options()
     spdlog_proj_opt_var.add_cmake_defines({'CMAKE_BUILD_TYPE': build_type})
+    spdlog_proj_opt_var.set_install(false)
     spdlog_proj = cmake.subproject('spdlog', options: spdlog_proj_opt_var)
     spdlog_dep = spdlog_proj.dependency('spdlog')
 endif
@@ -200,7 +232,7 @@ if not frida_gum_dep.found()
     frida_gum_dep = frida_gum_proj.get_variable('frida_gum_dep')
 endif
 
-# lua(only for WxBot)
+# lua
 lua_proj = subproject('lua')
 lua_dep = lua_proj.get_variable('lua_dep')
 
@@ -216,6 +248,7 @@ if not yaml_cpp_dep.found()
         'YAML_CPP_BUILD_TESTS': 'OFF',
         'YAML_CPP_BUILD_CONTRIB': 'OFF',
         'BUILD_SHARED_LIBS': 'OFF'})
+    yaml_cpp_proj_opt_var.set_install(false)
     yaml_cpp_proj_opt_var.append_compile_args('c', subproject_ignore_warnings)
     yaml_cpp_proj_opt_var.append_compile_args('cpp', subproject_ignore_warnings)
     yaml_cpp_proj = cmake.subproject('yaml-cpp', options: yaml_cpp_proj_opt_var)
@@ -223,7 +256,7 @@ if not yaml_cpp_dep.found()
                             compile_args: '/DYAML_CPP_STATIC_DEFINE')
 endif
 
-# TitanEngine
+# TitanEngine[deprecated]
 # TitanEngine_proj = subproject('TitanEngine')
 # TitanEngine_dep = TitanEngine_proj.get_variable('TitanEngine_dep')
 # TitanEngine_bin_root = TitanEngine_proj.get_variable('TitanEngine_bin_root')
@@ -242,9 +275,11 @@ proto_generator = generator(protoc,
                     arguments: [
                         protoc_gen_grpc_plugin,
                         '--grpc_out=@BUILD_DIR@',
-                        '--proto_path=@CURRENT_SOURCE_DIR@/protos',
+                        # '--proto_path=@CURRENT_SOURCE_DIR@/protos',
+                        '--proto_path=' + protos_root,
                         '--cpp_out=@BUILD_DIR@',                                                
-                        '@INPUT@'])
+                        # '@INPUT@',
+                        'wxbox.proto'])
 proto_generated = proto_generator.process('protos/wxbox.proto')
 
 #
@@ -255,7 +290,7 @@ utils_inc = [
     source_root
 ]
 
-utils_src = [
+utils_src = files([
     join_paths(utils_root, 'common.h'),
     join_paths(utils_root, 'process.h'),
     join_paths(utils_root, 'process.cpp'),
@@ -283,7 +318,7 @@ utils_src = [
     join_paths(utils_root, 'coredump.cpp'),
     join_paths(utils_root, 'config.hpp'),
     join_paths(utils_root, 'config.cpp')
-]
+])
 
 utils_static_lib = static_library('utils',
                         sources: [utils_src],
@@ -299,7 +334,7 @@ plugin_inc = [
     source_root
 ]
 
-plugin_src = [
+plugin_src = files([
     join_paths(plugin_root, 'plugin.h'),
     join_paths(plugin_root, 'plugin.cpp'),
     join_paths(plugin_root, 'plugin_virtual_machine.h'),
@@ -318,7 +353,7 @@ plugin_src = [
     join_paths(plugin_root, 'internal/module/model_event.cpp'),
     join_paths(plugin_root, 'internal/module/model_host_event.h'),
     join_paths(plugin_root, 'internal/module/model_host_event.cpp')
-]
+])
 
 plugin_static_lib = static_library('plugin',
                         sources: [plugin_src],
@@ -368,7 +403,17 @@ endif
 format_target = run_target('pretty_format', command: format_command)
 
 #
-# install与pack【这个留到之后补充】
+# install and dist
 #
- 
-# note: 处理qt依赖，在Windows下使用windeployqt，Mac OS下使用macdeployqt
+
+if build_type == 'debug'
+    zlib_bin = join_paths(grpc_bin_root, 'zlibd.dll')
+else
+    zlib_bin = join_paths(grpc_bin_root, 'zlib.dll')
+endif
+
+install_data(['assets/translations/zh_cn.qm', 'assets/translations/en.qm'], install_dir: join_paths(project_install_root, 'i18n'))
+install_subdir('plugins', install_dir: project_install_root)
+install_subdir('conf', install_dir: project_install_root)
+
+meson.add_install_script(project_install_script, 'wxbox.exe', build_type, wxbox_project_version, zlib_bin)

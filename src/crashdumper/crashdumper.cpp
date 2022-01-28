@@ -65,11 +65,7 @@ static CrashDumpReportPtr AnalysisCrashDumpReport(wb_coredump::PCrashDumperReque
 #endif
 
     // get crash thread description
-    wchar_t* threadDescription = nullptr;
-    if (SUCCEEDED(GetThreadDescription(hThread, &threadDescription))) {
-        dumpReport->crashThreadDescription = wb_string::ToString(threadDescription);
-        LocalFree(threadDescription);
-    }
+    dumpReport->crashThreadDescription = wb_process::GetThreadName(hThread);
 
     if (dumpReport->crashInstructionAddress) {
         // get crash symbol

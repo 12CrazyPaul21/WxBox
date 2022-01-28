@@ -16,11 +16,11 @@ test_inc = [
     configuration_inc
 ]
 
-test_src = [
+test_src = files([
     join_paths(tests_root, 'main.cpp'),
     join_paths(tests_root, 'utils_test.cpp'),
     join_paths(tests_root, 'plugin_test.cpp')
-]
+])
 
 test_exe = executable('test_all', test_src, include_directories: test_inc,
     dependencies: [gtest_dep, gmock_dep, spdlog_dep, yaml_cpp_dep, lua_dep],

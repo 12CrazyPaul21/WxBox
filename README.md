@@ -41,9 +41,9 @@ QMessageBox::information(this, tr("Title"), tr("\345\205\263\344\272\216 WxBox")
 
 ​	首先需要安装meson+ninja构建工具，可以到以下路径下载：https://github.com/mesonbuild/meson/releases。
 
-​	spdbuf需要cmake构建工具。
-
-​	编译器需要C++17以上标准。
+- ​	spdbuf需要cmake构建工具。
+- ​	编译器需要C++17以上标准。
+- ​	构建路径必须包含在build里面（不管是debug还是release版本的），ninja为backend使用build/debug和build/release，vs为backend使用build/vsdebug和build/release，mac用xcode构建的话使用build/xcodedebug和build/xcoderelease
 
 ### 关于构建时出现的Warning
 
@@ -166,6 +166,8 @@ PKG_CONFIG_PATH=/g/Tutorial/meson/testgrpc/grpc/lib/pkgconfig ./pkg-config.exe g
 
 ```bash
 # 在Visual Studio “x86”开发人员命令提示符执行以下命令
+# 默认用的backend是ninja
+# !!! 构建路径必须包含在build里面 !!!
 meson setup build/release --buildtype release
 meson compile -C build/release
 ```
@@ -330,7 +332,18 @@ meson compile -C build/release pretty_format
 
 ## install与打包方法
 
-​	先不考虑，开发得差不多再说。
+```bash
+# ninja作为后端编译打包
+meson setup build\release --buildtype=release
+meson compile -C build\release
+meson install -C build\release
+```
+
+​	最终会被打包到build\dist\release目录下，build\install是一个过度路径，给meson执行install。这个项目里别用DESTDIR或者--prefix来重新指定打包路径，这不会生效。
+
+​	打包最终会生成四个文件，分别是wxbox主体的.tar.xz和.zip包（它们内容相同），还有symbol的.tar.xz和.zip包。
+
+​	另外别打包debug版本的，debug版有些运行时的依赖没有做处理。	
 
 ## 运行环境
 

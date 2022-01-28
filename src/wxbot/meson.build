@@ -7,12 +7,12 @@ wxbot_inc = [
     configuration_inc
 ]
 
-wxbot_src = [
+wxbot_src = files([
     join_paths(wxbot_root, 'wxbot.hpp'),
     join_paths(wxbot_root, 'wxbot.cpp'),
     join_paths(wxbot_root, 'wxbox_client.hpp'),
     join_paths(wxbot_root, 'wxbox_client.cpp')
-]
+])
 
 # resources
 if host_os == 'windows'
@@ -25,6 +25,7 @@ endif
 shlib = shared_library('wxbot', [wxbot_src, proto_generated],
     include_directories: wxbot_inc,
     install : true,
+    install_dir: project_install_root,
     cpp_args : [lib_args, ignore_warnings, config_macro_flags],
     gnu_symbol_visibility : 'hidden',
     dependencies: [spdlog_dep, lua_dep, grpc_dep, yaml_cpp_dep],
@@ -42,22 +43,3 @@ test_env = environment()
 # test_env.prepend('PATH', TitanEngine_bin_root)
 test_env.prepend('PATH', grpc_bin_root)
 test('wxbot', test_exe)
-
-# Make this library usable as a Meson subproject.
-wxbot_dep = declare_dependency(
-    include_directories: include_directories('.'),
-    link_with : shlib)
-
-# Make this library usable from the system's
-# package manager.
-install_headers('wxbot.hpp', subdir : 'wxbot')
-
-pkg_mod = import('pkgconfig')
-pkg_mod.generate(
-    name : 'WxBot',
-    filebase : 'wxbot',
-    description : 'Wx Robot',
-    subdirs : 'wxbot',
-    libraries : shlib,
-    version : '0.1.0',
-)
