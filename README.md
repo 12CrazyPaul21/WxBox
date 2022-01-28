@@ -343,7 +343,6 @@ meson install -C build\release
 ​	打包最终会生成四个文件，分别是wxbox主体的.tar.xz和.zip包（它们内容相同），还有symbol的.tar.xz和.zip包。
 ​	另外别打包debug版本的，debug版有些运行时的依赖没有做处理。
 
-
 ## 运行环境
 
 ​	Windows 7以上
