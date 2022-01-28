@@ -1,19 +1,28 @@
 project('WxBox', ['c', 'cpp'],
-    version : '0.1.0',
-    default_options : ['warning_level=3',
+    version: '0.1.0',
+    default_options: ['warning_level=3',
                         'cpp_std=c++17',
                         'backend_startup_project=wxbox']
 )
+wxbot_project_version = meson.project_version()
 
+# host info
 host_os = host_machine.system()
 host_cpu_family = host_machine.cpu_family()
 build_type = get_option('buildtype')
 
+#
+# path
+#
+
 proj_root = meson.current_source_dir()
 source_root = join_paths(proj_root, 'src')
 tests_root = join_paths(proj_root, 'tests')
+
 assets_root = join_paths(proj_root, 'assets')
+wxbot_assets_root = join_paths(assets_root, 'wxbot')
 crashdumper_assets_root = join_paths(assets_root, 'crashdumper')
+interact_assets_root = join_paths(assets_root, 'interact')
 
 wxbox_root = join_paths(source_root, 'wxbox')
 wxbot_root = join_paths(source_root, 'wxbot')
@@ -65,8 +74,14 @@ else
     conf_data.set('cpu_family', 'WXBOX_CPU_UNSUPPORT')
 endif
 
-conf_data.set('wxbox_module_version', get_option('wxbox_module_version'))
-conf_data.set('wxbot_module_version', get_option('wxbot_module_version'))
+wxbox_version_array = meson.project_version().split('.')
+wxbot_version_array = wxbot_project_version.split('.')
+conf_data.set('wxbox_major_version', wxbox_version_array[0])
+conf_data.set('wxbox_minor_version', wxbox_version_array[1])
+conf_data.set('wxbox_revision_number', wxbox_version_array[2])
+conf_data.set('wxbot_major_version', wxbox_version_array[0])
+conf_data.set('wxbot_minor_version', wxbox_version_array[1])
+conf_data.set('wxbot_revision_number', wxbox_version_array[2])
 configure_file(input: 'config.h.in', output: 'config.h', configuration: conf_data)
 configuration_inc = include_directories('.')
 

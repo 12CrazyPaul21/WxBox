@@ -2,12 +2,6 @@
 #include <config.h>
 
 //
-// icon
-//
-
-IDI_ICON1 ICON DISCARDABLE "app.ico"
-
-//
 // version info
 //
 
@@ -31,11 +25,11 @@ BEGIN
         BLOCK "080404b0"
         BEGIN
             VALUE "CompanyName", "phantom"
-            VALUE "FileDescription", "WxBox Main Program"
+            VALUE "FileDescription", "WxBot Plugin Command Syntax Interact Train Program"
             VALUE "FileVersion", WXBOX_VERSION
-            VALUE "InternalName", "wxbox.exe"
+            VALUE "InternalName", "interact.exe"
             VALUE "LegalCopyright", "Copyright (C) 2022"
-            VALUE "OriginalFilename", "wxbox.exe"
+            VALUE "OriginalFilename", "interact.exe"
             VALUE "ProductName", "WxBox"
             VALUE "ProductVersion", WXBOX_VERSION
         END

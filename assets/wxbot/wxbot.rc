@@ -2,12 +2,6 @@
 #include <config.h>
 
 //
-// icon
-//
-
-IDI_ICON1 ICON DISCARDABLE "app.ico"
-
-//
 // version info
 //
 
@@ -18,12 +12,12 @@ IDI_ICON1 ICON DISCARDABLE "app.ico"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION WXBOX_MAJOR_VERSION, WXBOX_MINOR_VERSION, WXBOX_REVISION_NUMBER, 1
- PRODUCTVERSION WXBOX_MAJOR_VERSION, WXBOX_MINOR_VERSION, WXBOX_REVISION_NUMBER, 1
+ FILEVERSION WXBOT_MAJOR_VERSION, WXBOT_MINOR_VERSION, WXBOT_REVISION_NUMBER, 1
+ PRODUCTVERSION WXBOT_MAJOR_VERSION, WXBOT_MINOR_VERSION, WXBOT_REVISION_NUMBER, 1
  FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
  FILEFLAGS VER_DEBUG
  FILEOS VOS_NT_WINDOWS32
- FILETYPE VFT_APP
+ FILETYPE VFT_DLL
  FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
@@ -31,13 +25,13 @@ BEGIN
         BLOCK "080404b0"
         BEGIN
             VALUE "CompanyName", "phantom"
-            VALUE "FileDescription", "WxBox Main Program"
-            VALUE "FileVersion", WXBOX_VERSION
-            VALUE "InternalName", "wxbox.exe"
+            VALUE "FileDescription", "WxBot Injected Robot Module"
+            VALUE "FileVersion", WXBOT_VERSION
+            VALUE "InternalName", "wxbot.dll"
             VALUE "LegalCopyright", "Copyright (C) 2022"
-            VALUE "OriginalFilename", "wxbox.exe"
-            VALUE "ProductName", "WxBox"
-            VALUE "ProductVersion", WXBOX_VERSION
+            VALUE "OriginalFilename", "wxbot.dll"
+            VALUE "ProductName", "WxBot"
+            VALUE "ProductVersion", WXBOT_VERSION
         END
     END
     BLOCK "VarFileInfo"

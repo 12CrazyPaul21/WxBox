@@ -25,7 +25,7 @@ crashdumper_src = [
 # resources
 if host_os == 'windows'
     windows = import('windows')
-    crashdumper_src += windows.compile_resources(join_paths(crashdumper_assets_root, 'crashdumper.rc'))
+    crashdumper_src += windows.compile_resources(join_paths(crashdumper_assets_root, 'crashdumper.rc'), include_directories: configuration_inc)
 elif host_os == 'darwin'
     # apple
 endif
@@ -35,6 +35,7 @@ executable('crashdumper',
     sources: [crashdumper_src, crashdumper_qt_processed],
     include_directories: crashdumper_inc,
     gui_app: true,
+    install: true,
     dependencies: [qt5_dep, yaml_cpp_dep],
     cpp_args: [ignore_warnings],
     link_with: [utils_static_lib]

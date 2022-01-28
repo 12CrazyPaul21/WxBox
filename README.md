@@ -200,6 +200,13 @@ meson build/vsdebug --reconfigure -Ddisable_wxbox_utils_test=true
 
 ​	开发调试不使用ninja作为backend，也不使用vscode作为编辑器，而是切为IDE，在Windows下用Visual Studio，在Mac OS下用xcode。另外下面Windows版本中，Visual Studio指定了wxbox为启动项目，在使用Visual Studio写测试用例时可以改为测试用例为启动项目。
 
+### 安装git钩子
+
+```bash
+# 安装git pre-commit钩子，用于提交前自动完成代码风格化和更新i18n文件
+./githooks/setup_hook
+```
+
 ### Windows下使用Visual Studio IDE来开发并调试
 
 ```bash

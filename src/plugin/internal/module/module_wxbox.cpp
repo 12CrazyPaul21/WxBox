@@ -7,7 +7,7 @@
 static int __wxbox_version(lua_State* L)
 {
     std::stringstream ss;
-    ss << "wxbot-v" << WXBOT_MODULE_VERSION;
+    ss << "wxbot-v" << WXBOT_VERSION;
 
     lua_pushstring(L, ss.str().c_str());
     return 1;

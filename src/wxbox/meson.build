@@ -31,7 +31,7 @@ wxbox_src = [
 # resources
 if host_os == 'windows'
     windows = import('windows')
-    wxbox_src += windows.compile_resources(join_paths(assets_root, 'wxbox.rc'))
+    wxbox_src += windows.compile_resources(join_paths(assets_root, 'wxbox.rc'), include_directories: configuration_inc)
 elif host_os == 'darwin'
     # apple
 endif

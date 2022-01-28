@@ -14,6 +14,14 @@ wxbot_src = [
     join_paths(wxbot_root, 'wxbox_client.cpp')
 ]
 
+# resources
+if host_os == 'windows'
+    windows = import('windows')
+    wxbot_src += windows.compile_resources(join_paths(wxbot_assets_root, 'wxbot.rc'), include_directories: configuration_inc)
+elif host_os == 'darwin'
+    # apple
+endif
+
 shlib = shared_library('wxbot', [wxbot_src, proto_generated],
     include_directories: wxbot_inc,
     install : true,

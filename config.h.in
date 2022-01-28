@@ -9,9 +9,16 @@
 #define WXBOX_CPU_X86 1
 #define WXBOX_CPU_X86_64 2
 
-#define WXBOX_VERSION "@version@"
-#define WXBOX_MODULE_VERSION "@wxbox_module_version@"
-#define WXBOT_MODULE_VERSION "@wxbot_module_version@"
+#define WXBOX_MAJOR_VERSION @wxbox_major_version@
+#define WXBOX_MINOR_VERSION @wxbox_minor_version@
+#define WXBOX_REVISION_NUMBER @wxbox_revision_number@
+
+#define WXBOT_MAJOR_VERSION @wxbot_major_version@
+#define WXBOT_MINOR_VERSION @wxbot_minor_version@
+#define WXBOT_REVISION_NUMBER @wxbot_revision_number@
+
+#define WXBOX_VERSION "@wxbox_major_version@.@wxbox_minor_version@.@wxbox_revision_number@"
+#define WXBOT_VERSION "@wxbot_major_version@.@wxbot_minor_version@.@wxbot_revision_number@"
 #define WXBOX_PLATFORM @os@
 #define WXBOX_CPU_ENDIAN @endian@
 #define WXBOX_CPU_FAMILY @cpu_family@
@@ -32,3 +39,4 @@
 #else
 #define WXBOX_PLATFORM_NAME ""
 #endif
+
