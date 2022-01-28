@@ -340,10 +340,9 @@ meson install -C build\release
 ```
 
 ​	最终会被打包到build\dist\release目录下，build\install是一个过度路径，给meson执行install。这个项目里别用DESTDIR或者--prefix来重新指定打包路径，这不会生效。
-
 ​	打包最终会生成四个文件，分别是wxbox主体的.tar.xz和.zip包（它们内容相同），还有symbol的.tar.xz和.zip包。
+​	另外别打包debug版本的，debug版有些运行时的依赖没有做处理。
 
-​	另外别打包debug版本的，debug版有些运行时的依赖没有做处理。	
 
 ## 运行环境
 
