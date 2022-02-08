@@ -81,6 +81,12 @@ namespace wxbox {
                 static std::string default_value() { return ""; }
             };
 
+            template<>
+            struct SafeYamlNodeDefaultValue<bool>
+            {
+                static bool default_value() { return false; }
+            };
+
 #define DefineSafeYamlNodeNumberDefaultValue(T)   \
     template<>                                    \
     struct SafeYamlNodeDefaultValue<T>            \

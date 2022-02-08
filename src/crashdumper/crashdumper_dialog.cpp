@@ -1,29 +1,34 @@
 #include "crashdumper_dialog.h"
 #include "ui_crashdumper_dialog.h"
 
-CrashReportDialog::CrashReportDialog(QWidget* parent)
-  : CrashReportDialog(parent, nullptr, nullptr)
+#define CRASH_DUMPER_NAME "CrashDumper"
+#define CRASH_DUMPER_TITLE "WxBox - " CRASH_DUMPER_NAME
+
+CrashReportDialog::CrashReportDialog(QWidget* xstyleParent)
+  : CrashReportDialog(xstyleParent, nullptr, nullptr)
 {
 }
 
-CrashReportDialog::CrashReportDialog(QWidget* parent, wb_coredump::PCrashDumperRequest request, PCrashDumpReport dumpReport)
-  : QDialog(parent)
-  , ui(new Ui::CrashReportDialog)
+CrashReportDialog::CrashReportDialog(QWidget* xstyleParent, wb_coredump::PCrashDumperRequest request, PCrashDumpReport dumpReport)
+  : XStyleWindow(CRASH_DUMPER_NAME, xstyleParent, false)
+  , ui(new Ui::CrashReportWidget)
   , request(request)
   , dumpReport(dumpReport)
 {
-    if (request) {
-        auto languagePath = wb_file::JoinPath(request->i18nPath, std::string(request->language) + ".qm");
-        if (wb_file::IsPathExists(languagePath)) {
-            if (translator.load(QString::fromLocal8Bit(languagePath.c_str()))) {
-                qApp->installTranslator(&translator);
-            }
-        }
-    }
+    // setup xstyle ui
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+    SetupXStyleUi(ui);
 
-    ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    // update title
+    SetWindowTitle(Translate(CRASH_DUMPER_TITLE));
 
+    // wxbox repo link
+    QLabel* link = new QLabel(Translate(R"(visit wxbox repository to submit the issue)") + R"( : <a href=)" WXBOX_REPOSITORY_URL R"(>wxbox gitee repo</a>)");
+    link->setObjectName("CrashDumper_link_label");
+    link->setOpenExternalLinks(true);
+    this->footerPanel->layout()->addWidget(link);
+
+    // information
     if (dumpReport) {
         ui->label_crash_program->setText(QString::fromLocal8Bit(dumpReport->crashProgram.c_str()));
         ui->label_process_bits->setText(dumpReport->is64Process ? "64-bits" : "32-bits");
@@ -34,11 +39,22 @@ CrashReportDialog::CrashReportDialog(QWidget* parent, wb_coredump::PCrashDumperR
         ui->label_module_path->setText(QString::fromLocal8Bit(dumpReport->crashModule.c_str()));
         ui->label_module_path->setToolTip(dumpReport->crashModule.c_str());
     }
+
+    QObject::connect(ui->button_open_dump_folder, &QPushButton::clicked, this, &CrashReportDialog::openDumpFolderInExplorer);
+    QObject::connect(ui->button_confirm, &QPushButton::clicked, this, &CrashReportDialog::confirm);
 }
 
 CrashReportDialog::~CrashReportDialog()
 {
     delete ui;
+}
+
+void CrashReportDialog::RetranslateUi()
+{
+    XStyleWindow::RetranslateUi();
+    if (this->bodyContainer) {
+        ui->retranslateUi(this->bodyContainer);
+    }
 }
 
 void CrashReportDialog::openDumpFolderInExplorer()
@@ -48,13 +64,11 @@ void CrashReportDialog::openDumpFolderInExplorer()
     }
 }
 
-void CrashReportDialog::accept()
+void CrashReportDialog::confirm()
 {
-    QDialog::accept();
-
-    if (!dumpReport || !ui->is_need_restart_program->isChecked()) {
-        return;
+    if (dumpReport && ui->is_need_restart_program->isChecked()) {
+        wb_process::StartProcess(dumpReport->crashProgramFullPath, false);
     }
 
-    wb_process::StartProcess(dumpReport->crashProgramFullPath, false);
+    close();
 }

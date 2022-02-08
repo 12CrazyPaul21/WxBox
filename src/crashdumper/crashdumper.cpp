@@ -295,7 +295,15 @@ static void ShowCrashReport(int argc, char* argv[], wb_coredump::PCrashDumperReq
         return;
     }
 
-    QApplication      app(argc, argv);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication app(argc, argv);
+
+    xstyle_manager.RegisterI18nFolder(request->i18nPath);
+    xstyle_manager.RegisterThemeFolder(request->themePath);
+    xstyle_manager.RegisterDefaultTheme(XSTYLE_DEFAULT_THEME_URL);
+    xstyle_manager.ChangeLanguage(request->language);
+    xstyle_manager.ChangeTheme(request->themeName);
+
     CrashReportDialog dialog(nullptr, request, dumpReport);
     dialog.show();
     app.exec();

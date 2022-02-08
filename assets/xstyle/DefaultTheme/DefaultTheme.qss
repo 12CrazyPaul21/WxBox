@@ -1,0 +1,90 @@
+// #XStyleWindowTheme#
+
+.xstylewindow {
+    qproperty-title_height: 50;
+    qproperty-footer_height: 20;
+    qproperty-title_button_width: 40;
+    qproperty-title_button_height: 40;
+    qproperty-reserve_border_width: 2;
+    qproperty-reserve_shadow_width: 6;
+    qproperty-shadow_color: black;
+    qproperty-border_radius: 4;
+    qproperty-window_fade_out_duration: 300;
+    qproperty-window_icon_url: ":/XStyleTheme/DefaultTheme/image/app.png";
+}
+
+.xstylewindow_container {
+    background: rgb(0, 0, 77);
+}
+
+.xstylewindow_title_panel {
+    background: rgb(31, 39, 100);
+}
+
+.xstylewindow_title_label {
+    font: normal bold 15px "Microsoft YaHei";
+    color: rgba(255, 255, 255, 200);
+}
+
+.xstylewindow_body_container {
+    background: rgba(31, 39, 100, 150);
+}
+
+.xstylewindow_footer_panel {
+    background: rgb(31, 39, 100);
+}
+
+.xstylewindow_title_button {
+    border: 1px solid transparent;
+    border-radius: 0px;
+}
+
+.xstylewindow_title_button:hover {
+    border: 1px solid black;
+}
+
+.xstylewindow_min_button {
+    qproperty-icon_url: ":/XStyleTheme/DefaultTheme/image/minimize.png";
+    qproperty-down_color: rgba(0, 102, 255, 220);
+}
+
+.xstylewindow_max_button {
+    qproperty-icon_url: ":/XStyleTheme/DefaultTheme/image/maximize.png";
+}
+
+.xstylewindow_close_button {
+    qproperty-icon_url: ":/XStyleTheme/DefaultTheme/image/close.png";
+    qproperty-hover_color: rgba(230, 0, 0, 220);
+    qproperty-down_color: rgba(230, 0, 0, 255);
+}
+
+.xstylemessagebox {
+    qproperty-footer_height: 10;
+    qproperty-information_icon_url: ":/XStyleTheme/DefaultTheme/image/information.png";
+    qproperty-warning_icon_url: ":/XStyleTheme/DefaultTheme/image/warning.png";
+    qproperty-error_icon_url: ":/XStyleTheme/DefaultTheme/image/error.png";
+}
+
+#CrashDumper_body_container QLabel {
+    color: rgba(200, 200, 200, 200);
+}
+
+#CrashDumper_body_container QCheckBox {
+    color: rgba(200, 200, 200, 200);
+}
+
+#CrashDumper_xstylewindow {
+    qproperty-footer_height: 30;
+}
+
+#CrashDumper_link_label {
+    color: white;
+}
+
+QMenu::right-arrow {
+    image: url(":/XStyleTheme/DefaultTheme/image/menu-right-arrow.png")
+}
+
+QMenu::right-arrow:selected {
+    image: url(":/XStyleTheme/DefaultTheme/image/menu-right-arrow-hover.png")
+}

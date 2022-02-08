@@ -1,12 +1,17 @@
 #include "about.h"
 #include "ui_about.h"
 
-AboutWxBoxDialog::AboutWxBoxDialog(QWidget* parent)
-  : QDialog(parent)
+#define ABOUT_WXBOX_NAME "AboutWxboxDialog"
+#define ABOUT_WXBOX_TITLE "About WxBox"
+
+AboutWxBoxDialog::AboutWxBoxDialog(QWidget* parent, bool deleteWhenClose)
+  : XStyleWindow(ABOUT_WXBOX_NAME, parent, deleteWhenClose)
   , ui(new Ui::AboutWxBoxDialog)
 {
-    ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    SetupXStyleUi(ui);
+    SetWindowTitle(Translate(ABOUT_WXBOX_TITLE));
+
+    QObject::connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &AboutWxBoxDialog::close);
 }
 
 AboutWxBoxDialog::~AboutWxBoxDialog()
@@ -14,13 +19,12 @@ AboutWxBoxDialog::~AboutWxBoxDialog()
     delete ui;
 }
 
-void AboutWxBoxDialog::changeEvent(QEvent* event)
+void AboutWxBoxDialog::RetranslateUi()
 {
-    switch (event->type()) {
-        case QEvent::LanguageChange:
-            ui->retranslateUi(this);
-            break;
-        default:
-            QWidget::changeEvent(event);
+    XStyleWindow::RetranslateUi();
+
+    if (ui) {
+        ui->retranslateUi(this);
+        SetWindowTitle(Translate(ABOUT_WXBOX_TITLE));
     }
 }

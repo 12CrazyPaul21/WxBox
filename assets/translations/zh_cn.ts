@@ -2,7 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN" sourcelanguage="zh_CN">
 <context>
-    <name>MainWindow</name>
+    <name>xstyle_meta</name>
+    <message>
+        <source>English</source>
+        <translation>简体中文</translation>
+    </message>
+    <message>
+        <source>Minimize</source>
+        <translation>最小化</translation>
+    </message>
+    <message>
+        <source>Maximize</source>
+        <translation>最大化</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <source>Ok</source>
+        <translation>确定</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>是</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>否</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+</context>
+<context>
+    <name>AppMenu</name>
+    <message>
+        <source>setting</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <source>visit repository</source>
+        <translation>访问仓库</translation>
+    </message>
+    <message>
+        <source>about wxbox</source>
+        <translation>关于WxBox</translation>
+    </message>
+    <message>
+        <source>exit wxbox</source>
+        <translation>退出WxBox</translation>
+    </message>
+</context>
+<context>
+    <name>MainWindow_xstylewindow</name>
     <message>
         <source>English</source>
         <translation>简体中文</translation>
@@ -36,7 +94,14 @@
     </message>
 </context>
 <context>
-    <name>CrashReportDialog</name>
+    <name>CrashDumper_xstylewindow</name>
+    <message>
+        <source>visit wxbox repository to submit the issue</source>
+        <translation>访问wxbox仓库提交issue</translation>
+    </message>
+</context>
+<context>
+    <name>CrashReportWidget</name>
     <message>
         <source>WxBox崩溃报告</source>
         <translation>WxBox崩溃报告</translation>
@@ -80,6 +145,13 @@
     <message>
         <source>模块路径：</source>
         <translation>模块路径：</translation>
+    </message>
+</context>
+<context>
+    <name>AboutWxboxDialog_xstylewindow</name>
+    <message>
+        <source>About WxBox</source>
+        <translation>关于WxBox</translation>
     </message>
 </context>
 </TS>

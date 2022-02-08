@@ -1,21 +1,22 @@
 #ifndef __ABOUT_WXBOX_DIALOG_H
 #define __ABOUT_WXBOX_DIALOG_H
 
-#include <QDialog>
+#include <xstyle/xstylewindow.h>
 
 namespace Ui {
     class AboutWxBoxDialog;
 }
 
-class AboutWxBoxDialog : public QDialog
+class AboutWxBoxDialog final : public XStyleWindow
 {
     Q_OBJECT
 
   public:
-    explicit AboutWxBoxDialog(QWidget* parent = nullptr);
+    explicit AboutWxBoxDialog(QWidget* parent = nullptr, bool deleteWhenClose = false);
     ~AboutWxBoxDialog();
 
-    virtual void changeEvent(QEvent* event) override;
+  protected:
+    void RetranslateUi();
 
   private:
     Ui::AboutWxBoxDialog* ui;

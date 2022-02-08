@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/wxbox">
+    <file>./wxbox_quick_ui.qml</file>
+  </qresource>
+</RCC>

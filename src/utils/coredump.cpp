@@ -15,6 +15,9 @@ static std::string g_dumperPath   = "";
 static std::string g_i18nPath = "";
 static std::string g_language = "zh_cn";
 
+static std::string g_themePath        = "";
+static std::string g_currentThemeName = "";
+
 //
 // Functions
 //
@@ -86,6 +89,10 @@ static bool ReportExceptionToDumper(EXCEPTION_POINTERS* exception)
     // record i18n info
     strcpy_s(report->i18nPath, g_i18nPath.c_str());
     strcpy_s(report->language, g_language.c_str());
+
+    // record theme info
+    strcpy_s(report->themePath, g_themePath.c_str());
+    strcpy_s(report->themeName, g_currentThemeName.c_str());
 
     // record crash timestamp
     strcpy_s(report->crashTimestamp, timestampDesc.c_str());
@@ -350,7 +357,7 @@ static bool RegisterUnhandledExceptionAutoDumper_Mac(bool disabledWhenDebug)
 
 #endif
 
-bool wxbox::util::coredump::RegisterUnhandledExceptionAutoDumper(const std::string& dumpPrefix, const std::string& dumpSinkPath, const std::string& dumperPath, const std::string& i18nPath, bool disabledWhenDebug)
+bool wxbox::util::coredump::RegisterUnhandledExceptionAutoDumper(const std::string& dumpPrefix, const std::string& dumpSinkPath, const std::string& dumperPath, const std::string& i18nPath, const std::string& themePath, bool disabledWhenDebug)
 {
     std::lock_guard<std::mutex> lock(g_mutexHandleUnhandleException);
     if (g_alreadyRegistered) {
@@ -368,6 +375,7 @@ bool wxbox::util::coredump::RegisterUnhandledExceptionAutoDumper(const std::stri
         g_dumpSinkPath = dumpSinkPath;
         g_dumperPath   = dumperPath;
         g_i18nPath     = i18nPath;
+        g_themePath    = themePath;
     }
 
     return g_alreadyRegistered;
@@ -377,6 +385,12 @@ void wxbox::util::coredump::ChangeDumperLanguage(const std::string& language)
 {
     std::lock_guard<std::mutex> lock(g_mutexHandleUnhandleException);
     g_language = language;
+}
+
+void wxbox::util::coredump::ChangeTheme(const std::string& themeName)
+{
+    std::lock_guard<std::mutex> lock(g_mutexHandleUnhandleException);
+    g_currentThemeName = themeName;
 }
 
 void wxbox::util::coredump::RegisterExceptionExitCallback(wb_coredump::ExceptionExitCallback callback)

@@ -8,11 +8,12 @@ crashdumper_qt_processed = qt5.preprocess(
     moc_headers: crashdumper_moc_headers,
     # moc_sources: crashdumper_moc_sources,
     ui_files: crashdumper_ui_files,
-    qresources: crashdumper_qt_resources
+    qresources: [crashdumper_qt_resources, xstyle_resources]
 )
 
 crashdumper_inc = [
     utils_inc,
+    xstyle_inc,
     configuration_inc
 ]
 
@@ -38,6 +39,6 @@ executable('crashdumper',
     install: true,
     install_dir: project_install_root,
     dependencies: [qt5_dep, yaml_cpp_dep],
-    cpp_args: [ignore_warnings],
-    link_with: [utils_static_lib]
+    cpp_args: [ignore_warnings, xstyle_flags],
+    link_with: [utils_static_lib, xstyle_static_lib]
 )

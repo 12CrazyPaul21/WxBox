@@ -4,24 +4,30 @@
 // AppSingleton
 //
 
-wb_process::AppSingleton::AppSingleton(const std::string& name, bool immediately)
+wb_process::AppSingleton::AppSingleton(const std::string& name, bool lock)
   : name(name)
+  , mutexName("")
+  , winIdSharedName("")
+  , winId(nullptr)
   , mutex(nullptr)
+  , shared(nullptr)
 {
-    if (!immediately) {
+    mutexName       = "____" + name + "_Singleton_Mutex____";
+    winIdSharedName = "____" + name + "_Singleton_WinId_Shared____";
+
+    if (!lock) {
         return;
     }
 
     if (!TryLock()) {
+        WakeApplicationWindow();
         std::exit(0);
     }
 }
 
 wb_process::AppSingleton::~AppSingleton()
 {
-    if (mutex) {
-        Release();
-    }
+    Release();
 }
 
 bool wb_process::AppSingleton::TryLock()
@@ -31,7 +37,7 @@ bool wb_process::AppSingleton::TryLock()
     }
 
 #if WXBOX_IN_WINDOWS_OS
-    auto hMutex = ::CreateMutexA(NULL, TRUE, name.c_str());
+    auto hMutex = ::CreateMutexA(NULL, TRUE, mutexName.c_str());
     if (!hMutex) {
         return false;
     }
@@ -48,18 +54,83 @@ bool wb_process::AppSingleton::TryLock()
     return false;
 #endif
 }
+
 void wb_process::AppSingleton::Release()
 {
-    if (!mutex) {
+#if WXBOX_IN_WINDOWS_OS
+    if (mutex) {
+        ::CloseHandle(mutex);
+        mutex = nullptr;
+    }
+
+    if (winId) {
+        ::UnmapViewOfFile(winId);
+        winId = nullptr;
+    }
+
+    if (shared) {
+        ::CloseHandle(shared);
+        shared = nullptr;
+    }
+
+#else
+    throw std::exception("AppSingleton::Release stub");
+#endif
+}
+
+void wb_process::AppSingleton::RecordWindowId(ucpulong_t id)
+{
+#if WXBOX_IN_WINDOWS_OS
+    shared = ::CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(*winId), winIdSharedName.c_str());
+    if (!shared) {
         return;
     }
 
-#if WXBOX_IN_WINDOWS_OS
-    ::CloseHandle(mutex);
-    mutex = nullptr;
+    winId = (ucpulong_t*)::MapViewOfFile(shared, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(*winId));
+    if (!winId) {
+        ::CloseHandle(shared);
+        shared = nullptr;
+        return;
+    }
+
+    *winId = id;
 #else
-    throw std::exception("AppSingleton::Release stub");
-    return;
+    throw std::exception("AppSingleton::RecordWindowId stub");
+#endif
+}
+
+void wb_process::AppSingleton::WakeApplicationWindow()
+{
+#if WXBOX_IN_WINDOWS_OS
+
+    static constexpr UINT WM_XSTYLE_WAKE_UP = WM_USER + 0x502;
+
+    // open file mapping
+    HANDLE hShared = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, winIdSharedName.c_str());
+    if (!hShared) {
+        return;
+    }
+
+    // map winId
+    ucpulong_t* pWinId = (ucpulong_t*)::MapViewOfFile(hShared, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(ucpulong_t));
+    if (!pWinId) {
+        ::CloseHandle(hShared);
+        return;
+    }
+
+    // get winId
+    HWND hWnd = (HWND)*pWinId;
+    ::UnmapViewOfFile(pWinId);
+    ::CloseHandle(hShared);
+
+    // wake singleton application window
+    // ShowWindow(hWnd, SW_SHOWNORMAL);
+    // SetActiveWindow(hWnd);
+    // SetForegroundWindow(hWnd);
+    PostMessageA(hWnd, WM_XSTYLE_WAKE_UP, 0, 0);
+
+#else
+    throw std::exception("AppSingleton::WakeApplicationWindow stub");
 #endif
 }
 

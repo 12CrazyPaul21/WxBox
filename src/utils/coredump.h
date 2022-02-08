@@ -15,8 +15,9 @@ namespace wxbox {
             // Function
             //
 
-            bool RegisterUnhandledExceptionAutoDumper(const std::string& dumpPrefix, const std::string& dumpSinkPath, const std::string& dumperPath, const std::string& i18nPath, bool disabledWhenDebug = true);
+            bool RegisterUnhandledExceptionAutoDumper(const std::string& dumpPrefix, const std::string& dumpSinkPath, const std::string& dumperPath, const std::string& i18nPath, const std::string& themePath, bool disabledWhenDebug = true);
             void ChangeDumperLanguage(const std::string& language);
+            void ChangeTheme(const std::string& themeName);
             void RegisterExceptionExitCallback(ExceptionExitCallback callback);
 
 #if WXBOX_IN_WINDOWS_OS
@@ -38,6 +39,9 @@ namespace wxbox {
 
                 char i18nPath[MAX_PATH + 1];
                 char language[MAX_PATH + 1];
+
+                char themePath[MAX_PATH + 1];
+                char themeName[MAX_PATH + 1];
 
                 char crashTimestamp[MAX_PATH + 1];
                 char crashDate[MAX_PATH + 1];

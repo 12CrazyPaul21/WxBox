@@ -18,6 +18,7 @@ namespace wxbox {
             typedef HANDLE  THREAD_HANDLE;
             typedef HMODULE MODULE_HANDLE;
             typedef HANDLE  MUTEX_HANDLE;
+            typedef HANDLE  SHARED_HANDLE;
 #elif WXBOX_IN_MAC_OS
             /*
 			typedef ucpulong_t WIN_HANDLE;
@@ -32,6 +33,7 @@ namespace wxbox {
 			typedef ucpulong_t THREAD_HANDLE;
 			typedef ucpulong_t MODULE_HANDLE;
 			typedef ucpulong_t MUTEX_HANDLE;
+			typedef ucpulong_t SHARED_HANDLE;
 			*/
 #endif
 
@@ -79,15 +81,22 @@ namespace wxbox {
                 AppSingleton() = delete;
 
               public:
-                AppSingleton(const std::string& name, bool immediately = false);
+                AppSingleton(const std::string& name, bool lock = false);
                 ~AppSingleton();
 
                 bool TryLock();
                 void Release();
 
+                void RecordWindowId(ucpulong_t id);
+                void WakeApplicationWindow();
+
               private:
-                std::string  name;
-                MUTEX_HANDLE mutex;
+                std::string   name;
+                std::string   mutexName;
+                std::string   winIdSharedName;
+                ucpulong_t*   winId;
+                MUTEX_HANDLE  mutex;
+                SHARED_HANDLE shared;
             };
 
             //

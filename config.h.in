@@ -1,3 +1,5 @@
+#define WXBOX_REPOSITORY_URL "https://gitee.com/phantom27/wxbox"
+
 #define WXBOX_UNSUPPORT_OS 0
 #define WXBOX_WINDOWS_OS 1
 #define WXBOX_MAC_OS 2

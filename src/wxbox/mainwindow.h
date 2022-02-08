@@ -10,95 +10,105 @@
 #include <QAtomicInteger>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QCheckBox>
 #include <QTimer>
+#include <QMenu>
+#include <QDesktopServices>
+#include <QSystemTrayIcon>
 
 #undef signals
 #include <utils/common.h>
 #define signals Q_SIGNALS
 
-#include "app_log.hpp"
-#include "app_config.hpp"
-#include "wxbox_server.hpp"
+#include <xstyle/xstylewindow.h>
+#include <xstyle/xstylemessagebox.h>
+#include <xstyle/xstylemenu.h>
 
-#include "about.h"
+#ifdef WXBOX_XSTYLE_QUICK
+#include <xstyle/quick/qtquick_xstylewindow.h>
+#endif
+
+#include <app_log.hpp>
+#include <app_config.hpp>
+#include <wxbox_controller.h>
+
+#include <about.h>
 
 namespace Ui {
-    class MainWindow;
+    class MainWindowBody;
 }
 
-using wxbox::WxBoxServerStatus;
+#ifdef WXBOX_XSTYLE_QUICK
+#define XSTYLE_WINDOW_CLASS XStyleQuickWindow
+#define WXBOX_QUICK_UI_URL "qrc:/wxbox/wxbox_quick_ui.qml"
+#else
+#define XSTYLE_WINDOW_CLASS XStyleWindow
+#endif
 
-class MainWindow : public QMainWindow
+class MainWindow final : public XSTYLE_WINDOW_CLASS
 {
+    friend class WxBoxController;
+
     Q_OBJECT
 
   public:
-    //
-    // Constructor
-    //
-
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    //
-    // Events
-    //
-
-    virtual void changeEvent(QEvent* event) override;
-    virtual void showEvent(QShowEvent* event) override;
-    virtual void closeEvent(QCloseEvent* event) override;
-
-    //
-    // Public Methods
-    //
-
-    bool                                             checkSystemVersionSupported();
-    std::vector<std::pair<std::string, std::string>> i18ns();
-    void                                             changeLanguage(const std::string& language);
-    void                                             startWxBoxServer();
-    void                                             stopWxBoxServer();
+    bool CheckSystemVersionSupported();
 
   private:
-    //
-    // Private Methods
-    //
+    virtual void CompleteShow() override
+    {
+        if (!inited) {
+            inited = InitWxBox();
+        }
+    }
 
-    void ignoreForClose();
-    void readyForClose(const bool canCloseWhenZero = true);
+    virtual bool BeforeClose() override
+    {
+        return DeinitWxBox();
+    }
 
-    //
-    // WxBoxServer Wrapper Request Methods
-    //
+    virtual void RetranslateUi() override
+    {
+        XSTYLE_WINDOW_CLASS::RetranslateUi();
+        auto language              = xstyle_manager.CurrentLanguage().toStdString();
+        config[WXBOX_LANGUAGE_KEY] = language;
+        wb_coredump::ChangeDumperLanguage(language);
+    }
 
-    void RequestProfile(wb_process::PID clientPID);
+    virtual void AfterThemeChanged(const QString& themeName) override
+    {
+        auto theme                   = themeName.toStdString();
+        config[WXBOX_THEME_NAME_KEY] = theme;
+        wb_coredump::ChangeTheme(theme);
+    }
 
-    //
-    // WxBoxServer Response Handler
-    //
+    virtual void TurnCloseIsMinimizeToTray(bool toTray) override
+    {
+        XSTYLE_WINDOW_CLASS::TurnCloseIsMinimizeToTray(toTray);
+        if (config.close_is_minimize_to_tray() != toTray) {
+            config[WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY] = toTray;
+        }
+        qApp->setQuitOnLastWindowClosed(!toTray);
+    }
 
-    void ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response);
-
-  signals:
-    void PushMessageAsync(wxbox::WxBoxMessage message);
-
-  public slots:
-    void InitWxBox();
-    void DeinitWxBox();
-    void OpenAboutDialog();
-    void WxBoxServerStatusChange(const WxBoxServerStatus oldStatus, const WxBoxServerStatus newStatus);
-    void WxBoxServerEvent(wxbox::WxBoxMessage message);
-    void triggerTest();
+    void RegisterEvent();
+    void InitAppMenu();
+    void InitAppTray();
+    bool InitWxBox();
+    bool DeinitWxBox();
 
   private:
-    bool                    init;
-    bool                    wantToClose;
-    QAtomicInteger<int32_t> readyForCloseCounter;
+    Ui::MainWindowBody* ui;
+    AppConfig&          config;
 
-    Ui::MainWindow*          ui;
-    AppConfig&               config;
-    QTranslator              translator;
-    AboutWxBoxDialog         aboutDialog;
-    wxbox::WxBoxServerWorker worker;
+    AboutWxBoxDialog aboutDialog;
+    XStyleMenu       appMenu;
+    QSystemTrayIcon  appTray;
+
+    WxBoxController controller;
 };
 
 #endif  // __MAINWINDOW_H

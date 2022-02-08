@@ -25,6 +25,8 @@ assets_root = join_paths(proj_root, 'assets')
 wxbot_assets_root = join_paths(assets_root, 'wxbot')
 crashdumper_assets_root = join_paths(assets_root, 'crashdumper')
 interact_assets_root = join_paths(assets_root, 'interact')
+xstyle_assets_root = join_paths(assets_root, 'xstyle')
+xstyle_quick_assets_root = join_paths(xstyle_assets_root, 'quick')
 
 wxbox_root = join_paths(source_root, 'wxbox')
 wxbot_root = join_paths(source_root, 'wxbot')
@@ -32,6 +34,8 @@ utils_root = join_paths(source_root, 'utils')
 crashdumper_root = join_paths(source_root, 'crashdumper')
 plugin_root = join_paths(source_root, 'plugin')
 interact_root = join_paths(source_root, 'interact')
+xstyle_root = join_paths(source_root, 'xstyle')
+xstyle_quick_root = join_paths(xstyle_root, 'quick')
 
 #
 # install info
@@ -113,6 +117,8 @@ configuration_inc = include_directories('.')
 all_default_config = {
     '/wxbox/language': true,
     '/wxbox/i18n/path': true,
+    '/wxbox/theme/path': true,
+    '/wxbox/theme/name': true,
     '/wxbox/plugins_relpath': true,
     '/wxbox/coredump_path': true,
     '/wxbox/coredump_prefix': true,
@@ -123,7 +129,8 @@ all_default_config = {
     '/wxbox/log/max_single_file_size': false,
     '/wxbox/log/auto_flush_interval_sec': false,
     '/wxbox/wechat_installation_dir': true,
-    '/wxbox/wechat_multi_bloxing_quota': false
+    '/wxbox/wechat_multi_bloxing_quota': false,
+    '/wxbox/close_is_minimize_to_tray': false
 }
 
 config_macro_flags = []
@@ -196,7 +203,11 @@ endif
 
 # qt
 qt5 = import('qt5')
-qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'Widgets'], main: true)
+qt5_modules = ['Core', 'Gui', 'Widgets', 'winextras']
+if get_option('use_wxbox_xstyle_qml')
+    qt5_modules += ['QuickWidgets', 'Quick', 'qml', 'QuickControls2']
+endif
+qt5_dep = dependency('qt5', modules: qt5_modules, main: true)
 
 # spdlog
 spdlog_dep = dependency('spdlog', required: false)
@@ -362,6 +373,51 @@ plugin_static_lib = static_library('plugin',
                         cpp_args: [ignore_warnings])
 
 #
+# xstyle
+#
+
+xstyle_flags = []
+
+xstyle_inc = [
+    source_root,
+    join_paths(proj_root, 'thirdparty')
+]
+
+xstyle_src = files([
+    join_paths(xstyle_root, 'xstyle.cpp'),
+    join_paths(xstyle_root, 'xstylewindow.cpp'),
+    join_paths(xstyle_root, 'xstylemessagebox.cpp'),
+    join_paths(xstyle_root, 'xstylemenu.cpp')
+])
+
+xstyle_moc_headers = files([
+    join_paths(xstyle_root, 'xstyle.h'),
+    join_paths(xstyle_root, 'xstylewindow.h'),
+    join_paths(xstyle_root, 'xstylebutton.hpp'),
+    join_paths(xstyle_root, 'xstylemessagebox.h'),
+    join_paths(xstyle_root, 'xstylemenu.h')
+])
+
+xstyle_resources = files([xstyle_assets_root + '/DefaultTheme/DefaultTheme.qrc'])
+
+if get_option('use_wxbox_xstyle_qml')
+    xstyle_src += files(join_paths(xstyle_quick_root, 'qtquick_xstylewindow.cpp'))
+    xstyle_moc_headers += files(join_paths(xstyle_quick_root, 'qtquick_xstylewindow.h'))
+    xstyle_resources = files([assets_root + '/wxbox_quick_ui.qrc', xstyle_quick_assets_root + '/plugin/XStyleQuickPlugin.qrc'])
+    xstyle_flags += '-DWXBOX_XSTYLE_QUICK'
+endif
+
+xstyle_qt_processed = qt5.preprocess(
+    moc_headers: xstyle_moc_headers
+)
+
+xstyle_static_lib = static_library('xstyle',
+                        sources: [xstyle_src, xstyle_qt_processed],
+                        include_directories: [xstyle_inc, configuration_inc],
+                        dependencies: [qt5_dep],
+                        cpp_args: [ignore_warnings, xstyle_flags])
+
+#
 # WxBox
 #
 
@@ -413,6 +469,7 @@ else
 endif
 
 install_data(['assets/translations/zh_cn.qm', 'assets/translations/en.qm'], install_dir: join_paths(project_install_root, 'i18n'))
+install_data(['assets/themes/GreenTheme.rcc'], install_dir: join_paths(project_install_root, 'themes'))
 install_subdir('plugins', install_dir: project_install_root)
 install_subdir('conf', install_dir: project_install_root)
 

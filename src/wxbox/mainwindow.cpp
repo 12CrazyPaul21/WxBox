@@ -1,34 +1,28 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-static wb_process::PID last_client_pid = 0;
-static uint64_t        total_clients   = 0;
-static uint64_t        current_clients = 0;
+#define WXBOX_MAIN_WINDOW_NAME "MainWindow"
+#define WXBOX_MAIN_WINDOW_TITLE "WxBox"
+#define WXBOX_ICON_URL ":/icon/app.ico"
 
 MainWindow::MainWindow(QWidget* parent)
-  : QMainWindow(parent)
-  , aboutDialog(this)
-  , ui(new Ui::MainWindow)
+  : XSTYLE_WINDOW_CLASS(WXBOX_MAIN_WINDOW_NAME, parent, false)
+  , ui(new Ui::MainWindowBody)
   , config(AppConfig::singleton())
-  , init(false)
-  , wantToClose(false)
-  , readyForCloseCounter(0)
+  , aboutDialog(this)
+  , appMenu("AppMenu", this)
+  , appTray(this)
+  , controller(this)
 {
-    changeLanguage(config.language());
-    ui->setupUi(this);
+    // setup xstyle ui
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+    SetupXStyleUi(ui);
+    SetWindowTitle(Translate(WXBOX_MAIN_WINDOW_TITLE));
 
-    // set thread name
-    wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxMain");
-
-    // change style
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
-
-    // ---------------------------------------
-    //           trigger to test
-    // ---------------------------------------
-
-    auto button = new QPushButton("test", ui->centralWidget);
-    connect(button, SIGNAL(clicked()), this, SLOT(triggerTest()));
+#ifdef WXBOX_XSTYLE_QUICK
+    // setup xstyle quick ui
+    SetupXStyleQuick(ui->quickWidget, WXBOX_QUICK_UI_URL);
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -36,242 +30,94 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//
-// Events
-//
-
-void MainWindow::changeEvent(QEvent* event)
+bool MainWindow::CheckSystemVersionSupported()
 {
-    switch (event->type()) {
-        case QEvent::LanguageChange:
-            ui->retranslateUi(this);
-            break;
-        default:
-            QMainWindow::changeEvent(event);
+    if (controller.CheckSystemVersionSupported()) {
+        return true;
     }
-}
-
-void MainWindow::showEvent(QShowEvent* event)
-{
-    QMainWindow::showEvent(event);
-
-    if (!init) {
-        init = true;
-        QTimer::singleShot(10, this, SLOT(InitWxBox()));
-    }
-}
-
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-    if (init) {
-        emit DeinitWxBox();
-        init = false;
-    }
-
-    wantToClose = true;
-    readyForCloseCounter <= 0 ? event->accept() : event->ignore();
-}
-
-//
-// Slots
-//
-
-void MainWindow::InitWxBox()
-{
-    startWxBoxServer();
-}
-
-void MainWindow::DeinitWxBox()
-{
-    stopWxBoxServer();
-}
-
-void MainWindow::OpenAboutDialog()
-{
-    aboutDialog.show();
-}
-
-void MainWindow::WxBoxServerStatusChange(const WxBoxServerStatus oldStatus, const WxBoxServerStatus newStatus)
-{
-    WXBOX_UNREF(oldStatus);
-
-    switch (newStatus) {
-        case WxBoxServerStatus::Started:
-            break;
-        case WxBoxServerStatus::StartServiceFailed:
-            readyForClose(false);
-            QTimer::singleShot(100, this, [&]() {
-                QMessageBox::information(this, "Warning!!!", "start WxBoxServer failed, close application now...");
-                emit this->close();
-            });
-            break;
-        case WxBoxServerStatus::Interrupted:
-        case WxBoxServerStatus::Stopped:
-            readyForClose();
-            break;
-    }
-}
-
-void MainWindow::WxBoxServerEvent(wxbox::WxBoxMessage message)
-{
-    switch (message.type) {
-        case wxbox::WxBoxMessageType::WxBoxClientConnected:
-            last_client_pid = message.pid;
-            total_clients++;
-            current_clients++;
-            setWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
-            break;
-        case wxbox::WxBoxMessageType::WxBoxClientDone:
-            last_client_pid = 0;
-            current_clients--;
-            setWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
-            break;
-        case wxbox::WxBoxMessageType::WxBotRequestOrResponse: {
-            ProfileResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_profileresponse());
-            break;
-        }
-    }
-}
-
-//
-// Methods
-//
-
-bool MainWindow::checkSystemVersionSupported()
-{
-    bool isSupported = false;
 
 #if WXBOX_IN_WINDOWS_OS
-    static QString msg = tr("Only systems above Windows 7 are supported.");
-    isSupported        = QOperatingSystemVersion::current() >= QOperatingSystemVersion::Windows7;
+    static QString msg = Translate("Only systems above Windows 7 are supported.");
 #else
-    static QString msg = tr("Only systems above Mac OS Sierra are supported.");
-    isSupported        = QOperatingSystemVersion::current() >= QOperatingSystemVersion::MacOSSierra;
+    static QString msg = Translate("Only systems above Mac OS Sierra are supported.");
 #endif
 
-    if (!isSupported) {
-        QMessageBox::information(this, tr(""), msg);
-    }
-
-    return isSupported;
+    xstyle::information(nullptr, Translate("WxBox"), msg);
+    return false;
 }
 
-std::vector<std::pair<std::string, std::string>> MainWindow::i18ns()
+void MainWindow::RegisterEvent()
 {
-    std::vector<std::pair<std::string, std::string>> result;
-    auto                                             i18nPath = config.i18n_path();
+    QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
+    QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
+        xstyle::warning(this, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        xstyle_manager.ChangeLanguage("en");
+        xstyle_manager.ChangeTheme("");
+    });
+    QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
+        xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
+        xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
+        char* e = nullptr;
+        *e      = 0;
+    });
+    QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
+        xstyle::information(this, "information", "change to chinese and GreenTheme");
+        xstyle_manager.ChangeLanguage("zh_cn");
+        xstyle_manager.ChangeTheme("GreenTheme");
+    });
 
-    if (!wb_file::IsDirectory(i18nPath)) {
-        return result;
-    }
+    ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());
+    QObject::connect(ui->closeIsMinimizeTray, &QCheckBox::stateChanged, this, [this](int state) {
+        TurnCloseIsMinimizeToTray(state == Qt::Checked);
+    });
+}
 
-    for (auto qm : wb_file::ListFilesInDirectoryWithExt(i18nPath, "qm")) {
-        QTranslator trans;
-        if (trans.load(wb_file::JoinPath(config.i18n_path(), qm).c_str())) {
-            result.emplace_back(std::make_pair<std::string, std::string>(wb_file::ExtractFileNameAndExt(qm).first,
-                                                                         trans.translate("MainWindow", "English").toUtf8().toStdString()));
+void MainWindow::InitAppMenu()
+{
+    appMenu.pushAction("setting");
+    appMenu.pushSeparator();
+    appMenu.pushAction("visit repository", this, std::bind(&QDesktopServices::openUrl, QUrl(WXBOX_REPOSITORY_URL)));
+    appMenu.pushAction("about wxbox", &aboutDialog, std::bind(&AboutWxBoxDialog::showApplicationModal, &aboutDialog));
+    appMenu.pushSeparator();
+    appMenu.pushAction("exit wxbox", this, std::bind(&MainWindow::quit, this));
+}
+
+void MainWindow::InitAppTray()
+{
+    appTray.setContextMenu(&appMenu);
+    appTray.setToolTip(WXBOX_MAIN_WINDOW_TITLE);
+    appTray.setIcon(QIcon(WXBOX_ICON_URL));
+    appTray.show();
+
+    connect(&appTray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
+        if (reason == QSystemTrayIcon::ActivationReason::DoubleClick) {
+            show();
         }
-    }
-
-    return result;
+    });
 }
 
-void MainWindow::changeLanguage(const std::string& language)
+bool MainWindow::InitWxBox()
 {
-    wb_coredump::ChangeDumperLanguage(language);
+    // press close button is minimize to tray not quit
+    TurnCloseIsMinimizeToTray(config.close_is_minimize_to_tray());
 
-    auto languagePath = wb_file::JoinPath(config.i18n_path(), language + ".qm");
-    if (!wb_file::IsPathExists(languagePath)) {
-        return;
-    }
+    // init app menu
+    InitAppMenu();
 
-    if (translator.load(QString::fromLocal8Bit(languagePath.c_str()))) {
-        qApp->installTranslator(&translator);
-    }
+    // init app tray
+    InitAppTray();
+
+    // register event
+    RegisterEvent();
+
+    // start wxbox server
+    controller.StartWxBoxServer();
+    return true;
 }
 
-void MainWindow::ignoreForClose()
+bool MainWindow::DeinitWxBox()
 {
-    readyForCloseCounter.ref();
-}
-
-void MainWindow::readyForClose(const bool canCloseWhenZero)
-{
-    readyForCloseCounter.deref();
-    if (wantToClose && readyForCloseCounter <= 0 && canCloseWhenZero) {
-        emit this->close();
-    }
-}
-
-void MainWindow::startWxBoxServer()
-{
-    if (worker.isRunning()) {
-        return;
-    }
-
-    wxbox::WxBoxServer* server = wxbox::WxBoxServer::NewWxBoxServer();
-
-    // connect slots
-    QObject::connect(&worker, SIGNAL(finished()), server, SLOT(deleteLater()));
-    QObject::connect(&worker, SIGNAL(shutdown()), server, SLOT(shutdown()), Qt::DirectConnection);
-    QObject::connect(server, &wxbox::WxBoxServer::WxBoxServerStatusChange, this, &MainWindow::WxBoxServerStatusChange, Qt::QueuedConnection);
-    QObject::connect(this, &MainWindow::PushMessageAsync, server, &wxbox::WxBoxServer::PushMessageAsync, Qt::DirectConnection);
-    QObject::connect(server, &wxbox::WxBoxServer::WxBoxServerEvent, this, &MainWindow::WxBoxServerEvent, Qt::QueuedConnection);
-
-    // start WxBoxServer
-    worker.startServer(server);
-
-    // prevent the window from being closed before the service ends
-    ignoreForClose();
-
-    spdlog::info("WxBox Server is running");
-}
-
-void MainWindow::stopWxBoxServer()
-{
-    if (worker.isRunning()) {
-        worker.stopServer();
-    }
-
-    spdlog::info("WxBox Server is already stop");
-}
-
-//
-// WxBoxServer Wrapper Request Methods
-//
-
-void MainWindow::RequestProfile(wb_process::PID clientPID)
-{
-    if (!clientPID) {
-        return;
-    }
-
-    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
-    msg.pid = clientPID;
-    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::PROFILE_REQUEST);
-    PushMessageAsync(std::move(msg));
-}
-
-//
-// WxBoxServer Response Handler
-//
-
-void MainWindow::ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response)
-{
-    std::string wxid = response->wxid();
-    last_client_pid  = clientPID;
-    QMessageBox::information(this, "tips", QString("profile<%1> : %2").arg(last_client_pid).arg(QString::fromStdString(wxid.c_str())));
-}
-
-// ---------------------------------------
-//           trigger to test
-// ---------------------------------------
-
-[[deprecated("just a test trigger")]] void MainWindow::triggerTest()
-{
-    SPDLOG_DEBUG("trigger test button");
-
-    char* p = nullptr;
-    *p      = 2;
-    RequestProfile(last_client_pid);
+    // stop wxbox server
+    controller.StopWxBoxServer();
+    return true;
 }

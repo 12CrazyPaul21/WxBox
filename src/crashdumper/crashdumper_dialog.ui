@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CrashReportDialog</class>
- <widget class="QDialog" name="CrashReportDialog">
+ <class>CrashReportWidget</class>
+ <widget class="QWidget" name="CrashReportWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -31,13 +31,6 @@
   <property name="windowTitle">
    <string>WxBox崩溃报告</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="../../assets/crashdumper/crashdumper.qrc">
-    <normaloff>:/icon/crashdumper.ico</normaloff>:/icon/crashdumper.ico</iconset>
-  </property>
-  <property name="windowOpacity">
-   <double>1.000000000000000</double>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="5,1">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -59,7 +52,7 @@
        <item>
         <widget class="QLabel" name="label_crash_program">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
         </widget>
        </item>
@@ -77,7 +70,7 @@
        <item>
         <widget class="QLabel" name="label_process_bits">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
         </widget>
        </item>
@@ -95,7 +88,7 @@
        <item>
         <widget class="QLabel" name="label_crash_date">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
         </widget>
        </item>
@@ -113,7 +106,7 @@
        <item>
         <widget class="QLabel" name="label_error_type">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
         </widget>
        </item>
@@ -131,7 +124,7 @@
        <item>
         <widget class="QLabel" name="label_crash_module">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
         </widget>
        </item>
@@ -152,7 +145,7 @@
        <item>
         <widget class="QLabel" name="label_crash_address">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
         </widget>
        </item>
@@ -170,7 +163,7 @@
        <item>
         <widget class="QLabel" name="label_module_path">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
         </widget>
        </item>
@@ -214,40 +207,7 @@
  <resources>
   <include location="../../assets/crashdumper/crashdumper.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>button_confirm</sender>
-   <signal>clicked()</signal>
-   <receiver>CrashReportDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>360</x>
-     <y>210</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>219</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>button_open_dump_folder</sender>
-   <signal>clicked()</signal>
-   <receiver>CrashReportDialog</receiver>
-   <slot>openDumpFolderInExplorer()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>210</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>219</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>openDumpFolderInExplorer()</slot>
  </slots>

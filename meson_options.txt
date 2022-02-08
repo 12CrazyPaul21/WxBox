@@ -1,8 +1,12 @@
+option('use_wxbox_xstyle_qml', type: 'boolean', value: false)
+
 option('disable_wxbox_utils_test', type: 'boolean', value: false)
 option('disable_wxbox_plugin_test', type: 'boolean', value: false)
 
 option('default_wxbox_language', type: 'string', value: 'zh_cn')
 option('default_wxbox_i18n_path', type: 'string', value: 'i18n')
+option('default_wxbox_theme_path', type: 'string', value: 'themes')
+option('default_wxbox_theme_name', type: 'string', value: '')
 option('default_wxbox_plugins_relpath', type: 'string', value: 'plugins')
 option('default_wxbox_coredump_path', type: 'string', value: 'coredumps')
 option('default_wxbox_coredump_prefix', type: 'string', value: 'WxBox')
@@ -14,3 +18,4 @@ option('default_wxbox_log_max_single_file_size', type: 'integer', value: 2097152
 option('default_wxbox_log_auto_flush_interval_sec', type: 'integer', value: 120)
 option('default_wxbox_wechat_installation_dir', type: 'string', value: '')
 option('default_wxbox_wechat_multi_bloxing_quota', type: 'integer', value: -1)
+option('default_wxbox_close_is_minimize_to_tray', type: 'boolean', value: true)

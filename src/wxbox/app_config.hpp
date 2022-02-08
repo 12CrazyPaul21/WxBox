@@ -3,6 +3,8 @@
 
 REGISTER_CONFIG_KEY(WXBOX_LANGUAGE);
 REGISTER_CONFIG_KEY(WXBOX_I18N_PATH);
+REGISTER_CONFIG_KEY(WXBOX_THEME_PATH);
+REGISTER_CONFIG_KEY(WXBOX_THEME_NAME);
 REGISTER_CONFIG_KEY(WXBOX_PLUGINS_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PATH);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PREFIX);
@@ -14,6 +16,7 @@ REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
 REGISTER_CONFIG_KEY(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_INSTALLATION_DIR);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
+REGISTER_CONFIG_KEY(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 
 #if WXBOX_IN_WINDOWS_OS
 static constexpr auto DUMPER_EXT_NAME = ".exe";
@@ -49,6 +52,8 @@ class AppConfig final : public wb_config::Config
 
         CHECK_DEFAULT_CONFIG(WXBOX_LANGUAGE);
         CHECK_DEFAULT_CONFIG(WXBOX_I18N_PATH);
+        CHECK_DEFAULT_CONFIG(WXBOX_THEME_PATH);
+        CHECK_DEFAULT_CONFIG(WXBOX_THEME_NAME);
         CHECK_DEFAULT_CONFIG(WXBOX_PLUGINS_RELPATH);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PATH);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PREFIX);
@@ -60,6 +65,7 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_INSTALLATION_DIR);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
+        CHECK_DEFAULT_CONFIG(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 
         return value;
     }
@@ -90,6 +96,34 @@ class AppConfig final : public wb_config::Config
 #endif
 
         return i18nPath;
+    }
+
+    //
+    // theme
+    //
+
+    std::string theme_path()
+    {
+        auto themeSubPath = this->operator[](WXBOX_THEME_PATH_KEY).safe_as<std::string>();
+        if (themeSubPath.empty()) {
+            return "";
+        }
+
+        auto rootPath  = wxbox::util::file::GetProcessRootPath();
+        auto themePath = wxbox::util::file::JoinPath(rootPath, themeSubPath);
+
+#if _DEBUG
+        if (!wb_file::IsPathExists(themePath)) {
+            themePath = wb_file::JoinPath(rootPath, "/../../../../assets/themes");
+        }
+#endif
+
+        return themePath;
+    }
+
+    std::string current_theme_name()
+    {
+        return this->operator[](WXBOX_THEME_NAME_KEY).safe_as<std::string>();
     }
 
     //
@@ -180,6 +214,15 @@ class AppConfig final : public wb_config::Config
     std::string log_pattern() const
     {
         return "[thread %t] %+";
+    }
+
+    //
+    // wxbox
+    //
+
+    bool close_is_minimize_to_tray() const
+    {
+        return this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY).safe_as<bool>();
     }
 
     //
