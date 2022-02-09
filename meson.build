@@ -129,6 +129,7 @@ all_default_config = {
     '/wxbox/log/max_single_file_size': false,
     '/wxbox/log/auto_flush_interval_sec': false,
     '/wxbox/wechat_installation_dir': true,
+    '/wxbox/wechat_feature_relpath': true,
     '/wxbox/wechat_multi_bloxing_quota': false,
     '/wxbox/close_is_minimize_to_tray': false
 }
@@ -483,6 +484,6 @@ endif
 install_data(['assets/translations/zh_cn.qm', 'assets/translations/en.qm'], install_dir: join_paths(project_install_root, 'i18n'))
 install_data(['assets/themes/GreenTheme.rcc'], install_dir: join_paths(project_install_root, 'themes'))
 install_subdir('plugins', install_dir: project_install_root)
-install_subdir('conf', install_dir: project_install_root)
+install_subdir('features', install_dir: project_install_root)
 
 meson.add_install_script(project_install_script, 'wxbox.exe', build_type, wxbox_project_version, zlib_bin, openssl_bin_root)

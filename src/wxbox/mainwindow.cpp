@@ -66,6 +66,7 @@ void MainWindow::RegisterEvent()
         /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
         xstyle_manager.ChangeLanguage("zh_cn");
         xstyle_manager.ChangeTheme("GreenTheme");*/
+        xstyle::information(this, "feature path", config.features_meta_file_path().c_str());
         downloader.cancel();
     });
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {

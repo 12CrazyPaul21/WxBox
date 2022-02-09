@@ -15,6 +15,7 @@ REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_ROTATING_FILE_COUNT);
 REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
 REGISTER_CONFIG_KEY(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_INSTALLATION_DIR);
+REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
 REGISTER_CONFIG_KEY(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 
@@ -64,6 +65,7 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
         CHECK_DEFAULT_CONFIG(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_INSTALLATION_DIR);
+        CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_RELPATH);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
         CHECK_DEFAULT_CONFIG(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 
@@ -223,6 +225,34 @@ class AppConfig final : public wb_config::Config
     bool close_is_minimize_to_tray() const
     {
         return this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY).safe_as<bool>();
+    }
+
+    //
+    // feature
+    //
+
+    std::string features_path() const
+    {
+        auto featuresRealPath = this->operator[](WXBOX_WECHAT_FEATURE_RELPATH_KEY).safe_as<std::string>();
+        if (featuresRealPath.empty()) {
+            return "";
+        }
+
+        auto rootPath     = wxbox::util::file::GetProcessRootPath();
+        auto featuresPath = wxbox::util::file::JoinPath(rootPath, featuresRealPath);
+
+#if _DEBUG
+        if (!wb_file::IsPathExists(featuresPath)) {
+            featuresPath = wb_file::JoinPath(rootPath, "/../../../../features");
+        }
+#endif
+
+        return featuresPath;
+    }
+
+    std::string features_meta_file_path() const
+    {
+        return wb_file::JoinPath(features_path(), "features.yml");
     }
 
     //

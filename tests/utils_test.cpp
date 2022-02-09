@@ -119,7 +119,7 @@ TEST(wxbox_utils, feature)
     auto processPath = wxbox::util::file::GetProcessRootPath();
     EXPECT_NE("", processPath);
 
-    auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
+    auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../features/features.yml");
     EXPECT_NE("", processPath);
     spdlog::info("feature conf path : {}", featConfPath);
 
@@ -236,7 +236,7 @@ TEST(wxbox_utils, wx)
     // unwind feature
     wb_feature::WxApiHookInfo wxApiHookInfo;
     auto                      processPath  = wxbox::util::file::GetProcessRootPath();
-    auto                      featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
+    auto                      featConfPath = wxbox::util::file::JoinPath(processPath, "../../../features/features.yml");
     EXPECT_EQ(true, wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo));
 
     auto wxProcessLists = wxbox::util::wx::GetWeChatProcessList();
