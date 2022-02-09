@@ -31,6 +31,7 @@
 #include <app_log.hpp>
 #include <app_config.hpp>
 #include <wxbox_controller.h>
+#include <internal/downloader.hpp>
 
 #include <about.h>
 
@@ -44,6 +45,25 @@ namespace Ui {
 #else
 #define XSTYLE_WINDOW_CLASS XStyleWindow
 #endif
+
+class WxBoxDownloader : public QObject
+{
+    Q_OBJECT
+
+  public:
+    explicit WxBoxDownloader(QObject* parent = nullptr)
+      : QObject(parent)
+    {
+    }
+
+    void cancel()
+    {
+        emit triggerCancel();
+    }
+
+  signals:
+    void triggerCancel();
+};
 
 class MainWindow final : public XSTYLE_WINDOW_CLASS
 {
@@ -108,7 +128,8 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     XStyleMenu       appMenu;
     QSystemTrayIcon  appTray;
 
-    WxBoxController controller;
+    WxBoxController                  controller;
+    wxbox::internal::WxBoxDownloader downloader;
 };
 
 #endif  // __MAINWINDOW_H

@@ -203,7 +203,7 @@ endif
 
 # qt
 qt5 = import('qt5')
-qt5_modules = ['Core', 'Gui', 'Widgets', 'winextras']
+qt5_modules = ['Core', 'Gui', 'Widgets', 'winextras', 'network']
 if get_option('use_wxbox_xstyle_qml')
     qt5_modules += ['QuickWidgets', 'Quick', 'qml', 'QuickControls2']
 endif
@@ -468,9 +468,21 @@ else
     zlib_bin = join_paths(grpc_bin_root, 'zlib.dll')
 endif
 
+openssl_bin_root = ''
+if host_os == 'windows'
+    fs = import('fs')
+    rcc = find_program('rcc', required: false)
+    if rcc.found()
+        openssl_bin_root = fs.parent(fs.parent(fs.parent(rcc.full_path()))) + '\\Tools\\QtCreator\\bin'
+    endif
+    if openssl_bin_root == '' or fs.exists(openssl_bin_root) == false
+        openssl_bin_root = proj_root + '\\wintools\\bin'
+    endif
+endif
+
 install_data(['assets/translations/zh_cn.qm', 'assets/translations/en.qm'], install_dir: join_paths(project_install_root, 'i18n'))
 install_data(['assets/themes/GreenTheme.rcc'], install_dir: join_paths(project_install_root, 'themes'))
 install_subdir('plugins', install_dir: project_install_root)
 install_subdir('conf', install_dir: project_install_root)
 
-meson.add_install_script(project_install_script, 'wxbox.exe', build_type, wxbox_project_version, zlib_bin)
+meson.add_install_script(project_install_script, 'wxbox.exe', build_type, wxbox_project_version, zlib_bin, openssl_bin_root)

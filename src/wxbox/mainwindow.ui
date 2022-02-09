@@ -52,6 +52,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btn_test4">
+        <property name="text">
+         <string>test4</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="closeIsMinimizeTray">
         <property name="text">
          <string>closeIsMinimizeTray</string>

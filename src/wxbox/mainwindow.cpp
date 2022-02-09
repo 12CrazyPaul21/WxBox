@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget* parent)
   , appMenu("AppMenu", this)
   , appTray(this)
   , controller(this)
+  , downloader(this)
 {
     // setup xstyle ui
     qApp->setStyle(QStyleFactory::create("Fusion"));
@@ -49,6 +50,7 @@ bool MainWindow::CheckSystemVersionSupported()
 void MainWindow::RegisterEvent()
 {
     QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
+
     QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
         xstyle::warning(this, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
         xstyle_manager.ChangeLanguage("en");
@@ -61,9 +63,21 @@ void MainWindow::RegisterEvent()
         *e      = 0;
     });
     QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
-        xstyle::information(this, "information", "change to chinese and GreenTheme");
+        /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
         xstyle_manager.ChangeLanguage("zh_cn");
-        xstyle_manager.ChangeTheme("GreenTheme");
+        xstyle_manager.ChangeTheme("GreenTheme");*/
+        downloader.cancel();
+    });
+    QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
+        QUrl featureSetUrl("https://gitee.com/phantom27/wxbox-public-storage/attach_files/917653/download/lua-5.4.3.zip");
+        downloader.download(
+            featureSetUrl,
+            [this](const QUrl& url, qint64 progress, qint64 total) {
+                ui->progressBar->setValue(progress);
+                ui->progressBar->setMaximum(total);
+            },
+            [this](const QUrl& url, const QByteArray& bytes) { xstyle::information(this, "title", bytes); },
+            [this](const QUrl& url, const QNetworkReply::NetworkError& error, const QString& errorString) { xstyle::error(this, "", errorString); });
     });
 
     ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());

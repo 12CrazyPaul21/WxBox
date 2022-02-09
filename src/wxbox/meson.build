@@ -1,9 +1,12 @@
+wxbox_internal = join_paths(wxbox_root, 'internal')
+
 moc_headers = files([join_paths(wxbox_root, 'mainwindow.h'),
                         join_paths(wxbox_root, 'about.h'),
                         join_paths(wxbox_root, 'wxbox_server.hpp'),
-                        join_paths(wxbox_root, 'wxbox_controller.h')
+                        join_paths(wxbox_root, 'wxbox_controller.h'),
+                        join_paths(wxbox_internal, 'downloader.hpp')
 ])
-moc_sources = files([join_paths(wxbox_root, 'mainwindow.cpp'), join_paths(wxbox_root, 'about.cpp')])
+# moc_sources = files([join_paths(wxbox_root, 'mainwindow.cpp'), join_paths(wxbox_root, 'about.cpp')])
 ui_files = files([join_paths(wxbox_root, 'mainwindow.ui'), join_paths(wxbox_root, 'about.ui')])
 qt_resources = files([join_paths(assets_root, 'wxbox.qrc')])
 
@@ -14,8 +17,6 @@ qt_processed = qt5.preprocess(
     ui_files: ui_files,
     qresources: [qt_resources, xstyle_resources]
 )
-
-wxbox_internal = join_paths(wxbox_root, 'internal')
 
 wxbox_inc = [
     utils_inc,

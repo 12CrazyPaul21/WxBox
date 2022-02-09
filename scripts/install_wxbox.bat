@@ -6,6 +6,7 @@ set WXBOX_BUILD_TYPE=%2%
 set WXBOX_VERSION=%3%
 set ZLIB_BIN=%4%
 set ZLIB_BIN=%ZLIB_BIN:/=\%
+set OPENSSL_BIN_ROOT=%5%
 
 set WXBOX_PREFIX=wxbox-%WXBOX_VERSION%
 set WXBOX_PDB_PREFIX=%WXBOX_PREFIX%-pdb
@@ -35,6 +36,12 @@ mkdir %VCRUNTIME_EXTRACT_ROOT% 2>nul
 
 :: copy zlib
 copy /Y %ZLIB_BIN% %WXBOX_INSTALL_ROOT%
+
+:: copy openssl bin
+copy /Y %OPENSSL_BIN_ROOT%\libcrypto*.dll %WXBOX_INSTALL_ROOT%
+copy /Y %OPENSSL_BIN_ROOT%\libssl*.dll %WXBOX_INSTALL_ROOT%
+copy /Y %OPENSSL_BIN_ROOT%\libeay*.dll %WXBOX_INSTALL_ROOT%
+copy /Y %OPENSSL_BIN_ROOT%\ssleay*.dll %WXBOX_INSTALL_ROOT%
 
 :: collect pdb
 move %WXBOX_INSTALL_ROOT%\*.pdb %WXBOX_PDB_ROOT%
