@@ -34,6 +34,7 @@ if [[ "$is_dirty" = "1" ]]; then
     add_list=`diff <(echo $modified_file_list) <(echo $update_modified_file_list) | grep "^> " | sed 's/..//' | xargs`
     [[ -n "$add_list" ]] && git add $add_list
 
+    git add `echo $staged_file_list | xargs`
     git add assets/translations
 fi
 
