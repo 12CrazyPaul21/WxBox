@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 wxbox_proj_root=$(pwd)
 staged_file_list=$(git diff --cached --name-only HEAD 2>/dev/null)
+modified_file_list=$(git diff --name-only HEAD 2>/dev/null)
 
 [[ -z "$staged_file_list" ]] && exit 0
 
@@ -28,6 +29,12 @@ if [[ "0" -ne "$(echo "${staged_file_list}" | grep ^assets/translations/ | wc -l
     type lrelease 2>/dev/null 1>&2 && is_dirty=1 && ${update_i18n_command}
 fi
 
-[[ "$is_dirty" = "1" ]] && git add src/ assets/translations
+if [[ "$is_dirty" = "1" ]]; then
+    update_modified_file_list=$(git diff --name-only HEAD 2>/dev/null)
+    add_list=`diff <(echo $modified_file_list) <(echo $update_modified_file_list) | grep "^> " | sed 's/..//' | xargs`
+    [[ -n "$add_list" ]] && git add $add_list
+
+    git add assets/translations
+fi
 
 exit 0
