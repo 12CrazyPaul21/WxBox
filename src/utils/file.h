@@ -118,6 +118,7 @@ namespace wxbox {
             std::string                         ToFileName(const std::string& path);
             std::string                         ToDirectoryPath(const std::string& path);
             std::string                         JoinPath(const std::string& dirPath, const std::string& fileName);
+            std::string                         JoinUrl(const std::string& url, const std::string& name);
             std::pair<std::string, std::string> ExtractFileNameAndExt(const std::string& path);
             std::string                         GetProcessRootPath();
 

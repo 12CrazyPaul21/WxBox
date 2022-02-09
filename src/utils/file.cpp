@@ -351,6 +351,21 @@ std::string wxbox::util::file::JoinPath(const std::string& dirPath, const std::s
 #endif
 }
 
+std::string wxbox::util::file::JoinUrl(const std::string& url, const std::string& name)
+{
+    if (url.empty()) {
+        return name;
+    }
+
+    if (name.empty()) {
+        return url;
+    }
+
+    std::string result = (url[url.length() - 1] == '/' ? url : url + '/');
+    result += (name[0] == '/' ? (name.c_str() + 1) : name);
+    return result;
+}
+
 std::pair<std::string, std::string> wxbox::util::file::ExtractFileNameAndExt(const std::string& path)
 {
     std::pair<std::string, std::string> result;
