@@ -135,6 +135,7 @@ namespace wxbox {
 
             int  ExposeFileStreamFD(std::filebuf* fb);
             void OpenFolderInExplorer(const std::string& path);
+            void OpenFileInExplorer(const std::string& path);
         }
     }
 }

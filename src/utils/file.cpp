@@ -607,3 +607,14 @@ void wxbox::util::file::OpenFolderInExplorer(const std::string& path)
     throw std::exception("OpenFolderInExplorer stub");
 #endif
 }
+
+void wxbox::util::file::OpenFileInExplorer(const std::string& path)
+{
+#if WXBOX_IN_WINDOWS_OS
+    ::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    ::ShellExecuteA(NULL, "open", "explorer", ("/select," + path).c_str(), nullptr, SW_SHOWNORMAL);
+    ::CoUninitialize();
+#else
+    throw std::exception("OpenFileInExplorer stub");
+#endif
+}

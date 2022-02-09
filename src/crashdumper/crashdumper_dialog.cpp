@@ -60,7 +60,9 @@ void CrashReportDialog::RetranslateUi()
 void CrashReportDialog::openDumpFolderInExplorer()
 {
     if (request) {
-        wb_file::OpenFolderInExplorer(request->dumpSinkPath);
+        auto coredumpFileName = std::string(request->dumpPrefix) + "-MiniDump-" + request->crashTimestamp + ".dmp";
+        auto coredumpFilePath = wb_file::JoinPath(request->dumpSinkPath, coredumpFileName);
+        wb_file::OpenFileInExplorer(coredumpFilePath);
     }
 }
 
