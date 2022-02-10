@@ -31,6 +31,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btnUpdateFeatureRepository">
+        <property name="text">
+         <string>更新特征库</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btn_test1">
         <property name="text">
          <string>test1</string>

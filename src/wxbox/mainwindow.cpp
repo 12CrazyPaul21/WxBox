@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget* parent)
   , ui(new Ui::MainWindowBody)
   , config(AppConfig::singleton())
   , aboutDialog(this)
+  , downloadDialog(this)
   , appMenu("AppMenu", this)
   , appTray(this)
   , controller(this)
@@ -47,43 +48,74 @@ bool MainWindow::CheckSystemVersionSupported()
     return false;
 }
 
+void MainWindow::UpdateWeChatFeatures()
+{
+    downloadDialog.beginMission();
+
+    // pulling feature list
+    downloadDialog.SetWindowTitle(Translate("Update Feature Repository"));
+    downloadDialog.SetStatus(Translate("Pulling Feature List"));
+    auto result = downloadDialog.get(QUrl(config.extra_features_list_url().c_str()));
+    if (!std::get<0>(result)) {
+        downloadDialog.closeMission();
+        xstyle::error(this, "", Translate("Pulling Feature List Failed"));
+        return;
+    }
+
+    // parse feature list
+    wb_feature::RepoFeatureList repoFeatureList;
+    if (!wb_feature::ParseRepoFeatureList(std::get<1>(result), repoFeatureList)) {
+        downloadDialog.closeMission();
+        xstyle::error(this, "", Translate("Feature List Invalid"));
+        return;
+    }
+
+    // check for updates
+    if (!config.feature_update_timestamp().compare(repoFeatureList.timestamp)) {
+        downloadDialog.closeMission();
+        xstyle::information(this, "", Translate("Feature Repository is already up to date"));
+        return;
+    }
+
+    // download features
+    if (downloadDialog.download(config.extra_features_path().c_str(), repoFeatureList.features) == FileDownloadStatus::Success) {
+        config.update_feature_update_timestamp(repoFeatureList.timestamp);
+    }
+
+    downloadDialog.closeMission();
+}
+
 void MainWindow::RegisterEvent()
 {
     QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
+    QObject::connect(ui->btnUpdateFeatureRepository, &QPushButton::clicked, this, &MainWindow::UpdateWeChatFeatures);
+
+    ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());
+    QObject::connect(ui->closeIsMinimizeTray, &QCheckBox::stateChanged, this, [this](int state) {
+        TurnCloseIsMinimizeToTray(state == Qt::Checked);
+    });
 
     QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
         xstyle::warning(this, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle_manager.ChangeLanguage("en");
-        xstyle_manager.ChangeTheme("");
+        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        xstyle::warning(this, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        /*    xstyle_manager.ChangeLanguage("zh_cn");
+        xstyle_manager.ChangeTheme("");*/
     });
     QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
-        xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
+        /*     xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
         xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
         char* e = nullptr;
-        *e      = 0;
+        *e      = 0;*/
     });
     QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
         /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
         xstyle_manager.ChangeLanguage("zh_cn");
         xstyle_manager.ChangeTheme("GreenTheme");*/
-        xstyle::information(this, "feature path", config.features_meta_file_path().c_str());
-        downloader.cancel();
     });
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
-        QUrl featureSetUrl("https://gitee.com/phantom27/wxbox-public-storage/attach_files/917653/download/lua-5.4.3.zip");
-        downloader.download(
-            featureSetUrl,
-            [this](const QUrl& url, qint64 progress, qint64 total) {
-                ui->progressBar->setValue(progress);
-                ui->progressBar->setMaximum(total);
-            },
-            [this](const QUrl& url, const QByteArray& bytes) { xstyle::information(this, "title", bytes); },
-            [this](const QUrl& url, const QNetworkReply::NetworkError& error, const QString& errorString) { xstyle::error(this, "", errorString); });
-    });
-
-    ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());
-    QObject::connect(ui->closeIsMinimizeTray, &QCheckBox::stateChanged, this, [this](int state) {
-        TurnCloseIsMinimizeToTray(state == Qt::Checked);
+        //UpdateWeChatFeatures();
     });
 }
 

@@ -25,6 +25,8 @@ typedef enum class XStyleMessageBoxButton
     No,
     Confirm,
     Cancel,
+    Retry,
+    Skip,
     _Count
 } XStyleMessageBoxButton;
 
@@ -34,7 +36,8 @@ typedef enum class XStyleMessageBoxButtonType
     Ok,
     Confirm,
     ConfirmCancel,
-    YesNo
+    YesNo,
+    RetrySkip
 } XStyleMessageBoxButtonType;
 
 //
@@ -86,7 +89,9 @@ class XStyleMessageBox : public XStyleWindow
         connect(this, &XStyleMessageBox::closed, this, [this, &loop]() {
             loop.exit((int)exitCode);
         });
-        xstyleParent ? showApplicationModal() : show();
+        QTimer::singleShot(10, [this]() {
+            xstyleParent ? showApplicationModal() : show();
+        });
         XStyleMessageBoxButton retval = (XStyleMessageBoxButton)loop.exec();
 
         if (retval < XStyleMessageBoxButton::Close || retval >= XStyleMessageBoxButton::_Count) {
@@ -99,6 +104,9 @@ class XStyleMessageBox : public XStyleWindow
             }
             else if (btnFlags == XStyleMessageBoxButtonType::YesNo) {
                 retval = XStyleMessageBoxButton::No;
+            }
+            else if (btnFlags == XStyleMessageBoxButtonType::RetrySkip) {
+                retval = XStyleMessageBoxButton::Skip;
             }
         }
 

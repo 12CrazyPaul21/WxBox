@@ -29,6 +29,30 @@ namespace wxbox {
             // Typedef
             //
 
+            typedef struct _RepoFeatureList
+            {
+                std::string                                      timestamp;
+                std::vector<std::pair<std::string, std::string>> features;
+
+                //
+                // constructor
+                //
+
+                _RepoFeatureList() = default;
+
+                SETUP_COPY_METHOD(_RepoFeatureList, other)
+                {
+                    timestamp = other.timestamp;
+                    features  = other.features;
+                }
+
+                SETUP_MOVE_METHOD(_RepoFeatureList, other)
+                {
+                    timestamp = std::move(other.timestamp);
+                    features  = std::move(other.features);
+                }
+            } RepoFeatureList, *PRepoFeatureList;
+
             typedef struct _WxAbsoluteHookInfo
             {
                 std::string                                 wxVersion;
@@ -373,6 +397,7 @@ namespace wxbox {
             ucpulong_t LocateWxAPIHookPointVAOnlyAbsolute(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
             ucpulong_t LocateWxAPIHookPointVAOnlyFeature(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, WxApiHookInfo& wxApiHookInfo, LocateTargetInfo locateTargetInfo, const std::string& api);
             bool       CollectWeChatProcessHookPointVA(const wxbox::util::process::ProcessInfo& pi, const WxApiHookInfo& wxApiHookInfo, WxAPIHookPointVACollection& vaCollection);
+            bool       ParseRepoFeatureList(const char* rawFeatureList, RepoFeatureList& repoFeatureList);
         }
     }
 }
