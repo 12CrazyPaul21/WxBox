@@ -16,7 +16,7 @@ namespace wxbox {
 
         using WxBoxDownloadProgress = std::function<void(const QUrl& url, qint64 progress, qint64 total)>;
         using WxBoxDownloadSuccess  = std::function<void(const QUrl& url, const QByteArray& bytes)>;
-        using WxBoxDownloadError    = std::function<void(const QUrl& url, const QNetworkReply::NetworkError& error, const QString& errorString)>;
+        using WxBoxDownloadError    = std::function<bool(const QUrl& url, const QNetworkReply::NetworkError& error, const QString& errorString)>;
 
         class WxBoxDownloader : public QObject
         {
@@ -54,6 +54,14 @@ namespace wxbox {
             bool isRunning()
             {
                 return running;
+            }
+
+            std::size_t count()
+            {
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    return queue.size();
+                }
             }
 
           private:
@@ -109,7 +117,7 @@ namespace wxbox {
 
                 QObject::connect(reply, &QNetworkReply::downloadProgress, this, [url, progressCallback](qint64 progress, qint64 total) {
                     if (progressCallback) {
-                        progressCallback(url, progress, total >= 0 ? total : progress);
+                        progressCallback(url, progress, total);
                     }
                 });
 
@@ -133,8 +141,12 @@ namespace wxbox {
                         }
                     }
                     else {
-                        if (errorCallback) {
-                            errorCallback(url, reply->error(), reply->errorString());
+                        if (errorCallback && errorCallback(url, reply->error(), reply->errorString())) {
+                            // retry
+                            reply->deleteLater();
+                            networkManager->deleteLater();
+                            doDownload(url, progressCallback, successCallback, errorCallback);
+                            return;
                         }
                     }
 
@@ -143,7 +155,7 @@ namespace wxbox {
                     rolling();
                 });
 
-                QObject::connect(this, &WxBoxDownloader::triggerCancel, reply, &QNetworkReply::abort);
+                QObject::connect(this, &WxBoxDownloader::triggerCancel, reply, &QNetworkReply::abort, Qt::ConnectionType::DirectConnection);
             }
 
           signals:

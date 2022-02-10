@@ -39,6 +39,14 @@
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
+    <message>
+        <source>Retry</source>
+        <translation>重试</translation>
+    </message>
+    <message>
+        <source>Skip</source>
+        <translation>跳过</translation>
+    </message>
 </context>
 <context>
     <name>AppMenu</name>
@@ -74,6 +82,10 @@
         <translation>帮助(&amp;H)</translation>
     </message>
     <message>
+        <source>关于 WxBox</source>
+        <translation>关于 WxBox</translation>
+    </message>
+    <message>
         <source>Only systems above Windows 7 are supported.</source>
         <translation>只运行在Windows 7以上版本的操作系统</translation>
     </message>
@@ -82,8 +94,24 @@
         <translation>只运行在Mac OS Sierra以上版本的操作系统</translation>
     </message>
     <message>
-        <source>关于 WxBox</source>
-        <translation>关于 WxBox</translation>
+        <source>Update Feature Repository</source>
+        <translation>更新特征库</translation>
+    </message>
+    <message>
+        <source>Pulling Feature List</source>
+        <translation>正在拉取特征列表</translation>
+    </message>
+    <message>
+        <source>Pulling Feature List Failed</source>
+        <translation>拉取特征列表失败</translation>
+    </message>
+    <message>
+        <source>Feature List Invalid</source>
+        <translation>特征列表无效</translation>
+    </message>
+    <message>
+        <source>Feature Repository is already up to date</source>
+        <translation>特征库已是最新版本</translation>
     </message>
 </context>
 <context>
@@ -91,6 +119,32 @@
     <message>
         <source>关于 WxBox</source>
         <translation>关于 WxBox</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadDialog_xstylewindow</name>
+    <message>
+        <source>Download Failed</source>
+        <translation>下载失败</translation>
+    </message>
+    <message>
+        <source>Save File Failed</source>
+        <translation>保存文件失败</translation>
+    </message>
+    <message>
+        <source>Create Folder Failed</source>
+        <translation>创建文件夹失败</translation>
+    </message>
+    <message>
+        <source>Downloading : </source>
+        <translation>正在下载 ：</translation>
     </message>
 </context>
 <context>

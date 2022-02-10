@@ -226,6 +226,7 @@ class XStyleWindow : public QMainWindow
         if (this->btnClose) {
             this->btnClose->setEnabled(enabled);
             setWindowFlag(Qt::WindowCloseButtonHint, enabled);
+            setWindowFlag(Qt::WindowSystemMenuHint, enabled);
         }
     }
 
@@ -311,6 +312,7 @@ class XStyleWindow : public QMainWindow
 #if _WIN32
     bool nativeEvent_Windows(const QByteArray& eventType, void* message, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, long* result);
     void EnabledWindowCaption(bool bEnabled);
+    void DisableSystemMenuCloseItem();
 #endif
 
     virtual void CompleteShow();

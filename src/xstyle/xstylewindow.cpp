@@ -488,6 +488,11 @@ bool XStyleWindow::CanClose()
 
 void XStyleWindow::closeEvent(QCloseEvent* event)
 {
+    if (event->spontaneous() && !this->btnClose->isEnabled()) {
+        event->ignore();
+        return;
+    }
+
     // minimize to tray
     if (closeIsMinimizeToTray) {
         fadeOut(true);
@@ -563,7 +568,9 @@ bool XStyleWindow::eventFilter(QObject* obj, QEvent* e)
     auto eventType = e->type();
 
     if (obj == labelWindowIcon && eventType == QEvent::MouseButtonDblClick) {
-        close();
+        if (this->btnClose->isEnabled()) {
+            close();
+        }
     }
     else if (eventType == QEvent::ToolTip) {
         QString msg = "";
@@ -622,6 +629,16 @@ bool XStyleWindow::nativeEvent_Windows(const QByteArray& eventType, void* messag
     Q_UNUSED(wParam);
 
     switch (msg) {
+            // case WM_ENTERIDLE:
+            //     if (wParam != MSGF_MENU) {
+            //         break;
+            //     }
+            // case WM_INITMENUPOPUP:
+            //     if (this->btnClose && !this->btnClose->isEnabled()) {
+            //         DisableSystemMenuCloseItem();
+            //     }
+            //     break;
+
         case WM_XSTYLE_WAKE_UP: {
             show();
             break;
@@ -681,6 +698,14 @@ void XStyleWindow::EnabledWindowCaption(bool bEnabled)
 
     if (style != newStyle) {
         ::SetWindowLong(hWnd, GWL_STYLE, newStyle);
+    }
+}
+
+void XStyleWindow::DisableSystemMenuCloseItem()
+{
+    HMENU hSysMenu = GetSystemMenu((HWND)winId(), FALSE);
+    if (hSysMenu) {
+        EnableMenuItem(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED | MF_DISABLED);
     }
 }
 

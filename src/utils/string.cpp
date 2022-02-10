@@ -116,3 +116,25 @@ std::string wxbox::util::string::JoinString(const std::vector<std::string>& vt, 
     }
     return path.str();
 }
+
+void wxbox::util::string::LTrim(std::string& str)
+{
+    str.erase(str.begin(),
+              std::find_if(str.begin(), str.end(), [](unsigned char ch) {
+                  return !isspace(ch);
+              }));
+}
+
+void wxbox::util::string::RTrim(std::string& str)
+{
+    str.erase(std::find_if(str.rbegin(), str.rend(), [](unsigned char ch) {
+                  return !isspace(ch);
+              }).base(),
+              str.end());
+}
+
+void wxbox::util::string::Trim(std::string& str)
+{
+    LTrim(str);
+    RTrim(str);
+}

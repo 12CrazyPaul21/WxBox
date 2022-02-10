@@ -18,5 +18,7 @@ option('default_wxbox_log_max_single_file_size', type: 'integer', value: 2097152
 option('default_wxbox_log_auto_flush_interval_sec', type: 'integer', value: 120)
 option('default_wxbox_wechat_installation_dir', type: 'string', value: '')
 option('default_wxbox_wechat_feature_relpath', type: 'string', value: 'features')
+option('default_wxbox_wechat_feature_repo_root_url', type: 'string', value: 'https://gitee.com/phantom27/wxbox-public-storage/raw/master/')
+option('default_wxbox_wechat_feature_update_timestamp', type: 'string', value: '')
 option('default_wxbox_wechat_multi_bloxing_quota', type: 'integer', value: -1)
 option('default_wxbox_close_is_minimize_to_tray', type: 'boolean', value: true)

@@ -14,6 +14,10 @@ namespace wxbox {
 
             std::vector<std::string> SplitString(const std::string& str, const std::string& delim);
             std::string              JoinString(const std::vector<std::string>& vt, const std::string& delim);
+
+            void LTrim(std::string& str);
+            void RTrim(std::string& str);
+            void Trim(std::string& str);
         }
     }
 }

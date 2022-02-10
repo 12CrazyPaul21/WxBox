@@ -24,10 +24,8 @@ class XStyleMenu : public QMenu
     explicit XStyleMenu(const char* rootTitle, const char* title, QWidget* parent = nullptr);
     ~XStyleMenu();
 
-    // event
     virtual void changeEvent(QEvent* event) override;
 
-    // operator
     QAction* popup(const QPoint& pos);
     void     retranslateUi();
 
@@ -37,7 +35,6 @@ class XStyleMenu : public QMenu
     // action visitor
     QAction& action(const char* name);
 
-    // action adder
     QAction& pushSeparator();
     QMenu&   pushMenu(const char* title);
     QAction& pushAction(const char* name, QObject* receiver = nullptr, XStyleMenuHandler handler = nullptr, const QString& iconUrl = "", const QKeySequence& shortcut = QKeySequence());

@@ -34,6 +34,7 @@
 #include <internal/downloader.hpp>
 
 #include <about.h>
+#include <download_dialog.h>
 
 namespace Ui {
     class MainWindowBody;
@@ -76,6 +77,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     ~MainWindow();
 
     bool CheckSystemVersionSupported();
+    void UpdateWeChatFeatures();
 
   private:
     virtual void CompleteShow() override
@@ -125,6 +127,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     AppConfig&          config;
 
     AboutWxBoxDialog aboutDialog;
+    DownloadDialog   downloadDialog;
     XStyleMenu       appMenu;
     QSystemTrayIcon  appTray;
 

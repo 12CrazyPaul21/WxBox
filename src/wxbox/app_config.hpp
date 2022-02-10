@@ -16,6 +16,8 @@ REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
 REGISTER_CONFIG_KEY(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_INSTALLATION_DIR);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_RELPATH);
+REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_REPO_ROOT_URL);
+REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
 REGISTER_CONFIG_KEY(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 
@@ -66,6 +68,8 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_INSTALLATION_DIR);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_RELPATH);
+        CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_REPO_ROOT_URL);
+        CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
         CHECK_DEFAULT_CONFIG(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 
@@ -250,9 +254,49 @@ class AppConfig final : public wb_config::Config
         return featuresPath;
     }
 
+    std::string extra_features_path() const
+    {
+#if WXBOX_IN_WINDOWS_OS
+        return wb_file::JoinPath(features_path(), "extra/windows");
+#else
+        return wb_file::JoinPath(features_path(), "extra/mac");
+#endif
+    }
+
+    std::string features_repo_root_url() const
+    {
+        return this->operator[](WXBOX_WECHAT_FEATURE_REPO_ROOT_URL_KEY).safe_as<std::string>();
+    }
+
+    void change_features_repo_root_url(const std::string& url)
+    {
+        this->operator[](WXBOX_WECHAT_FEATURE_REPO_ROOT_URL_KEY) = url;
+        submit();
+    }
+
+    std::string extra_features_list_url() const
+    {
+#if WXBOX_IN_WINDOWS_OS
+        return wb_file::JoinUrl(features_repo_root_url(), "windows-feature-list.txt");
+#else
+        return wb_file::JoinUrl(features_repo_root_url(), "mac-feature-list.txt");
+#endif
+    }
+
     std::string features_meta_file_path() const
     {
         return wb_file::JoinPath(features_path(), "features.yml");
+    }
+
+    std::string feature_update_timestamp() const
+    {
+        return this->operator[](WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP_KEY).safe_as<std::string>();
+    }
+
+    void update_feature_update_timestamp(const std::string& timestamp)
+    {
+        this->operator[](WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP_KEY) = timestamp;
+        submit();
     }
 
     //

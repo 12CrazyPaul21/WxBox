@@ -639,3 +639,44 @@ bool wxbox::util::feature::CollectWeChatProcessHookPointVA(const wxbox::util::pr
 
     return bSuccess;
 }
+
+bool wxbox::util::feature::ParseRepoFeatureList(const char* rawFeatureList, RepoFeatureList& repoFeatureList)
+{
+    if (!rawFeatureList || !strlen(rawFeatureList)) {
+        return false;
+    }
+
+    std::stringstream ss(rawFeatureList);
+    std::string       line;
+
+    //
+    // fetch timestamp
+    //
+
+    if (!std::getline(ss, line, '\n')) {
+        return false;
+    }
+
+    wb_string::Trim(line);
+    auto timestampPair = wb_string::SplitString(line, " ");
+    if (timestampPair.size() != 2 || timestampPair[0].compare("timestamp")) {
+        return false;
+    }
+    repoFeatureList.timestamp = timestampPair[1];
+
+    //
+    // fetch all features
+    //
+
+    while (std::getline(ss, line, '\n')) {
+        wb_string::Trim(line);
+        auto featurePair = wb_string::SplitString(line, " ");
+        if (featurePair.size() != 2) {
+            continue;
+        }
+
+        repoFeatureList.features.emplace_back(std::make_pair(featurePair[0] + ".yml", featurePair[1]));
+    }
+
+    return true;
+}

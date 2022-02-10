@@ -106,6 +106,10 @@ void XStyleMessageBox::SetupButtonLayout(QFrame* bodyFrame)
             PushButton("Yes", XStyleMessageBoxButton::Yes, bodyFrame);
             PushButton("No", XStyleMessageBoxButton::No, bodyFrame);
             break;
+        case XStyleMessageBoxButtonType::RetrySkip:
+            PushButton("Retry", XStyleMessageBoxButton::Retry, bodyFrame);
+            PushButton("Skip", XStyleMessageBoxButton::Skip, bodyFrame);
+            break;
     }
 
     bodyFrame->layout()->addItem(buttonLayout);
