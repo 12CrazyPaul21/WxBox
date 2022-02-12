@@ -697,7 +697,7 @@ bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo
 bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo& pi, WxAPIHookPointVACollection& vaCollection)
 {
     wb_wx::WeChatEnvironmentInfo wxEnvInfo;
-    if (!wxbox::util::wx::ResolveWxEnvInfo(pi.dirpath, &wxEnvInfo)) {
+    if (!wxbox::util::wx::ResolveWxEnvInfo(pi.pid, wxEnvInfo)) {
         return false;
     }
 

@@ -122,6 +122,10 @@
         <translation>注册控件事件</translation>
     </message>
     <message>
+        <source>Load WeChat Environment Info</source>
+        <translation>加载WeChat环境信息</translation>
+    </message>
+    <message>
         <source>Preload WeChat API Features</source>
         <translation>预加载特征库</translation>
     </message>

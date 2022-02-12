@@ -30,6 +30,7 @@ class WxBoxController final : public QObject
     void StartWxBoxServer();
     void StopWxBoxServer();
 
+    void LoadWeChatEnvironmentInfo();
     void ReloadFeatures();
 
   private:
@@ -58,10 +59,12 @@ class WxBoxController final : public QObject
     void WxBoxServerEvent(wxbox::WxBoxMessage message);
 
   private:
-    AppConfig&                config;
-    wb_feature::WxApiFeatures wxApiFeatures;
-    wxbox::WxBoxServerWorker  worker;
-    MainWindow*               view;
+    MainWindow* view;
+    AppConfig&  config;
+
+    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
+    wb_feature::WxApiFeatures    wxApiFeatures;
+    wxbox::WxBoxServerWorker     worker;
 };
 
 #endif  // #ifndef __WXBOX_CONTROLLER_H

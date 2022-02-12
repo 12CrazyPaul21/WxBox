@@ -122,6 +122,10 @@
         <translation>Register Widget Event</translation>
     </message>
     <message>
+        <source>Load WeChat Environment Info</source>
+        <translation>Load WeChat Environment Info</translation>
+    </message>
+    <message>
         <source>Preload WeChat API Features</source>
         <translation>Preload WeChat API Features</translation>
     </message>

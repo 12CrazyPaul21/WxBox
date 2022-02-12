@@ -129,6 +129,7 @@ all_default_config = {
     '/wxbox/log/max_single_file_size': false,
     '/wxbox/log/auto_flush_interval_sec': false,
     '/wxbox/wechat_installation_dir': true,
+    '/wxbox/wechat_module_dir': true,
     '/wxbox/wechat_feature_relpath': true,
     '/wxbox/wechat_feature_repo_root_url': true,
     '/wxbox/wechat_feature_update_timestamp': true,

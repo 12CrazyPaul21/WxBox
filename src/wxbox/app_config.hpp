@@ -15,6 +15,7 @@ REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_ROTATING_FILE_COUNT);
 REGISTER_CONFIG_KEY(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
 REGISTER_CONFIG_KEY(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_INSTALLATION_DIR);
+REGISTER_CONFIG_KEY(WXBOX_WECHAT_MODULE_DIR);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_REPO_ROOT_URL);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
@@ -67,6 +68,7 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_LOG_MAX_SINGLE_FILE_SIZE);
         CHECK_DEFAULT_CONFIG(WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_INSTALLATION_DIR);
+        CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MODULE_DIR);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_RELPATH);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_REPO_ROOT_URL);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
@@ -278,6 +280,32 @@ class AppConfig final : public wb_config::Config
     void update_feature_update_timestamp(const std::string& timestamp)
     {
         this->operator[](WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP_KEY) = timestamp;
+        submit();
+    }
+
+    //
+    // wx
+    //
+
+    std::string wechat_installation_dir() const
+    {
+        return this->operator[](WXBOX_WECHAT_INSTALLATION_DIR_KEY).safe_as<std::string>();
+    }
+
+    void change_wechat_installation_dir(const std::string& path)
+    {
+        this->operator[](WXBOX_WECHAT_INSTALLATION_DIR_KEY) = path;
+        submit();
+    }
+
+    std::string wechat_module_dir() const
+    {
+        return this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY).safe_as<std::string>();
+    }
+
+    void change_wechat_module_dir(const std::string& path)
+    {
+        this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY) = path;
         submit();
     }
 

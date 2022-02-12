@@ -174,6 +174,10 @@ bool MainWindow::InitWxBox(QSplashScreen* splash)
     SPLASH_MESSAGE("Register Widget Event");
     RegisterEvent();
 
+    // load wechat environment info
+    SPLASH_MESSAGE("Load WeChat Environment Info");
+    controller.LoadWeChatEnvironmentInfo();
+
     // preload features
     SPLASH_MESSAGE("Preload WeChat API Features");
     controller.ReloadFeatures();

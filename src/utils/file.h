@@ -121,8 +121,10 @@ namespace wxbox {
             std::string                         JoinUrl(const std::string& url, const std::string& name);
             std::pair<std::string, std::string> ExtractFileNameAndExt(const std::string& path);
             std::string                         GetProcessRootPath();
+            std::string                         GetProcessRootPath(wxbox::util::process::PID pid);
 
             std::vector<std::string> ListFilesInDirectoryWithExt(const std::string& dirPath, const std::string& ext);
+            std::vector<std::string> ListFolderInDirectory(const std::string& dirPath);
 
             bool OpenFolderFilesChangeMonitor(const std::string& dirPath, const FileChangeMonitorCallback& callback);
             void CloseFolderFilesChangeMonitor(const std::string& dirPath);

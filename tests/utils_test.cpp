@@ -142,30 +142,7 @@ TEST(wxbox_utils, feature_list)
     EXPECT_EQ(true, features.GetSimilarHookPointFeature("1.5.5.208", "CheckAppSingleton", hookPointFeatureInfo));
 }
 
-// deprecated
-// TEST(wxbox_utils, feature_DISABLED)
-// {
-//     auto processPath = wxbox::util::file::GetProcessRootPath();
-//     EXPECT_NE("", processPath);
-//
-//     auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../features/features.yml");
-//     EXPECT_NE("", processPath);
-//     spdlog::info("feature conf path : {}", featConfPath);
-//
-//     wb_feature::WxApiHookInfo wxApiHookInfo;
-//     auto                      unwindSuccess = wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
-//     EXPECT_EQ(true, unwindSuccess);
-//     spdlog::info("feature conf unwind success : {}", unwindSuccess);
-//     if (unwindSuccess) {
-//         PrintWxApiHookInfo(wxApiHookInfo);
-//
-//         wb_feature::WxHookPointFeatures wxHookPointFeatures1, wxHookPointFeatures2;
-//         EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.4.4", wxHookPointFeatures1));
-//         EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.5.27", wxHookPointFeatures2));
-//     }
-// }
-
-TEST(wxbox_utils, wx)
+TEST(wxbox_utils__, wx)
 {
     AppConfig& config = AppConfig::singleton();
 
@@ -173,16 +150,20 @@ TEST(wxbox_utils, wx)
     EXPECT_NE("", wxInstallationPath);
     spdlog::info("wx installation path : {}", wxInstallationPath);
 
+	auto wxModuleFolderPath = wxbox::util::wx::GetWxModuleFolderPath(wxInstallationPath);
+    EXPECT_NE("", wxModuleFolderPath);
+    spdlog::info("wx module folder path : {}", wxModuleFolderPath);
+
     auto wxInstallationPathIsValid = wxbox::util::wx::IsWxInstallationPathValid(wxInstallationPath);
     EXPECT_EQ(true, wxInstallationPathIsValid);
     spdlog::info("wx installation path is valid : {}", wxInstallationPathIsValid);
 
-    auto wxVersion = wxbox::util::wx::GetWxVersion(wxInstallationPath);
+    auto wxVersion = wxbox::util::wx::GetWxVersion(wxModuleFolderPath);
     EXPECT_NE("", wxVersion);
     spdlog::info("wx version : {}", wxVersion);
 
     wb_wx::WeChatEnvironmentInfo wxEnvInfo;
-    auto                         resolveSuccess = wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo);
+    auto                         resolveSuccess = wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, wxModuleFolderPath, wxEnvInfo);
     EXPECT_EQ(true, resolveSuccess);
     spdlog::info("wechat environment success : {}", resolveSuccess);
 
@@ -223,7 +204,7 @@ TEST(wxbox_utils, crack)
     }
 
     wb_wx::WeChatEnvironmentInfo wxEnvInfo;
-    if (!wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo)) {
+    if (!wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, wxEnvInfo)) {
         return;
     }
 

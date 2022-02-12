@@ -66,6 +66,18 @@ void WxBoxController::StopWxBoxServer()
     spdlog::info("WxBox Server is already stop");
 }
 
+void WxBoxController::LoadWeChatEnvironmentInfo()
+{
+    if (wb_wx::ResolveWxEnvInfo(config.wechat_installation_dir(), config.wechat_module_dir(), wxEnvInfo)) {
+        return;
+    }
+
+    if (wb_wx::ResolveWxEnvInfo(wxEnvInfo)) {
+        config.change_wechat_installation_dir(wxEnvInfo.installPath);
+        config.change_wechat_module_dir(wxEnvInfo.moduleFolderAbsPath);
+    }
+}
+
 void WxBoxController::ReloadFeatures()
 {
     wb_feature::PreLoadFeatures(config.features_path(), wxApiFeatures);

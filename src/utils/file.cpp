@@ -95,6 +95,25 @@ static inline std::string GetProcessRootPath_Windows()
     return wxbox::util::file::ToDirectoryPath(absFullPath);
 }
 
+static inline std::string GetProcessRootPath_Windows(wb_process::PID pid)
+{
+    char  szFullName[MAX_PATH] = "";
+    DWORD dwSize               = MAX_PATH;
+
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+    if (!hProcess) {
+        return "";
+    }
+
+    if (!QueryFullProcessImageNameA(hProcess, 0, szFullName, &dwSize)) {
+        CloseHandle(hProcess);
+        return "";
+    }
+
+    CloseHandle(hProcess);
+    return wxbox::util::file::ToDirectoryPath(szFullName);
+}
+
 static inline std::vector<std::string> ListFilesInDirectoryWithExt_Windows(const std::string& dirPath, const std::string& ext)
 {
     std::vector<std::string> result;
@@ -115,6 +134,33 @@ static inline std::vector<std::string> ListFilesInDirectoryWithExt_Windows(const
         }
 
         result.emplace_back(std::string(findFileData.cFileName));
+    } while (::FindNextFileA(hFind, &findFileData));
+
+    return result;
+}
+
+static inline std::vector<std::string> ListFolderInDirectory_Windows(const std::string& dirPath)
+{
+    std::vector<std::string> result;
+
+    if (!wb_file::IsDirectory(dirPath)) {
+        return result;
+    }
+
+    WIN32_FIND_DATAA findFileData = {0};
+    HANDLE           hFind        = ::FindFirstFileA(wb_file::JoinPath(dirPath, R"(*.*)").c_str(), &findFileData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        return result;
+    }
+
+    do {
+        if (!strcmp(findFileData.cFileName, ".") || !strcmp(findFileData.cFileName, "..")) {
+            continue;
+        }
+
+        if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            result.emplace_back(std::string(findFileData.cFileName));
+        }
     } while (::FindNextFileA(hFind, &findFileData));
 
     return result;
@@ -264,9 +310,21 @@ static inline std::string GetProcessRootPath_Mac()
     return "";
 }
 
+static inline std::string GetProcessRootPath_Mac(wb_process::PID pid)
+{
+    throw std::exception("GetProcessRootPath_Mac stub");
+    return "";
+}
+
 static inline std::vector<std::string> ListFilesInDirectoryWithExt_Mac(const std::string& dirPath, const std::string& ext)
 {
     throw std::exception("ListFilesInDirectoryWithExt_Mac stub");
+    return std::vector<std::string>();
+}
+
+static inline std::vector<std::string> ListFolderInDirectory_Mac(const std::string& dirPath)
+{
+    throw std::exception("ListFolderInDirectory_Mac stub");
     return std::vector<std::string>();
 }
 
@@ -413,15 +471,20 @@ std::pair<std::string, std::string> wxbox::util::file::ExtractFileNameAndExt(con
 
 std::string wxbox::util::file::GetProcessRootPath()
 {
-    std::string processRootPath = "";
-
 #if WXBOX_IN_WINDOWS_OS
-    processRootPath = GetProcessRootPath_Windows();
+    return GetProcessRootPath_Windows();
 #elif WXBOX_IN_MAC_OS
-    processRootPath = GetProcessRootPath_Mac();
+    return GetProcessRootPath_Mac();
 #endif
+}
 
-    return processRootPath;
+std::string wxbox::util::file::GetProcessRootPath(wxbox::util::process::PID pid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return GetProcessRootPath_Windows(pid);
+#elif WXBOX_IN_MAC_OS
+    return GetProcessRootPath_Mac(pid);
+#endif
 }
 
 YAML::Node wxbox::util::file::UnwindYamlFile(const std::string& path)
@@ -513,6 +576,15 @@ std::vector<std::string> wxbox::util::file::ListFilesInDirectoryWithExt(const st
     return ListFilesInDirectoryWithExt_Windows(dirPath, ext);
 #elif WXBOX_IN_MAC_OS
     return ListFilesInDirectoryWithExt_Mac(dirPath, ext);
+#endif
+}
+
+std::vector<std::string> wxbox::util::file::ListFolderInDirectory(const std::string& dirPath)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ListFolderInDirectory_Windows(dirPath);
+#elif WXBOX_IN_MAC_OS
+    return ListFolderInDirectory_Mac(dirPath);
 #endif
 }
 
