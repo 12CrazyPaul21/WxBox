@@ -117,8 +117,8 @@ typedef unsigned long long ucpulong_t;
 #include <utils/traits.h>
 #include <utils/platform.h>
 #include <utils/process.h>
-#include <utils/feature.h>
 #include <utils/file.h>
+#include <utils/feature.h>
 #include <utils/memory.h>
 #include <utils/string.h>
 #include <utils/wx.h>

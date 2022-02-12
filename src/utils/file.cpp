@@ -501,6 +501,12 @@ bool wxbox::util::file::UnwindVersionNumber(const std::string& version, wxbox::u
     return true;
 }
 
+bool wxbox::util::file::CheckVersionNumberValid(const std::string& version)
+{
+    std::regex matchPattern(R"(^(?:([0-9]+)\.)?(?:([0-9]+)\.)?(?:([0-9]+)\.)?([0-9]+)$)");
+    return std::regex_match(version.begin(), version.end(), matchPattern);
+}
+
 std::vector<std::string> wxbox::util::file::ListFilesInDirectoryWithExt(const std::string& dirPath, const std::string& ext)
 {
 #if WXBOX_IN_WINDOWS_OS

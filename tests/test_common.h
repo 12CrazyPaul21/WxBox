@@ -119,4 +119,96 @@ char _getch()
         std::cout << "command parse error message : [" << parseResult->error << "]" << std::endl; \
     }
 
+#define PrintWxApiFeatures(FEATURES_INFO)                                                          \
+    {                                                                                              \
+        spdlog::info("WxApiFeatures platform : {}", FEATURES_INFO.platform);                       \
+        spdlog::info("WxApiFeatures featureFileAbsPath : {}", FEATURES_INFO.featureFolderAbsPath); \
+        for (auto v : FEATURES_INFO.featureVersionList) {                                          \
+            spdlog::info("    : {}", v.str);                                                       \
+        }                                                                                          \
+    }
+
+#define PrintWxAbsoluteHookInfo(FEATURES_INFO)                                                 \
+    {                                                                                          \
+        for (auto absoluteHookInfoPair : FEATURES_INFO.mapWxAbsoluteHookInfo) {                \
+            std::string                    wxVersion          = absoluteHookInfoPair.first;    \
+            wb_feature::WxAbsoluteHookInfo wxAbsoluteHookInfo = absoluteHookInfoPair.second;   \
+                                                                                               \
+            spdlog::info("WxApiHookInfo absoluteHookInfo wechat version : {}", wxVersion);     \
+            for (auto api : wb_feature::WX_HOOK_API) {                                         \
+                spdlog::info("    {} RVA : 0x{:08X}", api, wxAbsoluteHookInfo.GetApiRva(api)); \
+            }                                                                                  \
+        }                                                                                      \
+    }
+
+#define PrintWxHookPointFeatures(FEATURES_INFO)                                                                      \
+    {                                                                                                                \
+        for (auto wxHookPointFeaturesPair : FEATURES_INFO.mapWxHookPointFeatures) {                                  \
+            std::string                      wxVersion         = wxHookPointFeaturesPair.first;                      \
+            wb_feature::WxHookPointFeatures  hookPointFeatures = wxHookPointFeaturesPair.second;                     \
+            wb_feature::HookPointFeatureInfo hookFeatureInfo;                                                        \
+                                                                                                                     \
+            spdlog::info("WxApiHookInfo hookPointFeatures wechat version : {}", wxVersion);                          \
+            for (auto api : wb_feature::WX_HOOK_API) {                                                               \
+                spdlog::info("    {} hook feature :", api);                                                          \
+                if (!hookPointFeatures.GetApiHookFeature(api, hookFeatureInfo)) {                                    \
+                    continue;                                                                                        \
+                }                                                                                                    \
+                                                                                                                     \
+                spdlog::info("        ScanType : {}", hookFeatureInfo.scanType);                                     \
+                if (!hookFeatureInfo.scanType.compare("ref")) {                                                      \
+                    if (hookFeatureInfo.refFeatureStream.size()) {                                                   \
+                        spdlog::info("        RefFeatureStream :");                                                  \
+                        PrintUInt8Vector(hookFeatureInfo.refFeatureStream);                                          \
+                    }                                                                                                \
+                                                                                                                     \
+                    if (hookFeatureInfo.refBackExtralInstruction.size()) {                                           \
+                        spdlog::info("        RefBackExtralInstruction :");                                          \
+                        PrintUInt8Vector(hookFeatureInfo.refBackExtralInstruction);                                  \
+                    }                                                                                                \
+                                                                                                                     \
+                    if (hookFeatureInfo.refFrontExtralInstruction.size()) {                                          \
+                        spdlog::info("        RefFrontExtralInstruction :");                                         \
+                        PrintUInt8Vector(hookFeatureInfo.refFrontExtralInstruction);                                 \
+                    }                                                                                                \
+                }                                                                                                    \
+                else if (!hookFeatureInfo.scanType.compare("multiPushRef")) {                                        \
+                    if (hookFeatureInfo.pushInstruction.size()) {                                                    \
+                        spdlog::info("        PushInstruction :");                                                   \
+                        PrintUInt8Vector(hookFeatureInfo.pushInstruction);                                           \
+                    }                                                                                                \
+                                                                                                                     \
+                    if (hookFeatureInfo.refFeatureStreams.size()) {                                                  \
+                        spdlog::info("        RefFeatureStreams :");                                                 \
+                        for (auto refFeatureStream : hookFeatureInfo.refFeatureStreams) {                            \
+                            PrintUInt8Vector(refFeatureStream);                                                      \
+                        }                                                                                            \
+                    }                                                                                                \
+                }                                                                                                    \
+                else if (!hookFeatureInfo.scanType.compare("instruction")) {                                         \
+                    if (hookFeatureInfo.instructionFeatureStream.size()) {                                           \
+                        spdlog::info("        InstructionFeatureStream :");                                          \
+                        PrintUInt8Vector(hookFeatureInfo.instructionFeatureStream);                                  \
+                    }                                                                                                \
+                }                                                                                                    \
+                                                                                                                     \
+                spdlog::info("        LocateAction : {}", hookFeatureInfo.locateAction);                             \
+                if (hookFeatureInfo.locateActionFeatureStream.size()) {                                              \
+                    spdlog::info("        LocateActionFeatureStream :");                                             \
+                    PrintUInt8Vector(hookFeatureInfo.locateActionFeatureStream);                                     \
+                }                                                                                                    \
+                spdlog::info("        HookPointOffset : {}", hookFeatureInfo.hookPointOffset);                       \
+                if (!hookFeatureInfo.locateAction.compare("backThenFront")) {                                        \
+                    if (hookFeatureInfo.thenLocateActionFeatureStream.size()) {                                      \
+                        spdlog::info("        ThenLocateActionFeatureStream :");                                     \
+                        PrintUInt8Vector(hookFeatureInfo.thenLocateActionFeatureStream);                             \
+                    }                                                                                                \
+                }                                                                                                    \
+                else if (!hookFeatureInfo.locateAction.compare("backMultiTimes")) {                                  \
+                    spdlog::info("        LocateActionExecuteTimes : {}", hookFeatureInfo.locateActionExecuteTimes); \
+                }                                                                                                    \
+            }                                                                                                        \
+        }                                                                                                            \
+    }
+
 #endif  // #ifndef __WXBOX_TEST_COMMON_H

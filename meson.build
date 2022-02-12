@@ -56,7 +56,7 @@ endif
 #
 
 if host_os == 'windows'
-    ignore_warnings = ['/wd4125', '/wd4702', '/wd4505']
+    ignore_warnings = ['/wd4125', '/wd4702', '/wd4505', '/wd4459']
     subproject_ignore_warnings = ['/wd4244', '/wd4702']
 
     add_global_arguments(['/Zi'], language: 'c')

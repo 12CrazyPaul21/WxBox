@@ -71,13 +71,13 @@ static inline bool OpenWxWithMultiBoxing_CheckWeChatWinModule(HANDLE hProcess, c
  *         }
  *     }
  */
-static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wxbox::util::feature::WxApiHookInfo& wxApiHookInfo, HANDLE hProcess, LPVOID pBaseAddr, DWORD dwModuleSize)
+static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wxbox::util::feature::WxApiFeatures& wxApiFeatures, HANDLE hProcess, LPVOID pBaseAddr, DWORD dwModuleSize)
 {
     if (!hProcess) {
         return false;
     }
 
-    ucpulong_t checkAppSingletonVA = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, {hProcess, pBaseAddr, (ucpulong_t)dwModuleSize}, "CheckAppSingleton");
+    ucpulong_t checkAppSingletonVA = wxApiFeatures.Locate({hProcess, pBaseAddr, (ucpulong_t)dwModuleSize}, wxEnvInfo.version, "CheckAppSingleton");
     if (!checkAppSingletonVA) {
         return false;
     }
@@ -106,7 +106,7 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
     return wb_memory::WriteMemory(hProcess, (void*)checkAppSingletonVA, x86MachineInstruction, uInstructionSize, nullptr);
 }
 
-static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiHookInfo& wxApiHookInfo, wb_process::PID pid, wb_crack::POpenWxWithMultiBoxingResult pResult)
+static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_process::PID pid, wb_crack::POpenWxWithMultiBoxingResult pResult)
 {
     if (!pid) {
         return false;
@@ -132,7 +132,7 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
 
         if (debugEvent.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT && debugEvent.dwProcessId == pid) {
             if (OpenWxWithMultiBoxing_CheckWeChatWinModule(hProcess, debugEvent.u.LoadDll, &dwModuleSize)) {
-                result = OpenWxWithMultiBoxing_Crack(wxEnvInfo, wxApiHookInfo, hProcess, debugEvent.u.LoadDll.lpBaseOfDll, dwModuleSize);
+                result = OpenWxWithMultiBoxing_Crack(wxEnvInfo, wxApiFeatures, hProcess, debugEvent.u.LoadDll.lpBaseOfDll, dwModuleSize);
                 if (pResult) {
                     pResult->pid             = pid;
                     pResult->pModuleBaseAddr = debugEvent.u.LoadDll.lpBaseOfDll;
@@ -152,7 +152,7 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
     return result;
 }
 
-static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiHookInfo& wxApiHookInfo, wb_crack::POpenWxWithMultiBoxingResult pResult)
+static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_crack::POpenWxWithMultiBoxingResult pResult)
 {
     // check execute file path exist and is valid
     if (!wb_file::IsPathExists(wxEnvInfo.executeAbsPath)) {
@@ -166,7 +166,7 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
     }
 
     // debug loop
-    if (!OpenWxWithMultiBoxing_DebugLoop(wxEnvInfo, wxApiHookInfo, pid, pResult)) {
+    if (!OpenWxWithMultiBoxing_DebugLoop(wxEnvInfo, wxApiFeatures, pid, pResult)) {
         return false;
     }
 
@@ -175,7 +175,7 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
 
 #elif WXBOX_IN_MAC_OS
 
-static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiHookInfo& wxApiHookInfo, wb_crack::POpenWxWithMultiBoxingResult pResult)
+static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_crack::POpenWxWithMultiBoxingResult pResult)
 {
     throw std::exception("OpenWxWithMultiBoxing_Mac stub");
     return false;
@@ -183,11 +183,11 @@ static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo&
 
 #endif
 
-bool wxbox::util::crack::OpenWxWithMultiBoxing(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiHookInfo& wxApiHookInfo, POpenWxWithMultiBoxingResult pResult)
+bool wxbox::util::crack::OpenWxWithMultiBoxing(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, POpenWxWithMultiBoxingResult pResult)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return OpenWxWithMultiBoxing_Windows(wxEnvInfo, wxApiHookInfo, pResult);
+    return OpenWxWithMultiBoxing_Windows(wxEnvInfo, wxApiFeatures, pResult);
 #elif WXBOX_IN_MAC_OS
-    return OpenWxWithMultiBoxing_Mac(wxEnvInfo, wxApiHookInfo, pResult);
+    return OpenWxWithMultiBoxing_Mac(wxEnvInfo, wxApiFeatures, pResult);
 #endif
 }

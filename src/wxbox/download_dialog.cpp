@@ -92,14 +92,20 @@ std::tuple<bool, QByteArray> DownloadDialog::get(const QUrl& url)
         downloader.download(
             url,
             [this](const QUrl& url, qint64 progress, qint64 total) {
+                Q_UNUSED(url);
+
                 ui->progressBar->setValue(progress);
                 ui->progressBar->setMaximum(total < 0 ? 0 : total);
             },
             [&](const QUrl& url, const QByteArray& bytes) {
+                Q_UNUSED(url);
+
                 std::get<1>(result) = bytes;
                 loop.exit(0);
             },
             [&](const QUrl& url, const QNetworkReply::NetworkError& error, const QString& errorString) -> bool {
+                Q_UNUSED(url);
+
                 if (error == QNetworkReply::NetworkError::OperationCanceledError) {
                     loop.exit(1);
                     return false;
@@ -139,10 +145,14 @@ FileDownloadStatus DownloadDialog::download(const std::string& sinkFolder, const
         downloader.download(
             QUrl(item.second.c_str()),
             [this, filename](const QUrl& url, qint64 progress, qint64 total) {
+                Q_UNUSED(url);
+
                 ui->labelStatus->setText(Translate("Downloading : ") + filename.c_str());
                 SetProgress(progress, total < 0 ? 0 : total);
             },
             [&, filename](const QUrl& url, const QByteArray& bytes) {
+                Q_UNUSED(url);
+
                 std::ofstream stream(wb_file::JoinPath(sinkFolder, filename), std::ios::out | std::ios::trunc | std::ios::binary);
                 if (!stream.is_open()) {
                     lastError = FileDownloadStatus::PersistentFailed;
@@ -155,6 +165,8 @@ FileDownloadStatus DownloadDialog::download(const std::string& sinkFolder, const
                 stream.close();
             },
             [&](const QUrl& url, const QNetworkReply::NetworkError& error, const QString& errorString) -> bool {
+                Q_UNUSED(url);
+
                 if (error == QNetworkReply::NetworkError::OperationCanceledError) {
                     return false;
                 }

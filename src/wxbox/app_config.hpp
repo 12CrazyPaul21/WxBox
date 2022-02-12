@@ -251,16 +251,7 @@ class AppConfig final : public wb_config::Config
         }
 #endif
 
-        return featuresPath;
-    }
-
-    std::string extra_features_path() const
-    {
-#if WXBOX_IN_WINDOWS_OS
-        return wb_file::JoinPath(features_path(), "extra/windows");
-#else
-        return wb_file::JoinPath(features_path(), "extra/mac");
-#endif
+        return wxbox::util::file::JoinPath(featuresPath, WXBOX_PLATFORM_NAME);
     }
 
     std::string features_repo_root_url() const
@@ -274,18 +265,9 @@ class AppConfig final : public wb_config::Config
         submit();
     }
 
-    std::string extra_features_list_url() const
+    std::string features_list_url() const
     {
-#if WXBOX_IN_WINDOWS_OS
-        return wb_file::JoinUrl(features_repo_root_url(), "windows-feature-list.txt");
-#else
-        return wb_file::JoinUrl(features_repo_root_url(), "mac-feature-list.txt");
-#endif
-    }
-
-    std::string features_meta_file_path() const
-    {
-        return wb_file::JoinPath(features_path(), "features.yml");
+        return wb_file::JoinUrl(features_repo_root_url(), std::string(WXBOX_PLATFORM_NAME) + "-feature-list.txt");
     }
 
     std::string feature_update_timestamp() const

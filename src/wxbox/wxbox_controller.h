@@ -30,6 +30,8 @@ class WxBoxController final : public QObject
     void StartWxBoxServer();
     void StopWxBoxServer();
 
+    void ReloadFeatures();
+
   private:
     //
     // WxBoxServer Wrapper Request Methods
@@ -56,9 +58,10 @@ class WxBoxController final : public QObject
     void WxBoxServerEvent(wxbox::WxBoxMessage message);
 
   private:
-    AppConfig&               config;
-    wxbox::WxBoxServerWorker worker;
-    MainWindow*              view;
+    AppConfig&                config;
+    wb_feature::WxApiFeatures wxApiFeatures;
+    wxbox::WxBoxServerWorker  worker;
+    MainWindow*               view;
 };
 
 #endif  // #ifndef __WXBOX_CONTROLLER_H

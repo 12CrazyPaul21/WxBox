@@ -66,6 +66,12 @@ void WxBoxController::StopWxBoxServer()
     spdlog::info("WxBox Server is already stop");
 }
 
+void WxBoxController::ReloadFeatures()
+{
+    wb_feature::PreLoadFeatures(config.features_path(), wxApiFeatures);
+    spdlog::info("Load WxBox api features");
+}
+
 //
 // WxBoxServer status changed and event slots
 //

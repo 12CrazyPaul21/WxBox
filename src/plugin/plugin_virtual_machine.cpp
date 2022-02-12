@@ -468,6 +468,7 @@ static void RefreshPlugins(wxbox::plugin::PPluginVirtualMachine vm)
 
 static void PluginVirtualMachinePluginsChangeMonitor(wxbox::plugin::PPluginVirtualMachine vm, wb_file::FileChangeMonitorReport report)
 {
+    assert(vm != nullptr);
     std::unique_lock<std::shared_mutex> lock(vm->rwmutex);
     vm->pluginsRefreshTriggerTimestamp = wb_process::GetCurrentTimestamp();
 }

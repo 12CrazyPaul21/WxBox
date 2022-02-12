@@ -20,7 +20,7 @@ namespace wxbox {
             // Function
             //
 
-            bool OpenWxWithMultiBoxing(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, wxbox::util::feature::WxApiHookInfo& wxApiHookInfo, POpenWxWithMultiBoxingResult pResult = nullptr);
+            bool OpenWxWithMultiBoxing(const wxbox::util::wx::WeChatEnvironmentInfo& wxEnvInfo, wxbox::util::feature::WxApiFeatures& wxApiFeatures, POpenWxWithMultiBoxingResult pResult = nullptr);
         }
     }
 }

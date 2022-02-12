@@ -114,108 +114,61 @@ TEST(wxbox_utils, process)
     // }
 }
 
-TEST(wxbox_utils, feature)
+TEST(wxbox_utils, feature_list)
 {
-    auto processPath = wxbox::util::file::GetProcessRootPath();
-    EXPECT_NE("", processPath);
+    AppConfig& config = AppConfig::singleton();
 
-    auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../features/features.yml");
-    EXPECT_NE("", processPath);
-    spdlog::info("feature conf path : {}", featConfPath);
+    auto featuresPath = config.features_path();
+    EXPECT_NE("", featuresPath);
+    spdlog::info("features folder path : {}", featuresPath);
 
-    wb_feature::WxApiHookInfo wxApiHookInfo;
-    auto                      unwindSuccess = wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
-    EXPECT_EQ(true, unwindSuccess);
-    spdlog::info("feature conf unwind success : {}", unwindSuccess);
-    if (unwindSuccess) {
-        spdlog::info("WxApiHookInfo platform : {}", wxApiHookInfo.platform);
-        spdlog::info("WxApiHookInfo featureFileAbsPath : {}", wxApiHookInfo.featureFileAbsPath);
+    wb_feature::WxApiFeatures features;
+    EXPECT_EQ(true, wb_feature::PreLoadFeatures(featuresPath, features));
+    PrintWxApiFeatures(features);
 
-        for (auto absoluteHookInfoPair : wxApiHookInfo.mapWxAbsoluteHookInfo) {
-            std::string                    wxVersion        = absoluteHookInfoPair.first;
-            wb_feature::WxAbsoluteHookInfo absoluteHookInfo = absoluteHookInfoPair.second;
+    wb_feature::WxAbsoluteHookInfo absoluteHookInfo;
+    EXPECT_EQ(true, features.GetAbsoluteHookInfo("3.4.5.27", absoluteHookInfo));
+    EXPECT_NE(ucpulong_t(0), features.GetAbsoluteHookPointRVA("3.4.5.27", "CheckAppSingleton"));
+    PrintWxAbsoluteHookInfo(features);
 
-            spdlog::info("WxApiHookInfo absoluteHookInfo wechat version : {}", wxVersion);
-            for (auto api : wb_feature::WX_HOOK_API) {
-                spdlog::info("    {} RVA : 0x{:08X}", api, absoluteHookInfo.GetApiRva(api));
-            }
-        }
+	wb_feature::WxHookPointFeatures wxHookPointFeatures;
+    EXPECT_EQ(true, features.GetHookPointFeatures("3.4.5.27", wxHookPointFeatures));
+	wb_feature::HookPointFeatureInfo hookPointFeatureInfo;
+    EXPECT_EQ(true, features.GetHookPointFeature("3.4.5.27", "CheckAppSingleton", hookPointFeatureInfo));
+    PrintWxHookPointFeatures(features);
 
-        for (auto wxHookPointFeaturesPair : wxApiHookInfo.mapWxHookPointFeatures) {
-            std::string                      wxVersion         = wxHookPointFeaturesPair.first;
-            wb_feature::WxHookPointFeatures  hookPointFeatures = wxHookPointFeaturesPair.second;
-            wb_feature::HookPointFeatureInfo hookFeatureInfo;
-
-            spdlog::info("WxApiHookInfo hookPointFeatures wechat version : {}", wxVersion);
-            for (auto api : wb_feature::WX_HOOK_API) {
-                spdlog::info("    {} hook feature :", api);
-                if (!hookPointFeatures.GetApiHookFeature(api, hookFeatureInfo)) {
-                    continue;
-                }
-
-                spdlog::info("        ScanType : {}", hookFeatureInfo.scanType);
-                if (!hookFeatureInfo.scanType.compare("ref")) {
-                    if (hookFeatureInfo.refFeatureStream.size()) {
-                        spdlog::info("        RefFeatureStream :");
-                        PrintUInt8Vector(hookFeatureInfo.refFeatureStream);
-                    }
-
-                    if (hookFeatureInfo.refBackExtralInstruction.size()) {
-                        spdlog::info("        RefBackExtralInstruction :");
-                        PrintUInt8Vector(hookFeatureInfo.refBackExtralInstruction);
-                    }
-
-                    if (hookFeatureInfo.refFrontExtralInstruction.size()) {
-                        spdlog::info("        RefFrontExtralInstruction :");
-                        PrintUInt8Vector(hookFeatureInfo.refFrontExtralInstruction);
-                    }
-                }
-                else if (!hookFeatureInfo.scanType.compare("multiPushRef")) {
-                    if (hookFeatureInfo.pushInstruction.size()) {
-                        spdlog::info("        PushInstruction :");
-                        PrintUInt8Vector(hookFeatureInfo.pushInstruction);
-                    }
-
-                    if (hookFeatureInfo.refFeatureStreams.size()) {
-                        spdlog::info("        RefFeatureStreams :");
-                        for (auto refFeatureStream : hookFeatureInfo.refFeatureStreams) {
-                            PrintUInt8Vector(refFeatureStream);
-                        }
-                    }
-                }
-                else if (!hookFeatureInfo.scanType.compare("instruction")) {
-                    if (hookFeatureInfo.instructionFeatureStream.size()) {
-                        spdlog::info("        InstructionFeatureStream :");
-                        PrintUInt8Vector(hookFeatureInfo.instructionFeatureStream);
-                    }
-                }
-
-                spdlog::info("        LocateAction : {}", hookFeatureInfo.locateAction);
-                if (hookFeatureInfo.locateActionFeatureStream.size()) {
-                    spdlog::info("        LocateActionFeatureStream :");
-                    PrintUInt8Vector(hookFeatureInfo.locateActionFeatureStream);
-                }
-                spdlog::info("        HookPointOffset : {}", hookFeatureInfo.hookPointOffset);
-                if (!hookFeatureInfo.locateAction.compare("backThenFront")) {
-                    if (hookFeatureInfo.thenLocateActionFeatureStream.size()) {
-                        spdlog::info("        ThenLocateActionFeatureStream :");
-                        PrintUInt8Vector(hookFeatureInfo.thenLocateActionFeatureStream);
-                    }
-                }
-                else if (!hookFeatureInfo.locateAction.compare("backMultiTimes")) {
-                    spdlog::info("        LocateActionExecuteTimes : {}", hookFeatureInfo.locateActionExecuteTimes);
-                }
-            }
-        }
-
-        wb_feature::WxHookPointFeatures wxHookPointFeatures1, wxHookPointFeatures2;
-        EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.4.4", wxHookPointFeatures1));
-        EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.5.27", wxHookPointFeatures2));
-    }
+    EXPECT_EQ(true, features.GetSimilarHookPointFeatures("3.4.5.28", wxHookPointFeatures));
+    EXPECT_EQ(true, features.GetSimilarHookPointFeatures("1.5.5.28", wxHookPointFeatures));
+    EXPECT_EQ(true, features.GetSimilarHookPointFeature("1.5.5.208", "CheckAppSingleton", hookPointFeatureInfo));
 }
+
+// deprecated
+// TEST(wxbox_utils, feature_DISABLED)
+// {
+//     auto processPath = wxbox::util::file::GetProcessRootPath();
+//     EXPECT_NE("", processPath);
+//
+//     auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../features/features.yml");
+//     EXPECT_NE("", processPath);
+//     spdlog::info("feature conf path : {}", featConfPath);
+//
+//     wb_feature::WxApiHookInfo wxApiHookInfo;
+//     auto                      unwindSuccess = wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
+//     EXPECT_EQ(true, unwindSuccess);
+//     spdlog::info("feature conf unwind success : {}", unwindSuccess);
+//     if (unwindSuccess) {
+//         PrintWxApiHookInfo(wxApiHookInfo);
+//
+//         wb_feature::WxHookPointFeatures wxHookPointFeatures1, wxHookPointFeatures2;
+//         EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.4.4", wxHookPointFeatures1));
+//         EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.5.27", wxHookPointFeatures2));
+//     }
+// }
 
 TEST(wxbox_utils, wx)
 {
+    AppConfig& config = AppConfig::singleton();
+
     auto wxInstallationPath = wxbox::util::wx::GetWxInstallationPath();
     EXPECT_NE("", wxInstallationPath);
     spdlog::info("wx installation path : {}", wxInstallationPath);
@@ -234,10 +187,10 @@ TEST(wxbox_utils, wx)
     spdlog::info("wechat environment success : {}", resolveSuccess);
 
     // unwind feature
-    wb_feature::WxApiHookInfo wxApiHookInfo;
-    auto                      processPath  = wxbox::util::file::GetProcessRootPath();
-    auto                      featConfPath = wxbox::util::file::JoinPath(processPath, "../../../features/features.yml");
-    EXPECT_EQ(true, wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo));
+    wb_feature::WxApiFeatures features;
+    auto featuresPath = config.features_path();
+    EXPECT_NE("", featuresPath);
+    EXPECT_EQ(true, wb_feature::PreLoadFeatures(featuresPath, features));
 
     auto wxProcessLists = wxbox::util::wx::GetWeChatProcessList();
     spdlog::info("wechat prcoess count : {}", wxProcessLists.size());
@@ -248,7 +201,7 @@ TEST(wxbox_utils, wx)
         spdlog::info("    execute dirpath : {}", pi.dirpath);
 
         wb_feature::WxAPIHookPointVACollection vaCollection;
-        auto                                   valid = wxbox::util::feature::CollectWeChatProcessHookPointVA(pi, wxApiHookInfo, vaCollection);
+        auto                                   valid = features.Collect(pi, vaCollection);
         spdlog::info("    can hook : {}", valid);
         if (!valid) {
             continue;
@@ -262,6 +215,8 @@ TEST(wxbox_utils, wx)
 
 TEST(wxbox_utils, crack)
 {
+    AppConfig& config             = AppConfig::singleton();
+
     auto wxInstallationPath = wxbox::util::wx::GetWxInstallationPath();
     if (wxInstallationPath.empty()) {
         return;
@@ -273,14 +228,14 @@ TEST(wxbox_utils, crack)
     }
 
     // unwind feature
-    wb_feature::WxApiHookInfo wxApiHookInfo;
-    auto                      processPath  = wxbox::util::file::GetProcessRootPath();
-    auto                      featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
-    wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
+    wb_feature::WxApiFeatures features;
+    auto                      featuresPath = config.features_path();
+    EXPECT_NE("", featuresPath);
+    EXPECT_EQ(true, wb_feature::PreLoadFeatures(featuresPath, features));
 
     // open wechat with multi boxing
     wb_crack::OpenWxWithMultiBoxingResult openResult           = {0};
-    auto                                  wxMultiBoxingSuccess = wxbox::util::crack::OpenWxWithMultiBoxing(wxEnvInfo, wxApiHookInfo, &openResult);
+    auto                                  wxMultiBoxingSuccess = wxbox::util::crack::OpenWxWithMultiBoxing(wxEnvInfo, features, &openResult);
     EXPECT_EQ(true, wxMultiBoxingSuccess);
     spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
     if (wxMultiBoxingSuccess) {
@@ -314,9 +269,9 @@ TEST(wxbox_utils, crack)
         // known wechat version
         //
 
-        wb_feature::LocateTargetInfo locateTargetInfo = {hProcess, openResult.pModuleBaseAddr, openResult.uModuleSize};
+        wb_feature::LocateTarget locateTarget = {hProcess, openResult.pModuleBaseAddr, openResult.uModuleSize};
         for (auto api : wb_feature::WX_HOOK_API) {
-            ucpulong_t addr = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
+            ucpulong_t addr = features.Locate(locateTarget, wxEnvInfo.version, api);
             EXPECT_NE(ucpulong_t(0), addr);
             spdlog::info("{} VA : 0x{:08X}", api, addr);
         }
@@ -327,7 +282,7 @@ TEST(wxbox_utils, crack)
 
         wxEnvInfo.version = "3.2.2";
         for (auto api : wb_feature::WX_HOOK_API) {
-            ucpulong_t addr = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
+            ucpulong_t addr = features.Locate(locateTarget, wxEnvInfo.version, api);
             EXPECT_NE(ucpulong_t(0), addr);
             spdlog::info("unknwon version(v3.2.2) {} VA : 0x{:08X}", api, addr);
         }
