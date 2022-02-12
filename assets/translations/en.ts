@@ -68,6 +68,69 @@
     </message>
 </context>
 <context>
+    <name>SplashScreen</name>
+    <message>
+        <source>Register Logger</source>
+        <translation>Register Logger</translation>
+    </message>
+    <message>
+        <source>Register Exit Handler</source>
+        <translation>Register Exit Handler</translation>
+    </message>
+    <message>
+        <source>Register Core Dumper</source>
+        <translation>Register Core Dumper</translation>
+    </message>
+    <message>
+        <source>Init XStyle Theme</source>
+        <translation>Init XStyle Theme</translation>
+    </message>
+    <message>
+        <source>Instantiation Main Window</source>
+        <translation>Instantiation Main Window</translation>
+    </message>
+    <message>
+        <source>Check System Version Supported</source>
+        <translation>Check System Version Supported</translation>
+    </message>
+    <message>
+        <source>Init WxBox</source>
+        <translation>Init WxBox</translation>
+    </message>
+    <message>
+        <source>Record Singleton Window ID</source>
+        <translation>Record Singleton Window ID</translation>
+    </message>
+    <message>
+        <source>Show Main Window</source>
+        <translation>Show Main Window</translation>
+    </message>
+    <message>
+        <source>Init Application Menu</source>
+        <translation>Init Application Menu</translation>
+    </message>
+    <message>
+        <source>Init Application Tray</source>
+        <translation>Init Application Tray</translation>
+    </message>
+    <message>
+        <source>Init Widget</source>
+        <translation>Init Widget</translation>
+    </message>
+    <message>
+        <source>Register Widget Event</source>
+        <translation>Register Widget Event</translation>
+    </message>
+    <message>
+        <source>Preload WeChat API Features</source>
+        <translation>Preload WeChat API Features</translation>
+    </message>
+    <message>
+        <source>Start WxBox RPC Server</source>
+        <translation>Start WxBox RPC Server</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow_xstylewindow</name>
     <message>
         <source>English</source>

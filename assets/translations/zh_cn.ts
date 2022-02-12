@@ -68,6 +68,69 @@
     </message>
 </context>
 <context>
+    <name>SplashScreen</name>
+    <message>
+        <source>Register Logger</source>
+        <translation>初始化日志</translation>
+    </message>
+    <message>
+        <source>Register Exit Handler</source>
+        <translation>注册ExitHandler</translation>
+    </message>
+    <message>
+        <source>Register Core Dumper</source>
+        <translation>注册CoreDumper</translation>
+    </message>
+    <message>
+        <source>Init XStyle Theme</source>
+        <translation>初始化XStyle主题</translation>
+    </message>
+    <message>
+        <source>Instantiation Main Window</source>
+        <translation>实例化主窗口</translation>
+    </message>
+    <message>
+        <source>Check System Version Supported</source>
+        <translation>检查当前版本系统是否支持WxBox运行</translation>
+    </message>
+    <message>
+        <source>Init WxBox</source>
+        <translation>初始化WxBox</translation>
+    </message>
+    <message>
+        <source>Record Singleton Window ID</source>
+        <translation>注册单例窗口句柄</translation>
+    </message>
+    <message>
+        <source>Show Main Window</source>
+        <translation>显示主窗口</translation>
+    </message>
+    <message>
+        <source>Init Application Menu</source>
+        <translation>初始化AppMenu</translation>
+    </message>
+    <message>
+        <source>Init Application Tray</source>
+        <translation>初始化托盘</translation>
+    </message>
+    <message>
+        <source>Init Widget</source>
+        <translation>初始化控件</translation>
+    </message>
+    <message>
+        <source>Register Widget Event</source>
+        <translation>注册控件事件</translation>
+    </message>
+    <message>
+        <source>Preload WeChat API Features</source>
+        <translation>预加载特征库</translation>
+    </message>
+    <message>
+        <source>Start WxBox RPC Server</source>
+        <translation>启动WxBox RPC服务</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow_xstylewindow</name>
     <message>
         <source>English</source>

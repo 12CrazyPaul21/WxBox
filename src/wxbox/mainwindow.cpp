@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget* parent)
   , appMenu("AppMenu", this)
   , appTray(this)
   , controller(this)
-  , downloader(this)
 {
     // setup xstyle ui
     qApp->setStyle(QStyleFactory::create("Fusion"));
@@ -51,11 +50,12 @@ bool MainWindow::CheckSystemVersionSupported()
 void MainWindow::UpdateWeChatFeatures()
 {
     downloadDialog.beginMission();
+    spdlog::info("update wechat features");
 
     // pulling feature list
     downloadDialog.SetWindowTitle(Translate("Update Feature Repository"));
     downloadDialog.SetStatus(Translate("Pulling Feature List"));
-    auto result = downloadDialog.get(QUrl(config.extra_features_list_url().c_str()));
+    auto result = downloadDialog.get(QUrl(config.features_list_url().c_str()));
     if (!std::get<0>(result)) {
         downloadDialog.closeMission();
         xstyle::error(this, "", Translate("Pulling Feature List Failed"));
@@ -63,8 +63,8 @@ void MainWindow::UpdateWeChatFeatures()
     }
 
     // parse feature list
-    wb_feature::RepoFeatureList repoFeatureList;
-    if (!wb_feature::ParseRepoFeatureList(std::get<1>(result), repoFeatureList)) {
+    wb_feature::FeatureRepoList repoFeatureList;
+    if (!wb_feature::ParseFeatureRepoList(std::get<1>(result), repoFeatureList)) {
         downloadDialog.closeMission();
         xstyle::error(this, "", Translate("Feature List Invalid"));
         return;
@@ -78,45 +78,15 @@ void MainWindow::UpdateWeChatFeatures()
     }
 
     // download features
-    if (downloadDialog.download(config.extra_features_path().c_str(), repoFeatureList.features) == FileDownloadStatus::Success) {
+    if (downloadDialog.download(config.features_path().c_str(), repoFeatureList.features) == FileDownloadStatus::Success) {
         config.update_feature_update_timestamp(repoFeatureList.timestamp);
+        spdlog::info("update wechat features successful, the version timestamp : " + repoFeatureList.timestamp);
     }
 
     downloadDialog.closeMission();
-}
 
-void MainWindow::RegisterEvent()
-{
-    QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
-    QObject::connect(ui->btnUpdateFeatureRepository, &QPushButton::clicked, this, &MainWindow::UpdateWeChatFeatures);
-
-    ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());
-    QObject::connect(ui->closeIsMinimizeTray, &QCheckBox::stateChanged, this, [this](int state) {
-        TurnCloseIsMinimizeToTray(state == Qt::Checked);
-    });
-
-    QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
-        xstyle::warning(this, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(this, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        /*    xstyle_manager.ChangeLanguage("zh_cn");
-        xstyle_manager.ChangeTheme("");*/
-    });
-    QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
-        /*     xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
-        xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
-        char* e = nullptr;
-        *e      = 0;*/
-    });
-    QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
-        /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
-        xstyle_manager.ChangeLanguage("zh_cn");
-        xstyle_manager.ChangeTheme("GreenTheme");*/
-    });
-    QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
-        //UpdateWeChatFeatures();
-    });
+    // reload features
+    controller.ReloadFeatures();
 }
 
 void MainWindow::InitAppMenu()
@@ -143,21 +113,73 @@ void MainWindow::InitAppTray()
     });
 }
 
-bool MainWindow::InitWxBox()
+void MainWindow::InitWidget()
+{
+}
+
+void MainWindow::RegisterEvent()
+{
+    QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
+    QObject::connect(ui->btnUpdateFeatureRepository, &QPushButton::clicked, this, &MainWindow::UpdateWeChatFeatures);
+
+    ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());
+    QObject::connect(ui->closeIsMinimizeTray, &QCheckBox::stateChanged, this, [this](int state) {
+        TurnCloseIsMinimizeToTray(state == Qt::Checked);
+    });
+
+    QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
+        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        /*    xstyle_manager.ChangeLanguage("zh_cn");
+        xstyle_manager.ChangeTheme("");*/
+    });
+    QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
+        /*     xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
+        xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
+        char* e = nullptr;
+        *e      = 0;*/
+    });
+    QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
+        /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
+        xstyle_manager.ChangeLanguage("zh_cn");
+        xstyle_manager.ChangeTheme("GreenTheme");*/
+        xstyle_manager.ChangeLanguage("zh_cn");
+    });
+    QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
+        //UpdateWeChatFeatures();
+        xstyle_manager.ChangeLanguage("en");
+    });
+}
+
+bool MainWindow::InitWxBox(QSplashScreen* splash)
 {
     // press close button is minimize to tray not quit
     TurnCloseIsMinimizeToTray(config.close_is_minimize_to_tray());
 
     // init app menu
+    SPLASH_MESSAGE("Init Application Menu");
     InitAppMenu();
 
     // init app tray
+    SPLASH_MESSAGE("Init Application Tray");
     InitAppTray();
 
+    // init widget
+    SPLASH_MESSAGE("Init Widget");
+    InitWidget();
+
     // register event
+    SPLASH_MESSAGE("Register Widget Event");
     RegisterEvent();
 
+    // preload features
+    SPLASH_MESSAGE("Preload WeChat API Features");
+    controller.ReloadFeatures();
+
     // start wxbox server
+    SPLASH_MESSAGE("Start WxBox RPC Server");
     controller.StartWxBoxServer();
     return true;
 }

@@ -15,6 +15,7 @@
 #include <QMenu>
 #include <QDesktopServices>
 #include <QSystemTrayIcon>
+#include <QSplashScreen>
 
 #undef signals
 #include <utils/common.h>
@@ -36,9 +37,17 @@
 #include <about.h>
 #include <download_dialog.h>
 
-namespace Ui {
-    class MainWindowBody;
-}
+#define SHOW_SPLASH_SCREEN()                                                   \
+    QSplashScreen* splash = new QSplashScreen(QPixmap(":/splash_screen.png")); \
+    splash->setStyleSheet(R"(font: normal bold 14px "Microsoft YaHei";)");     \
+    splash->show();
+#define SPLASH_MESSAGE(MESSAGE) splash->showMessage(xstyle_manager.Translate("SplashScreen", MESSAGE), Qt::AlignCenter | Qt::AlignBottom, Qt::white);
+#define SPLASH_FINISH(PWIDGET)   \
+    {                            \
+        splash->finish(&window); \
+        delete splash;           \
+        splash = nullptr;        \
+    }
 
 #ifdef WXBOX_XSTYLE_QUICK
 #define XSTYLE_WINDOW_CLASS XStyleQuickWindow
@@ -47,24 +56,9 @@ namespace Ui {
 #define XSTYLE_WINDOW_CLASS XStyleWindow
 #endif
 
-class WxBoxDownloader : public QObject
-{
-    Q_OBJECT
-
-  public:
-    explicit WxBoxDownloader(QObject* parent = nullptr)
-      : QObject(parent)
-    {
-    }
-
-    void cancel()
-    {
-        emit triggerCancel();
-    }
-
-  signals:
-    void triggerCancel();
-};
+namespace Ui {
+    class MainWindowBody;
+}
 
 class MainWindow final : public XSTYLE_WINDOW_CLASS
 {
@@ -79,14 +73,10 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     bool CheckSystemVersionSupported();
     void UpdateWeChatFeatures();
 
-  private:
-    virtual void CompleteShow() override
-    {
-        if (!inited) {
-            inited = InitWxBox();
-        }
-    }
+    bool InitWxBox(QSplashScreen* splash);
+    bool DeinitWxBox();
 
+  private:
     virtual bool BeforeClose() override
     {
         return DeinitWxBox();
@@ -119,20 +109,17 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     void RegisterEvent();
     void InitAppMenu();
     void InitAppTray();
-    bool InitWxBox();
-    bool DeinitWxBox();
+    void InitWidget();
 
   private:
     Ui::MainWindowBody* ui;
-    AppConfig&          config;
+    AboutWxBoxDialog    aboutDialog;
+    DownloadDialog      downloadDialog;
+    XStyleMenu          appMenu;
+    QSystemTrayIcon     appTray;
 
-    AboutWxBoxDialog aboutDialog;
-    DownloadDialog   downloadDialog;
-    XStyleMenu       appMenu;
-    QSystemTrayIcon  appTray;
-
-    WxBoxController                  controller;
-    wxbox::internal::WxBoxDownloader downloader;
+    AppConfig&      config;
+    WxBoxController controller;
 };
 
 #endif  // __MAINWINDOW_H

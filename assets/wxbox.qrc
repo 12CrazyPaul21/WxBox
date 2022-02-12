@@ -2,4 +2,7 @@
   <qresource prefix="icon">
     <file>app.ico</file>
   </qresource>
+  <qresource prefix="/">
+    <file>./splash_screen.png</file>
+  </qresource>
 </RCC>
