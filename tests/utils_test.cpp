@@ -142,7 +142,7 @@ TEST(wxbox_utils, feature_list)
     EXPECT_EQ(true, features.GetSimilarHookPointFeature("1.5.5.208", "CheckAppSingleton", hookPointFeatureInfo));
 }
 
-TEST(wxbox_utils__, wx)
+TEST(wxbox_utils, wx)
 {
     AppConfig& config = AppConfig::singleton();
 
@@ -431,11 +431,13 @@ TEST(wxbox_utils, module_infos)
 
 std::string before_hook()
 {
+    spdlog::info("before hook");
     return "before hook";
 }
 
 std::string after_hook()
 {
+    spdlog::info("after hook");
     return "after hook";
 }
 
@@ -443,6 +445,11 @@ TEST(wxbox_utils, hook)
 {
     EXPECT_EQ(0, before_hook().compare("before hook"));
     wb_hook::InProcessDummyHook(before_hook, after_hook);
+    EXPECT_EQ(0, before_hook().compare("after hook"));
+    wb_hook::RevokeInProcessHook(before_hook);
+    EXPECT_EQ(0, before_hook().compare("before hook"));
+
+	wb_hook::InProcessHook(before_hook, after_hook);
     EXPECT_EQ(0, before_hook().compare("after hook"));
     wb_hook::RevokeInProcessHook(before_hook);
     EXPECT_EQ(0, before_hook().compare("before hook"));

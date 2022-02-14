@@ -45,6 +45,9 @@ namespace wxbox {
             // Function
             //
 
+            void* AllocUnrestrictedMem(const size_t& count);
+            void  FreeUnrestrictedMem(void* pMem);
+
             RemotePageInfo AllocPageToRemoteProcess(wxbox::util::process::PROCESS_HANDLE hProcess, ucpulong_t pageSize = RemotePageInfo::MIN_REMOTE_PAGE_SIZE, bool canExecute = false);
             bool           FreeRemoteProcessPage(wxbox::util::process::PROCESS_HANDLE hProcess, RemotePageInfo& pageInfo);
 

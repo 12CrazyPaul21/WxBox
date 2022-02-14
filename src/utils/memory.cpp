@@ -2,6 +2,56 @@
 
 #if WXBOX_IN_WINDOWS_OS
 
+static std::mutex         g_mutexAlloc;
+static std::atomic_size_t g_szAllocated = 0;
+static HANDLE             g_hHeap       = NULL;
+
+static inline void* AllocUnrestrictedMem_Windows(const size_t& count)
+{
+    if (count == 0) {
+        return nullptr;
+    }
+
+    std::lock_guard<std::mutex> lock(g_mutexAlloc);
+    if (!g_hHeap) {
+        g_hHeap = ::HeapCreate(HEAP_CREATE_ENABLE_EXECUTE, 0, 0);
+        if (!g_hHeap) {
+            return nullptr;
+        }
+    }
+
+    void* pMem = ::HeapAlloc(g_hHeap, HEAP_ZERO_MEMORY, count);
+    if (!pMem) {
+        return nullptr;
+    }
+
+    g_szAllocated += count;
+    return pMem;
+}
+
+static inline void FreeUnrestrictedMem_Windows(void* pMem)
+{
+    if (!pMem) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(g_mutexAlloc);
+    if (!g_hHeap) {
+        return;
+    }
+
+    auto size = ::HeapSize(g_hHeap, 0, pMem);
+    ::HeapFree(g_hHeap, 0, pMem);
+
+    if (size != -1) {
+        g_szAllocated -= size;
+        if (g_szAllocated <= 0) {
+            ::HeapDestroy(g_hHeap);
+            g_hHeap = NULL;
+        }
+    }
+}
+
 static inline bool ReadMemory_Windows(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, uint8_t* pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesRead)
 {
     SIZE_T numberOfBytesRead = 0;
@@ -117,6 +167,17 @@ static inline ucpulong_t ScanMemoryRev_Windows(wxbox::util::process::PROCESS_HAN
 
 #elif WXBOX_IN_MAC_OS
 
+static inline void* AllocUnrestrictedMem_Mac(const size_t& count)
+{
+    throw std::exception("AllocUnrestrictedMem_Mac stub");
+    return nullptr;
+}
+
+static inline void FreeUnrestrictedMem_Mac(void* pMem)
+{
+    throw std::exception("FreeUnrestrictedMem_Mac stub");
+}
+
 static inline bool ReadMemory_Mac(wb_process::PROCESS_HANDLE hProcess, const void* const pBaseAddress, uint8_t* pBuffer, ucpulong_t uSize, ucpulong_t* pNumberOfBytesRead)
 {
     throw std::exception("ReadMemory_Mac stub");
@@ -142,6 +203,24 @@ static inline ucpulong_t ScanMemoryRev_Mac(wxbox::util::process::PROCESS_HANDLE 
 }
 
 #endif
+
+void* wxbox::util::memory::AllocUnrestrictedMem(const size_t& count)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return AllocUnrestrictedMem_Windows(count);
+#elif WXBOX_IN_MAC_OS
+    return AllocUnrestrictedMem_Mac(count);
+#endif
+}
+
+void wxbox::util::memory::FreeUnrestrictedMem(void* pMem)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return FreeUnrestrictedMem_Windows(pMem);
+#elif WXBOX_IN_MAC_OS
+    return FreeUnrestrictedMem_Mac(pMem);
+#endif
+}
 
 wxbox::util::memory::RemotePageInfo wxbox::util::memory::AllocPageToRemoteProcess(wxbox::util::process::PROCESS_HANDLE hProcess, ucpulong_t pageSize, bool canExecute)
 {

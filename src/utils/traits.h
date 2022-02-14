@@ -26,6 +26,8 @@ namespace wxbox {
             //
 
             FunctionInfo FetchFunctionInfo(void* pFunc, void* pFuncEnd, bool ignoreFilledInt3 = false);
+            void*        GetActualEntryAddress(void* pfnEntry);
+            ucpulong_t   CpuOpcodeInstructionByteSize(void* pBeginOpcode);
         }
     }
 }

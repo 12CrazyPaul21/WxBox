@@ -2,6 +2,8 @@ option('use_wxbox_xstyle_qml', type: 'boolean', value: false)
 
 option('disable_wxbox_utils_test', type: 'boolean', value: false)
 option('disable_wxbox_plugin_test', type: 'boolean', value: false)
+option('disable_frida_gum_test', type: 'boolean', value: false)
+option('disable_hook_test', type: 'boolean', value: false)
 
 option('default_wxbox_language', type: 'string', value: 'zh_cn')
 option('default_wxbox_i18n_path', type: 'string', value: 'i18n')

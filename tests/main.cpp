@@ -21,6 +21,12 @@ int main(int argc, char* argv[])
 #ifdef DISABLE_WXBOX_PLUGIN_TEST
     ADD_DISABLE_FILTER("wxbox_plugin");
 #endif
+#ifdef DISABLE_FRIDA_GUM_TEST
+    ADD_DISABLE_FILTER("frida_gum");
+#endif
+#ifdef DISABLE_HOOK_TEST
+    ADD_DISABLE_FILTER("wxbox_hook");
+#endif
 
 	if (!filters.str().empty()) {
         ::testing::GTEST_FLAG(filter) = filters.str().c_str();

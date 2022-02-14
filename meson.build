@@ -305,7 +305,8 @@ proto_generated = proto_generator.process('protos/wxbox.proto')
 #
 
 utils_inc = [
-    source_root
+    source_root,
+    join_paths(proj_root, 'thirdparty')
 ]
 
 utils_src = files([

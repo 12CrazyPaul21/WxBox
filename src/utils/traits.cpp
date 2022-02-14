@@ -1,5 +1,7 @@
 #include <utils/common.h>
 
+#include <thirdparty/ldisasm.hpp>
+
 wxbox::util::traits::FunctionInfo wxbox::util::traits::FetchFunctionInfo(void* pFunc, void* pFuncEnd, bool ignoreFilledInt3)
 {
     FunctionInfo info;
@@ -34,4 +36,25 @@ wxbox::util::traits::FunctionInfo wxbox::util::traits::FetchFunctionInfo(void* p
         ;
 
     return info;
+}
+
+void* wxbox::util::traits::GetActualEntryAddress(void* pfnEntry)
+{
+#if WXBOX_CPU_IS_X86
+    if (((uint8_t*)pfnEntry)[0] != 0xE9) {
+        return pfnEntry;
+    }
+    return (uint8_t*)pfnEntry + *((long*)((uint8_t*)pfnEntry + 1)) + 1 + sizeof(long);
+#else
+    return pfnEntry;
+#endif
+}
+
+ucpulong_t wxbox::util::traits::CpuOpcodeInstructionByteSize(void* pBeginOpcode)
+{
+    if (!pBeginOpcode) {
+        return 0;
+    }
+
+    return ldisasm(pBeginOpcode, WXBOX_CPU_IS_X86_64);
 }
