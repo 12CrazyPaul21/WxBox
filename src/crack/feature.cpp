@@ -23,6 +23,25 @@ static inline ucpulong_t UnwindEntryRVA(const YAML::Node& hookInfo, const std::s
     return rva;
 }
 
+static inline std::vector<uint8_t> UnwindEntryFillStream(const YAML::Node& hookInfo, const std::string& funcName)
+{
+    std::vector<uint8_t> stream;
+
+    if (!funcName.length()) {
+        return stream;
+    }
+
+    try {
+        if (hookInfo[funcName].IsMap() && hookInfo[funcName]["FillStream"].IsSequence()) {
+            stream = hookInfo[funcName]["FillStream"].as<std::vector<uint8_t>>();
+        }
+    }
+    catch (const std::exception& /*e*/) {
+    }
+
+    return stream;
+}
+
 static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& hookPointName, wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
 {
     if (!hookPointName.length()) {
@@ -150,6 +169,14 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         hookPointFeatureInfo.locateActionExecuteTimes = hookPointFeatureNode["LocateActionExecuteTimes"].as<long>();
     }
 
+    //
+    // collect Fill Stream
+    //
+
+    if (hookPointFeatureNode["FillStream"].IsSequence()) {
+        hookPointFeatureInfo.fillStream = hookPointFeatureNode["FillStream"].as<std::vector<uint8_t>>();
+    }
+
     return true;
 }
 
@@ -174,6 +201,11 @@ static inline bool UnwindAbsoluteHookInfo(const std::string& wxVersion, const YA
             return false;
         }
         absoluteHookInfo.mapApiRva[api] = rva;
+
+        std::vector<uint8_t> fillStream = UnwindEntryFillStream(hookInfo, api);
+        if (!fillStream.empty()) {
+            absoluteHookInfo.mapApiFillStream.emplace(api, std::move(fillStream));
+        }
     }
 
     absoluteHookInfo.wxVersion = wxVersion;
@@ -337,6 +369,16 @@ ucpulong_t wb_feature::_WxAbsoluteHookInfo::GetApiRva(const std::string& api) co
     return mapApiRva[api];
 }
 
+bool wb_feature::_WxAbsoluteHookInfo::GetApiFillStream(const std::string& api, std::vector<uint8_t>& stream) const
+{
+    if (mapApiFillStream.find(api) == mapApiFillStream.end()) {
+        return false;
+    }
+
+    stream = mapApiFillStream[api];
+    return true;
+}
+
 /**
  * wxbox::util::feature::WxHookPointFeatures
  */
@@ -347,6 +389,16 @@ bool wb_feature::_WxHookPointFeatures::GetApiHookFeature(const std::string& api,
     }
 
     hookPointFeatureInfo = mapApiFeature[api];
+    return true;
+}
+
+bool wb_feature::_WxHookPointFeatures::GetApiHookFeatureFillStream(const std::string& api, std::vector<uint8_t>& stream) const
+{
+    if (mapApiFeature.find(api) == mapApiFeature.end()) {
+        return false;
+    }
+
+    stream = mapApiFeature[api].fillStream;
     return true;
 }
 
@@ -707,6 +759,38 @@ bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo
     else {
         return Collect(pi, FindSimilarVersion(wxEnvInfo.version), false, vaCollection);
     }
+}
+
+//
+// obtain fill stream
+//
+
+bool wb_feature::_WxApiFeatures::ObtainFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream)
+{
+    if (ObtainAbsoluteFillStream(version, api, stream)) {
+        return true;
+    }
+    return ObtainFuzzyFillStream(version, api, stream);
+}
+
+bool wb_feature::_WxApiFeatures::ObtainAbsoluteFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream)
+{
+    auto ptr = Inner_GetAbsoluteHookInfo(version);
+    if (!ptr) {
+        return false;
+    }
+
+    return ptr->GetApiFillStream(api, stream);
+}
+
+bool wb_feature::_WxApiFeatures::ObtainFuzzyFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream)
+{
+    auto ptr = Inner_GetHookPointFeatures(version);
+    if (!ptr) {
+        return false;
+    }
+
+    return ptr->GetApiHookFeatureFillStream(api, stream);
 }
 
 //

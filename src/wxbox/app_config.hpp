@@ -253,7 +253,13 @@ class AppConfig final : public wb_config::Config
         }
 #endif
 
-        return wxbox::util::file::JoinPath(featuresPath, WXBOX_PLATFORM_NAME);
+        return wxbox::util::file::JoinPath(wxbox::util::file::JoinPath(featuresPath, WXBOX_PLATFORM_NAME),
+#if WXBOX_CPU_IS_X86
+                                           "x86"
+#else
+                                           "x64"
+#endif
+        );
     }
 
     std::string features_repo_root_url() const

@@ -52,8 +52,9 @@ namespace wxbox {
 
             typedef struct _WxAbsoluteHookInfo
             {
-                std::string                                         wxVersion;
-                mutable std::unordered_map<std::string, ucpulong_t> mapApiRva;
+                std::string                                                   wxVersion;
+                mutable std::unordered_map<std::string, ucpulong_t>           mapApiRva;
+                mutable std::unordered_map<std::string, std::vector<uint8_t>> mapApiFillStream;
 
                 //
                 // constructor
@@ -63,14 +64,16 @@ namespace wxbox {
 
                 SETUP_COPY_METHOD(_WxAbsoluteHookInfo, other)
                 {
-                    wxVersion = other.wxVersion;
-                    mapApiRva = other.mapApiRva;
+                    wxVersion        = other.wxVersion;
+                    mapApiRva        = other.mapApiRva;
+                    mapApiFillStream = other.mapApiFillStream;
                 }
 
                 SETUP_MOVE_METHOD(_WxAbsoluteHookInfo, other)
                 {
-                    wxVersion = std::move(other.wxVersion);
-                    mapApiRva = std::move(other.mapApiRva);
+                    wxVersion        = std::move(other.wxVersion);
+                    mapApiRva        = std::move(other.mapApiRva);
+                    mapApiFillStream = std::move(other.mapApiFillStream);
                 }
 
                 //
@@ -81,9 +84,11 @@ namespace wxbox {
                 {
                     wxVersion = "";
                     mapApiRva.clear();
+                    mapApiFillStream.clear();
                 }
 
                 ucpulong_t GetApiRva(const std::string& api) const;
+                bool       GetApiFillStream(const std::string& api, std::vector<uint8_t>& stream) const;
 
             } WxAbsoluteHookInfo, *PWxAbsoluteHookInfo;
 
@@ -130,6 +135,9 @@ namespace wxbox {
                 // for 'backMultiTimes' locate action
                 long locateActionExecuteTimes;
 
+                // fill stream
+                std::vector<uint8_t> fillStream;
+
                 //
                 // constructor
                 //
@@ -175,6 +183,9 @@ namespace wxbox {
 
                     // for 'backMultiTimes'
                     locateActionExecuteTimes = other.locateActionExecuteTimes;
+
+                    // fill stream
+                    fillStream = other.fillStream;
                 }
 
                 SETUP_MOVE_METHOD(_HookPointFeatureInfo, other)
@@ -212,6 +223,9 @@ namespace wxbox {
 
                     // for 'backMultiTimes'
                     locateActionExecuteTimes = other.locateActionExecuteTimes;
+
+                    // fill stream
+                    fillStream = std::move(other.fillStream);
                 }
 
                 //
@@ -253,6 +267,9 @@ namespace wxbox {
 
                     // for 'backMultiTimes'
                     locateActionExecuteTimes = 0;
+
+                    // fill stream
+                    fillStream.clear();
                 }
 
             } HookPointFeatureInfo, *PHookPointFeatureInfo;
@@ -291,6 +308,7 @@ namespace wxbox {
                 }
 
                 bool GetApiHookFeature(const std::string& api, HookPointFeatureInfo& hookPointFeatureInfo) const;
+                bool GetApiHookFeatureFillStream(const std::string& api, std::vector<uint8_t>& stream) const;
 
             } WxHookPointFeatures, *PWxHookPointFeatures;
 
@@ -414,6 +432,14 @@ namespace wxbox {
                 bool Collect(const LocateTarget& locateTarget, const WxHookPointFeatures& wxHookPointFeatures, WxAPIHookPointVACollection& vaCollection);
                 bool Collect(const wxbox::util::process::ProcessInfo& pi, const std::string& featureVersion, bool absoluteLocate, WxAPIHookPointVACollection& vaCollection);
                 bool Collect(const wxbox::util::process::ProcessInfo& pi, WxAPIHookPointVACollection& vaCollection);
+
+                //
+                // obtain fill stream
+                //
+
+                bool ObtainFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream);
+                bool ObtainAbsoluteFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream);
+                bool ObtainFuzzyFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream);
 
               private:
                 bool                 Inner_LoadFeature(const std::string& version);

@@ -82,28 +82,35 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
         return false;
     }
 
+    // DEPRECATED :
     //
     // asm 'ret' code. [0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3](mov eax, 0; ret) can be used directly, but frida-gum's GumX86Writer is still used for assembly here
     //
 
-    GumX86Writer x86Writer;
-    guint8       x86MachineInstruction[32] = {0};
-    guint        uInstructionSize          = 0;
+    //     GumX86Writer x86Writer;
+    //     guint8       x86MachineInstruction[32] = {0};
+    //     guint        uInstructionSize          = 0;
+    //
+    // #if WXBOX_CPU_IS_X86
+    //     ::gum_x86_writer_init(&x86Writer, x86MachineInstruction);
+    //     ::gum_x86_writer_set_target_cpu(&x86Writer, GUM_CPU_IA32);
+    //     ::gum_x86_writer_set_target_abi(&x86Writer, GUM_ABI_WINDOWS);
+    //     ::gum_x86_writer_put_mov_reg_u32(&x86Writer, GUM_REG_EAX, 0);
+    //     ::gum_x86_writer_put_ret(&x86Writer);
+    //     uInstructionSize = ::gum_x86_writer_offset(&x86Writer);
+    // #endif
 
-#if WXBOX_CPU_IS_X86
-    ::gum_x86_writer_init(&x86Writer, x86MachineInstruction);
-    ::gum_x86_writer_set_target_cpu(&x86Writer, GUM_CPU_IA32);
-    ::gum_x86_writer_set_target_abi(&x86Writer, GUM_ABI_WINDOWS);
-    ::gum_x86_writer_put_mov_reg_u32(&x86Writer, GUM_REG_EAX, 0);
-    ::gum_x86_writer_put_ret(&x86Writer);
-    uInstructionSize = ::gum_x86_writer_offset(&x86Writer);
-#endif
+    // obtain fill stream
+    std::vector<uint8_t> fillStream;
+    if (!wxApiFeatures.ObtainFillStream(wxEnvInfo.version, "CheckAppSingleton", fillStream)) {
+        return false;
+    }
 
     //
     // crack wechat
     //
 
-    return wb_memory::WriteMemory(hProcess, (void*)checkAppSingletonVA, x86MachineInstruction, uInstructionSize, nullptr);
+    return wb_memory::WriteMemory(hProcess, (void*)checkAppSingletonVA, fillStream.data(), fillStream.size(), nullptr);
 }
 
 static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_process::PID pid, wb_crack::POpenWxWithMultiBoxingResult pResult)

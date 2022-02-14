@@ -151,11 +151,11 @@ TEST(wxbox_crack, crack)
         // unknwon wechat version
         //
 
-        wxEnvInfo.version = "3.2.2";
+        wxEnvInfo.version = "3.5.2";
         for (auto api : wb_feature::WX_HOOK_API) {
             ucpulong_t addr = features.Locate(locateTarget, wxEnvInfo.version, api);
             EXPECT_NE(ucpulong_t(0), addr);
-            spdlog::info("unknwon version(v3.2.2) {} VA : 0x{:08X}", api, addr);
+            spdlog::info("unknwon version(v3.5.2) {} VA : 0x{:08X}", api, addr);
         }
     }
 
