@@ -41,7 +41,7 @@
     QSplashScreen* splash = new QSplashScreen(QPixmap(":/splash_screen.png")); \
     splash->setStyleSheet(R"(font: normal bold 14px "Microsoft YaHei";)");     \
     splash->show();
-#define SPLASH_MESSAGE(MESSAGE) splash->showMessage(xstyle_manager.Translate("SplashScreen", MESSAGE), Qt::AlignCenter | Qt::AlignBottom, Qt::white);
+#define SPLASH_MESSAGE(MESSAGE) splash->showMessage(xstyle_manager.Translate("SplashScreen", MESSAGE), Qt::AlignCenter | Qt::AlignBottom, Qt::lightGray);
 #define SPLASH_FINISH(PWIDGET)   \
     {                            \
         splash->finish(&window); \
