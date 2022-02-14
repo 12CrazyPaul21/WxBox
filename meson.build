@@ -31,6 +31,7 @@ xstyle_quick_assets_root = join_paths(xstyle_assets_root, 'quick')
 wxbox_root = join_paths(source_root, 'wxbox')
 wxbot_root = join_paths(source_root, 'wxbot')
 utils_root = join_paths(source_root, 'utils')
+crack_root = join_paths(source_root, 'crack')
 crashdumper_root = join_paths(source_root, 'crashdumper')
 plugin_root = join_paths(source_root, 'plugin')
 interact_root = join_paths(source_root, 'interact')
@@ -313,18 +314,12 @@ utils_src = files([
     join_paths(utils_root, 'common.h'),
     join_paths(utils_root, 'process.h'),
     join_paths(utils_root, 'process.cpp'),
-    join_paths(utils_root, 'wx.h'),
-    join_paths(utils_root, 'wx.cpp'),
     join_paths(utils_root, 'file.h'),
     join_paths(utils_root, 'file.cpp'),
     join_paths(utils_root, 'string.h'),
     join_paths(utils_root, 'string.cpp'),
     join_paths(utils_root, 'memory.h'),
     join_paths(utils_root, 'memory.cpp'),
-    join_paths(utils_root, 'feature.h'),
-    join_paths(utils_root, 'feature.cpp'),
-    join_paths(utils_root, 'crack.h'),
-    join_paths(utils_root, 'crack.cpp'),
     join_paths(utils_root, 'traits.h'),
     join_paths(utils_root, 'traits.cpp'),
     join_paths(utils_root, 'inject.h'),
@@ -336,7 +331,15 @@ utils_src = files([
     join_paths(utils_root, 'coredump.h'),
     join_paths(utils_root, 'coredump.cpp'),
     join_paths(utils_root, 'config.hpp'),
-    join_paths(utils_root, 'config.cpp')
+    join_paths(utils_root, 'config.cpp'),
+
+    # wxbox crack
+    join_paths(crack_root, 'wx.h'),
+    join_paths(crack_root, 'wx.cpp'),
+    join_paths(crack_root, 'crack.h'),
+    join_paths(crack_root, 'crack.cpp'),
+    join_paths(crack_root, 'feature.h'),
+    join_paths(crack_root, 'feature.cpp'),
 ])
 
 utils_static_lib = static_library('utils',

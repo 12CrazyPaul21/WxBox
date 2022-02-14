@@ -72,7 +72,7 @@ static inline std::string GetWxModuleFolderPath_Mac(const std::string& installPa
 
 #endif
 
-std::string wxbox::util::wx::GetWxInstallationPath()
+std::string wxbox::crack::wx::GetWxInstallationPath()
 {
 #if WXBOX_IN_WINDOWS_OS
     return GetWxInstallationPath_Windows();
@@ -81,7 +81,7 @@ std::string wxbox::util::wx::GetWxInstallationPath()
 #endif
 }
 
-std::string wxbox::util::wx::GetWxModuleFolderPath(const std::string& installPath)
+std::string wxbox::crack::wx::GetWxModuleFolderPath(const std::string& installPath)
 {
 #if WXBOX_IN_WINDOWS_OS
     return GetWxModuleFolderPath_Windows(installPath);
@@ -90,7 +90,7 @@ std::string wxbox::util::wx::GetWxModuleFolderPath(const std::string& installPat
 #endif
 }
 
-std::string wxbox::util::wx::GetWxVersion(const std::string& moduleFolderPath)
+std::string wxbox::crack::wx::GetWxVersion(const std::string& moduleFolderPath)
 {
 #if WXBOX_IN_WINDOWS_OS
     // get WeChat version info from WeChatWin.dll
@@ -102,7 +102,7 @@ std::string wxbox::util::wx::GetWxVersion(const std::string& moduleFolderPath)
 #endif
 }
 
-bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& installPath)
+bool wxbox::crack::wx::IsWxInstallationPathValid(const std::string& installPath)
 {
     if (installPath.length() == 0 || !wb_file::IsPathExists(installPath)) {
         return false;
@@ -119,7 +119,7 @@ bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& installPath)
     return true;
 }
 
-bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& installPath, const std::string& moduleFolderPath)
+bool wxbox::crack::wx::IsWxInstallationPathValid(const std::string& installPath, const std::string& moduleFolderPath)
 {
     if (installPath.empty() || !wb_file::IsPathExists(installPath) || moduleFolderPath.empty() || !wb_file::IsPathExists(moduleFolderPath)) {
         return false;
@@ -132,7 +132,7 @@ bool wxbox::util::wx::IsWxInstallationPathValid(const std::string& installPath, 
     return wb_file::IsPathExists(wb_file::JoinPath(moduleFolderPath, WX_WE_CHAT_CORE_MODULE));
 }
 
-bool wxbox::util::wx::ResolveWxEnvInfo(WeChatEnvironmentInfo& wxEnvInfo)
+bool wxbox::crack::wx::ResolveWxEnvInfo(WeChatEnvironmentInfo& wxEnvInfo)
 {
     auto wxProcessList = GetWeChatProcessList();
     if (!wxProcessList.empty() && ResolveWxEnvInfo(wxProcessList[0].dirpath, wxEnvInfo)) {
@@ -147,7 +147,7 @@ bool wxbox::util::wx::ResolveWxEnvInfo(WeChatEnvironmentInfo& wxEnvInfo)
     return ResolveWxEnvInfo(installPath, wxEnvInfo);
 }
 
-bool wxbox::util::wx::ResolveWxEnvInfo(const wb_process::PID& pid, WeChatEnvironmentInfo& wxEnvInfo)
+bool wxbox::crack::wx::ResolveWxEnvInfo(const wb_process::PID& pid, WeChatEnvironmentInfo& wxEnvInfo)
 {
     std::string installPath = wb_file::GetProcessRootPath(pid);
     if (installPath.empty()) {
@@ -162,12 +162,12 @@ bool wxbox::util::wx::ResolveWxEnvInfo(const wb_process::PID& pid, WeChatEnviron
     return ResolveWxEnvInfo(installPath, wb_file::ToDirectoryPath(coreModuleInfo.modulePath), wxEnvInfo);
 }
 
-bool wxbox::util::wx::ResolveWxEnvInfo(const std::string& installPath, WeChatEnvironmentInfo& wxEnvInfo)
+bool wxbox::crack::wx::ResolveWxEnvInfo(const std::string& installPath, WeChatEnvironmentInfo& wxEnvInfo)
 {
     return ResolveWxEnvInfo(installPath, GetWxModuleFolderPath(installPath), wxEnvInfo);
 }
 
-bool wxbox::util::wx::ResolveWxEnvInfo(const std::string& installPath, const std::string& moduleFolderPath, WeChatEnvironmentInfo& wxEnvInfo)
+bool wxbox::crack::wx::ResolveWxEnvInfo(const std::string& installPath, const std::string& moduleFolderPath, WeChatEnvironmentInfo& wxEnvInfo)
 {
     if (!wb_wx::IsWxInstallationPathValid(installPath, moduleFolderPath)) {
         return false;
@@ -191,7 +191,7 @@ bool wxbox::util::wx::ResolveWxEnvInfo(const std::string& installPath, const std
     return true;
 }
 
-std::vector<wb_process::ProcessInfo> wxbox::util::wx::GetWeChatProcessList()
+std::vector<wb_process::ProcessInfo> wxbox::crack::wx::GetWeChatProcessList()
 {
     auto processLists = wxbox::util::process::GetProcessList();
 
@@ -203,7 +203,7 @@ std::vector<wb_process::ProcessInfo> wxbox::util::wx::GetWeChatProcessList()
     return processLists;
 }
 
-bool wxbox::util::wx::CheckWeChatProcessValid(wxbox::util::process::PID pid)
+bool wxbox::crack::wx::CheckWeChatProcessValid(wxbox::util::process::PID pid)
 {
     wb_process::ProcessInfo pi;
     if (!wb_process::GetProcessInfoByPID(pid, pi)) {

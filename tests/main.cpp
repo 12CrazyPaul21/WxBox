@@ -15,6 +15,7 @@ int main(int argc, char* argv[])
     }
 
     testing::InitGoogleTest(&argc, argv);
+
 #ifdef DISABLE_WXBOX_UTILS_TEST
     ADD_DISABLE_FILTER("wxbox_utils");
 #endif
@@ -26,6 +27,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef DISABLE_HOOK_TEST
     ADD_DISABLE_FILTER("wxbox_hook");
+#endif
+#ifdef DISABLE_CRACK_TEST
+    ADD_DISABLE_FILTER("wxbox_crack");
 #endif
 
 	if (!filters.str().empty()) {

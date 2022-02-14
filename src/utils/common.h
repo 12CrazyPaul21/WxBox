@@ -118,15 +118,20 @@ typedef unsigned long long ucpulong_t;
 #include <utils/platform.h>
 #include <utils/process.h>
 #include <utils/file.h>
-#include <utils/feature.h>
 #include <utils/memory.h>
 #include <utils/string.h>
-#include <utils/wx.h>
-#include <utils/crack.h>
 #include <utils/inject.h>
 #include <utils/hook.h>
 #include <utils/coredump.h>
 #include <utils/config.hpp>
+
+//
+// WxBox crack headers
+//
+
+#include <crack/wx.h>
+#include <crack/feature.h>
+#include <crack/crack.h>
 
 //
 // Short namespace
@@ -135,15 +140,16 @@ typedef unsigned long long ucpulong_t;
 namespace wb_traits   = wxbox::util::traits;
 namespace wb_platform = wxbox::util::platform;
 namespace wb_process  = wxbox::util::process;
-namespace wb_wx       = wxbox::util::wx;
 namespace wb_file     = wxbox::util::file;
 namespace wb_string   = wxbox::util::string;
 namespace wb_memory   = wxbox::util::memory;
-namespace wb_feature  = wxbox::util::feature;
-namespace wb_crack    = wxbox::util::crack;
 namespace wb_inject   = wxbox::util::inject;
 namespace wb_hook     = wxbox::util::hook;
 namespace wb_coredump = wxbox::util::coredump;
 namespace wb_config   = wxbox::util::config;
+
+namespace wb_wx      = wxbox::crack::wx;
+namespace wb_feature = wxbox::crack::feature;
+namespace wb_crack   = wxbox::crack;
 
 #endif  // #ifndef __WXBOX_UTILS_COMMON_H

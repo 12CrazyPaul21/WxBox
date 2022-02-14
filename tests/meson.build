@@ -15,6 +15,9 @@ endif
 if get_option('disable_hook_test')
     test_options += '-DDISABLE_HOOK_TEST'
 endif
+if get_option('disable_crack_test')
+    test_options += '-DDISABLE_CRACK_TEST'
+endif
 
 test_inc = [
     utils_inc,
@@ -27,7 +30,8 @@ test_src = files([
     join_paths(tests_root, 'utils_test.cpp'),
     join_paths(tests_root, 'plugin_test.cpp'),
     join_paths(tests_root, 'frida_test.cpp'),
-    join_paths(tests_root, 'hook_test.cpp')
+    join_paths(tests_root, 'hook_test.cpp'),
+    join_paths(tests_root, 'crack_test.cpp')
 ])
 
 test_exe = executable('test_all', test_src, include_directories: test_inc,

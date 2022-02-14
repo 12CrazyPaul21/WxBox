@@ -1,8 +1,8 @@
-#ifndef __WXBOX_UTILS_WX_H
-#define __WXBOX_UTILS_WX_H
+#ifndef __WXBOX_CRACK_WX_H
+#define __WXBOX_CRACK_WX_H
 
 namespace wxbox {
-    namespace util {
+    namespace crack {
         namespace wx {
 
             //
@@ -80,4 +80,4 @@ namespace wxbox {
     }
 }
 
-#endif  // #ifndef __WXBOX_UTILS_WX_H
+#endif  // #ifndef __WXBOX_CRACK_WX_H
