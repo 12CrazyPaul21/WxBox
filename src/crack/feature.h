@@ -107,6 +107,7 @@ namespace wxbox {
                 std::vector<uint8_t> refFeatureStream;
                 std::vector<uint8_t> refBackExtralInstruction;
                 std::vector<uint8_t> refFrontExtralInstruction;
+                uint8_t              refFeatureStreamOffset;
 
                 // for 'multiPushRef' scan type
                 std::vector<uint8_t>              pushInstruction;
@@ -143,7 +144,9 @@ namespace wxbox {
                 //
 
                 _HookPointFeatureInfo()
-                  : hookPointOffset(0)
+                  : refFeatureStreamOffset(0)
+                  , hookPointOffset(0)
+                  , locateActionRange(0)
                   , locateActionExecuteTimes(0)
                 {
                 }
@@ -160,6 +163,7 @@ namespace wxbox {
                     refFeatureStream          = other.refFeatureStream;
                     refBackExtralInstruction  = other.refBackExtralInstruction;
                     refFrontExtralInstruction = other.refFrontExtralInstruction;
+                    refFeatureStreamOffset    = other.refFeatureStreamOffset;
 
                     // for 'multiPushRef'
                     pushInstruction         = other.pushInstruction;
@@ -200,6 +204,7 @@ namespace wxbox {
                     refFeatureStream          = std::move(other.refFeatureStream);
                     refBackExtralInstruction  = std::move(other.refBackExtralInstruction);
                     refFrontExtralInstruction = std::move(other.refFrontExtralInstruction);
+                    refFeatureStreamOffset    = other.refFeatureStreamOffset;
 
                     // for 'multiPushRef'
                     pushInstruction         = std::move(other.pushInstruction);
@@ -244,6 +249,7 @@ namespace wxbox {
                     refFeatureStream.clear();
                     refBackExtralInstruction.clear();
                     refFrontExtralInstruction.clear();
+                    refFeatureStreamOffset = 0;
 
                     // for 'multiPushRef'
                     pushInstruction.clear();

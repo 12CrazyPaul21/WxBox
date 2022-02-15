@@ -93,6 +93,10 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         if (hookPointFeatureNode["RefFrontExtralInstruction"].IsSequence()) {
             hookPointFeatureInfo.refFrontExtralInstruction = hookPointFeatureNode["RefFrontExtralInstruction"].as<std::vector<uint8_t>>();
         }
+
+        if (hookPointFeatureNode["RefFeatureStreamOffset"].IsScalar()) {
+            hookPointFeatureInfo.refFeatureStreamOffset = hookPointFeatureNode["RefFeatureStreamOffset"].as<uint8_t>();
+        }
     }
     else if (!hookPointFeatureInfo.scanType.compare("multiPushRef")) {
         // for 'multiPushRef'
@@ -237,6 +241,9 @@ static inline ucpulong_t LocateWxAPIHookPointVA_Step_Scan_Type_Ref(const wb_feat
     if (!va) {
         return 0;
     }
+
+    // add offset
+    va += hookPointFeatureInfo.refFeatureStreamOffset;
 
     std::vector<uint8_t> scanPattern;
     scanPattern.insert(scanPattern.end(), hookPointFeatureInfo.refBackExtralInstruction.begin(), hookPointFeatureInfo.refBackExtralInstruction.end());
