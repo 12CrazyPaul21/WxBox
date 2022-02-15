@@ -15,6 +15,12 @@
 #endif
 #endif
 
+#ifdef __cplusplus
+#define WXBOT_PUBLIC_API extern "C" WXBOT_PUBLIC
+#else
+#define WXBOT_PUBLIC_API WXBOT_PUBLIC
+#endif
+
 namespace wxbot {
 
     class WxBoxClient;
@@ -47,5 +53,7 @@ namespace wxbot {
         class WxBoxClient* client;
     };
 }
+
+WXBOT_PUBLIC_API void WxBotMain(const char* args);
 
 #endif  // #ifndef __WXBOT_H

@@ -165,3 +165,31 @@ TEST(wxbox_crack, locate_hook_point)
 
 #endif
 }
+
+TEST(wxbox_crack, inject_wxbot)
+{
+    auto wxProcessList = wb_wx::GetWeChatProcessList();
+    if (wxProcessList.empty()) {
+        return;
+    }
+
+	auto wxPid = wxProcessList.front().pid;
+    auto processPath = wxbox::util::file::GetProcessRootPath();
+    EXPECT_NE(true, processPath.empty());
+
+    std::string moduleFolderPath = wxbox::util::file::JoinPath(processPath, "/../src/wxbot/");
+    wb_inject::AddModuleSearchPath(wxPid, moduleFolderPath);
+
+#if WXBOX_IN_WINDOWS_OS
+    char moduleName[] = "wxbot.dll";
+#else
+    char moduleName[] = "wxbot.so";
+#endif
+
+	char                              callFuncName[] = "WxBotMain";
+    char                              message[] = "Hello";
+    wb_inject::MethodCallingParameter parameter = wb_inject::MethodCallingParameter::BuildBufferValue(message, sizeof(message));
+
+    EXPECT_EQ(true, wb_inject::InjectModuleToProcess(wxPid, moduleName, callFuncName, &parameter));
+    EXPECT_EQ(true, wb_inject::UnInjectModuleFromProcess(wxPid, moduleName));
+}

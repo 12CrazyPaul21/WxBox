@@ -124,6 +124,7 @@ TEST(wxbox_utils, inject)
     EXPECT_NE(wb_process::PID(0), pid);
 
     std::string moduleFolderPath = wxbox::util::file::JoinPath(processPath, "/ModForInjectTest/");
+    wb_inject::AddModuleSearchPath(wb_process::GetCurrentProcessHandle(), moduleFolderPath);
 
 #if WXBOX_IN_WINDOWS_OS
     char moduleName[] = "ModForInjectTest.dll";
@@ -134,7 +135,6 @@ TEST(wxbox_utils, inject)
     char                              message[] = "Inject";
     wb_inject::MethodCallingParameter parameter = wb_inject::MethodCallingParameter::BuildBufferValue(message, sizeof(message));
 
-    wb_inject::AddModuleSearchPath(wb_process::GetCurrentProcessHandle(), moduleFolderPath);
     EXPECT_EQ(true, wb_inject::InjectModuleToProcess(pid, moduleName, callFuncName, &parameter));
     EXPECT_EQ(true, wb_inject::UnInjectModuleFromProcess(pid, moduleName));
 }

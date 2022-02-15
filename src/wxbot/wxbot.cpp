@@ -133,3 +133,15 @@ namespace wxbot {
         }
     }
 }
+
+WXBOT_PUBLIC_API void WxBotMain(const char* args)
+{
+    if (args) {
+        std::stringstream ss;
+        ss << "Hello " << args;
+        MessageBoxA(NULL, ss.str().c_str(), "WxBot", MB_OK);
+    }
+    else {
+        MessageBoxA(NULL, "Hello Inject...", "WxBot", MB_OK);
+    }
+}
