@@ -43,7 +43,13 @@ BEGIN_NAKED_STD_FUNCTION(CallProcessModuleMethodStub, wb_inject::RemoteCallParam
         ;  // call target
 		push [esi]p.pArg
 		call eax
+
+		;  // if it's cdecl, then actively clean stack
+		cmp [esi]p.stdcallPromise, 0
+		jne _NotStdcall
 		add esp, 4
+
+	_NotStdcall:
 		mov eax, 0
 
 	_Ret:
@@ -68,9 +74,20 @@ static wb_traits::FunctionInfo GetCallProcessModuleMethodStubInfo()
 
 #if WXBOX_IN_WINDOWS_OS
 
-static bool InjectModuleToProcess_Windows(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, wb_inject::PMethodCallingParameter parameter)
+static void AddModuleSearchPath_Windows(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleFolderPath)
 {
-    if (!pid || !wb_file::IsPathExists(modulePath)) {
+    if (hProcess == ::GetCurrentProcess()) {
+        SetDllDirectoryA(moduleFolderPath.c_str());
+        return;
+    }
+
+    wb_inject::MethodCallingParameter parameter = wb_inject::MethodCallingParameter::BuildBufferValue(const_cast<char*>(moduleFolderPath.c_str()), moduleFolderPath.length() + 1);
+    CallProcessModuleMethod(hProcess, "kernel32", "SetDllDirectoryA", &parameter, true);
+}
+
+static bool InjectModuleToProcess_Windows(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, wb_inject::PMethodCallingParameter parameter, bool stdcallPromise)
+{
+    if (!pid || modulePath.empty()) {
         return false;
     }
 
@@ -127,7 +144,7 @@ static bool InjectModuleToProcess_Windows(wxbox::util::process::PID pid, const s
     if (entryMethod.empty()) {
         goto _DONE;
     }
-    retval = wb_inject::CallProcessModuleMethod(hProcess, dataPageInfo, wb_file::ToFileName(modulePath), entryMethod, parameter);
+    retval = wb_inject::CallProcessModuleMethod(hProcess, dataPageInfo, wb_file::ToFileName(modulePath), entryMethod, parameter, stdcallPromise);
 
 _DONE:
     wb_memory::FreeRemoteProcessPage(hProcess, dataPageInfo);
@@ -189,7 +206,7 @@ _DONE:
     return retval;
 }
 
-static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter)
+static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter, bool stdcallPromise)
 {
     if (!hProcess || moduleName.empty() || method.empty()) {
         return false;
@@ -237,6 +254,7 @@ static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE
     remoteCallParameter.pArg                  = 0;
     remoteCallParameter.pFuncGetModuleHandleA = funcGetModuleHandleA;
     remoteCallParameter.pFuncGetProcAddress   = funcGetProcAddress;
+    remoteCallParameter.stdcallPromise        = stdcallPromise ? 1 : 0;
 
     // handle method calling parameter
     if (parameter) {
@@ -289,7 +307,12 @@ static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE
 
 #else
 
-static bool InjectModuleToProcess_Mac(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, wb_inject::PMethodCallingParameter parameter)
+static void AddModuleSearchPath_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleFolderPath)
+{
+    throw std::exception("AddModuleSearchPath_Mac stub");
+}
+
+static bool InjectModuleToProcess_Mac(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, wb_inject::PMethodCallingParameter parameter, bool stdcallPromise)
 {
     throw std::exception("InjectModuleToProcess_Mac stub");
     return false;
@@ -301,7 +324,7 @@ static bool UnInjectModuleFromProcess_Mac(wxbox::util::process::PID pid, const s
     return false;
 }
 
-static bool CallProcessModuleMethod_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter)
+static bool CallProcessModuleMethod_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter, bool stdcallPromise)
 {
     throw std::exception("CallProcessModuleMethod_Mac stub");
     return false;
@@ -309,12 +332,35 @@ static bool CallProcessModuleMethod_Mac(wxbox::util::process::PROCESS_HANDLE hPr
 
 #endif
 
-bool wxbox::util::inject::InjectModuleToProcess(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, PMethodCallingParameter parameter)
+void wxbox::util::inject::AddModuleSearchPath(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleFolderPath)
+{
+    if (!hProcess || moduleFolderPath.empty()) {
+        return;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    return AddModuleSearchPath_Windows(hProcess, moduleFolderPath);
+#else
+    return AddModuleSearchPath_Mac(hProcess, moduleFolderPath);
+#endif
+}
+
+void wxbox::util::inject::AddModuleSearchPath(wxbox::util::process::PID pid, const std::string& moduleFolderPath)
+{
+    wb_process::PROCESS_HANDLE hProcess = wb_process::OpenProcessHandle(pid);
+    if (!hProcess) {
+        return;
+    }
+    AddModuleSearchPath(hProcess, moduleFolderPath);
+    wb_process::CloseProcessHandle(hProcess);
+}
+
+bool wxbox::util::inject::InjectModuleToProcess(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, PMethodCallingParameter parameter, bool stdcallPromise)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return InjectModuleToProcess_Windows(pid, modulePath, entryMethod, parameter);
+    return InjectModuleToProcess_Windows(pid, modulePath, entryMethod, parameter, stdcallPromise);
 #else
-    return InjectModuleToProcess_Mac(pid, modulePath, entryMethod, parameter);
+    return InjectModuleToProcess_Mac(pid, modulePath, entryMethod, parameter, stdcallPromise);
 #endif
 }
 
@@ -327,28 +373,28 @@ bool wxbox::util::inject::UnInjectModuleFromProcess(wxbox::util::process::PID pi
 #endif
 }
 
-bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return CallProcessModuleMethod_Windows(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+    return CallProcessModuleMethod_Windows(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter, stdcallPromise);
 #else
-    return CallProcessModuleMethod_Mac(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+    return CallProcessModuleMethod_Mac(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter, stdcallPromise);
 #endif
 }
 
-bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise)
 {
     bool                       retval   = false;
     wb_process::PROCESS_HANDLE hProcess = wb_process::OpenProcessHandle(pid);
     if (!hProcess) {
         return false;
     }
-    retval = CallProcessModuleMethod(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter, stdcallPromise);
     wb_process::CloseProcessHandle(hProcess);
     return retval;
 }
 
-bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise)
 {
     if (!hProcess) {
         return false;
@@ -366,24 +412,24 @@ bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_
         return false;
     }
 
-    retval = CallProcessModuleMethod(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter);
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, codePageInfo, moduleName, method, parameter, stdcallPromise);
     wb_memory::FreeRemoteProcessPage(hProcess, codePageInfo);
     return retval;
 }
 
-bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise)
 {
     bool                       retval   = false;
     wb_process::PROCESS_HANDLE hProcess = wb_process::OpenProcessHandle(pid);
     if (!hProcess) {
         return false;
     }
-    retval = CallProcessModuleMethod(hProcess, dataPageInfo, moduleName, method, parameter);
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, moduleName, method, parameter, stdcallPromise);
     wb_process::CloseProcessHandle(hProcess);
     return retval;
 }
 
-bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise)
 {
     if (!hProcess) {
         return false;
@@ -395,19 +441,19 @@ bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PROCESS_
         return false;
     }
 
-    retval = CallProcessModuleMethod(hProcess, dataPageInfo, moduleName, method, parameter);
+    retval = CallProcessModuleMethod(hProcess, dataPageInfo, moduleName, method, parameter, stdcallPromise);
     wb_memory::FreeRemoteProcessPage(hProcess, dataPageInfo);
     return retval;
 }
 
-bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter)
+bool wxbox::util::inject::CallProcessModuleMethod(wxbox::util::process::PID pid, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise)
 {
     bool                       retval   = false;
     wb_process::PROCESS_HANDLE hProcess = wb_process::OpenProcessHandle(pid);
     if (!hProcess) {
         return false;
     }
-    retval = CallProcessModuleMethod(hProcess, moduleName, method, parameter);
+    retval = CallProcessModuleMethod(hProcess, moduleName, method, parameter, stdcallPromise);
     wb_process::CloseProcessHandle(hProcess);
     return retval;
 }

@@ -84,7 +84,7 @@ TEST(wxbox_crack, wx)
     }
 }
 
-TEST(wxbox_crack, crack)
+TEST(wxbox_crack, locate_hook_point)
 {
     AppConfig& config = AppConfig::singleton();
 

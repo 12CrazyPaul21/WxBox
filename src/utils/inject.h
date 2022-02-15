@@ -13,15 +13,12 @@ namespace wxbox {
 
             typedef struct _RemoteCallParameter
             {
-                //
-                // note: pFuncName must be a __cdecl function
-                //
-
-                char* pModuleName;
-                char* pFuncName;
-                void* pArg;
-                void* pFuncGetProcAddress;
-                void* pFuncGetModuleHandleA;
+                char*   pModuleName;
+                char*   pFuncName;
+                void*   pArg;
+                void*   pFuncGetProcAddress;
+                void*   pFuncGetModuleHandleA;
+                uint8_t stdcallPromise;
 
                 _RemoteCallParameter()
                   : pModuleName(nullptr)
@@ -29,6 +26,7 @@ namespace wxbox {
                   , pArg(nullptr)
                   , pFuncGetProcAddress(nullptr)
                   , pFuncGetModuleHandleA(nullptr)
+                  , stdcallPromise(0)
                 {
                 }
             } RemoteCallParameter, *PRemoteCallParameter;
@@ -83,17 +81,20 @@ namespace wxbox {
             // Function
             //
 
-            bool InjectModuleToProcess(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, PMethodCallingParameter parameter);
+            void AddModuleSearchPath(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleFolderPath);
+            void AddModuleSearchPath(wxbox::util::process::PID pid, const std::string& moduleFolderPath);
+
+            bool InjectModuleToProcess(wxbox::util::process::PID pid, const std::string& modulePath, const std::string& entryMethod, PMethodCallingParameter parameter, bool stdcallPromise = false);
             bool UnInjectModuleFromProcess(wxbox::util::process::PID pid, const std::string& moduleName);
 
-            bool CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter);
-            bool CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter);
+            bool CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise = false);
+            bool CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise = false);
 
-            bool CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter);
-            bool CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter);
+            bool CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise = false);
+            bool CallProcessModuleMethod(wxbox::util::process::PID pid, wxbox::util::memory::RemotePageInfo& dataPageInfo, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise = false);
 
-            bool CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter);
-            bool CallProcessModuleMethod(wxbox::util::process::PID pid, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter);
+            bool CallProcessModuleMethod(wxbox::util::process::PROCESS_HANDLE hProcess, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise = false);
+            bool CallProcessModuleMethod(wxbox::util::process::PID pid, const std::string& moduleName, const std::string& method, PMethodCallingParameter parameter, bool stdcallPromise = false);
         }
     }
 }
