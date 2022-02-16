@@ -64,6 +64,7 @@ class XStyleButton : public QPushButton
 
         int left, top, right, bottom;
         rect().getCoords(&left, &top, &right, &bottom);
+        right += 1;
 
         // right top
         auto rightTopDiam = rightTopRadius * 2;
