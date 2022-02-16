@@ -84,6 +84,72 @@ void WxBoxController::ReloadFeatures()
     spdlog::info("Load WxBox api features");
 }
 
+void WxBoxController::StartWeChatInstance()
+{
+    xstyle::information(view, "", "start wechat instance");
+
+    view->BeginMission();
+    wxbox::internal::TaskInThreadPool::StartTask([this]() {
+        // resolve wechat environment info
+        if (!wb_wx::IsWxInstallationPathValid(wxEnvInfo.installPath, wxEnvInfo.moduleFolderAbsPath)) {
+            return;
+        }
+
+        // unwind feature
+        wb_feature::WxApiFeatures features;
+        if (!wb_feature::PreLoadFeatures(config.features_path(), features)) {
+            return;
+        }
+
+        // open and wechat with multi boxing
+        wb_crack::OpenWxWithMultiBoxingResult openResult = {0};
+        if (!wxbox::crack::OpenWxWithMultiBoxing(wxEnvInfo, features, &openResult, true)) {
+            return;
+        }
+        spdlog::info("wechat new process pid : {}", openResult.pid);
+
+        // get process info
+        wb_process::AutoProcessHandle aphandle = wb_process::OpenProcessAutoHandle(openResult.pid);
+        if (!aphandle.valid()) {
+            return;
+        }
+
+        // collect hook point
+        wb_feature::LocateTarget               locateTarget = {aphandle.hProcess, openResult.pModuleBaseAddr, openResult.uModuleSize};
+        wb_feature::WxAPIHookPointVACollection vaCollection;
+        features.Collect(locateTarget, wxEnvInfo.version, vaCollection);
+        aphandle.close();
+
+        // deattach
+        wb_crack::DeAttachWxProcess(openResult.pid);
+
+        //
+        // inject wxbot
+        //
+
+        auto wxboxRoot = wb_file::GetProcessRootPath();
+        auto wxbotRoot = config.wxbot_root_path();
+
+        // wxbot entry parameter
+        wb_crack::WxBotEntryParameter wxbotEntryParameter;
+        std::memset(&wxbotEntryParameter, 0, sizeof(wxbotEntryParameter));
+        wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
+        strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wxboxRoot.data());
+        strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), wxbotRoot.data());
+        wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
+        wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis);
+
+        // inject
+        wb_crack::InjectWxBot(openResult.pid, wxbotEntryParameter);
+
+        //
+        // uninject
+        //
+
+        wb_crack::IsWxBotInjected(openResult.pid);
+        wb_crack::UnInjectWxBot(openResult.pid); }, [this]() { this->view->CloseMission(); });
+}
+
 //
 // WxBoxServer status changed and event slots
 //

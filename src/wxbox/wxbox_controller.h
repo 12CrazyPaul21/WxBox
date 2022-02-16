@@ -33,6 +33,8 @@ class WxBoxController final : public QObject
     void LoadWeChatEnvironmentInfo();
     void ReloadFeatures();
 
+    void StartWeChatInstance();
+
   private:
     //
     // WxBoxServer Wrapper Request Methods

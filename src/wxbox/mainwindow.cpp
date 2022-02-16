@@ -49,7 +49,7 @@ bool MainWindow::CheckSystemVersionSupported()
 
 void MainWindow::UpdateWeChatFeatures()
 {
-    downloadDialog.beginMission();
+    downloadDialog.BeginMission();
     spdlog::info("update wechat features");
 
     // pulling feature list
@@ -57,7 +57,7 @@ void MainWindow::UpdateWeChatFeatures()
     downloadDialog.SetStatus(Translate("Pulling Feature List"));
     auto result = downloadDialog.get(QUrl(config.features_list_url().c_str()));
     if (!std::get<0>(result)) {
-        downloadDialog.closeMission();
+        downloadDialog.CloseMission();
         xstyle::error(this, "", Translate("Pulling Feature List Failed"));
         return;
     }
@@ -65,14 +65,14 @@ void MainWindow::UpdateWeChatFeatures()
     // parse feature list
     wb_feature::FeatureRepoList repoFeatureList;
     if (!wb_feature::ParseFeatureRepoList(std::get<1>(result), repoFeatureList)) {
-        downloadDialog.closeMission();
+        downloadDialog.CloseMission();
         xstyle::error(this, "", Translate("Feature List Invalid"));
         return;
     }
 
     // check for updates
     if (!config.feature_update_timestamp().compare(repoFeatureList.timestamp)) {
-        downloadDialog.closeMission();
+        downloadDialog.CloseMission();
         xstyle::information(this, "", Translate("Feature Repository is already up to date"));
         return;
     }
@@ -83,10 +83,20 @@ void MainWindow::UpdateWeChatFeatures()
         spdlog::info("update wechat features successful, the version timestamp : " + repoFeatureList.timestamp);
     }
 
-    downloadDialog.closeMission();
+    downloadDialog.CloseMission();
 
     // reload features
     controller.ReloadFeatures();
+}
+
+void MainWindow::EnableAllElements()
+{
+    ui->btnStartWeChat->setEnabled(true);
+}
+
+void MainWindow::DisableAllElements()
+{
+    ui->btnStartWeChat->setEnabled(false);
 }
 
 void MainWindow::InitAppMenu()
@@ -121,6 +131,7 @@ void MainWindow::RegisterEvent()
 {
     QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
     QObject::connect(ui->btnUpdateFeatureRepository, &QPushButton::clicked, this, &MainWindow::UpdateWeChatFeatures);
+    QObject::connect(ui->btnStartWeChat, &QPushButton::clicked, &this->controller, &WxBoxController::StartWeChatInstance);
 
     ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());
     QObject::connect(ui->closeIsMinimizeTray, &QCheckBox::stateChanged, this, [this](int state) {

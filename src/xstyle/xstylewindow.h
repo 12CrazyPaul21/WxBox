@@ -271,6 +271,30 @@ class XStyleWindow : public QMainWindow
         SetStyleSheetSync(this->styleSheet() + styleSheet);
     }
 
+    //
+    // mission
+    //
+
+    virtual void BeginMission()
+    {
+        IgnoreForClose();
+        if (missionCounter == 0) {
+            emit missionBegined();
+            QCoreApplication::processEvents();
+        }
+        missionCounter.ref();
+    }
+
+    virtual void CloseMission()
+    {
+        missionCounter.deref();
+        if (missionCounter == 0) {
+            emit missionClosed();
+            QCoreApplication::processEvents();
+        }
+        ReadyForClose();
+    }
+
   protected:
     void SetupXStyleTheme();
     void SetupXStyleLayout();
@@ -331,9 +355,19 @@ class XStyleWindow : public QMainWindow
 
   signals:
     void closed();
+    void missionBegined();
+    void missionClosed();
 
   public slots:
     virtual void ThemeChanged(QString themeName, QString styleSheet);
+
+    virtual void EnableAllElements()
+    {
+    }
+
+    virtual void DisableAllElements()
+    {
+    }
 
   protected:
     // window property
@@ -354,6 +388,9 @@ class XStyleWindow : public QMainWindow
     bool                    wantToClose;
     QAtomicInteger<int32_t> readyForCloseCounter;
     qint64                  lastClickIconTimeStamp;
+
+    // mission flags
+    QAtomicInteger<int32_t> missionCounter;
 
     // shadow
     QPixmap shadowBuffer;

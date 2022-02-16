@@ -76,6 +76,9 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     bool InitWxBox(QSplashScreen* splash);
     bool DeinitWxBox();
 
+    virtual void EnableAllElements() Q_DECL_OVERRIDE;
+    virtual void DisableAllElements() Q_DECL_OVERRIDE;
+
   private:
     virtual bool BeforeClose() override
     {

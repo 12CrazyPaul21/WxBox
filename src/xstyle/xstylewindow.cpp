@@ -19,6 +19,7 @@ XStyleWindow::XStyleWindow(const QString& name, QWidget* xstyleParent, bool dele
   , wantToClose(false)
   , readyForCloseCounter(0)
   , lastClickIconTimeStamp(0)
+  , missionCounter(0)
   , inActiveTitleColorDesc("")
   , container(nullptr)
   , containerLayout(nullptr)
@@ -40,6 +41,9 @@ XStyleWindow::XStyleWindow(const QString& name, QWidget* xstyleParent, bool dele
     setObjectName(name + "_xstylewindow");
     setProperty("class", "xstylewindow");
     installEventFilter(this);
+
+    QObject::connect(this, SIGNAL(missionBegined()), this, SLOT(DisableAllElements()), Qt::ConnectionType::QueuedConnection);
+    QObject::connect(this, SIGNAL(missionClosed()), this, SLOT(EnableAllElements()), Qt::ConnectionType::QueuedConnection);
 }
 
 XStyleWindow::~XStyleWindow()

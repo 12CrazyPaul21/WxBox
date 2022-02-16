@@ -42,8 +42,8 @@ class DownloadDialog final : public XStyleWindow
     void SetStatus(const QString& status);
     void SetProgress(qint64 progress, qint64 total);
 
-    void beginMission();
-    void closeMission();
+    virtual void BeginMission() Q_DECL_OVERRIDE;
+    virtual void CloseMission() Q_DECL_OVERRIDE;
 
     std::tuple<bool, QByteArray> get(const QUrl& url);
     FileDownloadStatus           download(const std::string& sinkFolder, const std::vector<std::pair<std::string, std::string>>& fileList);

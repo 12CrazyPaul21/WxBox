@@ -60,14 +60,16 @@ void DownloadDialog::SetProgress(qint64 progress, qint64 total)
 #endif
 }
 
-void DownloadDialog::beginMission()
+void DownloadDialog::BeginMission()
 {
+    XStyleWindow::BeginMission();
     SetProgress(0, 0);
     showApplicationModal();
 }
 
-void DownloadDialog::closeMission()
+void DownloadDialog::CloseMission()
 {
+    XStyleWindow::CloseMission();
     cancel();
     close();
 }

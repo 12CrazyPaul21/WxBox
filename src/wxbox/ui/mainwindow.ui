@@ -38,6 +38,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btnStartWeChat">
+        <property name="text">
+         <string>以多开方式启动微信</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btn_test1">
         <property name="text">
          <string>test1</string>
@@ -63,6 +70,30 @@
         <property name="text">
          <string>test4</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="tableWidget">
+        <column>
+         <property name="text">
+          <string>状态</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>PID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>微信号</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>wxid</string>
+         </property>
+        </column>
        </widget>
       </item>
       <item>
