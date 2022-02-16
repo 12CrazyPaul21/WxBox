@@ -10,31 +10,42 @@ namespace wxbox {
         {
           public:
             typedef std::function<void(void)> TaskFunc;
+            typedef std::function<void(void)> FinishFunc;
 
-            explicit TaskInThreadPool(TaskFunc func)
+            explicit TaskInThreadPool(TaskFunc func, FinishFunc finishFunc = nullptr)
               : func(func)
+              , finishFunc(finishFunc)
             {
             }
 
             void run() Q_DECL_OVERRIDE
             {
-                if (func) {
-                    func();
+                try {
+                    if (func) {
+                        func();
+                    }
+                }
+                catch (const std::exception& /*e*/) {
+                }
+
+                if (finishFunc) {
+                    finishFunc();
                 }
             }
 
-            static TaskInThreadPool* NewTask(TaskFunc func)
+            static inline TaskInThreadPool* NewTask(TaskFunc func, FinishFunc finishFunc = nullptr)
             {
-                return new TaskInThreadPool(func);
+                return new TaskInThreadPool(func, finishFunc);
             }
 
-            static void StartTask(TaskFunc func)
+            static inline void StartTask(TaskFunc func, FinishFunc finishFunc = nullptr)
             {
-                QThreadPool::globalInstance()->start(new TaskInThreadPool(func));
+                QThreadPool::globalInstance()->start(new TaskInThreadPool(func, finishFunc));
             }
 
           private:
-            TaskFunc func;
+            TaskFunc   func;
+            FinishFunc finishFunc;
         };
     }
 }
