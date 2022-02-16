@@ -9,6 +9,8 @@
 #include <QColor>
 #include <QResource>
 #include <QTextStream>
+#include <QPixmap>
+#include <QPainter>
 
 #include <vector>
 #include <unordered_map>
@@ -192,6 +194,12 @@ namespace xstyle {
         QString                              currentStyleSheet;
         std::unordered_map<QString, QString> themeResourceMaps;
     };
+
+    //
+    // xstyle helper
+    //
+
+    QPixmap RotatePixmap(const QPixmap& pixmap, qreal angle);
 }
 
 #define xstyle_manager xstyle::XStyleManager::singleton()

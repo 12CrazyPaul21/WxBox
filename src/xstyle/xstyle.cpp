@@ -373,3 +373,26 @@ bool xstyle::XStyleManager::ChangeTheme(const QString& themeName)
 
     return true;
 }
+
+//
+// xstyle helper
+//
+
+QPixmap xstyle::RotatePixmap(const QPixmap& pixmap, qreal angle)
+{
+    QPixmap rotatedPixmap(pixmap.size());
+    rotatedPixmap.fill(Qt::transparent);
+
+    qreal halfWidth  = pixmap.width() / 2.0;
+    qreal halfHeight = pixmap.height() / 2.0;
+
+    QPainter painter(&rotatedPixmap);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    painter.translate(halfWidth, halfHeight);
+    painter.rotate(angle);
+    painter.translate(-halfWidth, -halfHeight);
+    painter.drawPixmap(0, 0, pixmap);
+    painter.end();
+
+    return rotatedPixmap;
+}
