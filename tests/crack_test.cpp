@@ -258,3 +258,72 @@ TEST(wxbox_crack, run_wx_and_inject_wxbot)
 	EXPECT_EQ(true, wb_crack::IsWxBotInjected(openResult.pid));
     EXPECT_EQ(true, wb_crack::UnInjectWxBot(openResult.pid));
 }
+
+TEST(wxbox_crack, inject_wxbot_to_wxprocess)
+{
+    AppConfig& config = AppConfig::singleton();
+
+    // resolve wechat environment info
+    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
+    if (!wxbox::crack::wx::ResolveWxEnvInfo(wxEnvInfo)) {
+        return;
+    }
+
+    // unwind feature
+    wb_feature::WxApiFeatures features;
+    if (!wb_feature::PreLoadFeatures(config.features_path(), features)) {
+        return;
+    }
+
+    // open and wechat with multi boxing
+    wb_crack::OpenWxWithMultiBoxingResult openResult = {0};
+    if (!wxbox::crack::OpenWxWithMultiBoxing(wxEnvInfo, features, &openResult)) {
+        return;
+    }
+    spdlog::info("wechat process pid : {}", openResult.pid);
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+	// attach process
+    EXPECT_EQ(true, wb_crack::AttachWxProcess(openResult.pid));
+
+    // get process info
+    wb_process::AutoProcessHandle aphandle = wb_process::OpenProcessAutoHandle(openResult.pid);
+    if (!aphandle.valid()) {
+        return;
+    }
+
+    // collect hook point
+    wb_feature::LocateTarget               locateTarget = {aphandle.hProcess, openResult.pModuleBaseAddr, openResult.uModuleSize};
+    wb_feature::WxAPIHookPointVACollection vaCollection;
+    EXPECT_EQ(true, features.Collect(locateTarget, wxEnvInfo.version, vaCollection));
+    aphandle.close();
+
+    // deattach
+    wb_crack::DeAttachWxProcess(openResult.pid);
+
+    //
+    // inject wxbot
+    //
+
+    auto wxboxRoot = wb_file::GetProcessRootPath();
+    auto wxbotRoot = config.wxbot_root_path();
+
+    // wxbot entry parameter
+    wb_crack::WxBotEntryParameter wxbotEntryParameter;
+    std::memset(&wxbotEntryParameter, 0, sizeof(wxbotEntryParameter));
+    wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
+    strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wxboxRoot.data());
+    strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), wxbotRoot.data());
+    EXPECT_EQ(true, wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis));
+    EXPECT_EQ(true, wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis));
+
+    // inject
+    EXPECT_EQ(true, wb_crack::InjectWxBot(openResult.pid, wxbotEntryParameter));
+
+    //
+    // uninject
+    //
+
+    EXPECT_EQ(true, wb_crack::IsWxBotInjected(openResult.pid));
+    EXPECT_EQ(true, wb_crack::UnInjectWxBot(openResult.pid));
+}
