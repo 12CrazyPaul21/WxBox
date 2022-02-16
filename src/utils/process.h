@@ -67,6 +67,37 @@ namespace wxbox {
 
             } ProcessInfo, *PProcessInfo;
 
+            typedef struct _AutoProcessHandle
+            {
+                PROCESS_HANDLE hProcess;
+
+                _AutoProcessHandle(const _AutoProcessHandle&) = delete;
+                _AutoProcessHandle& operator=(const _AutoProcessHandle& OTHER_VAL_NAME) = delete;
+
+                _AutoProcessHandle()
+                  : hProcess(0)
+                {}
+
+                ~_AutoProcessHandle()
+                {
+                    close();
+                }
+
+                SETUP_MOVE_METHOD(_AutoProcessHandle, other)
+                {
+                    hProcess       = other.hProcess;
+                    other.hProcess = 0;
+                }
+
+                bool valid() const
+                {
+                    return hProcess != 0;
+                }
+
+                void close();
+
+            } AutoProcessHandle;
+
             typedef struct _ModuleInfo
             {
                 MODULE_HANDLE hModule;
@@ -113,9 +144,10 @@ namespace wxbox {
             TID           GetCurrentThreadId();
             THREAD_HANDLE GetCurrentThreadHandle();
 
-            bool           Is64Process(PROCESS_HANDLE hProcess);
-            PROCESS_HANDLE OpenProcessHandle(PID pid);
-            void           CloseProcessHandle(PROCESS_HANDLE handle);
+            bool              Is64Process(PROCESS_HANDLE hProcess);
+            PROCESS_HANDLE    OpenProcessHandle(PID pid);
+            AutoProcessHandle OpenProcessAutoHandle(PID pid);
+            void              CloseProcessHandle(PROCESS_HANDLE handle);
 
             WIN_HANDLE              GetWindowHandleFromScreenPoint(const SCREEN_POINT& pt);
             bool                    GetProcessInfoFromWindowHandle(const WIN_HANDLE& hWnd, ProcessInfo& pi);
@@ -125,6 +157,7 @@ namespace wxbox {
 
             PID  StartProcess(const std::string& binFilePath, bool isAttach);
             bool SuspendAllOtherThread(PID pid, TID tid);
+            void ResumeAllThread(PID pid);
 
             void        SetThreadName(THREAD_HANDLE hThread, const std::string& threadName);
             std::string GetThreadName(THREAD_HANDLE hThread);

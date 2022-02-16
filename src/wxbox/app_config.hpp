@@ -249,6 +249,10 @@ class AppConfig final : public wb_config::Config
 
 #if _DEBUG
         if (!wb_file::IsPathExists(featuresPath)) {
+            featuresPath = wb_file::JoinPath(rootPath, "/../../../features");
+        }
+
+        if (!wb_file::IsPathExists(featuresPath)) {
             featuresPath = wb_file::JoinPath(rootPath, "/../../../../features");
         }
 #endif
@@ -313,6 +317,24 @@ class AppConfig final : public wb_config::Config
     {
         this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY) = path;
         submit();
+    }
+
+    //
+    // wxbot
+    //
+
+    std::string wxbot_root_path() const
+    {
+#ifndef _DEBUG
+        return wxbox::util::file::GetProcessRootPath();
+#else
+        auto rootPath      = wxbox::util::file::GetProcessRootPath();
+        auto wxbotRootPath = wb_file::JoinPath(rootPath, "/../wxbot/");
+        if (!wb_file::IsPathExists(wxbotRootPath)) {
+            wxbotRootPath = wb_file::JoinPath(rootPath, "/../src/wxbot/");
+        }
+        return wxbotRootPath;
+#endif
     }
 
     //

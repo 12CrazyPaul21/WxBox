@@ -134,14 +134,18 @@ namespace wxbot {
     }
 }
 
-WXBOT_PUBLIC_API void WxBotMain(const char* args)
+WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
 {
+    //wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+
     if (args) {
         std::stringstream ss;
-        ss << "Hello " << args;
+        ss << "wxbox root path : " << args->wxbox_root;
         MessageBoxA(NULL, ss.str().c_str(), "WxBot", MB_OK);
     }
     else {
         MessageBoxA(NULL, "Hello Inject...", "WxBot", MB_OK);
     }
+
+    //wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
 }

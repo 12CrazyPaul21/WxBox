@@ -54,6 +54,12 @@ namespace wxbot {
     };
 }
 
-WXBOT_PUBLIC_API void WxBotMain(const char* args);
+namespace wxbox {
+    namespace crack {
+        struct _WxBotEntryParameter;
+    }
+}
+
+WXBOT_PUBLIC_API void WxBotEntry(wxbox::crack::_WxBotEntryParameter* args);
 
 #endif  // #ifndef __WXBOT_H

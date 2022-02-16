@@ -1,6 +1,18 @@
 #include <utils/common.h>
 
 //
+// AutoProcessHandle
+//
+
+void wb_process::AutoProcessHandle::close()
+{
+    if (hProcess) {
+        CloseProcessHandle(hProcess);
+        hProcess = 0;
+    }
+}
+
+//
 // AppSingleton
 //
 
@@ -306,7 +318,7 @@ static inline wb_process::PID StartProcess_Windows(const std::string& binFilePat
     return pi.dwProcessId;
 }
 
-static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID tid)
+static bool SuspendOrResumeAllThread_Windows(wb_process::PID pid, wb_process::TID tid, bool suspend)
 {
     HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, pid);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
@@ -325,7 +337,7 @@ static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID t
         if (threadEntry.th32OwnerProcessID == pid && threadEntry.th32ThreadID != tid) {
             HANDLE hThread = ::OpenThread(THREAD_ALL_ACCESS, FALSE, threadEntry.th32ThreadID);
             if (hThread) {
-                ::SuspendThread(hThread);
+                suspend ? ::SuspendThread(hThread) : ResumeThread(hThread);
                 ::CloseHandle(hThread);
             }
         }
@@ -334,7 +346,16 @@ static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID t
 
     ::CloseHandle(hSnapshot);
     return true;
-    return false;
+}
+
+static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID tid)
+{
+    return SuspendOrResumeAllThread_Windows(pid, tid, true);
+}
+
+static void ResumeAllThread_Windows(wb_process::PID pid)
+{
+    SuspendOrResumeAllThread_Windows(pid, 0, false);
 }
 
 #elif WXBOX_IN_MAC_OS
@@ -374,6 +395,11 @@ static bool SuspendAllOtherThread_Mac(wb_process::PID pid, wb_process::TID tid)
 {
     throw std::exception("SuspendAllOtherThread_Mac stub");
     return false;
+}
+
+static void ResumeAllThread_Mac(wb_process::PID pid)
+{
+    throw std::exception("SuspendAllOtherThread_Mac stub");
 }
 
 #endif
@@ -454,6 +480,13 @@ wxbox::util::process::PROCESS_HANDLE wxbox::util::process::OpenProcessHandle(PID
     throw std::exception("OpenProcessHandle stub");
     return 0;
 #endif
+}
+
+wxbox::util::process::AutoProcessHandle wxbox::util::process::OpenProcessAutoHandle(PID pid)
+{
+    AutoProcessHandle handle;
+    handle.hProcess = OpenProcessHandle(pid);
+    return handle;
 }
 
 void wxbox::util::process::CloseProcessHandle(PROCESS_HANDLE handle)
@@ -566,6 +599,15 @@ bool wxbox::util::process::SuspendAllOtherThread(PID pid, TID tid)
     return SuspendAllOtherThread_Windows(pid, tid);
 #elif WXBOX_IN_MAC_OS
     return SuspendAllOtherThread_Mac(pid, tid);
+#endif
+}
+
+void wxbox::util::process::ResumeAllThread(PID pid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ResumeAllThread_Windows(pid);
+#elif WXBOX_IN_MAC_OS
+    return ResumeAllThread_Mac(pid);
 #endif
 }
 

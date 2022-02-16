@@ -113,7 +113,7 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
     return wb_memory::WriteMemory(hProcess, (void*)checkAppSingletonVA, fillStream.data(), fillStream.size(), nullptr);
 }
 
-static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_process::PID pid, wb_crack::POpenWxWithMultiBoxingResult pResult)
+static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_process::PID pid, wb_crack::POpenWxWithMultiBoxingResult pResult, bool keepAttach)
 {
     if (!pid) {
         return false;
@@ -154,12 +154,15 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
         }
     }
 
-    ::DebugActiveProcessStop(pid);
+    if (!keepAttach) {
+        ::DebugActiveProcessStop(pid);
+    }
+
     ::CloseHandle(hProcess);
     return result;
 }
 
-static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_crack::POpenWxWithMultiBoxingResult pResult)
+static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_crack::POpenWxWithMultiBoxingResult pResult, bool keepAttach)
 {
     // check execute file path exist and is valid
     if (!wb_file::IsPathExists(wxEnvInfo.executeAbsPath)) {
@@ -173,7 +176,7 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
     }
 
     // debug loop
-    if (!OpenWxWithMultiBoxing_DebugLoop(wxEnvInfo, wxApiFeatures, pid, pResult)) {
+    if (!OpenWxWithMultiBoxing_DebugLoop(wxEnvInfo, wxApiFeatures, pid, pResult, keepAttach)) {
         return false;
     }
 
@@ -182,7 +185,7 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
 
 #elif WXBOX_IN_MAC_OS
 
-static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_crack::POpenWxWithMultiBoxingResult pResult)
+static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_crack::POpenWxWithMultiBoxingResult pResult, bool keepAttach)
 {
     throw std::exception("OpenWxWithMultiBoxing_Mac stub");
     return false;
@@ -190,11 +193,118 @@ static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo&
 
 #endif
 
-bool wxbox::crack::OpenWxWithMultiBoxing(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, POpenWxWithMultiBoxingResult pResult)
+bool wxbox::crack::AttachWxProcess(wxbox::util::process::PID pid)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return OpenWxWithMultiBoxing_Windows(wxEnvInfo, wxApiFeatures, pResult);
+
+    if (pid) {
+        return ::DebugActiveProcess(pid);
+    }
+
+    return false;
+
 #elif WXBOX_IN_MAC_OS
-    return OpenWxWithMultiBoxing_Mac(wxEnvInfo, wxApiFeatures, pResult);
+    throw std::exception("AttachWxProcess stub");
+    return false;
 #endif
+}
+
+void wxbox::crack::DeAttachWxProcess(wxbox::util::process::PID pid)
+{
+#if WXBOX_IN_WINDOWS_OS
+
+    if (pid) {
+        ::DebugActiveProcessStop(pid);
+    }
+
+#elif WXBOX_IN_MAC_OS
+    throw std::exception("DeAttachWxProcess stub");
+#endif
+}
+
+bool wxbox::crack::GenerateWxApis(const wb_feature::WxAPIHookPointVACollection& collection, WxApis& apis)
+{
+    bool success = true;
+    std::memset(&apis, 0, sizeof(WxApis));
+
+#define SET_WX_API(WX_API_NAME)                      \
+    apis.WX_API_NAME = collection.get(#WX_API_NAME); \
+    if (!apis.WX_API_NAME) {                         \
+        success = false;                             \
+    }
+
+    SET_WX_API(CheckAppSingleton);
+    SET_WX_API(FetchGlobalContactContextAddress);
+    SET_WX_API(InitWeChatContactItem);
+    SET_WX_API(DeinitWeChatContactItem);
+    SET_WX_API(FindAndDeepCopyWeChatContactItemWithWXIDWrapper);
+    SET_WX_API(FetchGlobalProfileContext);
+    SET_WX_API(HandleRawMessages);
+    SET_WX_API(HandleReceivedMessages);
+    SET_WX_API(WXSendTextMessage);
+    SET_WX_API(FetchGlobalSendMessageContext);
+    SET_WX_API(WXSendFileMessage);
+
+    return success;
+}
+
+bool wxbox::crack::VerifyWxApis(const WxApis& apis)
+{
+#define CHECK_WX_API(WX_API_NAME) \
+    if (!apis.WX_API_NAME) {      \
+        return false;             \
+    }
+
+    CHECK_WX_API(CheckAppSingleton);
+    CHECK_WX_API(FetchGlobalContactContextAddress);
+    CHECK_WX_API(InitWeChatContactItem);
+    CHECK_WX_API(DeinitWeChatContactItem);
+    CHECK_WX_API(FindAndDeepCopyWeChatContactItemWithWXIDWrapper);
+    CHECK_WX_API(FetchGlobalProfileContext);
+    CHECK_WX_API(HandleRawMessages);
+    CHECK_WX_API(HandleReceivedMessages);
+    CHECK_WX_API(WXSendTextMessage);
+    CHECK_WX_API(FetchGlobalSendMessageContext);
+    CHECK_WX_API(WXSendFileMessage);
+
+    return true;
+}
+
+bool wxbox::crack::OpenWxWithMultiBoxing(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, POpenWxWithMultiBoxingResult pResult, bool keepAttach)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return OpenWxWithMultiBoxing_Windows(wxEnvInfo, wxApiFeatures, pResult, keepAttach);
+#elif WXBOX_IN_MAC_OS
+    return OpenWxWithMultiBoxing_Mac(wxEnvInfo, wxApiFeatures, pResult, keepAttach);
+#endif
+}
+
+bool wxbox::crack::IsWxBotInjected(wxbox::util::process::PID pid)
+{
+    if (!pid) {
+        return false;
+    }
+
+    wb_process::ModuleInfo moduleInfo;
+    return wb_process::GetModuleInfo(pid, WXBOT_MODULE_NAME, moduleInfo);
+}
+
+bool wxbox::crack::InjectWxBot(wxbox::util::process::PID pid, const WxBotEntryParameter& parameter)
+{
+    if (!pid) {
+        return false;
+    }
+
+    wb_inject::AddModuleSearchPath(pid, parameter.wxbot_root);
+    wb_inject::MethodCallingParameter injectParameter = wb_inject::MethodCallingParameter::BuildBufferValue(const_cast<WxBotEntryParameter*>(&parameter), sizeof(parameter));
+    return wb_inject::InjectModuleToProcess(pid, wb_crack::WXBOT_MODULE_NAME, wb_crack::WXBOT_ENTRY_METHOD_NAME, &injectParameter);
+}
+
+bool wxbox::crack::UnInjectWxBot(wxbox::util::process::PID pid)
+{
+    if (!pid) {
+        return false;
+    }
+
+    return wb_inject::UnInjectModuleFromProcess(pid, wb_crack::WXBOT_MODULE_NAME);
 }

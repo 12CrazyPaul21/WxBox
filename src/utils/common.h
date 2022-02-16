@@ -4,43 +4,6 @@
 #include "config.h"
 
 //
-// Macro
-//
-
-#if defined(_MSC_VER)
-#define PRAGMA __pragma
-#else
-#define PRAGMA _Pragma
-#endif
-
-#if WXBOX_IN_WINDOWS_OS
-#define CloseHandleSafe(h)    \
-    {                         \
-        if (h) {              \
-            ::CloseHandle(h); \
-            h = NULL;         \
-        }                     \
-    }
-#else
-#define CloseHandleSafe(h) \
-    {}
-#endif
-
-#define WXBOX_UNREF(P) (P)
-
-//
-// Typedef
-//
-
-#if WXBOX_CPU_IS_X86
-typedef long          cpulong_t;
-typedef unsigned long ucpulong_t;
-#else
-typedef long long          cpulong_t;
-typedef unsigned long long ucpulong_t;
-#endif
-
-//
 // Platform related headers
 //
 
@@ -108,6 +71,45 @@ typedef unsigned long long ucpulong_t;
 #ifdef _stricmp
 #define _stricmp strcmp
 #endif
+#endif
+
+//
+// Macro
+//
+
+#if defined(_MSC_VER)
+#define PRAGMA __pragma
+#else
+#define PRAGMA _Pragma
+#endif
+
+#if WXBOX_IN_WINDOWS_OS
+#define CloseHandleSafe(h)    \
+    {                         \
+        if (h) {              \
+            ::CloseHandle(h); \
+            h = NULL;         \
+        }                     \
+    }
+#define WXBOX_MAX_PATH MAX_PATH
+#else
+#define CloseHandleSafe(h) \
+    {}
+#define WXBOX_MAX_PATH 256
+#endif
+
+#define WXBOX_UNREF(P) (P)
+
+//
+// Typedef
+//
+
+#if WXBOX_CPU_IS_X86
+typedef long          cpulong_t;
+typedef unsigned long ucpulong_t;
+#else
+typedef long long          cpulong_t;
+typedef unsigned long long ucpulong_t;
 #endif
 
 //

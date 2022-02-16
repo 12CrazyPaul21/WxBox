@@ -677,35 +677,60 @@ ucpulong_t wb_feature::_WxApiFeatures::FuzzyLocate(const LocateTarget& locateTar
 
 bool wb_feature::_WxApiFeatures::Collect(const LocateTarget& locateTarget, const WxAbsoluteHookInfo& wxAbsoluteHookInfo, WxAPIHookPointVACollection& vaCollection)
 {
+    bool success = true;
+
     for (auto api : wb_feature::WX_HOOK_API) {
         ucpulong_t rva = wxAbsoluteHookInfo.GetApiRva(api);
         if (!rva) {
-            return false;
+            success = false;
+            continue;
         }
 
         vaCollection.set(api, (ucpulong_t)locateTarget.pModuleBaseAddr + rva);
     }
 
-    return true;
+    return success;
 }
 
 bool wb_feature::_WxApiFeatures::Collect(const LocateTarget& locateTarget, const WxHookPointFeatures& wxHookPointFeatures, WxAPIHookPointVACollection& vaCollection)
 {
+    bool success = true;
+
     for (auto api : wb_feature::WX_HOOK_API) {
         wb_feature::HookPointFeatureInfo hookPointFeatureInfo;
         if (!wxHookPointFeatures.GetApiHookFeature(api, hookPointFeatureInfo)) {
-            return false;
+            success = false;
+            continue;
         }
 
         ucpulong_t va = FuzzyLocate(locateTarget, hookPointFeatureInfo);
         if (!va) {
-            return false;
+            success = false;
+            continue;
         }
 
         vaCollection.set(api, va);
     }
 
-    return true;
+    return success;
+}
+
+bool wb_feature::_WxApiFeatures::Collect(const LocateTarget& locateTarget, const std::string& wxVersion, WxAPIHookPointVACollection& vaCollection)
+{
+    if (IsThisWxVersionExplicitLocated(wxVersion)) {
+        auto ptr = Inner_GetAbsoluteHookInfo(wxVersion);
+        if (ptr) {
+            return Collect(locateTarget, *ptr, vaCollection);
+        }
+    }
+    else {
+        auto ptr = Inner_GetHookPointFeatures(wxVersion);
+        if (ptr) {
+            return Collect(locateTarget, *ptr, vaCollection);
+        }
+    }
+
+    return false;
 }
 
 bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo& pi, const std::string& featureVersion, bool absoluteLocate, WxAPIHookPointVACollection& vaCollection)
@@ -715,16 +740,13 @@ bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo
         return false;
     }
 
-    wb_process::PROCESS_HANDLE hProcess;
-
-#if WXBOX_IN_WINDOWS_OS
-    hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pi.pid);
-#elif WXBOX_IN_MAC_OS
-
-#endif
+    wb_process::AutoProcessHandle aphandle = wb_process::OpenProcessAutoHandle(pi.pid);
+    if (!aphandle.valid()) {
+        return false;
+    }
 
     bool                                   bSuccess     = false;
-    wb_feature::LocateTarget               locateTarget = {hProcess, modInfo.pModuleBaseAddr, modInfo.uModuleSize};
+    wb_feature::LocateTarget               locateTarget = {aphandle.hProcess, modInfo.pModuleBaseAddr, modInfo.uModuleSize};
     wb_feature::WxAPIHookPointVACollection collection;
 
     if (absoluteLocate) {
@@ -744,13 +766,17 @@ bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo
         vaCollection = std::move(collection);
     }
 
-#if WXBOX_IN_WINDOWS_OS
-    CloseHandle(hProcess);
-#elif WXBOX_IN_MAC_OS
-
-#endif
-
     return bSuccess;
+}
+
+bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo& pi, const std::string& wxVersion, WxAPIHookPointVACollection& vaCollection)
+{
+    if (IsThisWxVersionExplicitLocated(wxVersion)) {
+        return Collect(pi, wxVersion, true, vaCollection);
+    }
+    else {
+        return Collect(pi, FindSimilarVersion(wxVersion), false, vaCollection);
+    }
 }
 
 bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo& pi, WxAPIHookPointVACollection& vaCollection)
@@ -760,12 +786,7 @@ bool wb_feature::_WxApiFeatures::Collect(const wxbox::util::process::ProcessInfo
         return false;
     }
 
-    if (IsThisWxVersionExplicitLocated(wxEnvInfo.version)) {
-        return Collect(pi, wxEnvInfo.version, true, vaCollection);
-    }
-    else {
-        return Collect(pi, FindSimilarVersion(wxEnvInfo.version), false, vaCollection);
-    }
+    return Collect(pi, wxEnvInfo.version, vaCollection);
 }
 
 //

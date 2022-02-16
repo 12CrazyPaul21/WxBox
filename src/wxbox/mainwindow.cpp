@@ -136,10 +136,10 @@ void MainWindow::RegisterEvent()
         xstyle_manager.ChangeTheme("");*/
     });
     QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
-        /*     xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
+        xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
         xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
         char* e = nullptr;
-        *e      = 0;*/
+        *e      = 0;
     });
     QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
         /*    xstyle::information(this, "information", "change to chinese and GreenTheme");

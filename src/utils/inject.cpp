@@ -170,6 +170,12 @@ static bool UnInjectModuleFromProcess_Windows(wxbox::util::process::PID pid, con
         return retval;
     }
 
+    // current process
+    if (pid == ::GetCurrentProcessId()) {
+        ::FreeLibrary(remoteModuleInfo.hModule);
+        return true;
+    }
+
     // open process with all access permission
     HANDLE hProcess = wb_process::OpenProcessHandle(pid);
     if (!hProcess) {

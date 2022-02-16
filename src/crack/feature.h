@@ -327,7 +327,7 @@ namespace wxbox {
 
             typedef struct _WxAPIHookPointVACollection
             {
-                std::unordered_map<std::string, ucpulong_t> collection;
+                mutable std::unordered_map<std::string, ucpulong_t> collection;
 
                 _WxAPIHookPointVACollection() = default;
 
@@ -346,7 +346,7 @@ namespace wxbox {
                     collection[api] = va;
                 }
 
-                ucpulong_t get(const std::string& api)
+                ucpulong_t get(const std::string& api) const
                 {
                     if (collection.find(api) == collection.end()) {
                         return 0;
@@ -436,7 +436,9 @@ namespace wxbox {
 
                 bool Collect(const LocateTarget& locateTarget, const WxAbsoluteHookInfo& wxAbsoluteHookInfo, WxAPIHookPointVACollection& vaCollection);
                 bool Collect(const LocateTarget& locateTarget, const WxHookPointFeatures& wxHookPointFeatures, WxAPIHookPointVACollection& vaCollection);
+                bool Collect(const LocateTarget& locateTarget, const std::string& wxVersion, WxAPIHookPointVACollection& vaCollection);
                 bool Collect(const wxbox::util::process::ProcessInfo& pi, const std::string& featureVersion, bool absoluteLocate, WxAPIHookPointVACollection& vaCollection);
+                bool Collect(const wxbox::util::process::ProcessInfo& pi, const std::string& wxVersion, WxAPIHookPointVACollection& vaCollection);
                 bool Collect(const wxbox::util::process::ProcessInfo& pi, WxAPIHookPointVACollection& vaCollection);
 
                 //
