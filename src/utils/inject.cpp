@@ -212,6 +212,52 @@ _DONE:
     return retval;
 }
 
+typedef struct _UnloadModuleBySelfParameter
+{
+    wb_process::MODULE_HANDLE hModule;
+    wb_process::TID           tid;
+} UnloadModuleBySelfParameter, *PUnloadModuleBySelfParameter;
+
+static DWORD WINAPI UnloadModuleBySelf_ThreadProc(LPVOID lpParam)
+{
+    PUnloadModuleBySelfParameter parameter = reinterpret_cast<PUnloadModuleBySelfParameter>(lpParam);
+    if (!parameter) {
+        return 0;
+    }
+
+    HMODULE         hModule = parameter->hModule;
+    wb_process::TID tid     = parameter->tid;
+    delete parameter;
+
+    // wait for target thread finish
+    if (tid) {
+        HANDLE hThread = ::OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
+        if (hThread) {
+            WaitForSingleObject(hThread, INFINITE);
+            CloseHandle(hThread);
+        }
+    }
+
+    // unload library
+    FreeLibraryAndExitThread(hModule, 0);
+    return 0;
+}
+
+static bool UnloadModuleBySelf_Windows(const std::string& moduleName, wb_process::TID triggerThreadId)
+{
+    PUnloadModuleBySelfParameter parameter = new UnloadModuleBySelfParameter();
+    if (!parameter) {
+        return false;
+    }
+
+    if (!::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, moduleName.c_str(), &parameter->hModule)) {
+        return false;
+    }
+    parameter->tid = triggerThreadId;
+
+    return ::CreateThread(NULL, 0, UnloadModuleBySelf_ThreadProc, parameter, 0, nullptr);
+}
+
 static bool CallProcessModuleMethod_Windows(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter, bool stdcallPromise)
 {
     if (!hProcess || moduleName.empty() || method.empty()) {
@@ -330,6 +376,12 @@ static bool UnInjectModuleFromProcess_Mac(wxbox::util::process::PID pid, const s
     return false;
 }
 
+static bool UnloadModuleBySelf_Mac(const std::string& moduleName, wb_process::TID triggerThreadId)
+{
+    throw std::exception("UnloadModuleBySelf_Mac stub");
+    return false;
+}
+
 static bool CallProcessModuleMethod_Mac(wxbox::util::process::PROCESS_HANDLE hProcess, wxbox::util::memory::RemotePageInfo& dataPageInfo, wxbox::util::memory::RemotePageInfo& codePageInfo, const std::string& moduleName, const std::string& method, wb_inject::PMethodCallingParameter parameter, bool stdcallPromise)
 {
     throw std::exception("CallProcessModuleMethod_Mac stub");
@@ -376,6 +428,15 @@ bool wxbox::util::inject::UnInjectModuleFromProcess(wxbox::util::process::PID pi
     return UnInjectModuleFromProcess_Windows(pid, moduleName);
 #else
     return UnInjectModuleFromProcess_Mac(pid, moduleName);
+#endif
+}
+
+bool wxbox::util::inject::UnloadModuleBySelf(const std::string& moduleName, wb_process::TID triggerThreadId)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return UnloadModuleBySelf_Windows(moduleName, triggerThreadId);
+#else
+    return UnloadModuleBySelf_Mac(moduleName, triggerThreadId);
 #endif
 }
 

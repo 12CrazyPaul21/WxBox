@@ -308,3 +308,8 @@ bool wxbox::crack::UnInjectWxBot(wxbox::util::process::PID pid)
 
     return wb_inject::UnInjectModuleFromProcess(pid, wb_crack::WXBOT_MODULE_NAME);
 }
+
+bool wxbox::crack::UnInjectWxBotBySelf()
+{
+    return wb_inject::UnloadModuleBySelf(wb_crack::WXBOT_MODULE_NAME, wb_process::GetCurrentThreadId());
+}

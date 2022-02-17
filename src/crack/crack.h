@@ -65,6 +65,7 @@ namespace wxbox {
         bool IsWxBotInjected(wxbox::util::process::PID pid);
         bool InjectWxBot(wxbox::util::process::PID pid, const WxBotEntryParameter& parameter);
         bool UnInjectWxBot(wxbox::util::process::PID pid);
+        bool UnInjectWxBotBySelf();
     }
 }
 

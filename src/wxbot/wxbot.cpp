@@ -134,18 +134,39 @@ namespace wxbot {
     }
 }
 
-WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
+static void WxBotRoutine(std::unique_ptr<wb_crack::WxBotEntryParameter> args)
 {
-    //wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
-
     if (args) {
         std::stringstream ss;
         ss << "wxbox root path : " << args->wxbox_root;
         MessageBoxA(NULL, ss.str().c_str(), "WxBot", MB_OK);
     }
-    else {
-        MessageBoxA(NULL, "Hello Inject...", "WxBot", MB_OK);
+
+    // resume other threads
+    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+
+    // unload wxbot module
+    wb_crack::UnInjectWxBotBySelf();
+}
+
+WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
+{
+    if (!args) {
+        wb_crack::UnInjectWxBotBySelf();
+        return;
     }
 
-    //wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+    // duplicate wxbot entry parameter
+    std::unique_ptr<wb_crack::WxBotEntryParameter> duplicatedArgs = std::make_unique<wb_crack::WxBotEntryParameter>();
+    if (!duplicatedArgs) {
+        wb_crack::UnInjectWxBotBySelf();
+        return;
+    }
+    std::memcpy(duplicatedArgs.get(), args, sizeof(wb_crack::WxBotEntryParameter));
+
+    // suspend all other threads
+    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+
+    // start wxbot
+    std::thread(WxBotRoutine, std::move(duplicatedArgs)).detach();
 }
