@@ -1,6 +1,7 @@
 <RCC>
   <qresource prefix="/XStyleTheme/DefaultTheme/">
     <file>./image/app.png</file>
+    <file>./image/loading.png</file>
     <file>./image/minimize.png</file>
     <file>./image/maximize.png</file>
     <file>./image/close.png</file>
