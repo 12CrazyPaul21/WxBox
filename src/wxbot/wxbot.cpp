@@ -142,7 +142,7 @@ static void WxBotRoutine(std::unique_ptr<wb_crack::WxBotEntryParameter> args)
         MessageBoxA(NULL, ss.str().c_str(), "WxBot", MB_OK);
     }
 
-    // resume other threads
+    // resume all other wechat threads
     wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
 
     // unload wxbot module
