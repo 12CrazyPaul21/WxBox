@@ -50,14 +50,14 @@
 
 #define WXBOX_LOG_INFO_AND_SHOW_MSG_BOX(VIEW, TITLE, FORMAT, ...) \
     spdlog::info(FORMAT, ##__VA_ARGS__);                          \
-    xstyle::information(VIEW, TITLE, spdlog::fmt_lib::format(FORMAT, ##__VA_ARGS__).c_str());
+    xstyle::information(VIEW, Translate(TITLE), Translate(spdlog::fmt_lib::format(FORMAT, ##__VA_ARGS__).c_str()));
 
 #define WXBOX_LOG_WARNING_AND_SHOW_MSG_BOX(VIEW, TITLE, FORMAT, ...) \
     spdlog::warn(FORMAT, ##__VA_ARGS__);                             \
-    xstyle::warning(VIEW, TITLE, spdlog::fmt_lib::format(FORMAT, ##__VA_ARGS__).c_str());
+    xstyle::warning(VIEW, Translate(TITLE), Translate(spdlog::fmt_lib::format(FORMAT, ##__VA_ARGS__).c_str()));
 
 #define WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(VIEW, TITLE, FORMAT, ...) \
     spdlog::error(FORMAT, ##__VA_ARGS__);                          \
-    xstyle::error(VIEW, TITLE, spdlog::fmt_lib::format(FORMAT, ##__VA_ARGS__).c_str());
+    xstyle::error(VIEW, Translate(TITLE), Translate(spdlog::fmt_lib::format(FORMAT, ##__VA_ARGS__).c_str()));
 
 #endif  // #ifndef __WXBOX_APP_LOG_H

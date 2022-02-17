@@ -49,25 +49,6 @@
     </message>
 </context>
 <context>
-    <name>AppMenu</name>
-    <message>
-        <source>setting</source>
-        <translation>设置</translation>
-    </message>
-    <message>
-        <source>visit repository</source>
-        <translation>访问仓库</translation>
-    </message>
-    <message>
-        <source>about wxbox</source>
-        <translation>关于WxBox</translation>
-    </message>
-    <message>
-        <source>exit wxbox</source>
-        <translation>退出WxBox</translation>
-    </message>
-</context>
-<context>
     <name>SplashScreen</name>
     <message>
         <source>Register Logger</source>
@@ -141,14 +122,6 @@
         <translation>简体中文</translation>
     </message>
     <message>
-        <source>文件(&amp;F)</source>
-        <translation>文件(&amp;F)</translation>
-    </message>
-    <message>
-        <source>帮助(&amp;H)</source>
-        <translation>帮助(&amp;H)</translation>
-    </message>
-    <message>
         <source>关于 WxBox</source>
         <translation>关于 WxBox</translation>
     </message>
@@ -179,6 +152,36 @@
     <message>
         <source>Feature Repository is already up to date</source>
         <translation>特征库已是最新版本</translation>
+    </message>
+</context>
+<context>
+    <name>WxBoxController</name>
+    <message>
+        <source>Invalid WeChat Environment Info</source>
+        <translation>请指定有效的WeChat安装路径</translation>
+    </message>
+    <message>
+        <source>Do you want to inject wxbot at the same time?</source>
+        <translation>是否同时注入WxBot模块？</translation>
+    </message>
+</context>
+<context>
+    <name>AppMenu</name>
+    <message>
+        <source>setting</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <source>visit repository</source>
+        <translation>访问仓库</translation>
+    </message>
+    <message>
+        <source>about wxbox</source>
+        <translation>关于WxBox</translation>
+    </message>
+    <message>
+        <source>exit wxbox</source>
+        <translation>退出WxBox</translation>
     </message>
 </context>
 <context>

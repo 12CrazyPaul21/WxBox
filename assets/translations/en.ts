@@ -49,25 +49,6 @@
     </message>
 </context>
 <context>
-    <name>AppMenu</name>
-    <message>
-        <source>setting</source>
-        <translation>setting</translation>
-    </message>
-    <message>
-        <source>visit repository</source>
-        <translation>visit repository</translation>
-    </message>
-    <message>
-        <source>about wxbox</source>
-        <translation>about wxbox</translation>
-    </message>
-    <message>
-        <source>exit wxbox</source>
-        <translation>exit wxbox</translation>
-    </message>
-</context>
-<context>
     <name>SplashScreen</name>
     <message>
         <source>Register Logger</source>
@@ -141,14 +122,6 @@
         <translation>English</translation>
     </message>
     <message>
-        <source>文件(&amp;F)</source>
-        <translation>File(&amp;F)</translation>
-    </message>
-    <message>
-        <source>帮助(&amp;H)</source>
-        <translation>Help(&amp;H)</translation>
-    </message>
-    <message>
         <source>关于 WxBox</source>
         <translation>About WxBox</translation>
     </message>
@@ -179,6 +152,36 @@
     <message>
         <source>Feature Repository is already up to date</source>
         <translation>Feature Repository is already up to date</translation>
+    </message>
+</context>
+<context>
+    <name>WxBoxController</name>
+    <message>
+        <source>Invalid WeChat Environment Info</source>
+        <translation>Invalid WeChat Environment Info</translation>
+    </message>
+    <message>
+        <source>Do you want to inject wxbot at the same time?</source>
+        <translation>Do you want to inject wxbot at the same time?</translation>
+    </message>
+</context>
+<context>
+    <name>AppMenu</name>
+    <message>
+        <source>setting</source>
+        <translation>setting</translation>
+    </message>
+    <message>
+        <source>visit repository</source>
+        <translation>visit repository</translation>
+    </message>
+    <message>
+        <source>about wxbox</source>
+        <translation>about wxbox</translation>
+    </message>
+    <message>
+        <source>exit wxbox</source>
+        <translation>exit wxbox</translation>
     </message>
 </context>
 <context>
