@@ -1,6 +1,8 @@
 #ifndef __WXBOX_APP_CONFIG_HPP
 #define __WXBOX_APP_CONFIG_HPP
 
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 REGISTER_CONFIG_KEY(WXBOX_LANGUAGE);
 REGISTER_CONFIG_KEY(WXBOX_I18N_PATH);
 REGISTER_CONFIG_KEY(WXBOX_THEME_PATH);
@@ -404,10 +406,18 @@ class AppConfig final : public wb_config::Config
         bool             retval = false;
 
         try {
-            auto sinker = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(config.log_file_path(), config.log_max_single_file_size(), config.log_max_rotating_file_count());
-            auto logger = std::make_shared<spdlog::logger>(config.log_name(), sinker);
+            std::vector<spdlog::sink_ptr> sinks;
+#ifdef _DEBUG
+            sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+#endif
+            sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(config.log_file_path(), config.log_max_single_file_size(), config.log_max_rotating_file_count()));
+
+            auto logger      = std::make_shared<spdlog::logger>(config.log_name(), std::begin(sinks), std::end(sinks));
+            auto wxbotLogger = std::make_shared<spdlog::logger>(WXBOT_LOG_NAME, std::begin(sinks), std::end(sinks));
 
             spdlog::register_logger(logger);
+            spdlog::register_logger(wxbotLogger);
+
             spdlog::set_default_logger(logger);
 
             spdlog::flush_every(std::chrono::seconds(config.log_auto_flush_interval_sec()));

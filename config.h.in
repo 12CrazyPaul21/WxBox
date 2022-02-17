@@ -1,4 +1,5 @@
 #define WXBOX_REPOSITORY_URL "https://gitee.com/phantom27/wxbox"
+#define WXBOT_LOG_NAME "WxBot"
 
 #define WXBOX_UNSUPPORT_OS 0
 #define WXBOX_WINDOWS_OS 1

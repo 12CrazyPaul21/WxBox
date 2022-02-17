@@ -164,6 +164,13 @@ void MainWindow::RegisterEvent()
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
         //UpdateWeChatFeatures();
         //xstyle_manager.ChangeLanguage("en");
+
+        WXBOT_LOG_INFO("hello {}", "information");
+        WXBOT_LOG_WARNING("hello {}", "warning");
+        WXBOT_LOG_ERROR("hello {}", "error");
+        WXBOX_LOG_INFO_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", "information");
+        WXBOX_LOG_WARNING_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", "warning");
+        WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", " error");
     });
 }
 
