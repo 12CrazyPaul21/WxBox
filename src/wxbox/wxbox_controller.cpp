@@ -147,7 +147,11 @@ void WxBoxController::StartWeChatInstance()
         //
 
         wb_crack::IsWxBotInjected(openResult.pid);
-        wb_crack::UnInjectWxBot(openResult.pid); }, [this]() { this->view->CloseMission(); });
+        wb_crack::UnInjectWxBot(openResult.pid);
+    })
+        .wait();
+
+    this->view->CloseMission();
 }
 
 //

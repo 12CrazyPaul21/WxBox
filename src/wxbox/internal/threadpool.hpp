@@ -1,11 +1,33 @@
 #ifndef __WXBOX_INTERNAL_THREAD_POOL_H
 #define __WXBOX_INTERNAL_THREAD_POOL_H
 
-#include <functional>
 #include <QThreadPool>
+
+#include <functional>
+#include <future>
 
 namespace wxbox {
     namespace internal {
+
+        class Future final
+        {
+          public:
+            Future(std::future<void> f)
+              : objFuture(std::move(f))
+            {
+            }
+
+            void wait()
+            {
+                while (objFuture.wait_for(std::chrono::milliseconds(10)) == std::future_status::timeout) {
+                    QCoreApplication::processEvents();
+                }
+            }
+
+          private:
+            std::future<void> objFuture;
+        };
+
         class TaskInThreadPool final : public QRunnable
         {
           public:
@@ -31,6 +53,13 @@ namespace wxbox {
                 if (finishFunc) {
                     finishFunc();
                 }
+
+                sigFinished.set_value();
+            }
+
+            Future get_future()
+            {
+                return Future(sigFinished.get_future());
             }
 
             static inline TaskInThreadPool* NewTask(TaskFunc func, FinishFunc finishFunc = nullptr)
@@ -38,14 +67,17 @@ namespace wxbox {
                 return new TaskInThreadPool(func, finishFunc);
             }
 
-            static inline void StartTask(TaskFunc func, FinishFunc finishFunc = nullptr)
+            static inline Future StartTask(TaskFunc func, FinishFunc finishFunc = nullptr)
             {
-                QThreadPool::globalInstance()->start(new TaskInThreadPool(func, finishFunc));
+                TaskInThreadPool* th = new TaskInThreadPool(func, finishFunc);
+                QThreadPool::globalInstance()->start(th);
+                return th->get_future();
             }
 
           private:
-            TaskFunc   func;
-            FinishFunc finishFunc;
+            TaskFunc           func;
+            FinishFunc         finishFunc;
+            std::promise<void> sigFinished;
         };
     }
 }
