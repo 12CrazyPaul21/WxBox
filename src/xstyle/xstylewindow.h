@@ -24,6 +24,7 @@
 #include <QThread>
 #include <QDesktopWidget>
 #include <QScreen>
+#include <QPixmapCache>
 
 #include <vector>
 #include <unordered_map>
@@ -40,12 +41,23 @@
 #include <xstyle/xstylebutton.hpp>
 #include <qt_shadow_helper.hpp>
 
+enum class WindowLoadingIconType
+{
+    DontUse = 0,
+    OnlyTitleIcon,
+    BothTitleIconAndTaskbarIcon
+};
+
 //
 // XStyleWindow
 //
 
 #define RegisterXStyleWindowProperty(Type, PropertyName, MemberName, Suffix, DefaultValue) \
     DefineXStyleProperty(Type, PropertyName, MemberName, Suffix, DefaultValue)             \
+        Q_PROPERTY(Type PropertyName READ Get##Suffix WRITE Set##Suffix DESIGNABLE true SCRIPTABLE true)
+
+#define RegisterXStyleWindowPropertyWithOutSetter(Type, PropertyName, MemberName, Suffix, DefaultValue) \
+    DefineXStylePropertyWithOutSetter(Type, PropertyName, MemberName, Suffix, DefaultValue)             \
         Q_PROPERTY(Type PropertyName READ Get##Suffix WRITE Set##Suffix DESIGNABLE true SCRIPTABLE true)
 
 class XStyleWindow : public QMainWindow
@@ -69,6 +81,10 @@ class XStyleWindow : public QMainWindow
     RegisterXStyleWindowProperty(QColor, shadow_color, shadowColor, ShadowColor, DEFAULT_XSTYLE_WINDOW_SHADOW_COLOR);
     RegisterXStyleWindowProperty(int, window_fade_out_duration, msWindowFadeOutDuration, WindowFadeOutDuration, DEFAULT_XSTYLE_WINDOW_FADE_OUT_DURATION);
     RegisterXStyleWindowProperty(QColor, window_inactive_overlay_color, windowInActiveOverlayColor, WindowInActiveOverlayColor, DEFAULT_XSTYLE_WINDOW_INACTIVE_OVERLAY_COLOR);
+
+    RegisterXStyleWindowProperty(int, window_loading_icon_rotate_duration, windowLoadingIconRotateDuration, WindowLoadingIconRotateDuration, DEFAULT_XSTYLE_WINDOW_WINDOW_LOADING_ICON_ROTATE_DURATION);
+    RegisterXStyleWindowPropertyWithOutSetter(QString, window_loading_icon_url, windowLoadingIconUrl, WindowLoadingIconUrl, DEFAULT_XSTYLE_WINDOW_WINDOW_LOADING_ICON_URL);
+    RegisterXStyleWindowPropertyWithOutSetter(int, window_loading_icon_rotation, windowLoadingIconRotation, WindowLoadingIconRotation, 0);
 
   public:
     explicit XStyleWindow(const QString& name, QWidget* xstyleParent = nullptr, bool deleteWhenClose = false);
@@ -278,21 +294,58 @@ class XStyleWindow : public QMainWindow
     virtual void BeginMission()
     {
         IgnoreForClose();
-        if (missionCounter == 0) {
+
+        if (missionCounter.ref() && missionCounter == 1) {
             emit missionBegined();
             QCoreApplication::processEvents();
         }
-        missionCounter.ref();
     }
 
     virtual void CloseMission()
     {
-        missionCounter.deref();
-        if (missionCounter == 0) {
+        if (!missionCounter.deref()) {
             emit missionClosed();
             QCoreApplication::processEvents();
         }
+
         ReadyForClose();
+    }
+
+    Q_INVOKABLE WindowLoadingIconType GetWindowLoadingIconType() const
+    {
+        return windowLoadingIconType;
+    }
+
+    Q_INVOKABLE void SetWindowLoadingIconType(WindowLoadingIconType type)
+    {
+        windowLoadingIconType = type;
+    }
+
+    Q_INVOKABLE bool IsUseLoadingIconAnimationCache() const
+    {
+        return useLoadingIconAnimationCache;
+    }
+
+    Q_INVOKABLE void SetUseLoadingIconAnimationCache(bool useCache)
+    {
+        useLoadingIconAnimationCache = useCache;
+    }
+
+    Q_INVOKABLE void SetWindowLoadingIconUrl(QString url)
+    {
+        if (!QFile(url).exists()) {
+            return;
+        }
+        loadingIcon = QIcon(url);
+        loadingIconAnimationPixmapBuffer.clear();
+    }
+
+    Q_INVOKABLE void SetWindowLoadingIconRotation(int rotation)
+    {
+        windowLoadingIconRotation = rotation;
+        if (missionCounter && windowLoadingIconType != WindowLoadingIconType::DontUse) {
+            UpdateLoadingIcon(rotation);
+        }
     }
 
   protected:
@@ -353,6 +406,82 @@ class XStyleWindow : public QMainWindow
     Q_INVOKABLE void ReadyForClose(const bool canCloseWhenZero = true);
     Q_INVOKABLE bool CanClose();
 
+    //
+    // loading icon rotation animation
+    //
+
+    void BeginLoadingIconRotate()
+    {
+        if (loadingIconAnimation || windowLoadingIconType == WindowLoadingIconType::DontUse) {
+            return;
+        }
+
+        windowLoadingIconRotation = 0;
+
+        loadingIconAnimation = new QPropertyAnimation(this, "window_loading_icon_rotation", this);
+        loadingIconAnimation->setDuration(windowLoadingIconRotateDuration);
+        loadingIconAnimation->setStartValue(0);
+        loadingIconAnimation->setEndValue(360);
+        loadingIconAnimation->setEasingCurve(QEasingCurve::Linear);
+        loadingIconAnimation->setLoopCount(-1);
+        loadingIconAnimation->start(QPropertyAnimation::KeepWhenStopped);
+    }
+
+    void EndLoadingIconRotate()
+    {
+        if (!loadingIconAnimation) {
+            return;
+        }
+
+        loadingIconAnimation->stop();
+        while (loadingIconAnimation->state() != QAbstractAnimation::Stopped) {
+            QCoreApplication::processEvents();
+            QThread::msleep(10);
+        }
+        delete loadingIconAnimation;
+        loadingIconAnimation = nullptr;
+
+        WindowActiveChanged(isActiveWindow());
+        if (windowLoadingIconType == WindowLoadingIconType::BothTitleIconAndTaskbarIcon) {
+            setWindowIcon(windowTitleIcon.pixmap(labelWindowIcon->width(), labelWindowIcon->height(), QIcon::Normal, QIcon::On));
+        }
+    }
+
+    void UpdateLoadingIcon(int angle)
+    {
+        if (windowLoadingIconType == WindowLoadingIconType::DontUse) {
+            return;
+        }
+
+        QPixmap loadingPixmap;
+
+        // QString pixmapId = QString("%1_loading_icon_angle_%2").arg(objectName()).arg(angle);
+        // if (!QPixmapCache::find(pixmapId, &loadingPixmap)) {
+        //     loadingPixmap = xstyle::RotatePixmap((loadingIcon.isNull() ? windowTitleIcon : loadingIcon).pixmap(labelWindowIcon->size(), QIcon::Normal, QIcon::On), windowLoadingIconRotation);
+        //     QPixmapCache::insert(pixmapId, loadingPixmap);
+        // }
+
+        if (useLoadingIconAnimationCache) {
+            if (loadingIconAnimationPixmapBuffer.find(angle) == loadingIconAnimationPixmapBuffer.end()) {
+                loadingPixmap                           = xstyle::RotatePixmap((loadingIcon.isNull() ? windowTitleIcon : loadingIcon).pixmap(labelWindowIcon->size(), QIcon::Normal, QIcon::On), angle);
+                loadingIconAnimationPixmapBuffer[angle] = loadingPixmap;
+            }
+            else {
+                loadingPixmap = loadingIconAnimationPixmapBuffer[angle];
+            }
+        }
+        else {
+            loadingPixmap = xstyle::RotatePixmap((loadingIcon.isNull() ? windowTitleIcon : loadingIcon).pixmap(labelWindowIcon->size(), QIcon::Normal, QIcon::On), angle);
+        }
+
+        if (labelWindowIcon) {
+            labelWindowIcon->setPixmap(loadingPixmap);
+        }
+        if (windowLoadingIconType == WindowLoadingIconType::BothTitleIconAndTaskbarIcon) {
+            setWindowIcon(loadingPixmap);
+        }
+    }
+
   signals:
     void closed();
     void missionBegined();
@@ -361,12 +490,14 @@ class XStyleWindow : public QMainWindow
   public slots:
     virtual void ThemeChanged(QString themeName, QString styleSheet);
 
-    virtual void EnableAllElements()
+    virtual void OnBeginMission()
     {
+        BeginLoadingIconRotate();
     }
 
-    virtual void DisableAllElements()
+    virtual void OnCloseMission()
     {
+        EndLoadingIconRotate();
     }
 
   protected:
@@ -390,7 +521,12 @@ class XStyleWindow : public QMainWindow
     qint64                  lastClickIconTimeStamp;
 
     // mission flags
-    QAtomicInteger<int32_t> missionCounter;
+    QAtomicInteger<int32_t>          missionCounter;
+    WindowLoadingIconType            windowLoadingIconType;
+    QIcon                            loadingIcon;
+    QPropertyAnimation*              loadingIconAnimation;
+    bool                             useLoadingIconAnimationCache;
+    std::unordered_map<int, QPixmap> loadingIconAnimationPixmapBuffer;
 
     // shadow
     QPixmap shadowBuffer;
@@ -400,7 +536,7 @@ class XStyleWindow : public QMainWindow
     QString inActiveTitleColorDesc;
 
     // window icon
-    QIcon windowIcon;
+    QIcon windowTitleIcon;
 
     // ui components
     QWidget*      container;

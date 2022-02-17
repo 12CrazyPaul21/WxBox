@@ -26,3 +26,5 @@ option('default_wxbox_wechat_feature_repo_root_url', type: 'string', value: 'htt
 option('default_wxbox_wechat_feature_update_timestamp', type: 'string', value: '')
 option('default_wxbox_wechat_multi_bloxing_quota', type: 'integer', value: -1)
 option('default_wxbox_close_is_minimize_to_tray', type: 'boolean', value: true)
+option('default_wxbox_loading_icon_type', type: 'integer', value: 1)
+option('default_wxbox_loading_icon_animation_use_cache', type: 'boolean', value: false)

@@ -76,8 +76,8 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     bool InitWxBox(QSplashScreen* splash);
     bool DeinitWxBox();
 
-    virtual void EnableAllElements() Q_DECL_OVERRIDE;
-    virtual void DisableAllElements() Q_DECL_OVERRIDE;
+    virtual void OnBeginMission() Q_DECL_OVERRIDE;
+    virtual void OnCloseMission() Q_DECL_OVERRIDE;
 
   private:
     virtual bool BeforeClose() override
@@ -88,15 +88,15 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     virtual void RetranslateUi() override
     {
         XSTYLE_WINDOW_CLASS::RetranslateUi();
-        auto language              = xstyle_manager.CurrentLanguage().toStdString();
-        config[WXBOX_LANGUAGE_KEY] = language;
+        auto language = xstyle_manager.CurrentLanguage().toStdString();
+        config.change_language(language);
         wb_coredump::ChangeDumperLanguage(language);
     }
 
     virtual void AfterThemeChanged(const QString& themeName) override
     {
-        auto theme                   = themeName.toStdString();
-        config[WXBOX_THEME_NAME_KEY] = theme;
+        auto theme = themeName.toStdString();
+        config.change_theme(theme);
         wb_coredump::ChangeTheme(theme);
     }
 
@@ -104,7 +104,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     {
         XSTYLE_WINDOW_CLASS::TurnCloseIsMinimizeToTray(toTray);
         if (config.close_is_minimize_to_tray() != toTray) {
-            config[WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY] = toTray;
+            config.change_close_is_minimize_to_tray(toTray);
         }
         qApp->setQuitOnLastWindowClosed(!toTray);
     }

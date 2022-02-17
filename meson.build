@@ -135,7 +135,9 @@ all_default_config = {
     '/wxbox/wechat_feature_repo_root_url': true,
     '/wxbox/wechat_feature_update_timestamp': true,
     '/wxbox/wechat_multi_bloxing_quota': false,
-    '/wxbox/close_is_minimize_to_tray': false
+    '/wxbox/close_is_minimize_to_tray': false,
+    '/wxbox/loading_icon_type': false,
+    '/wxbox/loading_icon_animation_use_cache': false
 }
 
 config_macro_flags = []

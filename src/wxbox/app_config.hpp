@@ -21,6 +21,8 @@ REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_REPO_ROOT_URL);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
 REGISTER_CONFIG_KEY(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
+REGISTER_CONFIG_KEY(WXBOX_LOADING_ICON_TYPE);
+REGISTER_CONFIG_KEY(WXBOX_LOADING_ICON_ANIMATION_USE_CACHE);
 
 #if WXBOX_IN_WINDOWS_OS
 static constexpr auto DUMPER_EXT_NAME = ".exe";
@@ -74,6 +76,8 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
         CHECK_DEFAULT_CONFIG(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
+        CHECK_DEFAULT_CONFIG(WXBOX_LOADING_ICON_TYPE);
+        CHECK_DEFAULT_CONFIG(WXBOX_LOADING_ICON_ANIMATION_USE_CACHE);
 
         return value;
     }
@@ -85,6 +89,12 @@ class AppConfig final : public wb_config::Config
     std::string language()
     {
         return this->operator[](WXBOX_LANGUAGE_KEY).safe_as<std::string>();
+    }
+
+    void change_language(const std::string& language)
+    {
+        this->operator[](WXBOX_LANGUAGE_KEY) = language;
+        submit();
     }
 
     std::string i18n_path()
@@ -132,6 +142,12 @@ class AppConfig final : public wb_config::Config
     std::string current_theme_name()
     {
         return this->operator[](WXBOX_THEME_NAME_KEY).safe_as<std::string>();
+    }
+
+    void change_theme(const std::string& themeName)
+    {
+        this->operator[](WXBOX_THEME_NAME_KEY) = themeName;
+        submit();
     }
 
     //
@@ -231,6 +247,41 @@ class AppConfig final : public wb_config::Config
     bool close_is_minimize_to_tray() const
     {
         return this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY).safe_as<bool>();
+    }
+
+    void change_close_is_minimize_to_tray(bool toTray)
+    {
+        this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY) = toTray;
+        submit();
+    }
+
+    int loading_icon_type() const
+    {
+        int type = this->operator[](WXBOX_LOADING_ICON_TYPE_KEY).safe_as<int>();
+        if (type < 0 || type > 2) {
+            type = 0;
+        }
+        return type;
+    }
+
+    void change_loading_icon_type(int type)
+    {
+        if (type < 0 || type > 2) {
+            type = 0;
+        }
+        this->operator[](WXBOX_LOADING_ICON_TYPE_KEY) = type;
+        submit();
+    }
+
+    bool loading_icon_animation_use_cache() const
+    {
+        return this->operator[](WXBOX_LOADING_ICON_ANIMATION_USE_CACHE_KEY).safe_as<bool>();
+    }
+
+    void change_loading_icon_animation_use_cache(bool useCache)
+    {
+        this->operator[](WXBOX_LOADING_ICON_ANIMATION_USE_CACHE_KEY) = useCache;
+        submit();
     }
 
     //

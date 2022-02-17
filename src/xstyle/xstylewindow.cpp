@@ -20,6 +20,9 @@ XStyleWindow::XStyleWindow(const QString& name, QWidget* xstyleParent, bool dele
   , readyForCloseCounter(0)
   , lastClickIconTimeStamp(0)
   , missionCounter(0)
+  , windowLoadingIconType(WindowLoadingIconType::DontUse)
+  , loadingIconAnimation(nullptr)
+  , useLoadingIconAnimationCache(false)
   , inActiveTitleColorDesc("")
   , container(nullptr)
   , containerLayout(nullptr)
@@ -42,8 +45,8 @@ XStyleWindow::XStyleWindow(const QString& name, QWidget* xstyleParent, bool dele
     setProperty("class", "xstylewindow");
     installEventFilter(this);
 
-    QObject::connect(this, SIGNAL(missionBegined()), this, SLOT(DisableAllElements()), Qt::ConnectionType::QueuedConnection);
-    QObject::connect(this, SIGNAL(missionClosed()), this, SLOT(EnableAllElements()), Qt::ConnectionType::QueuedConnection);
+    QObject::connect(this, SIGNAL(missionBegined()), this, SLOT(OnBeginMission()), Qt::ConnectionType::QueuedConnection);
+    QObject::connect(this, SIGNAL(missionClosed()), this, SLOT(OnCloseMission()), Qt::ConnectionType::QueuedConnection);
 }
 
 XStyleWindow::~XStyleWindow()
@@ -250,12 +253,12 @@ void XStyleWindow::ApplyTheme(bool extractXStyle)
     inactivePixmap.setMask(mask);
 
     // add icon
-    windowIcon = QIcon();
-    windowIcon.addPixmap(originalPixmap, QIcon::Normal, QIcon::On);
-    windowIcon.addPixmap(inactivePixmap, QIcon::Normal, QIcon::Off);
+    windowTitleIcon = QIcon();
+    windowTitleIcon.addPixmap(originalPixmap, QIcon::Normal, QIcon::On);
+    windowTitleIcon.addPixmap(inactivePixmap, QIcon::Normal, QIcon::Off);
 
     if (labelWindowIcon) {
-        labelWindowIcon->setPixmap(windowIcon.pixmap(labelWindowIcon->width(), labelWindowIcon->height(), QIcon::Normal, QIcon::On));
+        labelWindowIcon->setPixmap(windowTitleIcon.pixmap(labelWindowIcon->width(), labelWindowIcon->height(), QIcon::Normal, QIcon::On));
     }
 
     //
@@ -448,13 +451,19 @@ void XStyleWindow::WindowActiveChanged(bool isActive)
         return;
     }
 
+    bool updateIcon = missionCounter == 0 || windowLoadingIconType == WindowLoadingIconType::DontUse;
+
     if (isActive) {
         labelWindowTitle->setStyleSheet("");
-        labelWindowIcon->setPixmap(windowIcon.pixmap(labelWindowIcon->width(), labelWindowIcon->height(), QIcon::Normal, QIcon::On));
+        if (updateIcon) {
+            labelWindowIcon->setPixmap(windowTitleIcon.pixmap(labelWindowIcon->width(), labelWindowIcon->height(), QIcon::Normal, QIcon::On));
+        }
     }
     else {
         labelWindowTitle->setStyleSheet(inActiveTitleColorDesc);
-        labelWindowIcon->setPixmap(windowIcon.pixmap(labelWindowIcon->width(), labelWindowIcon->height(), QIcon::Normal, QIcon::Off));
+        if (updateIcon) {
+            labelWindowIcon->setPixmap(windowTitleIcon.pixmap(labelWindowIcon->width(), labelWindowIcon->height(), QIcon::Normal, QIcon::Off));
+        }
     }
 }
 

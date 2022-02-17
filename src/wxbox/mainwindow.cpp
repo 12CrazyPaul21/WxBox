@@ -89,14 +89,16 @@ void MainWindow::UpdateWeChatFeatures()
     controller.ReloadFeatures();
 }
 
-void MainWindow::EnableAllElements()
+void MainWindow::OnBeginMission()
 {
-    ui->btnStartWeChat->setEnabled(true);
+    XSTYLE_WINDOW_CLASS::OnBeginMission();
+    ui->btnStartWeChat->setEnabled(false);
 }
 
-void MainWindow::DisableAllElements()
+void MainWindow::OnCloseMission()
 {
-    ui->btnStartWeChat->setEnabled(false);
+    XSTYLE_WINDOW_CLASS::OnCloseMission();
+    ui->btnStartWeChat->setEnabled(true);
 }
 
 void MainWindow::InitAppMenu()
@@ -156,11 +158,12 @@ void MainWindow::RegisterEvent()
         /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
         xstyle_manager.ChangeLanguage("zh_cn");
         xstyle_manager.ChangeTheme("GreenTheme");*/
+        xstyle_manager.ChangeTheme("");
         xstyle_manager.ChangeLanguage("zh_cn");
     });
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
         //UpdateWeChatFeatures();
-        xstyle_manager.ChangeLanguage("en");
+        //xstyle_manager.ChangeLanguage("en");
     });
 }
 
@@ -168,6 +171,10 @@ bool MainWindow::InitWxBox(QSplashScreen* splash)
 {
     // press close button is minimize to tray not quit
     TurnCloseIsMinimizeToTray(config.close_is_minimize_to_tray());
+
+    // loading icon
+    SetWindowLoadingIconType(WindowLoadingIconType(config.loading_icon_type()));
+    SetUseLoadingIconAnimationCache(config.loading_icon_animation_use_cache());
 
     // init app menu
     SPLASH_MESSAGE("Init Application Menu");
