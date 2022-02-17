@@ -255,6 +255,7 @@ static bool UnloadModuleBySelf_Windows(const std::string& moduleName, wb_process
     }
     parameter->tid = triggerThreadId;
 
+    // executing in a new thread, In order to allow the destructor to be executed after the end of the target thread
     return ::CreateThread(NULL, 0, UnloadModuleBySelf_ThreadProc, parameter, 0, nullptr);
 }
 
