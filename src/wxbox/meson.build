@@ -29,6 +29,7 @@ wxbox_inc = [
 wxbox_src = files([
     join_paths(wxbox_root, 'main.cpp'),
     join_paths(wxbox_root, 'mainwindow.cpp'),
+    join_paths(wxbox_root, 'wxbox_controller_error.h'),
     join_paths(wxbox_root, 'wxbox_controller.cpp'),
     join_paths(wxbox_root, 'about.cpp'),
     join_paths(wxbox_root, 'download_dialog.cpp'),

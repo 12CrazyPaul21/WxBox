@@ -5,6 +5,8 @@
 #include <QOperatingSystemVersion>
 #include <QMessageBox>
 
+#include <xstyle/xstyle.h>
+
 #undef signals
 #include <utils/common.h>
 #define signals Q_SIGNALS
@@ -25,12 +27,18 @@ class WxBoxController final : public QObject
     explicit WxBoxController(MainWindow* view = nullptr);
     ~WxBoxController();
 
+    inline QString Translate(const char* text)
+    {
+        return xstyle_manager.Translate("WxBoxController", text);
+    }
+
     bool CheckSystemVersionSupported();
 
     void StartWxBoxServer();
     void StopWxBoxServer();
 
     void LoadWeChatEnvironmentInfo();
+    bool RequireValidWeChatEnvironmentInfo();
     void ReloadFeatures();
 
     void StartWeChatInstance();

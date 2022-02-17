@@ -157,8 +157,28 @@
 <context>
     <name>WxBoxController</name>
     <message>
+        <source>Start WxBoxServer failed, close application now...</source>
+        <translation>启动WxBoxServer失败, 准备关闭程序...</translation>
+    </message>
+    <message>
         <source>Invalid WeChat Environment Info</source>
         <translation>请指定有效的WeChat安装路径</translation>
+    </message>
+    <message>
+        <source>Open WeChat failed</source>
+        <translation>启动微信失败</translation>
+    </message>
+    <message>
+        <source>Get WeChat process handle failed</source>
+        <translation>获取WeChat进程句柄失败</translation>
+    </message>
+    <message>
+        <source>WeChat api hook point invalid</source>
+        <translation>定位WeChat Hook点部分失败</translation>
+    </message>
+    <message>
+        <source>Inject WxBot module invalid</source>
+        <translation>注入WxBot模块失败</translation>
     </message>
     <message>
         <source>Do you want to inject wxbot at the same time?</source>
