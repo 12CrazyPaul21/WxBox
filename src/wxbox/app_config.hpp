@@ -3,6 +3,7 @@
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+REGISTER_CONFIG_KEY(WXBOX_SERVER_URI);
 REGISTER_CONFIG_KEY(WXBOX_LANGUAGE);
 REGISTER_CONFIG_KEY(WXBOX_I18N_PATH);
 REGISTER_CONFIG_KEY(WXBOX_THEME_PATH);
@@ -58,6 +59,7 @@ class AppConfig final : public wb_config::Config
         }                                  \
     }
 
+        CHECK_DEFAULT_CONFIG(WXBOX_SERVER_URI);
         CHECK_DEFAULT_CONFIG(WXBOX_LANGUAGE);
         CHECK_DEFAULT_CONFIG(WXBOX_I18N_PATH);
         CHECK_DEFAULT_CONFIG(WXBOX_THEME_PATH);
@@ -283,6 +285,21 @@ class AppConfig final : public wb_config::Config
     void change_loading_icon_animation_use_cache(bool useCache)
     {
         this->operator[](WXBOX_LOADING_ICON_ANIMATION_USE_CACHE_KEY) = useCache;
+        submit();
+    }
+
+    //
+    // wxbox server
+    //
+
+    std::string wxbox_server_uri() const
+    {
+        return this->operator[](WXBOX_SERVER_URI_KEY).safe_as<std::string>();
+    }
+
+    void change_wxbox_server_uri(const std::string& uri)
+    {
+        this->operator[](WXBOX_SERVER_URI_KEY) = uri;
         submit();
     }
 

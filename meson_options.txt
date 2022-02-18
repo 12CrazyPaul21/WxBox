@@ -6,6 +6,7 @@ option('disable_frida_gum_test', type: 'boolean', value: false)
 option('disable_hook_test', type: 'boolean', value: false)
 option('disable_crack_test', type: 'boolean', value: false)
 
+option('default_wxbox_server_uri', type: 'string', value: 'localhost:52333')
 option('default_wxbox_language', type: 'string', value: 'zh_cn')
 option('default_wxbox_i18n_path', type: 'string', value: 'i18n')
 option('default_wxbox_theme_path', type: 'string', value: 'themes')

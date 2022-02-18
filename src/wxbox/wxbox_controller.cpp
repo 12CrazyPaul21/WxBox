@@ -40,7 +40,7 @@ void WxBoxController::StartWxBoxServer()
         return;
     }
 
-    wxbox::WxBoxServer* server = wxbox::WxBoxServer::NewWxBoxServer();
+    wxbox::WxBoxServer* server = wxbox::WxBoxServer::NewWxBoxServer(config.wxbox_server_uri());
 
     // connect slots
     QObject::connect(&worker, SIGNAL(finished()), server, SLOT(deleteLater()));
@@ -148,20 +148,24 @@ void WxBoxController::StartWeChatInstance()
         wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
         strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wb_file::GetProcessRootPath().data());
         strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), config.wxbot_root_path().data());
+        strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
 
+        // log wx core module info
+        spdlog::info("WeChat Core Module baseaddr : 0x{:08X}, size : 0x{:08X}", (ucpulong_t)openResult.pModuleBaseAddr, openResult.uModuleSize);
+
         // log wx hook point
-        spdlog::info("CheckAppSingleton va : {}", wxbotEntryParameter.wechat_apis.CheckAppSingleton);
-        spdlog::info("FetchGlobalContactContextAddress va : {}", wxbotEntryParameter.wechat_apis.FetchGlobalContactContextAddress);
-        spdlog::info("InitWeChatContactItem va : {}", wxbotEntryParameter.wechat_apis.InitWeChatContactItem);
-        spdlog::info("DeinitWeChatContactItem va : {}", wxbotEntryParameter.wechat_apis.DeinitWeChatContactItem);
-        spdlog::info("FindAndDeepCopyWeChatContactItemWithWXIDWrapper va : {}", wxbotEntryParameter.wechat_apis.FindAndDeepCopyWeChatContactItemWithWXIDWrapper);
-        spdlog::info("FetchGlobalProfileContext va : {}", wxbotEntryParameter.wechat_apis.FetchGlobalProfileContext);
-        spdlog::info("HandleRawMessages va : {}", wxbotEntryParameter.wechat_apis.HandleRawMessages);
-        spdlog::info("HandleReceivedMessages va : {}", wxbotEntryParameter.wechat_apis.HandleReceivedMessages);
-        spdlog::info("WXSendTextMessage va : {}", wxbotEntryParameter.wechat_apis.WXSendTextMessage);
-        spdlog::info("FetchGlobalSendMessageContext va : {}", wxbotEntryParameter.wechat_apis.FetchGlobalSendMessageContext);
-        spdlog::info("WXSendFileMessage va : {}", wxbotEntryParameter.wechat_apis.WXSendFileMessage);
+        spdlog::info("CheckAppSingleton va : 0x{:08X}", wxbotEntryParameter.wechat_apis.CheckAppSingleton);
+        spdlog::info("FetchGlobalContactContextAddress va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FetchGlobalContactContextAddress);
+        spdlog::info("InitWeChatContactItem va : 0x{:08X}", wxbotEntryParameter.wechat_apis.InitWeChatContactItem);
+        spdlog::info("DeinitWeChatContactItem va : 0x{:08X}", wxbotEntryParameter.wechat_apis.DeinitWeChatContactItem);
+        spdlog::info("FindAndDeepCopyWeChatContactItemWithWXIDWrapper va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FindAndDeepCopyWeChatContactItemWithWXIDWrapper);
+        spdlog::info("FetchGlobalProfileContext va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FetchGlobalProfileContext);
+        spdlog::info("HandleRawMessages va : 0x{:08X}", wxbotEntryParameter.wechat_apis.HandleRawMessages);
+        spdlog::info("HandleReceivedMessages va : 0x{:08X}", wxbotEntryParameter.wechat_apis.HandleReceivedMessages);
+        spdlog::info("WXSendTextMessage va : 0x{:08X}", wxbotEntryParameter.wechat_apis.WXSendTextMessage);
+        spdlog::info("FetchGlobalSendMessageContext va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FetchGlobalSendMessageContext);
+        spdlog::info("WXSendFileMessage va : 0x{:08X}", wxbotEntryParameter.wechat_apis.WXSendFileMessage);
 
         // verify hook point
         if (!wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis)) {

@@ -33,13 +33,13 @@ shlib = shared_library('wxbot', [wxbot_src, proto_generated],
 )
 
 # Test wxbot
-test_exe = executable('wxbot_test', 'wxbot_test.cpp',
-    include_directories: configuration_inc,
-    link_with : shlib,
-    dependencies: [spdlog_dep],
-    cpp_args: [ignore_warnings]
-)
-test_env = environment()
-# test_env.prepend('PATH', TitanEngine_bin_root)
-test_env.prepend('PATH', grpc_bin_root)
-test('wxbot', test_exe)
+# test_exe = executable('wxbot_test', 'wxbot_test.cpp',
+#     include_directories: configuration_inc,
+#     link_with : shlib,
+#     dependencies: [spdlog_dep],
+#     cpp_args: [ignore_warnings]
+# )
+# test_env = environment()
+# # test_env.prepend('PATH', TitanEngine_bin_root)
+# test_env.prepend('PATH', grpc_bin_root)
+# test('wxbot', test_exe)

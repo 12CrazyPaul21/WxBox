@@ -33,7 +33,7 @@ namespace wxbot {
         ~WxBot();
 
         bool Ping();
-        bool BuildWxBoxClient();
+        bool BuildWxBoxClient(const char* uri);
         void DestroyWxBoxClient();
         bool StartWxBoxClient();
         void StopWxBoxClient();

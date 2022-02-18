@@ -38,6 +38,7 @@ namespace wxbox {
             ucpulong_t wxbox_pid;
             char       wxbox_root[WXBOX_MAX_PATH];
             char       wxbot_root[WXBOX_MAX_PATH];
+            char       wxbox_server_uri[WXBOX_MAX_PATH];
             WxApis     wechat_apis;
         } WxBotEntryParameter, *PWxBotEntryParameter;
 

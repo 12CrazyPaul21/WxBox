@@ -305,16 +305,20 @@ namespace wxbox {
         Q_OBJECT
 
       public:
-        explicit WxBoxServer(QObject* parent = nullptr)
+        explicit WxBoxServer(const std::string& url = "", QObject* parent = nullptr)
           : QObject(parent)
+          , serverURI(url)
           , status(WxBoxServerStatus::Uninit)
           , serverImpl(nullptr)
         {
+            if (serverURI.empty()) {
+                serverURI = WxBoxServerURI();
+            }
         }
 
-        static WxBoxServer* NewWxBoxServer(QObject* parent = nullptr)
+        static WxBoxServer* NewWxBoxServer(const std::string& url = "", QObject* parent = nullptr)
         {
-            return new WxBoxServer(parent);
+            return new WxBoxServer(url, parent);
         }
 
         //
@@ -420,7 +424,7 @@ namespace wxbox {
             GOOGLE_PROTOBUF_VERIFY_VERSION;
             grpc::EnableDefaultHealthCheckService(true);
             grpc::reflection::InitProtoReflectionServerBuilderPlugin();
-            serverImpl = ServerBuilder().AddListeningPort(WxBoxServerURI(), grpc::InsecureServerCredentials()).RegisterService(this).BuildAndStart();
+            serverImpl = ServerBuilder().AddListeningPort(serverURI, grpc::InsecureServerCredentials()).RegisterService(this).BuildAndStart();
             return serverImpl != nullptr;
         }
 
@@ -483,6 +487,7 @@ namespace wxbox {
         }
 
       private:
+        std::string                                         serverURI;
         WxBoxServerStatus                                   status;
         std::unique_ptr<Server>                             serverImpl;
         mutable std::shared_mutex                           mutex;

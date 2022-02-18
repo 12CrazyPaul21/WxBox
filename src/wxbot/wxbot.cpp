@@ -55,13 +55,13 @@ namespace wxbot {
         return client->Ping();
     }
 
-    bool WxBot::BuildWxBoxClient()
+    bool WxBot::BuildWxBoxClient(const char* uri)
     {
         if (client) {
             return false;
         }
 
-        client = new wxbot::WxBoxClient(wxbot::WxBoxClient::WxBoxServerURI());
+        client = new wxbot::WxBoxClient(uri);
         return !!client;
     }
 
@@ -136,14 +136,25 @@ namespace wxbot {
 
 static void WxBotRoutine(std::unique_ptr<wb_crack::WxBotEntryParameter> args)
 {
-    if (args) {
-        std::stringstream ss;
-        ss << "wxbox root path : " << args->wxbox_root;
-        MessageBoxA(NULL, ss.str().c_str(), "WxBot", MB_OK);
-    }
+    std::stringstream ss;
+    ss << "wxbox server uri : " << args->wxbox_server_uri;
+    MessageBoxA(NULL, ss.str().c_str(), "WxBot", MB_OK);
+
+    // execute hook
+
+    // start wxbox client
+    wxbot::WxBot bot;
+    bot.BuildWxBoxClient(args->wxbox_server_uri);
+    bot.StartWxBoxClient();
 
     // resume all other wechat threads
     wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+
+    // wait for finish
+    bot.Wait();
+    bot.DestroyWxBoxClient();
+
+    // execute unhook
 
     // unload wxbot module
     wb_crack::UnInjectWxBotBySelf();

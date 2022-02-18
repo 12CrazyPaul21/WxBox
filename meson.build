@@ -116,6 +116,7 @@ configuration_inc = include_directories('.')
 #
 
 all_default_config = {
+    '/wxbox/server_uri': true,
     '/wxbox/language': true,
     '/wxbox/i18n/path': true,
     '/wxbox/theme/path': true,

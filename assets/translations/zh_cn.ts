@@ -158,7 +158,7 @@
     <name>WxBoxController</name>
     <message>
         <source>Start WxBoxServer failed, close application now...</source>
-        <translation>启动WxBoxServer失败, 准备关闭程序...</translation>
+        <translation>启动WxBoxServer失败, 准备关闭程序, 请检查端口是否有冲突...</translation>
     </message>
     <message>
         <source>Invalid WeChat Environment Info</source>
