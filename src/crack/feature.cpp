@@ -724,7 +724,7 @@ bool wb_feature::_WxApiFeatures::Collect(const LocateTarget& locateTarget, const
         }
     }
     else {
-        auto ptr = Inner_GetHookPointFeatures(wxVersion);
+        auto ptr = Inner_GetSimilarHookPointFeatures(wxVersion);
         if (ptr) {
             return Collect(locateTarget, *ptr, vaCollection);
         }
@@ -813,7 +813,7 @@ bool wb_feature::_WxApiFeatures::ObtainAbsoluteFillStream(const std::string& ver
 
 bool wb_feature::_WxApiFeatures::ObtainFuzzyFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream)
 {
-    auto ptr = Inner_GetHookPointFeatures(version);
+    auto ptr = Inner_GetSimilarHookPointFeatures(version);
     if (!ptr) {
         return false;
     }
