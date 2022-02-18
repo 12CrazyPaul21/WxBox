@@ -58,7 +58,7 @@ void ping(wxbot::WxBot& bot)
     }
 }
 
-int main(int /*argc*/, char** /*argv*/)
+[[deprecated]] int main(int /*argc*/, char** /*argv*/)
 {
     wxbot::WxBot bot;
 

@@ -1,7 +1,4 @@
 #include <wxbot.hpp>
-#include <wxbox_client.hpp>
-
-#include <spdlog/spdlog.h>
 
 const char* ParseStatus(wxbot::WxBoxClientStatus status)
 {
@@ -32,129 +29,200 @@ const char* ParseStatus(wxbot::WxBoxClientStatus status)
     }
 }
 
-namespace wxbot {
+//
+// WxBot
+//
 
-    WxBot::WxBot()
-      : client(nullptr)
-    {
+bool wxbot::WxBot::Initialize()
+{
+#define WXBOT_INIT_FAILED() \
+    {                       \
+        inited = false;     \
+        return false;       \
     }
 
-    WxBot::~WxBot()
-    {
-        StopWxBoxClient();
-        Wait();
-        DestroyWxBoxClient();
+    bool alreadyInited = false;
+    inited.compare_exchange_strong(alreadyInited, true);
+
+    if (alreadyInited) {
+        return false;
     }
 
-    bool WxBot::Ping()
-    {
-        if (!client) {
-            return false;
-        }
-
-        return client->Ping();
+    if (!args) {
+        WXBOT_INIT_FAILED();
     }
 
-    bool WxBot::BuildWxBoxClient(const char* uri)
-    {
-        if (client) {
-            return false;
-        }
-
-        client = new wxbot::WxBoxClient(uri);
-        return !!client;
+    // build WxBoxClient
+    client = new wxbot::WxBoxClient(args->wxbox_server_uri);
+    if (!client) {
+        WXBOT_INIT_FAILED();
     }
 
-    void WxBot::DestroyWxBoxClient()
-    {
-        if (client) {
-            delete client;
-            client = nullptr;
-        }
+    return true;
+}
+
+bool wxbot::WxBot::Startup()
+{
+#define WXBOT_STARTUP_FAILED() \
+    {                          \
+        running = false;       \
+        return false;          \
     }
 
-    bool WxBot::StartWxBoxClient()
-    {
-        if (!client) {
-            return false;
-        }
-
-        client->RegisterWxBotCallback(std::bind(&WxBot::WxBoxClientEvent, this, std::placeholders::_1));
-        return client->Start();
+    if (!inited) {
+        return false;
     }
 
-    void WxBot::StopWxBoxClient()
-    {
-        if (!client) {
-            return;
-        }
+    bool alreadyRunning = false;
+    running.compare_exchange_strong(alreadyRunning, true);
 
-        client->Stop();
+    if (alreadyRunning) {
+        return false;
     }
 
-    void WxBot::Wait()
-    {
-        if (!client) {
-            return;
-        }
-
-        client->Wait();
+    // start plugin virtual machine
+    wb_plugin::PluginVirtualMachineStartupInfo startupInfo;
+    startupInfo.pluginPath      = args->plugins_root;
+    startupInfo.longTaskTimeout = args->plugin_long_task_timeout;
+    startupInfo.callback        = std::bind(&WxBot::PluginVirtualMachineEventHandler, this, std::placeholders::_1);
+    if (!wb_plugin::StartPluginVirtualMachine(&startupInfo)) {
+        WXBOT_STARTUP_FAILED();
     }
 
-    void WxBot::Shutdown()
-    {
-        google::protobuf::ShutdownProtobufLibrary();
+    // start wxbox client
+    client->RegisterWxBotCallback(std::bind(&WxBot::WxBoxClientEventHandler, this, std::placeholders::_1));
+    if (!client->Start()) {
+        wb_plugin::StopPluginVirtualMachine();
+        WXBOT_STARTUP_FAILED();
     }
 
-    void WxBot::WxBoxClientEvent(wxbot::WxBotMessage message)
-    {
-        if (message.type == wxbot::WxBotMessageType::WxBoxClientStatusChange) {
-            spdlog::info("WxBoxClient status change, oldStatus<{}>, newStatus<{}>", ParseStatus(message.u.wxBoxClientStatus.oldStatus), ParseStatus(message.u.wxBoxClientStatus.newStatus));
-        }
-        else if (message.type == wxbot::WxBotMessageType::WxBoxRequestOrResponse) {
-            if (message.u.wxBoxControlPacket.type() == wxbox::ControlPacketType::PROFILE_REQUEST) {
-                spdlog::info("WxBoxServer request profile");
-                ResponseProfile();
-            }
-        }
+    return true;
+}
+
+void wxbot::WxBot::Wait()
+{
+    if (!running) {
+        return;
     }
 
-    //
-    // WxBoxClient Wrapper Response Methods
-    //
+    client->Wait();
+}
 
-    void WxBot::ResponseProfile()
-    {
-        wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
-        msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::PROFILE_RESPONSE);
-        msg.u.wxBotControlPacket.mutable_profileresponse()->set_wxid("<is a wxid for test>");
-        if (client) {
-            client->PushMessageAsync(std::move(msg));
+void wxbot::WxBot::Stop()
+{
+    if (!running) {
+        return;
+    }
+
+    // stop plugin virtual machine
+    wb_plugin::StopPluginVirtualMachine();
+
+    // stop wxbox client
+    client->Stop();
+}
+
+void wxbot::WxBot::Shutdown()
+{
+    if (!inited || running) {
+        return;
+    }
+
+    // destroy wxbox client
+    if (client) {
+        delete client;
+        client = nullptr;
+    }
+
+    // clear context
+    google::protobuf::ShutdownProtobufLibrary();
+
+    inited = false;
+}
+
+bool wxbot::WxBot::HookWeChat()
+{
+    return true;
+}
+
+void wxbot::WxBot::UnHookWeChat()
+{
+}
+
+//
+// WxBoxClient & PluginVirtualMachine EventHandler
+//
+
+void wxbot::WxBot::WxBoxClientEventHandler(wxbot::WxBotMessage message)
+{
+    if (message.type == wxbot::WxBotMessageType::WxBoxClientStatusChange) {
+        //spdlog::info("WxBoxClient status change, oldStatus<{}>, newStatus<{}>", ParseStatus(message.u.wxBoxClientStatus.oldStatus), ParseStatus(message.u.wxBoxClientStatus.newStatus));
+    }
+    else if (message.type == wxbot::WxBotMessageType::WxBoxRequestOrResponse) {
+        if (message.u.wxBoxControlPacket.type() == wxbox::ControlPacketType::PROFILE_REQUEST) {
+            //spdlog::info("WxBoxServer request profile");
+            ResponseProfile();
         }
     }
 }
 
+void wxbot::WxBot::PluginVirtualMachineEventHandler(wb_plugin::PluginVirtualMachineEventPtr event)
+{
+}
+
+//
+// WxBoxClient Wrapper Response Methods
+//
+
+void wxbot::WxBot::ResponseProfile()
+{
+    wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+    msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::PROFILE_RESPONSE);
+    msg.u.wxBotControlPacket.mutable_profileresponse()->set_wxid("<is a wxid for test>");
+    if (client) {
+        client->PushMessageAsync(std::move(msg));
+    }
+}
+
+//
+// wxbot routine
+//
+
 static void WxBotRoutine(std::unique_ptr<wb_crack::WxBotEntryParameter> args)
 {
-    std::stringstream ss;
-    ss << "wxbox server uri : " << args->wxbox_server_uri;
-    MessageBoxA(NULL, ss.str().c_str(), "WxBot", MB_OK);
+    wxbot::WxBot bot(std::move(args));
+
+#define WXBOT_STARTUP_FAILED()                                      \
+    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId()); \
+    goto _Finish;
+
+    // init
+    if (!bot.Initialize()) {
+        WXBOT_STARTUP_FAILED();
+    }
 
     // execute hook
-
-    // start wxbox client
-    wxbot::WxBot bot;
-    bot.BuildWxBoxClient(args->wxbox_server_uri);
-    bot.StartWxBoxClient();
+    if (!bot.HookWeChat()) {
+        WXBOT_STARTUP_FAILED();
+    }
 
     // resume all other wechat threads
     wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
 
-    // wait for finish
+    // start
+    if (!bot.Startup()) {
+        WXBOT_STARTUP_FAILED();
+    }
+
+    // wait for wxbot finish
     bot.Wait();
-    bot.DestroyWxBoxClient();
+
+    // deinit
+    bot.Shutdown();
 
     // execute unhook
+    bot.UnHookWeChat();
+
+_Finish:
 
     // unload wxbot module
     wb_crack::UnInjectWxBotBySelf();

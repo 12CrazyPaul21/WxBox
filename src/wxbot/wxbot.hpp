@@ -21,27 +21,46 @@
 #define WXBOT_PUBLIC_API WXBOT_PUBLIC
 #endif
 
+#include <wxbox_client.hpp>
+#include <plugin/plugin.h>
+
 namespace wxbot {
-
-    class WxBoxClient;
-    struct _WxBotMessage;
-
-    class WXBOT_PUBLIC WxBot
+    class WxBot
     {
       public:
-        WxBot();
-        ~WxBot();
+        WxBot(std::unique_ptr<wb_crack::WxBotEntryParameter>&& args)
+          : args(std::move(args))
+          , inited(false)
+          , running(false)
+          , client(nullptr)
+        {
+        }
 
-        bool Ping();
-        bool BuildWxBoxClient(const char* uri);
-        void DestroyWxBoxClient();
-        bool StartWxBoxClient();
-        void StopWxBoxClient();
+        ~WxBot()
+        {
+            if (inited) {
+                Stop();
+                Wait();
+                Shutdown();
+            }
+        }
+
+        bool Initialize();
+        bool Startup();
         void Wait();
+        void Stop();
         void Shutdown();
 
+        bool HookWeChat();
+        void UnHookWeChat();
+
       private:
-        void WxBoxClientEvent(_WxBotMessage message);
+        //
+        // WxBoxClient & PluginVirtualMachine EventHandler
+        //
+
+        void WxBoxClientEventHandler(WxBotMessage message);
+        void PluginVirtualMachineEventHandler(wb_plugin::PluginVirtualMachineEventPtr event);
 
         //
         // WxBoxClient Wrapper Response Methods
@@ -50,16 +69,13 @@ namespace wxbot {
         void ResponseProfile();
 
       private:
-        class WxBoxClient* client;
+        std::unique_ptr<wb_crack::WxBotEntryParameter> args;
+        std::atomic<bool>                              inited;
+        std::atomic<bool>                              running;
+        class WxBoxClient*                             client;
     };
 }
 
-namespace wxbox {
-    namespace crack {
-        struct _WxBotEntryParameter;
-    }
-}
-
-WXBOT_PUBLIC_API void WxBotEntry(wxbox::crack::_WxBotEntryParameter* args);
+WXBOT_PUBLIC_API void WxBotEntry(wxbox::crack::WxBotEntryParameter* args);
 
 #endif  // #ifndef __WXBOT_H

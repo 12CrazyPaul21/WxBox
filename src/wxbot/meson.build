@@ -29,7 +29,7 @@ shlib = shared_library('wxbot', [wxbot_src, proto_generated],
     cpp_args : [lib_args, ignore_warnings, config_macro_flags],
     gnu_symbol_visibility : 'hidden',
     dependencies: [spdlog_dep, lua_dep, grpc_dep, yaml_cpp_dep, frida_gum_dep],
-    link_with: utils_static_lib
+    link_with: [utils_static_lib, plugin_static_lib]
 )
 
 # Test wxbot

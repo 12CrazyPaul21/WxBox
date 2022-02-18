@@ -4,11 +4,13 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 REGISTER_CONFIG_KEY(WXBOX_SERVER_URI);
+REGISTER_CONFIG_KEY(WXBOX_CLIENT_RECONNECT_INTERVAL);
 REGISTER_CONFIG_KEY(WXBOX_LANGUAGE);
 REGISTER_CONFIG_KEY(WXBOX_I18N_PATH);
 REGISTER_CONFIG_KEY(WXBOX_THEME_PATH);
 REGISTER_CONFIG_KEY(WXBOX_THEME_NAME);
 REGISTER_CONFIG_KEY(WXBOX_PLUGINS_RELPATH);
+REGISTER_CONFIG_KEY(WXBOX_PLUGIN_LONG_TASK_TIMEOUT);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PATH);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PREFIX);
 REGISTER_CONFIG_KEY(WXBOX_CRASHDUMPER);
@@ -60,11 +62,13 @@ class AppConfig final : public wb_config::Config
     }
 
         CHECK_DEFAULT_CONFIG(WXBOX_SERVER_URI);
+        CHECK_DEFAULT_CONFIG(WXBOX_CLIENT_RECONNECT_INTERVAL);
         CHECK_DEFAULT_CONFIG(WXBOX_LANGUAGE);
         CHECK_DEFAULT_CONFIG(WXBOX_I18N_PATH);
         CHECK_DEFAULT_CONFIG(WXBOX_THEME_PATH);
         CHECK_DEFAULT_CONFIG(WXBOX_THEME_NAME);
         CHECK_DEFAULT_CONFIG(WXBOX_PLUGINS_RELPATH);
+        CHECK_DEFAULT_CONFIG(WXBOX_PLUGIN_LONG_TASK_TIMEOUT);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PATH);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PREFIX);
         CHECK_DEFAULT_CONFIG(WXBOX_CRASHDUMPER);
@@ -303,6 +307,16 @@ class AppConfig final : public wb_config::Config
         submit();
     }
 
+    int wxbox_client_reconnect_interval() const
+    {
+        return this->operator[](WXBOX_CLIENT_RECONNECT_INTERVAL_KEY).safe_as<int>();
+    }
+
+    void change_wxbox_client_reconnect_interval(int interval)
+    {
+        this->operator[](WXBOX_CLIENT_RECONNECT_INTERVAL_KEY) = interval;
+    }
+
     //
     // feature
     //
@@ -405,6 +419,39 @@ class AppConfig final : public wb_config::Config
         }
         return wxbotRootPath;
 #endif
+    }
+
+    //
+    // plugin
+    //
+
+    std::string plugins_root() const
+    {
+        auto pluginsRelpath = this->operator[](WXBOX_PLUGINS_RELPATH_KEY).safe_as<std::string>();
+        if (pluginsRelpath.empty()) {
+            return "";
+        }
+
+        auto rootPath        = wxbox::util::file::GetProcessRootPath();
+        auto pluginsRootPath = wxbox::util::file::JoinPath(rootPath, pluginsRelpath);
+
+#if _DEBUG
+        if (!wb_file::IsPathExists(pluginsRootPath)) {
+            pluginsRootPath = wb_file::JoinPath(rootPath, "/../../../../" + pluginsRelpath);
+        }
+#endif
+
+        return pluginsRootPath;
+    }
+
+    int plugin_long_task_timeout() const
+    {
+        return this->operator[](WXBOX_PLUGIN_LONG_TASK_TIMEOUT_KEY).safe_as<int>();
+    }
+
+    void change_plugin_long_task_timeout(int timeout)
+    {
+        this->operator[](WXBOX_PLUGIN_LONG_TASK_TIMEOUT_KEY) = timeout;
     }
 
     //

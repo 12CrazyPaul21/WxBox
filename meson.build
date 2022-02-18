@@ -117,11 +117,13 @@ configuration_inc = include_directories('.')
 
 all_default_config = {
     '/wxbox/server_uri': true,
+    '/wxbox/client_reconnect_interval': false,
     '/wxbox/language': true,
     '/wxbox/i18n/path': true,
     '/wxbox/theme/path': true,
     '/wxbox/theme/name': true,
     '/wxbox/plugins_relpath': true,
+    '/wxbox/plugin_long_task_timeout': false,
     '/wxbox/coredump_path': true,
     '/wxbox/coredump_prefix': true,
     '/wxbox/crashdumper': true,

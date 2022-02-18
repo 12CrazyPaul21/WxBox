@@ -148,7 +148,10 @@ void WxBoxController::StartWeChatInstance()
         wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
         strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wb_file::GetProcessRootPath().data());
         strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), config.wxbot_root_path().data());
+        strcpy_s(wxbotEntryParameter.plugins_root, sizeof(wxbotEntryParameter.plugins_root), config.plugins_root().data());
         strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
+        wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
+        wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
 
         // log wx core module info
@@ -166,6 +169,8 @@ void WxBoxController::StartWeChatInstance()
         spdlog::info("WXSendTextMessage va : 0x{:08X}", wxbotEntryParameter.wechat_apis.WXSendTextMessage);
         spdlog::info("FetchGlobalSendMessageContext va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FetchGlobalSendMessageContext);
         spdlog::info("WXSendFileMessage va : 0x{:08X}", wxbotEntryParameter.wechat_apis.WXSendFileMessage);
+        spdlog::info("CloseLoginWnd va : 0x{:08X}", wxbotEntryParameter.wechat_apis.CloseLoginWnd);
+        spdlog::info("LogoutAndExitWeChat va : 0x{:08X}", wxbotEntryParameter.wechat_apis.LogoutAndExitWeChat);
 
         // verify hook point
         if (!wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis)) {
