@@ -31,6 +31,8 @@ namespace wxbox {
             ucpulong_t WXSendTextMessage;
             ucpulong_t FetchGlobalSendMessageContext;
             ucpulong_t WXSendFileMessage;
+            ucpulong_t CloseLoginWnd;
+            ucpulong_t LogoutAndExitWeChat;
         } WxApis, *PWxApis;
 
         typedef struct _WxBotEntryParameter
@@ -38,7 +40,10 @@ namespace wxbox {
             ucpulong_t wxbox_pid;
             char       wxbox_root[WXBOX_MAX_PATH];
             char       wxbot_root[WXBOX_MAX_PATH];
+            char       plugins_root[WXBOX_MAX_PATH];
             char       wxbox_server_uri[WXBOX_MAX_PATH];
+            int        wxbot_reconnect_interval;
+            int        plugin_long_task_timeout;
             WxApis     wechat_apis;
         } WxBotEntryParameter, *PWxBotEntryParameter;
 

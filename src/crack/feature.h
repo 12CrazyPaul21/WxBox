@@ -20,7 +20,10 @@ namespace wxbox {
                 "HandleReceivedMessages",
                 "WXSendTextMessage",
                 "FetchGlobalSendMessageContext",
-                "WXSendFileMessage"};
+                "WXSendFileMessage",
+                "CloseLoginWnd",
+                "LogoutAndExitWeChat",
+            };
 
             //
             // Typedef

@@ -244,6 +244,8 @@ bool wxbox::crack::GenerateWxApis(const wb_feature::WxAPIHookPointVACollection& 
     SET_WX_API(WXSendTextMessage);
     SET_WX_API(FetchGlobalSendMessageContext);
     SET_WX_API(WXSendFileMessage);
+    SET_WX_API(CloseLoginWnd);
+    SET_WX_API(LogoutAndExitWeChat);
 
     return success;
 }
@@ -266,6 +268,8 @@ bool wxbox::crack::VerifyWxApis(const WxApis& apis)
     CHECK_WX_API(WXSendTextMessage);
     CHECK_WX_API(FetchGlobalSendMessageContext);
     CHECK_WX_API(WXSendFileMessage);
+    CHECK_WX_API(CloseLoginWnd);
+    CHECK_WX_API(LogoutAndExitWeChat);
 
     return true;
 }
