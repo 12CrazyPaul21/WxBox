@@ -3,6 +3,12 @@
 
 namespace wxbox {
     namespace util {
+
+        namespace memory {
+            template<class T>
+            struct internal_allocator;
+        }
+
         namespace process {
 
             //
@@ -130,6 +136,14 @@ namespace wxbox {
                 SHARED_HANDLE shared;
             };
 
+            typedef struct _CallFrameHitTestItem
+            {
+                void*      addr;
+                ucpulong_t length;
+            } CallFrameHitTestItem, *PCallFrameHitTestItem;
+
+            using CallFrameHitTestItemVector = std::vector<CallFrameHitTestItem, wxbox::util::memory::internal_allocator<CallFrameHitTestItem>>;
+
             //
             // Function
             //
@@ -161,6 +175,12 @@ namespace wxbox {
 
             void        SetThreadName(THREAD_HANDLE hThread, const std::string& threadName);
             std::string GetThreadName(THREAD_HANDLE hThread);
+
+            std::vector<TID, wxbox::util::memory::internal_allocator<TID>>                            GetAllThreadId(PID pid, TID excludeThreadId = 0);
+            std::vector<ucpulong_t, wxbox::util::memory::internal_allocator<ucpulong_t>>              WalkThreadStack(TID tid);
+            std::set<ucpulong_t, std::less<int>, wxbox::util::memory::internal_allocator<ucpulong_t>> GetAllOtherThreadCallFrameEips();
+            std::vector<ucpulong_t, wxbox::util::memory::internal_allocator<ucpulong_t>>              HitTestAllOtherThreadCallFrame(const CallFrameHitTestItemVector& targets);
+            bool                                                                                      HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t length);
 
             //
             // Async

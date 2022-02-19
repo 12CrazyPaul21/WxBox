@@ -358,6 +358,88 @@ static void ResumeAllThread_Windows(wb_process::PID pid)
     SuspendOrResumeAllThread_Windows(pid, 0, false);
 }
 
+std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> GetAllThreadId_Windows(wb_process::PID pid, wb_process::TID excludeThreadId)
+{
+    std::vector<wxbox::util::process::TID, wb_memory::internal_allocator<wxbox::util::process::TID>> result;
+
+    HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, pid);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return result;
+    }
+
+    THREADENTRY32 threadEntry;
+    threadEntry.dwSize = sizeof(threadEntry);
+
+    if (!::Thread32First(hSnapshot, &threadEntry)) {
+        ::CloseHandle(hSnapshot);
+        return result;
+    }
+
+    do {
+        if (threadEntry.th32OwnerProcessID == GetCurrentProcessId() && threadEntry.th32ThreadID != excludeThreadId) {
+            result.push_back(threadEntry.th32ThreadID);
+        }
+
+    } while (::Thread32Next(hSnapshot, &threadEntry));
+
+    ::CloseHandle(hSnapshot);
+    return result;
+}
+
+std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> WalkThreadStack_Windows(wb_process::TID tid)
+{
+    std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> result;
+
+    if (!tid) {
+        return result;
+    }
+
+    HANDLE hProcess = ::GetCurrentProcess();
+    HANDLE hThread  = ::OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
+    if (!hThread) {
+        return result;
+    }
+
+    STACKFRAME64 stackFrame;
+    CONTEXT      context = {0};
+    context.ContextFlags = CONTEXT_ALL;
+    if (!GetThreadContext(hThread, &context)) {
+        ::CloseHandle(hThread);
+        return result;
+    }
+
+    std::memset(&stackFrame, 0, sizeof(stackFrame));
+
+#if !defined(_AMD64_)
+    DWORD machineType           = IMAGE_FILE_MACHINE_I386;
+    stackFrame.AddrPC.Mode      = AddrModeFlat;
+    stackFrame.AddrPC.Offset    = context.Eip;
+    stackFrame.AddrStack.Mode   = AddrModeFlat;
+    stackFrame.AddrStack.Offset = context.Esp;
+    stackFrame.AddrFrame.Mode   = AddrModeFlat;
+    stackFrame.AddrFrame.Offset = context.Ebp;
+#else
+    DWORD machineType           = IMAGE_FILE_MACHINE_AMD64;
+    stackFrame.AddrPC.Mode      = AddrModeFlat;
+    stackFrame.AddrPC.Offset    = context.Rip;
+    stackFrame.AddrStack.Mode   = AddrModeFlat;
+    stackFrame.AddrStack.Offset = context.Rsp;
+    stackFrame.AddrFrame.Mode   = AddrModeFlat;
+    stackFrame.AddrFrame.Offset = context.Rbp;
+#endif
+
+    while (StackWalk64(machineType, hProcess, hThread, &stackFrame, &context, NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL)) {
+#if !defined(_AMD64_)
+        result.push_back(context.Eip);
+#else
+        result.push_back(context.Rip);
+#endif
+    }
+
+    ::CloseHandle(hThread);
+    return result;
+}
+
 #elif WXBOX_IN_MAC_OS
 
 static inline std::vector<wb_process::ProcessInfo> GetProcessList_Mac()
@@ -400,6 +482,20 @@ static bool SuspendAllOtherThread_Mac(wb_process::PID pid, wb_process::TID tid)
 static void ResumeAllThread_Mac(wb_process::PID pid)
 {
     throw std::exception("SuspendAllOtherThread_Mac stub");
+}
+
+static std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> GetAllThreadId_Mac(wb_process::PID pid, wb_process::TID excludeThreadId)
+{
+    std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> result;
+    throw std::exception("GetAllThreadId_Mac stub");
+    return result;
+}
+
+static std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> WalkThreadStack_Mac(wb_process::TID tid)
+{
+    std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> result;
+    throw std::exception("WalkThreadStack_Mac stub");
+    return result;
 }
 
 #endif
@@ -680,4 +776,85 @@ std::string wxbox::util::process::GetThreadName(THREAD_HANDLE hThread)
     throw std::exception("GetThreadName stub");
     return "";
 #endif
+}
+
+std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> wxbox::util::process::GetAllThreadId(PID pid, TID excludeThreadId)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return GetAllThreadId_Windows(pid, excludeThreadId);
+#elif WXBOX_IN_MAC_OS
+    return GetAllThreadId_Mac(pid, excludeThreadId);
+#endif
+}
+
+std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::process::WalkThreadStack(TID tid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return WalkThreadStack_Windows(tid);
+#elif WXBOX_IN_MAC_OS
+    return WalkThreadStack_Mac(tid);
+#endif
+}
+
+std::set<ucpulong_t, std::less<int>, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::process::GetAllOtherThreadCallFrameEips()
+{
+    std::set<ucpulong_t, std::less<int>, wb_memory::internal_allocator<ucpulong_t>> eips;
+    for (auto tid : wb_process::GetAllThreadId(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId())) {
+        auto frames = WalkThreadStack(tid);
+        eips.insert(frames.begin(), frames.end());
+    }
+    return eips;
+}
+
+std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::process::HitTestAllOtherThreadCallFrame(const CallFrameHitTestItemVector& targets)
+{
+    std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> hit;
+
+    auto eips = GetAllOtherThreadCallFrameEips();
+    if (eips.empty()) {
+        return hit;
+    }
+
+    auto _targets = targets;
+
+    for (auto eip : eips) {
+        for (auto it = _targets.begin(); it != _targets.end();) {
+            ucpulong_t begin_addr = (ucpulong_t)it->addr;
+            ucpulong_t end_addr   = begin_addr + it->length;
+
+            if (eip >= begin_addr && eip < end_addr) {
+                hit.push_back(begin_addr);
+                it = _targets.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        if (_targets.empty()) {
+            goto _Finish;
+        }
+    }
+
+_Finish:
+    return hit;
+}
+
+bool wxbox::util::process::HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t length)
+{
+    auto eips = GetAllOtherThreadCallFrameEips();
+    if (eips.empty()) {
+        return false;
+    }
+
+    ucpulong_t begin_addr = (ucpulong_t)addr;
+    ucpulong_t end_addr   = begin_addr + length;
+
+    for (auto eip : eips) {
+        if (eip >= begin_addr && eip < end_addr) {
+            return true;
+        }
+    }
+
+    return false;
 }
