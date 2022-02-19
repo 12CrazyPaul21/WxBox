@@ -12,6 +12,12 @@ namespace wxbox {
         static constexpr auto WXBOT_MODULE_NAME = "wxbot.so";
 #endif
 
+#if WXBOX_CPU_IS_X86
+        static constexpr ucpulong_t HOOK_OPCODE_LENGTH = 5;
+#else
+        static constexpr ucpulong_t HOOK_OPCODE_LENGTH = 14;
+#endif
+
         //
         // Typedef
         //
@@ -56,6 +62,8 @@ namespace wxbox {
             ucpulong_t                uModuleSize;
         } OpenWxWithMultiBoxingResult, *POpenWxWithMultiBoxingResult;
 
+        using FnWeChatExitHandler = std::function<void(void)>;
+
         //
         // Function
         //
@@ -72,6 +80,10 @@ namespace wxbox {
         bool InjectWxBot(wxbox::util::process::PID pid, const WxBotEntryParameter& parameter);
         bool UnInjectWxBot(wxbox::util::process::PID pid);
         bool UnInjectWxBotBySelf();
+
+        bool PreInterceptWeChatExit(const WxApis& wxApis);
+        void RegisterWeChatExitHandler(FnWeChatExitHandler handler);
+        void UnRegisterWeChatExitHandler();
     }
 }
 

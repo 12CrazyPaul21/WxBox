@@ -1,6 +1,37 @@
 #include <utils/common.h>
 #include <frida-gum.h>
 
+//
+// Globals
+//
+
+// hook point handler
+static wb_crack::FnWeChatExitHandler g_wechat_exit_handler = nullptr;
+
+//
+// wechat intercept stubs
+//
+
+static void internal_wechat_exit_handler()
+{
+    if (g_wechat_exit_handler) {
+        g_wechat_exit_handler();
+    }
+}
+
+BEGIN_NAKED_STD_FUNCTION(internal_wechat_exit_handler_stub)
+{
+    __asm {
+		call internal_wechat_exit_handler
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(internal_wechat_exit_handler_stub)
+
+//
+// wxbox::crack
+//
+
 #if WXBOX_IN_WINDOWS_OS
 
 //
@@ -316,4 +347,24 @@ bool wxbox::crack::UnInjectWxBot(wxbox::util::process::PID pid)
 bool wxbox::crack::UnInjectWxBotBySelf()
 {
     return wb_inject::UnloadModuleBySelf(wb_crack::WXBOT_MODULE_NAME, wb_process::GetCurrentThreadId());
+}
+
+bool wxbox::crack::PreInterceptWeChatExit(const WxApis& wxApis)
+{
+    return wb_hook::PreInProcessIntercept((void*)wxApis.CloseLoginWnd, internal_wechat_exit_handler_stub) &&
+           wb_hook::PreInProcessIntercept((void*)wxApis.LogoutAndExitWeChat, internal_wechat_exit_handler_stub);
+}
+
+void wxbox::crack::RegisterWeChatExitHandler(FnWeChatExitHandler handler)
+{
+    if (!handler) {
+        return;
+    }
+
+    g_wechat_exit_handler = handler;
+}
+
+void wxbox::crack::UnRegisterWeChatExitHandler()
+{
+    g_wechat_exit_handler = nullptr;
 }

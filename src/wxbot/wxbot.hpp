@@ -55,6 +55,19 @@ namespace wxbot {
         void UnHookWeChat();
 
       private:
+        void PreHookWeChat();
+        void ReleasePreHookWeChatHookPoint();
+        void RegisterInterceptHanlders();
+        void UnRegisterInterceptHanlders();
+        void ExecuteHookWeChat(bool hook = true);
+
+      private:
+        //
+        // WeChat Intercept Handler
+        //
+
+        void WeChatExitHandler();
+
         //
         // WxBoxClient & PluginVirtualMachine EventHandler
         //
@@ -70,6 +83,8 @@ namespace wxbot {
 
       private:
         std::unique_ptr<wb_crack::WxBotEntryParameter> args;
+        std::vector<void*>                             hookPoints;
+        std::mutex                                     mutex;
         std::atomic<bool>                              inited;
         std::atomic<bool>                              running;
         class WxBoxClient*                             client;

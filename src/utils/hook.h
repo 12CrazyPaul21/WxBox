@@ -22,6 +22,7 @@ namespace wxbox {
                 void*                entry;
                 void*                actualEntry;
                 void*                repeater;
+                size_t               repeaterSize;
                 std::vector<uint8_t> originalEntryBackup;
                 std::vector<uint8_t> hookOpcodes;
                 bool                 isPre;
@@ -32,6 +33,7 @@ namespace wxbox {
                   , entry(nullptr)
                   , actualEntry(nullptr)
                   , repeater(nullptr)
+                  , repeaterSize(0)
                   , isPre(false)
                   , delayedRelease(false)
                 {
@@ -43,6 +45,7 @@ namespace wxbox {
                     entry               = other.entry;
                     actualEntry         = other.actualEntry;
                     repeater            = other.repeater;
+                    repeaterSize        = other.repeaterSize;
                     originalEntryBackup = other.originalEntryBackup;
                     hookOpcodes         = other.hookOpcodes;
                     isPre               = other.isPre;
@@ -54,6 +57,7 @@ namespace wxbox {
                     entry               = other.entry;
                     actualEntry         = other.actualEntry;
                     repeater            = other.repeater;
+                    repeaterSize        = other.repeaterSize;
                     originalEntryBackup = std::move(other.originalEntryBackup);
                     hookOpcodes         = std::move(other.hookOpcodes);
                     isPre               = other.isPre;

@@ -91,7 +91,8 @@ static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* p
     }
 
     // allocate memory for repeater
-    uint8_t* repeater = (uint8_t*)wb_memory::AllocUnrestrictedMem(20);
+    size_t   repeaterSize = 20;
+    uint8_t* repeater     = (uint8_t*)wb_memory::AllocUnrestrictedMem(repeaterSize);
     if (!repeater) {
         return false;
     }
@@ -138,6 +139,7 @@ static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* p
     hookMetaInfo.entry          = pfnOriginal;
     hookMetaInfo.actualEntry    = actualEntry;
     hookMetaInfo.repeater       = repeater;
+    hookMetaInfo.repeaterSize   = repeaterSize;
     hookMetaInfo.isPre          = isPre;
     hookMetaInfo.delayedRelease = isPre;
     g_vtHookRecord.emplace(pfnOriginal, std::move(hookMetaInfo));
@@ -166,7 +168,8 @@ static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEn
     //
 
     // allocate memory for repeater
-    uint8_t* repeater = (uint8_t*)wb_memory::AllocUnrestrictedMem(20 + opcodeSerialLength);
+    size_t   repeaterSize = 20 + opcodeSerialLength;
+    uint8_t* repeater     = (uint8_t*)wb_memory::AllocUnrestrictedMem(repeaterSize);
     if (!repeater) {
         return false;
     }
@@ -223,6 +226,7 @@ static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEn
     hookMetaInfo.entry          = pfnOriginal;
     hookMetaInfo.actualEntry    = pfnOriginal;
     hookMetaInfo.repeater       = repeater;
+    hookMetaInfo.repeaterSize   = repeaterSize;
     hookMetaInfo.isPre          = isPre;
     hookMetaInfo.delayedRelease = isPre;
     g_vtHookRecord.emplace(pfnOriginal, std::move(hookMetaInfo));

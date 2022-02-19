@@ -1,34 +1,5 @@
 #include <wxbot.hpp>
 
-const char* ParseStatus(wxbot::WxBoxClientStatus status)
-{
-    switch (status) {
-        case wxbot::WxBoxClientStatus::Uninit:
-            return "Uninit";
-
-        case wxbot::WxBoxClientStatus::Started:
-            return "Started";
-
-        case wxbot::WxBoxClientStatus::ConnectWxBoxServerFailed:
-            return "ConnectWxBoxServerFailed";
-
-        case wxbot::WxBoxClientStatus::ConnectWxBoxServerSuccess:
-            return "ConnectWxBoxServerSuccess";
-
-        case wxbot::WxBoxClientStatus::ConnectionLost:
-            return "ConnectionLost";
-
-        case wxbot::WxBoxClientStatus::Stopped:
-            return "Stopped";
-
-        case wxbot::WxBoxClientStatus::DoReConnect:
-            return "DoReConnect";
-
-        default:
-            return "";
-    }
-}
-
 //
 // WxBot
 //
@@ -63,20 +34,12 @@ bool wxbot::WxBot::Initialize()
 
 bool wxbot::WxBot::Startup()
 {
-#define WXBOT_STARTUP_FAILED() \
-    {                          \
-        running = false;       \
-        return false;          \
-    }
-
     if (!inited) {
         return false;
     }
 
-    bool alreadyRunning = false;
-    running.compare_exchange_strong(alreadyRunning, true);
-
-    if (alreadyRunning) {
+    std::lock_guard<std::mutex> lock(mutex);
+    if (running) {
         return false;
     }
 
@@ -86,16 +49,17 @@ bool wxbot::WxBot::Startup()
     startupInfo.longTaskTimeout = args->plugin_long_task_timeout;
     startupInfo.callback        = std::bind(&WxBot::PluginVirtualMachineEventHandler, this, std::placeholders::_1);
     if (!wb_plugin::StartPluginVirtualMachine(&startupInfo)) {
-        WXBOT_STARTUP_FAILED();
+        return false;
     }
 
     // start wxbox client
     client->RegisterWxBotCallback(std::bind(&WxBot::WxBoxClientEventHandler, this, std::placeholders::_1));
     if (!client->Start()) {
         wb_plugin::StopPluginVirtualMachine();
-        WXBOT_STARTUP_FAILED();
+        return false;
     }
 
+    running = true;
     return true;
 }
 
@@ -119,6 +83,8 @@ void wxbot::WxBot::Stop()
 
     // stop wxbox client
     client->Stop();
+
+    running = false;
 }
 
 void wxbot::WxBot::Shutdown()
@@ -141,11 +107,145 @@ void wxbot::WxBot::Shutdown()
 
 bool wxbot::WxBot::HookWeChat()
 {
+    if (!args) {
+        return false;
+    }
+
+    // execute pre intercept hook
+    PreHookWeChat();
+
+    // init internal allocator's heap
+    wb_memory::init_internal_allocator();
+
+    // suspend all other threads
+    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+
+    // execute hook
+    ExecuteHookWeChat(true);
+
+    // register intercept handlers
+    RegisterInterceptHanlders();
+
+    // resume all other threads
+    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+
+    // deref internal allocator
+    wb_memory::deinit_internal_allocator();
     return true;
 }
 
 void wxbot::WxBot::UnHookWeChat()
 {
+    // init internal allocator's heap
+    wb_memory::init_internal_allocator();
+
+    // suspend all other threads
+    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+
+    // execute unhook
+    ExecuteHookWeChat(false);
+
+    // unregister intercept handlers
+    UnRegisterInterceptHanlders();
+
+    // resume all other threads
+    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+
+    // deref internal allocator
+    wb_memory::deinit_internal_allocator();
+
+    // release hook point mem resources
+    ReleasePreHookWeChatHookPoint();
+}
+
+//
+// internal
+//
+
+void wxbot::WxBot::PreHookWeChat()
+{
+    const wb_crack::WxApis& wxApis = args->wechat_apis;
+
+    //
+    // execute pre intercept
+    //
+
+    wb_crack::PreInterceptWeChatExit(wxApis);
+
+    //
+    // record hook points
+    //
+
+    hookPoints.clear();
+
+    if (wxApis.CloseLoginWnd) {
+        hookPoints.push_back((void*)wxApis.CloseLoginWnd);
+    }
+    if (wxApis.LogoutAndExitWeChat) {
+        hookPoints.push_back((void*)wxApis.LogoutAndExitWeChat);
+    }
+}
+
+void wxbot::WxBot::ReleasePreHookWeChatHookPoint()
+{
+    for (auto hookPoint : hookPoints) {
+        wb_hook::ReleasePreInProcessInterceptItem(hookPoint);
+    }
+
+    hookPoints.clear();
+}
+
+void wxbot::WxBot::RegisterInterceptHanlders()
+{
+    wb_crack::RegisterWeChatExitHandler(std::bind(&wxbot::WxBot::WeChatExitHandler, this));
+}
+
+void wxbot::WxBot::UnRegisterInterceptHanlders()
+{
+    wb_crack::UnRegisterWeChatExitHandler();
+}
+
+// must avoid system calling and memory alloc&free calling
+void wxbot::WxBot::ExecuteHookWeChat(bool hook)
+{
+    wb_process::CallFrameHitTestItemVector testPoints;
+    for (auto hookPoint : hookPoints) {
+        if (hookPoint) {
+            testPoints.push_back(wb_process::CallFrameHitTestItem{hookPoint, wb_crack::HOOK_OPCODE_LENGTH});
+        }
+    }
+
+    for (;;) {
+        auto hittedPoints = wb_process::HitTestAllOtherThreadCallFrame(testPoints);
+        for (auto it = testPoints.begin(); it != testPoints.end();) {
+            void* hookPoint = it->addr;
+            if (std::find(hittedPoints.begin(), hittedPoints.end(), (ucpulong_t)hookPoint) == hittedPoints.end()) {
+                hook ? wb_hook::ExecuteInProcessIntercept(hookPoint) : wb_hook::RevokeInProcessHook(hookPoint);
+                it = testPoints.erase(it);
+                continue;
+            }
+            else {
+                ++it;
+            }
+        }
+
+        if (testPoints.empty()) {
+            break;
+        }
+
+        wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+    }
+}
+
+//
+// WeChat Intercept Handler
+//
+
+void wxbot::WxBot::WeChatExitHandler()
+{
+    Stop();
 }
 
 //
@@ -191,26 +291,22 @@ static void WxBotRoutine(std::unique_ptr<wb_crack::WxBotEntryParameter> args)
 {
     wxbot::WxBot bot(std::move(args));
 
-#define WXBOT_STARTUP_FAILED()                                      \
-    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId()); \
-    goto _Finish;
-
     // init
     if (!bot.Initialize()) {
-        WXBOT_STARTUP_FAILED();
+        goto _Finish;
     }
 
     // execute hook
     if (!bot.HookWeChat()) {
-        WXBOT_STARTUP_FAILED();
+        bot.Shutdown();
+        goto _Finish;
     }
-
-    // resume all other wechat threads
-    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
 
     // start
     if (!bot.Startup()) {
-        WXBOT_STARTUP_FAILED();
+        bot.Shutdown();
+        bot.UnHookWeChat();
+        goto _Finish;
     }
 
     // wait for wxbot finish
@@ -242,9 +338,6 @@ WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
         return;
     }
     std::memcpy(duplicatedArgs.get(), args, sizeof(wb_crack::WxBotEntryParameter));
-
-    // suspend all other threads
-    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
 
     // start wxbot
     std::thread(WxBotRoutine, std::move(duplicatedArgs)).detach();
