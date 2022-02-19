@@ -336,3 +336,47 @@ TEST(wxbox_utils, log)
     t1.join();
     t2.join();
 }
+
+typedef struct _TestItem
+{
+    int         a;
+    int         b;
+    std::string c;
+
+    _TestItem(int _a, int _b, const std::string& _c)
+      : a(_a)
+      , b(_b)
+      , c(_c)
+    {
+    }
+} TestItem;
+
+void print_internal_allocator_ref(std::vector<TestItem, wb_memory::internal_allocator<TestItem>>& vt, const std::set<ucpulong_t, std::less<ucpulong_t>, wb_memory::internal_allocator<ucpulong_t>>& s)
+{
+    for (auto item : vt) {
+        spdlog::info("TestItem a : {}, b : {}, c : {}", item.a, item.b, item.c);
+    }
+
+    for (auto v : s) {
+        spdlog::info("ucpulong_t value : {}", v);
+    }
+}
+
+TEST(wxbox_utils, internal_allocator)
+{
+	wb_memory::init_internal_allocator();
+
+    std::vector<TestItem, wb_memory::internal_allocator<TestItem>> vt;
+    std::set<ucpulong_t, std::less<ucpulong_t>, wb_memory::internal_allocator<ucpulong_t>> s;
+
+	vt.push_back(TestItem(1, 2, "3"));
+    vt.emplace_back(TestItem(4, 5, "6"));
+
+	s.insert(1);
+    s.insert(2);
+    s.insert(3);
+
+	print_internal_allocator_ref(vt, s);
+
+	wb_memory::deinit_internal_allocator();
+}

@@ -2,6 +2,75 @@
 
 #if WXBOX_IN_WINDOWS_OS
 
+//
+// internal_allocator
+//
+
+static std::atomic_size_t g_szInternalAllocatorAllocated = 0;
+static HANDLE             g_hInternalAllocatorHeap       = NULL;
+
+static inline bool init_internal_allocator_Windows()
+{
+    if (g_hInternalAllocatorHeap) {
+        return false;
+    }
+
+    g_hInternalAllocatorHeap       = ::HeapCreate(HEAP_CREATE_ENABLE_EXECUTE, 0, 0);
+    g_szInternalAllocatorAllocated = 0;
+    return g_hInternalAllocatorHeap != NULL;
+}
+
+static inline bool deinit_internal_allocator_Windows()
+{
+    if (!g_hInternalAllocatorHeap || g_szInternalAllocatorAllocated) {
+        return false;
+    }
+
+    ::HeapDestroy(g_hInternalAllocatorHeap);
+    g_hInternalAllocatorHeap = NULL;
+    return true;
+}
+
+static inline void* internal_malloc_Windows(size_t n)
+{
+    if (!n) {
+        return nullptr;
+    }
+
+    if (!g_hInternalAllocatorHeap && !init_internal_allocator_Windows()) {
+        return nullptr;
+    }
+
+    auto ptr = ::HeapAlloc(g_hInternalAllocatorHeap, HEAP_ZERO_MEMORY, n);
+    if (!ptr) {
+        return nullptr;
+    }
+
+    g_szInternalAllocatorAllocated += n;
+    return ptr;
+}
+
+static inline void internal_free_Windows(void* p)
+{
+    if (!p || !g_hInternalAllocatorHeap) {
+        return;
+    }
+
+    auto size = ::HeapSize(g_hInternalAllocatorHeap, 0, p);
+    ::HeapFree(g_hInternalAllocatorHeap, 0, p);
+
+    if (size != -1) {
+        g_szInternalAllocatorAllocated -= size;
+        if (g_szInternalAllocatorAllocated <= 0) {
+            deinit_internal_allocator_Windows();
+        }
+    }
+}
+
+//
+// wxbox::utils::memory
+//
+
 static std::mutex         g_mutexAlloc;
 static std::atomic_size_t g_szAllocated = 0;
 static HANDLE             g_hHeap       = NULL;
@@ -167,6 +236,29 @@ static inline ucpulong_t ScanMemoryRev_Windows(wxbox::util::process::PROCESS_HAN
 
 #elif WXBOX_IN_MAC_OS
 
+static inline bool init_internal_allocator_Mac()
+{
+    throw std::exception("init_internal_allocator_Mac stub");
+    return false;
+}
+
+static inline bool deinit_internal_allocator_Mac()
+{
+    throw std::exception("deinit_internal_allocator_Mac stub");
+    return false;
+}
+
+static inline void* internal_malloc_Mac(size_t n)
+{
+    throw std::exception("internal_malloc_Mac stub");
+    return nullptr;
+}
+
+static inline void internal_free_Mac(void* p)
+{
+    throw std::exception("internal_free_Mac stub");
+}
+
 static inline void* AllocUnrestrictedMem_Mac(const size_t& count)
 {
     throw std::exception("AllocUnrestrictedMem_Mac stub");
@@ -203,6 +295,50 @@ static inline ucpulong_t ScanMemoryRev_Mac(wxbox::util::process::PROCESS_HANDLE 
 }
 
 #endif
+
+//
+// internal_allocator
+//
+
+bool wxbox::util::memory::init_internal_allocator()
+{
+#if WXBOX_IN_WINDOWS_OS
+    return init_internal_allocator_Windows();
+#elif WXBOX_IN_MAC_OS
+    return init_internal_allocator_Mac();
+#endif
+}
+
+bool wxbox::util::memory::deinit_internal_allocator()
+{
+#if WXBOX_IN_WINDOWS_OS
+    return deinit_internal_allocator_Windows();
+#elif WXBOX_IN_MAC_OS
+    return deinit_internal_allocator_Mac();
+#endif
+}
+
+void* wxbox::util::memory::internal_malloc(size_t n)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return internal_malloc_Windows(n);
+#elif WXBOX_IN_MAC_OS
+    return internal_malloc_Mac(n);
+#endif
+}
+
+void wxbox::util::memory::internal_free(void* p)
+{
+#if WXBOX_IN_WINDOWS_OS
+    internal_free_Windows(p);
+#elif WXBOX_IN_MAC_OS
+    internal_free_Mac(p);
+#endif
+}
+
+//
+// wxbox::utils::memory
+//
 
 void* wxbox::util::memory::AllocUnrestrictedMem(const size_t& count)
 {

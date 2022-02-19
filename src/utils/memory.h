@@ -59,6 +59,76 @@ namespace wxbox {
 
             ucpulong_t ScanMemory(wxbox::util::process::PROCESS_HANDLE hProcess, const void* const pMemBegin, ucpulong_t uMemSize, const void* const pPattern, ucpulong_t uPatternSize);
             ucpulong_t ScanMemoryRev(wxbox::util::process::PROCESS_HANDLE hProcess, const void* const pMemRevBegin, ucpulong_t uMemSize, const void* const pPattern, ucpulong_t uPatternSize);
+
+            //
+            // internal allocator, for avoid other suspended thread executing allocate cause deadlock
+            //
+
+            bool  init_internal_allocator();
+            bool  deinit_internal_allocator();
+            void* internal_malloc(size_t n);
+            void  internal_free(void* p);
+
+            template<class T>
+            struct internal_allocator
+            {
+                typedef size_t   size_type;
+                typedef T        value_type;
+                typedef T*       pointer;
+                typedef const T* const_pointer;
+                typedef T&       reference;
+                typedef const T& const_reference;
+
+                internal_allocator()                                             = default;
+                constexpr internal_allocator(const internal_allocator&) noexcept = default;
+
+                template<class U>
+                constexpr internal_allocator(const internal_allocator<U>&) noexcept
+                {
+                }
+
+                template<class U>
+                struct rebind
+                {
+                    using other = internal_allocator<U>;
+                };
+
+                pointer address(reference x) const
+                {
+                    return &x;
+                }
+
+                const_pointer address(const_reference x) const
+                {
+                    return &x;
+                }
+
+                size_type max_size() const noexcept
+                {
+#ifdef max
+#undef max
+#endif
+                    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+                }
+
+                pointer allocate(std::size_t n)
+                {
+                    if (n > max_size()) {
+                        throw std::bad_array_new_length();
+                    }
+
+                    if (auto p = static_cast<pointer>(internal_malloc(n * sizeof(T)))) {
+                        return p;
+                    }
+
+                    throw std::bad_alloc();
+                }
+
+                void deallocate(pointer p, std::size_t /*n*/) noexcept
+                {
+                    internal_free(p);
+                }
+            };
         }
     }
 }
