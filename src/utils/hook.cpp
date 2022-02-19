@@ -11,7 +11,7 @@ static std::mutex                                       g_mutexHook;
 // jmp far op code : jmp(0xEP) <4 bytes - relative address>
 static constexpr DWORD dwJmpFarInstructionSize = 1 + sizeof(void*);
 
-static bool Do_InProcessHook_Windows_x86(void* pfnOriginal, void* pfnNewEntry, std::vector<uint8_t>& originalEntryBackup)
+static bool Do_InProcessHook_Windows_x86(void* pfnOriginal, void* pfnNewEntry, std::vector<uint8_t>& hookOpcodes, std::vector<uint8_t>& originalEntryBackup, bool isPre = false)
 {
     // calc relative address for jmp far
     DWORD dwRelativeAddress = (DWORD)pfnNewEntry - ((DWORD)pfnOriginal + dwJmpFarInstructionSize);
@@ -34,6 +34,10 @@ static bool Do_InProcessHook_Windows_x86(void* pfnOriginal, void* pfnNewEntry, s
     // relative address
     *((DWORD*)(&newEntry[1])) = dwRelativeAddress;
 
+    // backup
+    hookOpcodes.clear();
+    hookOpcodes.insert(hookOpcodes.begin(), &newEntry[0], (&newEntry[0]) + sizeof(newEntry));
+
     // change protect attribute
     DWORD oldProtect = 0;
     if (!VirtualProtect(pfnOriginal, sizeof(newEntry), PAGE_EXECUTE_READWRITE, &oldProtect)) {
@@ -41,9 +45,11 @@ static bool Do_InProcessHook_Windows_x86(void* pfnOriginal, void* pfnNewEntry, s
     }
 
     // write memory
-    ucpulong_t szNumberOfBytesWritten = 0;
-    if (!wb_memory::WriteMemory(wb_process::GetCurrentProcessHandle(), pfnOriginal, newEntry, dwJmpFarInstructionSize, &szNumberOfBytesWritten)) {
-        return false;
+    if (!isPre) {
+        ucpulong_t szNumberOfBytesWritten = 0;
+        if (!wb_memory::WriteMemory(wb_process::GetCurrentProcessHandle(), pfnOriginal, newEntry, dwJmpFarInstructionSize, &szNumberOfBytesWritten)) {
+            return false;
+        }
     }
 
     return true;
@@ -62,19 +68,21 @@ static bool InProcessHook_Windows_x86(void* pfnOriginal, void* pfnNewEntry)
 
     // execute hook
     wb_hook::HookMetaInfo hookMetaInfo;
-    if (!Do_InProcessHook_Windows_x86(pfnOriginal, pfnNewEntry, hookMetaInfo.originalEntryBackup)) {
+    if (!Do_InProcessHook_Windows_x86(pfnOriginal, pfnNewEntry, hookMetaInfo.hookOpcodes, hookMetaInfo.originalEntryBackup, false)) {
         return false;
     }
 
-    hookMetaInfo.type        = wb_hook::HookPointType::Hook;
-    hookMetaInfo.entry       = pfnOriginal;
-    hookMetaInfo.actualEntry = pfnOriginal;
-    hookMetaInfo.repeater    = nullptr;
+    hookMetaInfo.type           = wb_hook::HookPointType::Hook;
+    hookMetaInfo.entry          = pfnOriginal;
+    hookMetaInfo.actualEntry    = pfnOriginal;
+    hookMetaInfo.repeater       = nullptr;
+    hookMetaInfo.isPre          = false;
+    hookMetaInfo.delayedRelease = false;
     g_vtHookRecord.emplace(pfnOriginal, std::move(hookMetaInfo));
     return true;
 }
 
-static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEntry)
+static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEntry, bool isPre = false)
 {
     // get function's actual entry address
     void* actualEntry = wb_traits::GetActualEntryAddress(pfnOriginal);
@@ -121,21 +129,23 @@ static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* p
     //
 
     wb_hook::HookMetaInfo hookMetaInfo;
-    if (!Do_InProcessHook_Windows_x86(pfnOriginal, &repeater[8], hookMetaInfo.originalEntryBackup)) {
+    if (!Do_InProcessHook_Windows_x86(pfnOriginal, &repeater[8], hookMetaInfo.hookOpcodes, hookMetaInfo.originalEntryBackup, isPre)) {
         wb_memory::FreeUnrestrictedMem(repeater);
         return false;
     }
 
-    hookMetaInfo.type        = wb_hook::HookPointType::RelocateIntercept;
-    hookMetaInfo.entry       = pfnOriginal;
-    hookMetaInfo.actualEntry = actualEntry;
-    hookMetaInfo.repeater    = repeater;
+    hookMetaInfo.type           = wb_hook::HookPointType::RelocateIntercept;
+    hookMetaInfo.entry          = pfnOriginal;
+    hookMetaInfo.actualEntry    = actualEntry;
+    hookMetaInfo.repeater       = repeater;
+    hookMetaInfo.isPre          = isPre;
+    hookMetaInfo.delayedRelease = isPre;
     g_vtHookRecord.emplace(pfnOriginal, std::move(hookMetaInfo));
     return true;
 }
 
 // warning: this operation is unsafe
-static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEntry)
+static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEntry, bool isPre = false)
 {
     //
     // calc valid entry opcode serial length
@@ -204,15 +214,17 @@ static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEn
     //
 
     wb_hook::HookMetaInfo hookMetaInfo;
-    if (!Do_InProcessHook_Windows_x86(pfnOriginal, &repeater[8], hookMetaInfo.originalEntryBackup)) {
+    if (!Do_InProcessHook_Windows_x86(pfnOriginal, &repeater[8], hookMetaInfo.hookOpcodes, hookMetaInfo.originalEntryBackup, isPre)) {
         wb_memory::FreeUnrestrictedMem(repeater);
         return false;
     }
 
-    hookMetaInfo.type        = wb_hook::HookPointType::Intercept;
-    hookMetaInfo.entry       = pfnOriginal;
-    hookMetaInfo.actualEntry = pfnOriginal;
-    hookMetaInfo.repeater    = repeater;
+    hookMetaInfo.type           = wb_hook::HookPointType::Intercept;
+    hookMetaInfo.entry          = pfnOriginal;
+    hookMetaInfo.actualEntry    = pfnOriginal;
+    hookMetaInfo.repeater       = repeater;
+    hookMetaInfo.isPre          = isPre;
+    hookMetaInfo.delayedRelease = isPre;
     g_vtHookRecord.emplace(pfnOriginal, std::move(hookMetaInfo));
     return true;
 }
@@ -230,6 +242,21 @@ static bool InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEntry
 
     return (((uint8_t*)pfnOriginal)[0] != 0xE9) ? Do_InProcessIntercept_Windows_x86(pfnOriginal, pfnStubEntry)
                                                 : Do_InProcessRelocateIntercept_Windows_x86(pfnOriginal, pfnStubEntry);
+}
+
+static bool PreInProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEntry)
+{
+    if (!pfnOriginal || !pfnStubEntry) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(g_mutexHook);
+    if (g_vtHookRecord.find(pfnOriginal) != g_vtHookRecord.end()) {
+        return false;
+    }
+
+    return (((uint8_t*)pfnOriginal)[0] != 0xE9) ? Do_InProcessIntercept_Windows_x86(pfnOriginal, pfnStubEntry, true)
+                                                : Do_InProcessRelocateIntercept_Windows_x86(pfnOriginal, pfnStubEntry, true);
 }
 
 #else
@@ -323,6 +350,12 @@ static bool InProcessIntercept_Windows_x64(void* pfnOriginal, void* pfnStubEntry
     return false;
 }
 
+static bool PreInProcessIntercept_Windows_x64(void* pfnOriginal, void* pfnStubEntry)
+{
+    throw std::exception("PreInProcessIntercept_Windows_x64 stub");
+    return false;
+}
+
 #endif
 
 static bool InProcessHook_Windows(void* pfnOriginal, void* pfnNewEntry)
@@ -343,6 +376,15 @@ static bool InProcessIntercept_Windows(void* pfnOriginal, void* pfnStubEntry)
 #endif
 }
 
+static bool PreInProcessIntercept_Windows(void* pfnOriginal, void* pfnStubEntry)
+{
+#if WXBOX_CPU_IS_X86
+    return PreInProcessIntercept_Windows_x86(pfnOriginal, pfnStubEntry);
+#else
+    return PreInProcessIntercept_Windows_x64(pfnOriginal, pfnStubEntry);
+#endif
+}
+
 #elif WXBOX_IN_MAC_OS
 
 static bool InProcessHook_Mac(void* pfnOriginal, void* pfnNewEntry)
@@ -354,6 +396,12 @@ static bool InProcessHook_Mac(void* pfnOriginal, void* pfnNewEntry)
 static bool InProcessIntercept_Mac(void* pfnOriginal, void* pfnStubEntry)
 {
     throw std::exception("InProcessBridgeHook_Mac stub");
+    return false;
+}
+
+static bool PreInProcessIntercept_Mac(void* pfnOriginal, void* pfnStubEntry)
+{
+    throw std::exception("PreInProcessBridgeHook_Mac stub");
     return false;
 }
 
@@ -404,6 +452,67 @@ bool wxbox::util::hook::InProcessIntercept(void* pfnOriginal, void* pfnStubEntry
 #endif
 }
 
+bool wxbox::util::hook::PreInProcessIntercept(void* pfnOriginal, void* pfnStubEntry)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return PreInProcessIntercept_Windows(pfnOriginal, pfnStubEntry);
+#elif WXBOX_IN_MAC_OS
+    return PreInProcessIntercept_Mac(pfnOriginal, pfnStubEntry);
+#endif
+}
+
+bool wxbox::util::hook::ExecuteInProcessIntercept(void* pfnOriginal)
+{
+    if (!pfnOriginal) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(g_mutexHook);
+    auto                        it = g_vtHookRecord.find(pfnOriginal);
+    if (it == g_vtHookRecord.end()) {
+        return false;
+    }
+
+    HookMetaInfo& meta = it->second;
+    if (!meta.isPre || meta.hookOpcodes.empty()) {
+        return false;
+    }
+
+    ucpulong_t szNumberOfBytesWritten = 0;
+    if (!wb_memory::WriteMemory(wb_process::GetCurrentProcessHandle(), pfnOriginal, meta.hookOpcodes.data(), meta.hookOpcodes.size(), &szNumberOfBytesWritten)) {
+        return false;
+    }
+
+    meta.isPre = false;
+    return true;
+}
+
+bool wxbox::util::hook::ReleasePreInProcessInterceptItem(void* pfnOriginal)
+{
+    if (!pfnOriginal) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(g_mutexHook);
+    auto                        it = g_vtHookRecord.find(pfnOriginal);
+    if (it == g_vtHookRecord.end()) {
+        return false;
+    }
+
+    HookMetaInfo& meta = it->second;
+    if (!meta.delayedRelease) {
+        return false;
+    }
+
+    if (meta.repeater) {
+        wb_memory::FreeUnrestrictedMem(meta.repeater);
+        meta.repeater = nullptr;
+    }
+
+    g_vtHookRecord.erase(it);
+    return true;
+}
+
 bool wxbox::util::hook::RevokeInProcessHook(void* pfnEntry)
 {
     if (!pfnEntry) {
@@ -417,17 +526,21 @@ bool wxbox::util::hook::RevokeInProcessHook(void* pfnEntry)
     }
 
     HookMetaInfo& meta = it->second;
-    if (meta.repeater) {
+    if (meta.repeater && !meta.delayedRelease) {
         wb_memory::FreeUnrestrictedMem(meta.repeater);
         meta.repeater = nullptr;
     }
 
-    ucpulong_t szNumberOfBytesWritten = 0;
-    if (!wb_memory::WriteMemory(wb_process::GetCurrentProcessHandle(), meta.entry, meta.originalEntryBackup.data(), meta.originalEntryBackup.size(), &szNumberOfBytesWritten)) {
-        return false;
+    if (!meta.isPre) {
+        ucpulong_t szNumberOfBytesWritten = 0;
+        if (!wb_memory::WriteMemory(wb_process::GetCurrentProcessHandle(), meta.entry, meta.originalEntryBackup.data(), meta.originalEntryBackup.size(), &szNumberOfBytesWritten)) {
+            return false;
+        }
     }
 
-    g_vtHookRecord.erase(it);
+    if (!meta.delayedRelease) {
+        g_vtHookRecord.erase(it);
+    }
     return true;
 }
 

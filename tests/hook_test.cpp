@@ -110,12 +110,109 @@ TEST(wxbox_hook, intercept_hook)
 {
     wb_hook::HookMetaInfo hookMetaInfo;
 
-	void* actualEntry = wb_traits::GetActualEntryAddress(before_relocate_intercept_hook);
+	void* actualEntry = wb_traits::GetActualEntryAddress(before_intercept_hook);
     EXPECT_NE(nullptr, actualEntry);
 
     EXPECT_EQ(true, wb_hook::InProcessIntercept(actualEntry, intercept_hook_stub));
-    EXPECT_EQ(1, before_relocate_intercept_hook("hello intercept_hook"));
+    EXPECT_EQ(1, before_intercept_hook("hello intercept_hook"));
     EXPECT_EQ(true, wb_hook::ObtainHookMetaInfo(actualEntry, hookMetaInfo));
     EXPECT_EQ(true, wb_hook::RevokeInProcessHook(actualEntry));
-    EXPECT_EQ(1, before_relocate_intercept_hook("hello intercept_hook"));
+    EXPECT_EQ(1, before_intercept_hook("hello intercept_hook"));
+}
+
+//
+// pre relocate intercept hook
+//
+
+static int before_pre_relocate_intercept_hook(const char* str)
+{
+    spdlog::info("before_pre_relocate_intercept_hook : {}", str);
+    return 1;
+}
+
+static void after_pre_relocate_intercept_hook(const char* str)
+{
+    spdlog::info("after_pre_relocate_intercept_hook : {}", str);
+}
+
+BEGIN_NAKED_STD_FUNCTION(pre_relocate_intercept_hook_stub)
+{
+    spdlog::info("pre_relocate_intercept_hook_stub");
+
+    __asm {
+		push edx
+		mov edx, esp
+		add edx, 4
+		add edx, 8
+		mov edx, [edx]
+		push edx
+		call after_pre_relocate_intercept_hook
+		add esp, 4
+		pop edx
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(pre_relocate_intercept_hook_stub)
+
+TEST(wxbox_hook, pre_relocate_intercept_hook)
+{
+    wb_hook::HookMetaInfo hookMetaInfo;
+
+    EXPECT_EQ(true, wb_hook::PreInProcessIntercept(before_pre_relocate_intercept_hook, pre_relocate_intercept_hook_stub));
+    EXPECT_EQ(true, wb_hook::ExecuteInProcessIntercept(before_pre_relocate_intercept_hook));
+    EXPECT_EQ(1, before_pre_relocate_intercept_hook("hello pre_relocate_intercept_hook"));
+    EXPECT_EQ(true, wb_hook::ObtainHookMetaInfo(before_pre_relocate_intercept_hook, hookMetaInfo));
+    EXPECT_EQ(true, wb_hook::RevokeInProcessHook(before_pre_relocate_intercept_hook));
+    EXPECT_EQ(true, wb_hook::ReleasePreInProcessInterceptItem(before_pre_relocate_intercept_hook));
+    EXPECT_EQ(1, before_pre_relocate_intercept_hook("hello pre_relocate_intercept_hook"));
+}
+
+//
+// pre intercept hook
+//
+
+static int before_preintercept_hook(const char* str)
+{
+    spdlog::info("before_preintercept_hook : {}", str);
+    return 1;
+}
+
+static void after_preintercept_hook(const char* str)
+{
+    spdlog::info("after_preintercept_hook : {}", str);
+}
+
+BEGIN_NAKED_STD_FUNCTION(preintercept_hook_stub)
+{
+    spdlog::info("preintercept_hook_stub");
+
+    __asm {
+		push edx
+		mov edx, esp
+		add edx, 4
+		add edx, 8
+		mov edx, [edx]
+		push edx
+		call after_preintercept_hook
+		add esp, 4
+		pop edx
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(preintercept_hook_stub)
+
+TEST(wxbox_hook, preintercept_hook)
+{
+    wb_hook::HookMetaInfo hookMetaInfo;
+
+    void* actualEntry = wb_traits::GetActualEntryAddress(before_preintercept_hook);
+    EXPECT_NE(nullptr, actualEntry);
+
+    EXPECT_EQ(true, wb_hook::PreInProcessIntercept(actualEntry, preintercept_hook_stub));
+    EXPECT_EQ(true, wb_hook::ExecuteInProcessIntercept(actualEntry));
+    EXPECT_EQ(1, before_preintercept_hook("hello preintercept_hook"));
+    EXPECT_EQ(true, wb_hook::ObtainHookMetaInfo(actualEntry, hookMetaInfo));
+    EXPECT_EQ(true, wb_hook::RevokeInProcessHook(actualEntry));
+    EXPECT_EQ(true, wb_hook::ReleasePreInProcessInterceptItem(actualEntry));
+    EXPECT_EQ(1, before_preintercept_hook("hello preintercept_hook"));
 }

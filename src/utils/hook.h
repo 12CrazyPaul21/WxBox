@@ -23,12 +23,17 @@ namespace wxbox {
                 void*                actualEntry;
                 void*                repeater;
                 std::vector<uint8_t> originalEntryBackup;
+                std::vector<uint8_t> hookOpcodes;
+                bool                 isPre;
+                bool                 delayedRelease;
 
                 _HookMetaInfo()
                   : type(HookPointType::Hook)
                   , entry(nullptr)
                   , actualEntry(nullptr)
                   , repeater(nullptr)
+                  , isPre(false)
+                  , delayedRelease(false)
                 {
                 }
 
@@ -39,6 +44,8 @@ namespace wxbox {
                     actualEntry         = other.actualEntry;
                     repeater            = other.repeater;
                     originalEntryBackup = other.originalEntryBackup;
+                    hookOpcodes         = other.hookOpcodes;
+                    isPre               = other.isPre;
                 }
 
                 SETUP_MOVE_METHOD(_HookMetaInfo, other)
@@ -48,6 +55,8 @@ namespace wxbox {
                     actualEntry         = other.actualEntry;
                     repeater            = other.repeater;
                     originalEntryBackup = std::move(other.originalEntryBackup);
+                    hookOpcodes         = std::move(other.hookOpcodes);
+                    isPre               = other.isPre;
                 }
 
             } HookMetaInfo, *PHookMetaInfo;
@@ -58,7 +67,11 @@ namespace wxbox {
 
             bool InProcessHook(void* pfnOriginal, void* pfnNewEntry);
             bool InProcessDummyHook(void* pfnOriginal, void* pfnDummy);
-            bool InProcessIntercept(void* pfnOriginal, void* pfnNewEntryOrStubEntry);
+
+            bool InProcessIntercept(void* pfnOriginal, void* pfnStubEntry);
+            bool PreInProcessIntercept(void* pfnOriginal, void* pfnStubEntry);
+            bool ExecuteInProcessIntercept(void* pfnOriginal);
+            bool ReleasePreInProcessInterceptItem(void* pfnOriginal);
 
             bool RevokeInProcessHook(void* pfnEntry);
             bool ObtainHookMetaInfo(void* pfnOriginal, HookMetaInfo& hookMetaInfo);
