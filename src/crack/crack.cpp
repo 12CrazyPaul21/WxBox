@@ -146,6 +146,8 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
 
 static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_process::PID pid, wb_crack::POpenWxWithMultiBoxingResult pResult, bool keepAttach)
 {
+    using FnWaitForDebugEvent = BOOL(APIENTRY*)(LPDEBUG_EVENT lpDebugEvent, DWORD dwMilliseconds);
+
     if (!pid) {
         return false;
     }
@@ -159,8 +161,18 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
     DEBUG_EVENT debugEvent   = {0};
     DWORD       dwModuleSize = 0;
 
+    HMODULE hKernel32 = LoadLibraryA("kernel32.dll");
+    if (!hKernel32) {
+        return false;
+    }
+
+    FnWaitForDebugEvent pfnWaitForDebugEvent = reinterpret_cast<FnWaitForDebugEvent>(GetProcAddress(hKernel32, "WaitForDebugEventEx"));
+    if (!pfnWaitForDebugEvent && !(pfnWaitForDebugEvent = reinterpret_cast<FnWaitForDebugEvent>(GetProcAddress(hKernel32, "WaitForDebugEvent")))) {
+        return false;
+    }
+
     for (;;) {
-        if (!::WaitForDebugEventEx(&debugEvent, DEBUG_MODE_WAITING_INTERVAL_MS)) {
+        if (!pfnWaitForDebugEvent(&debugEvent, DEBUG_MODE_WAITING_INTERVAL_MS)) {
             break;
         }
 
