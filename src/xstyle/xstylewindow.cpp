@@ -741,7 +741,7 @@ bool XStyleWindow::DraggableAreaHitTest(int x, int y)
     }
 
     for (auto& child : this->titlePanel->findChildren<QWidget*>()) {
-        if (!child->objectName().compare(winName + QString::fromUtf8("_title_label"))) {
+        if (!child->isEnabled() || !child->objectName().compare(winName + QString::fromUtf8("_title_label"))) {
             continue;
         }
 

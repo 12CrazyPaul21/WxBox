@@ -184,7 +184,7 @@ QMenu {
     background-color: rgba(0, 0, 26, 200);
     color: white;
     border: 1px solid rgba(245, 245, 240, 240);
-    border-radius: 2px;
+    border-radius: 1px;
     padding: 0px;
 }
 
