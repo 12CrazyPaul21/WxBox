@@ -12,6 +12,8 @@ WxBoxController::WxBoxController(MainWindow* view)
   : QObject(reinterpret_cast<QObject*>(view))
   , config(AppConfig::singleton())
   , view(view)
+  , server(nullptr)
+  , statusMonitorTimerId(-1)
 {
     // set thread name
     wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxMain");
@@ -40,7 +42,7 @@ void WxBoxController::StartWxBoxServer()
         return;
     }
 
-    wxbox::WxBoxServer* server = wxbox::WxBoxServer::NewWxBoxServer(config.wxbox_server_uri());
+    server = wxbox::WxBoxServer::NewWxBoxServer(config.wxbox_server_uri());
 
     // connect slots
     QObject::connect(&worker, SIGNAL(finished()), server, SLOT(deleteLater()));
@@ -63,6 +65,26 @@ void WxBoxController::StopWxBoxServer()
         worker.stopServer();
         spdlog::info("WxBox Server is already stoped");
     }
+}
+
+void WxBoxController::StartWeChatStatusMonitor()
+{
+    statusMonitorTimerId = view->startTimer(config.wechat_status_monitor_interval());
+}
+
+void WxBoxController::StopWeChatStatusMonitor()
+{
+    if (statusMonitorTimerId != -1) {
+        view->killTimer(statusMonitorTimerId);
+        statusMonitorTimerId = -1;
+    }
+}
+
+void WxBoxController::ChangeWeChatStatusMonitorInterval(int interval)
+{
+    config.change_wechat_status_monitor_interval(interval);
+    StopWeChatStatusMonitor();
+    StartWeChatStatusMonitor();
 }
 
 void WxBoxController::LoadWeChatEnvironmentInfo()
@@ -95,15 +117,15 @@ void WxBoxController::ReloadFeatures()
     spdlog::info("Load WxBox api features");
 }
 
-void WxBoxController::StartWeChatInstance()
+bool WxBoxController::StartWeChatInstance()
 {
     view->BeginMission();
 
     // verify wechat environment info
     if (!RequireValidWeChatEnvironmentInfo()) {
-        xstyle::warning(view, "", _wctr(WBC_MESSAGE(WBCErrorCode::INVALID_WECHAT_ENV_INFO)));
+        xstyle::warning(view, "", WBC_TRANSMESSAGE(WBCErrorCode::INVALID_WECHAT_ENV_INFO));
         view->CloseMission();
-        return;
+        return false;
     }
 
     WBCErrorCode errorCode     = WBCErrorCode::WBC_NO_ERROR;
@@ -122,7 +144,7 @@ void WxBoxController::StartWeChatInstance()
             return;
         }
 
-        // get process info
+        // get process handle
         wb_process::AutoProcessHandle aphandle = wb_process::OpenProcessAutoHandle(openResult.pid);
         if (!aphandle.valid()) {
             errorCode = WBCErrorCode::GET_WECHAT_PROCESS_HANDLE_FAILED;
@@ -158,19 +180,7 @@ void WxBoxController::StartWeChatInstance()
         spdlog::info("WeChat Core Module baseaddr : 0x{:08X}, size : 0x{:08X}", (ucpulong_t)openResult.pModuleBaseAddr, openResult.uModuleSize);
 
         // log wx hook point
-        spdlog::info("CheckAppSingleton va : 0x{:08X}", wxbotEntryParameter.wechat_apis.CheckAppSingleton);
-        spdlog::info("FetchGlobalContactContextAddress va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FetchGlobalContactContextAddress);
-        spdlog::info("InitWeChatContactItem va : 0x{:08X}", wxbotEntryParameter.wechat_apis.InitWeChatContactItem);
-        spdlog::info("DeinitWeChatContactItem va : 0x{:08X}", wxbotEntryParameter.wechat_apis.DeinitWeChatContactItem);
-        spdlog::info("FindAndDeepCopyWeChatContactItemWithWXIDWrapper va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FindAndDeepCopyWeChatContactItemWithWXIDWrapper);
-        spdlog::info("FetchGlobalProfileContext va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FetchGlobalProfileContext);
-        spdlog::info("HandleRawMessages va : 0x{:08X}", wxbotEntryParameter.wechat_apis.HandleRawMessages);
-        spdlog::info("HandleReceivedMessages va : 0x{:08X}", wxbotEntryParameter.wechat_apis.HandleReceivedMessages);
-        spdlog::info("WXSendTextMessage va : 0x{:08X}", wxbotEntryParameter.wechat_apis.WXSendTextMessage);
-        spdlog::info("FetchGlobalSendMessageContext va : 0x{:08X}", wxbotEntryParameter.wechat_apis.FetchGlobalSendMessageContext);
-        spdlog::info("WXSendFileMessage va : 0x{:08X}", wxbotEntryParameter.wechat_apis.WXSendFileMessage);
-        spdlog::info("CloseLoginWnd va : 0x{:08X}", wxbotEntryParameter.wechat_apis.CloseLoginWnd);
-        spdlog::info("LogoutAndExitWeChat va : 0x{:08X}", wxbotEntryParameter.wechat_apis.LogoutAndExitWeChat);
+        WXBOX_LOG_WECHAT_APIS(wxbotEntryParameter.wechat_apis);
 
         // verify hook point
         if (!wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis)) {
@@ -191,6 +201,151 @@ void WxBoxController::StartWeChatInstance()
     }
 
     view->CloseMission();
+    return errorCode == WBCErrorCode::WBC_NO_ERROR;
+}
+
+bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
+{
+    if (wb_crack::IsWxBotInjected(pid)) {
+        xstyle::information(view, "", WBC_TRANSMESSAGE(WBCErrorCode::WECHAT_PROCESS_IS_ALREADY_INJECT));
+        return false;
+    }
+
+    view->BeginMission();
+
+    WBCErrorCode errorCode = WBCErrorCode::WBC_NO_ERROR;
+
+    wxbox::internal::TaskInThreadPool::StartTask([this, pid, &errorCode]() {
+        // get wechat process environment info
+        wb_wx::WeChatProcessEnvironmentInfo wxProcessEnvInfo;
+        if (!wb_wx::ResolveWxEnvInfo(pid, wxProcessEnvInfo)) {
+            errorCode = WBCErrorCode::RESOLVE_WECHAT_PROCESS_ENV_INFO_FAILED;
+            return;
+        }
+
+        // get process handle
+        wb_process::AutoProcessHandle aphandle = wb_process::OpenProcessAutoHandle(pid);
+        if (!aphandle.valid()) {
+            errorCode = WBCErrorCode::GET_WECHAT_PROCESS_HANDLE_FAILED;
+            return;
+        }
+
+        // collect hook point
+        wb_feature::LocateTarget               locateTarget = {aphandle.hProcess, wxProcessEnvInfo.pCoreModuleBaseAddr, wxProcessEnvInfo.uCoreModuleSize};
+        wb_feature::WxAPIHookPointVACollection vaCollection;
+        wxApiFeatures.Collect(locateTarget, wxProcessEnvInfo.wxEnvInfo.version, vaCollection);
+        aphandle.close();
+
+        //
+        // inject wxbot
+        //
+
+        // wxbot entry parameter
+        wb_crack::WxBotEntryParameter wxbotEntryParameter;
+        std::memset(&wxbotEntryParameter, 0, sizeof(wxbotEntryParameter));
+        wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
+        strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wb_file::GetProcessRootPath().data());
+        strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), config.wxbot_root_path().data());
+        strcpy_s(wxbotEntryParameter.plugins_root, sizeof(wxbotEntryParameter.plugins_root), config.plugins_root().data());
+        strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
+        wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
+        wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
+        wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
+
+        // log wx core module info
+        spdlog::info("Inject to WeChat Process(PID : {})", pid);
+        spdlog::info("WeChat Version : {}", wxProcessEnvInfo.wxEnvInfo.version);
+        spdlog::info("WeChat Install Path : {}", wxProcessEnvInfo.wxEnvInfo.installPath);
+        spdlog::info("WeChat Core Module baseaddr : 0x{:08X}, size : 0x{:08X}", (ucpulong_t)wxProcessEnvInfo.pCoreModuleBaseAddr, wxProcessEnvInfo.uCoreModuleSize);
+
+        // log wx hook point
+        WXBOX_LOG_WECHAT_APIS(wxbotEntryParameter.wechat_apis);
+
+        // verify hook point
+        if (!wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis)) {
+            errorCode = WBCErrorCode::WECHAT_API_HOOK_POINT_INVALID;
+            return;
+        }
+
+        // inject
+        if (!wb_crack::InjectWxBot(pid, wxbotEntryParameter)) {
+            errorCode = WBCErrorCode::INJECT_WXBOT_MODULE_FAILED;
+            return;
+        }
+    })
+        .wait();
+
+    if (WBC_FAILED(errorCode)) {
+        WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(view, "", WBC_MESSAGE(errorCode));
+    }
+
+    view->CloseMission();
+    return errorCode == WBCErrorCode::WBC_NO_ERROR;
+}
+
+bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
+{
+    if (!wb_crack::IsWxBotInjected(pid)) {
+        xstyle::information(view, "", WBC_TRANSMESSAGE(WBCErrorCode::WECHAT_PROCESS_IS_NOT_INJECTED));
+        return false;
+    }
+
+    if (!server->IsClientAlive(pid)) {
+        xstyle::information(view, "", WBC_TRANSMESSAGE(WBCErrorCode::WECHAT_PROCESS_WXBOT_MODULE_NOT_CONNECTED));
+        return false;
+    }
+
+    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
+    msg.pid = pid;
+    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::UNINJECT_WXBOT_REQUEST);
+    PushMessageAsync(std::move(msg));
+    return true;
+}
+
+//
+// WeChat Status
+//
+
+void WxBoxController::UpdateWeChatStatus()
+{
+    auto          wechatProcessList = wb_wx::GetWeChatProcessList();
+    auto&         model             = view->wechatStatusModel;
+    std::set<int> invalidRows;
+
+    for (int row = 0; row < model.rowCount(); row++) {
+        auto pidItem = model.item(row, 1);
+        if (!pidItem) {
+            continue;
+        }
+
+        auto pid = pidItem->text().toUInt();
+        auto it  = std::find_if(wechatProcessList.begin(), wechatProcessList.end(), [pid](const wb_process::ProcessInfo& processInfo) {
+            return processInfo.pid == pid;
+        });
+
+        // invalid row
+        if (it == wechatProcessList.end()) {
+            invalidRows.insert(row);
+            continue;
+        }
+
+        // update
+        auto statusItem = model.item(row, 0);
+        if (statusItem) {
+            statusItem->setText(QString("%1").arg(wb_crack::IsWxBotInjected(pid)));
+        }
+        wechatProcessList.erase(it);
+    }
+
+    // delete invalid rows
+    for (auto row : invalidRows) {
+        model.removeRow(row);
+    }
+
+    // add new wechat process items
+    for (auto wp : wechatProcessList) {
+        model.appendRow(QList<QStandardItem*>({new QStandardItem(QString("%1").arg(wb_crack::IsWxBotInjected(wp.pid))), new QStandardItem(QString("%1").arg(wp.pid))}));
+    }
 }
 
 //
@@ -203,6 +358,7 @@ void WxBoxController::WxBoxServerStatusChange(const WxBoxServerStatus oldStatus,
 
     switch (newStatus) {
         case WxBoxServerStatus::Started:
+            StartWeChatStatusMonitor();
             break;
         case WxBoxServerStatus::StartServiceFailed:
             view->ReadyForClose(false);

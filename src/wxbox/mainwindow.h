@@ -16,6 +16,7 @@
 #include <QDesktopServices>
 #include <QSystemTrayIcon>
 #include <QSplashScreen>
+#include <QStandardItemModel>
 
 #undef signals
 #include <utils/common.h>
@@ -80,12 +81,12 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     virtual void OnCloseMission() Q_DECL_OVERRIDE;
 
   private:
-    virtual bool BeforeClose() override
+    virtual bool BeforeClose() Q_DECL_OVERRIDE
     {
         return DeinitWxBox();
     }
 
-    virtual void RetranslateUi() override
+    virtual void RetranslateUi() Q_DECL_OVERRIDE
     {
         XSTYLE_WINDOW_CLASS::RetranslateUi();
         auto language = xstyle_manager.CurrentLanguage().toStdString();
@@ -93,14 +94,14 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         wb_coredump::ChangeDumperLanguage(language);
     }
 
-    virtual void AfterThemeChanged(const QString& themeName) override
+    virtual void AfterThemeChanged(const QString& themeName) Q_DECL_OVERRIDE
     {
         auto theme = themeName.toStdString();
         config.change_theme(theme);
         wb_coredump::ChangeTheme(theme);
     }
 
-    virtual void TurnCloseIsMinimizeToTray(bool toTray) override
+    virtual void TurnCloseIsMinimizeToTray(bool toTray) Q_DECL_OVERRIDE
     {
         XSTYLE_WINDOW_CLASS::TurnCloseIsMinimizeToTray(toTray);
         if (config.close_is_minimize_to_tray() != toTray) {
@@ -109,10 +110,17 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         qApp->setQuitOnLastWindowClosed(!toTray);
     }
 
-    void RegisterEvent();
+    virtual void timerEvent(QTimerEvent* event) Q_DECL_OVERRIDE
+    {
+        if (event->timerId() == controller.statusMonitorTimerId) {
+            controller.UpdateWeChatStatus();
+        }
+    }
+
     void InitAppMenu();
     void InitAppTray();
     void InitWidget();
+    void RegisterWidgetEventHandler();
 
   private:
     Ui::MainWindowBody* ui;
@@ -120,6 +128,8 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     DownloadDialog      downloadDialog;
     XStyleMenu          appMenu;
     QSystemTrayIcon     appTray;
+    XStyleMenu          clientItemContextMenu;
+    QStandardItemModel  wechatStatusModel;
 
     AppConfig&      config;
     WxBoxController controller;

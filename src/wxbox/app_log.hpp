@@ -60,4 +60,21 @@
     spdlog::error(FORMAT, ##__VA_ARGS__);                          \
     xstyle::error(VIEW, Translate(TITLE), Translate(spdlog::fmt_lib::format(FORMAT, ##__VA_ARGS__).c_str()));
 
+#define WXBOX_LOG_WECHAT_APIS(WECHAT_APIS)                                                                                                          \
+    {                                                                                                                                               \
+        spdlog::info("CheckAppSingleton va : 0x{:08X}", WECHAT_APIS.CheckAppSingleton);                                                             \
+        spdlog::info("FetchGlobalContactContextAddress va : 0x{:08X}", WECHAT_APIS.FetchGlobalContactContextAddress);                               \
+        spdlog::info("InitWeChatContactItem va : 0x{:08X}", WECHAT_APIS.InitWeChatContactItem);                                                     \
+        spdlog::info("DeinitWeChatContactItem va : 0x{:08X}", WECHAT_APIS.DeinitWeChatContactItem);                                                 \
+        spdlog::info("FindAndDeepCopyWeChatContactItemWithWXIDWrapper va : 0x{:08X}", WECHAT_APIS.FindAndDeepCopyWeChatContactItemWithWXIDWrapper); \
+        spdlog::info("FetchGlobalProfileContext va : 0x{:08X}", WECHAT_APIS.FetchGlobalProfileContext);                                             \
+        spdlog::info("HandleRawMessages va : 0x{:08X}", WECHAT_APIS.HandleRawMessages);                                                             \
+        spdlog::info("HandleReceivedMessages va : 0x{:08X}", WECHAT_APIS.HandleReceivedMessages);                                                   \
+        spdlog::info("WXSendTextMessage va : 0x{:08X}", WECHAT_APIS.WXSendTextMessage);                                                             \
+        spdlog::info("FetchGlobalSendMessageContext va : 0x{:08X}", WECHAT_APIS.FetchGlobalSendMessageContext);                                     \
+        spdlog::info("WXSendFileMessage va : 0x{:08X}", WECHAT_APIS.WXSendFileMessage);                                                             \
+        spdlog::info("CloseLoginWnd va : 0x{:08X}", WECHAT_APIS.CloseLoginWnd);                                                                     \
+        spdlog::info("LogoutAndExitWeChat va : 0x{:08X}", WECHAT_APIS.LogoutAndExitWeChat);                                                         \
+    }
+
 #endif  // #ifndef __WXBOX_APP_LOG_H

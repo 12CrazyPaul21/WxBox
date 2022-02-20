@@ -181,6 +181,22 @@
         <translation>注入WxBot模块失败</translation>
     </message>
     <message>
+        <source>Resolve WeChat process environment info failed</source>
+        <translation>获取指定WeChat进程的环境信息失败</translation>
+    </message>
+    <message>
+        <source>WeChat process is already inject</source>
+        <translation>该WeChat进程已注入WxBot模块</translation>
+    </message>
+    <message>
+        <source>WeChat process is not injected</source>
+        <translation>该WeChat进程未注入WxBot模块</translation>
+    </message>
+    <message>
+        <source>WeChat process's WxBot module not connected</source>
+        <translation>未连接WeChat进程的WxBot模块</translation>
+    </message>
+    <message>
         <source>Do you want to inject wxbot at the same time?</source>
         <translation>是否同时注入WxBot模块？</translation>
     </message>

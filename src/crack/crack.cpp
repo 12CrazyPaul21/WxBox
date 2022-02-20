@@ -141,6 +141,11 @@ static inline bool OpenWxWithMultiBoxing_Crack(const wb_wx::WeChatEnvironmentInf
     // crack wechat
     //
 
+    DWORD oldProtect = 0;
+    if (!VirtualProtectEx(hProcess, (void*)checkAppSingletonVA, fillStream.size(), PAGE_EXECUTE_READWRITE, &oldProtect)) {
+        return false;
+    }
+
     return wb_memory::WriteMemory(hProcess, (void*)checkAppSingletonVA, fillStream.data(), fillStream.size(), nullptr);
 }
 

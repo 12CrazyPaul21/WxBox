@@ -57,11 +57,38 @@ namespace wxbox {
 
             } WeChatEnvironmentInfo, *PWeChatEnvironmentInfo;
 
+            typedef struct _WeChatProcessEnvironmentInfo
+            {
+                WeChatEnvironmentInfo     wxEnvInfo;
+                wxbox::util::process::PID pid;
+                void*                     pCoreModuleBaseAddr;
+                ucpulong_t                uCoreModuleSize;
+
+                _WeChatProcessEnvironmentInfo() = default;
+
+                SETUP_COPY_METHOD(_WeChatProcessEnvironmentInfo, other)
+                {
+                    wxEnvInfo           = other.wxEnvInfo;
+                    pid                 = other.pid;
+                    pCoreModuleBaseAddr = other.pCoreModuleBaseAddr;
+                    uCoreModuleSize     = other.uCoreModuleSize;
+                }
+
+                SETUP_MOVE_METHOD(_WeChatProcessEnvironmentInfo, other)
+                {
+                    wxEnvInfo           = std::move(other.wxEnvInfo);
+                    pid                 = other.pid;
+                    pCoreModuleBaseAddr = other.pCoreModuleBaseAddr;
+                    uCoreModuleSize     = other.uCoreModuleSize;
+                }
+            } WeChatProcessEnvironmentInfo, *PWeChatProcessEnvironmentInfo;
+
             //
             // Function
             //
 
-            std::string GetWxInstallationPath();
+            std::string
+                        GetWxInstallationPath();
             std::string GetWxModuleFolderPath(const std::string& installPath);
 
             std::string GetWxVersion(const std::string& moduleFolderPath);
@@ -71,6 +98,7 @@ namespace wxbox {
 
             bool ResolveWxEnvInfo(WeChatEnvironmentInfo& wxEnvInfo);
             bool ResolveWxEnvInfo(const wxbox::util::process::PID& pid, WeChatEnvironmentInfo& wxEnvInfo);
+            bool ResolveWxEnvInfo(const wxbox::util::process::PID& pid, WeChatProcessEnvironmentInfo& wxProcessEnvInfo);
             bool ResolveWxEnvInfo(const std::string& installPath, WeChatEnvironmentInfo& wxEnvInfo);
             bool ResolveWxEnvInfo(const std::string& installPath, const std::string& moduleFolderPath, WeChatEnvironmentInfo& wxEnvInfo);
 

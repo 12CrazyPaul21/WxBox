@@ -181,6 +181,22 @@
         <translation>Inject WxBot module invalid</translation>
     </message>
     <message>
+        <source>Resolve WeChat process environment info failed</source>
+        <translation>Resolve WeChat process environment info failed</translation>
+    </message>
+    <message>
+        <source>WeChat process is already inject</source>
+        <translation>WeChat process is already inject</translation>
+    </message>
+    <message>
+        <source>WeChat process is not injected</source>
+        <translation>WeChat process is not injected</translation>
+    </message>
+    <message>
+        <source>WeChat process's WxBot module not connected</source>
+        <translation>WeChat process's WxBot module not connected</translation>
+    </message>
+    <message>
         <source>Do you want to inject wxbot at the same time?</source>
         <translation>Do you want to inject wxbot at the same time?</translation>
     </message>

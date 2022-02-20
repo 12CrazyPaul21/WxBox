@@ -258,9 +258,15 @@ void wxbot::WxBot::WxBoxClientEventHandler(wxbot::WxBotMessage message)
         //spdlog::info("WxBoxClient status change, oldStatus<{}>, newStatus<{}>", ParseStatus(message.u.wxBoxClientStatus.oldStatus), ParseStatus(message.u.wxBoxClientStatus.newStatus));
     }
     else if (message.type == wxbot::WxBotMessageType::WxBoxRequestOrResponse) {
-        if (message.u.wxBoxControlPacket.type() == wxbox::ControlPacketType::PROFILE_REQUEST) {
-            //spdlog::info("WxBoxServer request profile");
-            ResponseProfile();
+        switch (message.u.wxBoxControlPacket.type()) {
+            case wxbox::ControlPacketType::PROFILE_REQUEST: {
+                ResponseProfile();
+                break;
+            }
+            case wxbox::ControlPacketType::UNINJECT_WXBOT_REQUEST: {
+                Stop();
+                break;
+            }
         }
     }
 }

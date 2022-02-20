@@ -162,6 +162,25 @@ bool wxbox::crack::wx::ResolveWxEnvInfo(const wb_process::PID& pid, WeChatEnviro
     return ResolveWxEnvInfo(installPath, wb_file::ToDirectoryPath(coreModuleInfo.modulePath), wxEnvInfo);
 }
 
+bool wxbox::crack::wx::ResolveWxEnvInfo(const wxbox::util::process::PID& pid, WeChatProcessEnvironmentInfo& wxProcessEnvInfo)
+{
+    std::string installPath = wb_file::GetProcessRootPath(pid);
+    if (installPath.empty()) {
+        return false;
+    }
+
+    wb_process::ModuleInfo coreModuleInfo;
+    if (!wb_process::GetModuleInfo(pid, WX_WE_CHAT_CORE_MODULE, coreModuleInfo)) {
+        return false;
+    }
+
+    wxProcessEnvInfo.pid                 = pid;
+    wxProcessEnvInfo.pCoreModuleBaseAddr = coreModuleInfo.pModuleBaseAddr;
+    wxProcessEnvInfo.uCoreModuleSize     = coreModuleInfo.uModuleSize;
+
+    return ResolveWxEnvInfo(installPath, wb_file::ToDirectoryPath(coreModuleInfo.modulePath), wxProcessEnvInfo.wxEnvInfo);
+}
+
 bool wxbox::crack::wx::ResolveWxEnvInfo(const std::string& installPath, WeChatEnvironmentInfo& wxEnvInfo)
 {
     return ResolveWxEnvInfo(installPath, GetWxModuleFolderPath(installPath), wxEnvInfo);

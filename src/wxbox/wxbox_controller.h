@@ -37,13 +37,25 @@ class WxBoxController final : public QObject
     void StartWxBoxServer();
     void StopWxBoxServer();
 
+    void StartWeChatStatusMonitor();
+    void StopWeChatStatusMonitor();
+    void ChangeWeChatStatusMonitorInterval(int interval);
+
     void LoadWeChatEnvironmentInfo();
     bool RequireValidWeChatEnvironmentInfo();
     void ReloadFeatures();
 
-    void StartWeChatInstance();
+    bool StartWeChatInstance();
+    bool InjectWxBotModule(wb_process::PID pid);
+    bool UnInjectWxBotModule(wb_process::PID pid);
 
   private:
+    //
+    // WeChat Status
+    //
+
+    void UpdateWeChatStatus();
+
     //
     // WxBoxServer Wrapper Request Methods
     //
@@ -74,7 +86,9 @@ class WxBoxController final : public QObject
 
     wb_wx::WeChatEnvironmentInfo wxEnvInfo;
     wb_feature::WxApiFeatures    wxApiFeatures;
+    wxbox::WxBoxServer*          server;
     wxbox::WxBoxServerWorker     worker;
+    int                          statusMonitorTimerId;
 };
 
 #endif  // #ifndef __WXBOX_CONTROLLER_H

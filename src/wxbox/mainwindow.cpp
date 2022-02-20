@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget* parent)
   , downloadDialog(this)
   , appMenu("AppMenu", this)
   , appTray(this)
+  , clientItemContextMenu("ClientItemContextMenu", this)
+  , wechatStatusModel(this)
   , controller(this)
 {
     // setup xstyle ui
@@ -103,12 +105,17 @@ void MainWindow::OnCloseMission()
 
 void MainWindow::InitAppMenu()
 {
+    // application menu
     appMenu.pushAction("setting");
     appMenu.pushSeparator();
     appMenu.pushAction("visit repository", this, std::bind(&QDesktopServices::openUrl, QUrl(WXBOX_REPOSITORY_URL)));
     appMenu.pushAction("about wxbox", &aboutDialog, std::bind(&AboutWxBoxDialog::showApplicationModal, &aboutDialog));
     appMenu.pushSeparator();
     appMenu.pushAction("exit wxbox", this, std::bind(&MainWindow::quit, this));
+
+    // client item context menu
+    clientItemContextMenu.pushAction("inject");
+    clientItemContextMenu.pushAction("uninject");
 }
 
 void MainWindow::InitAppTray()
@@ -127,10 +134,41 @@ void MainWindow::InitAppTray()
 
 void MainWindow::InitWidget()
 {
+    // wechat status table view
+    ui->viewWeChatStatus->setModel(&wechatStatusModel);
+    ui->viewWeChatStatus->verticalHeader()->hide();
+    ui->viewWeChatStatus->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->viewWeChatStatus->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->viewWeChatStatus->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->viewWeChatStatus->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
+
+    // wechat status table model
+    wechatStatusModel.setHorizontalHeaderLabels(QStringList({"status", "pid", "wxid"}));
 }
 
-void MainWindow::RegisterEvent()
+void MainWindow::RegisterWidgetEventHandler()
 {
+    QObject::connect(ui->viewWeChatStatus, &QWidget::customContextMenuRequested, this, [this](QPoint pos) {
+        auto selectedClients = this->ui->viewWeChatStatus->selectionModel()->selectedRows();
+        if (selectedClients.empty()) {
+            return;
+        }
+
+        auto pidItem = wechatStatusModel.item(selectedClients.at(0).row(), 1);
+        if (!pidItem) {
+            return;
+        }
+        auto pid = pidItem->text().toUInt();
+
+        clientItemContextMenu.connectAction("inject", this, [this, pid]() {
+            controller.InjectWxBotModule(pid);
+        });
+        clientItemContextMenu.connectAction("uninject", this, [this, pid]() {
+            controller.UnInjectWxBotModule(pid);
+        });
+        clientItemContextMenu.popup(this->ui->viewWeChatStatus->viewport()->mapToGlobal(pos));
+    });
+
     QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
     QObject::connect(ui->btnUpdateFeatureRepository, &QPushButton::clicked, this, &MainWindow::UpdateWeChatFeatures);
     QObject::connect(ui->btnStartWeChat, &QPushButton::clicked, &this->controller, &WxBoxController::StartWeChatInstance);
@@ -158,8 +196,9 @@ void MainWindow::RegisterEvent()
         /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
         xstyle_manager.ChangeLanguage("zh_cn");
         xstyle_manager.ChangeTheme("GreenTheme");*/
-        xstyle_manager.ChangeTheme("");
-        xstyle_manager.ChangeLanguage("zh_cn");
+        /*       xstyle_manager.ChangeTheme("");
+        xstyle_manager.ChangeLanguage("zh_cn");*/
+        controller.ChangeWeChatStatusMonitorInterval(2000);
     });
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
         //UpdateWeChatFeatures();
@@ -195,9 +234,9 @@ bool MainWindow::InitWxBox(QSplashScreen* splash)
     SPLASH_MESSAGE("Init Widget");
     InitWidget();
 
-    // register event
+    // register widget event handelr
     SPLASH_MESSAGE("Register Widget Event");
-    RegisterEvent();
+    RegisterWidgetEventHandler();
 
     // load wechat environment info
     SPLASH_MESSAGE("Load WeChat Environment Info");
@@ -215,6 +254,9 @@ bool MainWindow::InitWxBox(QSplashScreen* splash)
 
 bool MainWindow::DeinitWxBox()
 {
+    // stop wechat status monitor
+    controller.StopWeChatStatusMonitor();
+
     // stop wxbox server
     controller.StopWxBoxServer();
     return true;

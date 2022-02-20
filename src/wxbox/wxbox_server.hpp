@@ -378,6 +378,24 @@ namespace wxbox {
             return endpoint;
         }
 
+        std::set<wb_process::PID> GetClientList() const noexcept
+        {
+            std::set<wb_process::PID> result;
+
+            std::shared_lock<std::shared_mutex> lock(mutex);
+            for (auto client : clients) {
+                result.insert(client.first);
+            }
+
+            return result;
+        }
+
+        bool IsClientAlive(wb_process::PID pid) const noexcept
+        {
+            std::shared_lock<std::shared_mutex> lock(mutex);
+            return clients.find(pid) != clients.end();
+        }
+
         void     ResponseHandshake(wb_process::PID pid, bool success);
         bool     RegisterWxBotEndPoint(wb_process::PID pid, WxBotEndPoint* endpoint);
         void     CloseAllClients();

@@ -25,6 +25,7 @@ REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_REPO_ROOT_URL);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
+REGISTER_CONFIG_KEY(WXBOX_WECHAT_STATUS_MONITOR_INTERVAL);
 REGISTER_CONFIG_KEY(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 REGISTER_CONFIG_KEY(WXBOX_LOADING_ICON_TYPE);
 REGISTER_CONFIG_KEY(WXBOX_LOADING_ICON_ANIMATION_USE_CACHE);
@@ -83,6 +84,7 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_REPO_ROOT_URL);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
+        CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_STATUS_MONITOR_INTERVAL);
         CHECK_DEFAULT_CONFIG(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
         CHECK_DEFAULT_CONFIG(WXBOX_LOADING_ICON_TYPE);
         CHECK_DEFAULT_CONFIG(WXBOX_LOADING_ICON_ANIMATION_USE_CACHE);
@@ -249,75 +251,6 @@ class AppConfig final : public wb_config::Config
     }
 
     //
-    // wxbox
-    //
-
-    bool close_is_minimize_to_tray() const
-    {
-        return this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY).safe_as<bool>();
-    }
-
-    void change_close_is_minimize_to_tray(bool toTray)
-    {
-        this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY) = toTray;
-        submit();
-    }
-
-    int loading_icon_type() const
-    {
-        int type = this->operator[](WXBOX_LOADING_ICON_TYPE_KEY).safe_as<int>();
-        if (type < 0 || type > 2) {
-            type = 0;
-        }
-        return type;
-    }
-
-    void change_loading_icon_type(int type)
-    {
-        if (type < 0 || type > 2) {
-            type = 0;
-        }
-        this->operator[](WXBOX_LOADING_ICON_TYPE_KEY) = type;
-        submit();
-    }
-
-    bool loading_icon_animation_use_cache() const
-    {
-        return this->operator[](WXBOX_LOADING_ICON_ANIMATION_USE_CACHE_KEY).safe_as<bool>();
-    }
-
-    void change_loading_icon_animation_use_cache(bool useCache)
-    {
-        this->operator[](WXBOX_LOADING_ICON_ANIMATION_USE_CACHE_KEY) = useCache;
-        submit();
-    }
-
-    //
-    // wxbox server
-    //
-
-    std::string wxbox_server_uri() const
-    {
-        return this->operator[](WXBOX_SERVER_URI_KEY).safe_as<std::string>();
-    }
-
-    void change_wxbox_server_uri(const std::string& uri)
-    {
-        this->operator[](WXBOX_SERVER_URI_KEY) = uri;
-        submit();
-    }
-
-    int wxbox_client_reconnect_interval() const
-    {
-        return this->operator[](WXBOX_CLIENT_RECONNECT_INTERVAL_KEY).safe_as<int>();
-    }
-
-    void change_wxbox_client_reconnect_interval(int interval)
-    {
-        this->operator[](WXBOX_CLIENT_RECONNECT_INTERVAL_KEY) = interval;
-    }
-
-    //
     // feature
     //
 
@@ -401,6 +334,86 @@ class AppConfig final : public wb_config::Config
     {
         this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY) = path;
         submit();
+    }
+
+    int wechat_status_monitor_interval() const
+    {
+        return this->operator[](WXBOX_WECHAT_STATUS_MONITOR_INTERVAL_KEY).safe_as<int>();
+    }
+
+    void change_wechat_status_monitor_interval(int interval)
+    {
+        this->operator[](WXBOX_WECHAT_STATUS_MONITOR_INTERVAL_KEY) = interval;
+        submit();
+    }
+
+    //
+    // wxbox
+    //
+
+    bool close_is_minimize_to_tray() const
+    {
+        return this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY).safe_as<bool>();
+    }
+
+    void change_close_is_minimize_to_tray(bool toTray)
+    {
+        this->operator[](WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY_KEY) = toTray;
+        submit();
+    }
+
+    int loading_icon_type() const
+    {
+        int type = this->operator[](WXBOX_LOADING_ICON_TYPE_KEY).safe_as<int>();
+        if (type < 0 || type > 2) {
+            type = 0;
+        }
+        return type;
+    }
+
+    void change_loading_icon_type(int type)
+    {
+        if (type < 0 || type > 2) {
+            type = 0;
+        }
+        this->operator[](WXBOX_LOADING_ICON_TYPE_KEY) = type;
+        submit();
+    }
+
+    bool loading_icon_animation_use_cache() const
+    {
+        return this->operator[](WXBOX_LOADING_ICON_ANIMATION_USE_CACHE_KEY).safe_as<bool>();
+    }
+
+    void change_loading_icon_animation_use_cache(bool useCache)
+    {
+        this->operator[](WXBOX_LOADING_ICON_ANIMATION_USE_CACHE_KEY) = useCache;
+        submit();
+    }
+
+    //
+    // wxbox server
+    //
+
+    std::string wxbox_server_uri() const
+    {
+        return this->operator[](WXBOX_SERVER_URI_KEY).safe_as<std::string>();
+    }
+
+    void change_wxbox_server_uri(const std::string& uri)
+    {
+        this->operator[](WXBOX_SERVER_URI_KEY) = uri;
+        submit();
+    }
+
+    int wxbox_client_reconnect_interval() const
+    {
+        return this->operator[](WXBOX_CLIENT_RECONNECT_INTERVAL_KEY).safe_as<int>();
+    }
+
+    void change_wxbox_client_reconnect_interval(int interval)
+    {
+        this->operator[](WXBOX_CLIENT_RECONNECT_INTERVAL_KEY) = interval;
     }
 
     //
