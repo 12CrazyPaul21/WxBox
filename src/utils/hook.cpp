@@ -91,7 +91,7 @@ static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* p
     }
 
     // allocate memory for repeater
-    size_t   repeaterSize = 20;
+    size_t   repeaterSize = 24;
     uint8_t* repeater     = (uint8_t*)wb_memory::AllocUnrestrictedMem(repeaterSize);
     if (!repeater) {
         return false;
@@ -102,6 +102,14 @@ static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* p
     *((unsigned long*)&repeater[4]) = (unsigned long)actualEntry;
 
     //
+    // pushad : 0x60
+    // pushfd : 0x9C
+    //
+
+    repeater[8] = 0x60;
+    repeater[9] = 0x9C;
+
+    //
     // call dword ptr to stub  :
     //  memory indirect ModR/M : [disp32]
     //                     mod : 00
@@ -109,9 +117,17 @@ static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* p
     //                     r/m : 101
     //
 
-    repeater[8]                      = 0xFF;
-    repeater[9]                      = 0x15;
-    *((unsigned long*)&repeater[10]) = (unsigned long)(&repeater[0]);
+    repeater[10]                     = 0xFF;
+    repeater[11]                     = 0x15;
+    *((unsigned long*)&repeater[12]) = (unsigned long)(&repeater[0]);
+
+    //
+    // popfd : 0x9D
+    // popad : 0x61
+    //
+
+    repeater[16] = 0x9D;
+    repeater[17] = 0x61;
 
     //
     // jmp dword ptr to original entry :
@@ -121,9 +137,9 @@ static bool Do_InProcessRelocateIntercept_Windows_x86(void* pfnOriginal, void* p
     //                             r/m : 101
     //
 
-    repeater[14]                     = 0xFF;
-    repeater[15]                     = 0x25;
-    *((unsigned long*)&repeater[16]) = (unsigned long)(&repeater[4]);
+    repeater[18]                     = 0xFF;
+    repeater[19]                     = 0x25;
+    *((unsigned long*)&repeater[20]) = (unsigned long)(&repeater[4]);
 
     //
     // execute hook
@@ -168,7 +184,7 @@ static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEn
     //
 
     // allocate memory for repeater
-    size_t   repeaterSize = 20 + opcodeSerialLength;
+    size_t   repeaterSize = 24 + opcodeSerialLength;
     uint8_t* repeater     = (uint8_t*)wb_memory::AllocUnrestrictedMem(repeaterSize);
     if (!repeater) {
         return false;
@@ -179,6 +195,14 @@ static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEn
     *((unsigned long*)&repeater[4]) = ((unsigned long)pfnOriginal) + opcodeSerialLength;
 
     //
+    // pushad : 0x60
+    // pushfd : 0x9C
+    //
+
+    repeater[8] = 0x60;
+    repeater[9] = 0x9C;
+
+    //
     // call dword ptr to stub  :
     //  memory indirect ModR/M : [disp32]
     //                     mod : 00
@@ -186,16 +210,24 @@ static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEn
     //                     r/m : 101
     //
 
-    repeater[8]                      = 0xFF;
-    repeater[9]                      = 0x15;
-    *((unsigned long*)&repeater[10]) = (unsigned long)(&repeater[0]);
+    repeater[10]                     = 0xFF;
+    repeater[11]                     = 0x15;
+    *((unsigned long*)&repeater[12]) = (unsigned long)(&repeater[0]);
+
+    //
+    // popfd : 0x9D
+    // popad : 0x61
+    //
+
+    repeater[16] = 0x9D;
+    repeater[17] = 0x61;
 
     //
     // read original valid opcode serials
     //
 
     ucpulong_t szNumberOfBytesRead = 0;
-    if (!wb_memory::ReadMemory(wb_process::GetCurrentProcessHandle(), pfnOriginal, &repeater[14], opcodeSerialLength, &szNumberOfBytesRead)) {
+    if (!wb_memory::ReadMemory(wb_process::GetCurrentProcessHandle(), pfnOriginal, &repeater[18], opcodeSerialLength, &szNumberOfBytesRead)) {
         wb_memory::FreeUnrestrictedMem(repeater);
         return false;
     }
@@ -208,9 +240,9 @@ static bool Do_InProcessIntercept_Windows_x86(void* pfnOriginal, void* pfnStubEn
     //                             r/m : 101
     //
 
-    repeater[14 + opcodeSerialLength]                     = 0xFF;
-    repeater[15 + opcodeSerialLength]                     = 0x25;
-    *((unsigned long*)&repeater[16 + opcodeSerialLength]) = (unsigned long)(&repeater[4]);
+    repeater[18 + opcodeSerialLength]                     = 0xFF;
+    repeater[19 + opcodeSerialLength]                     = 0x25;
+    *((unsigned long*)&repeater[20 + opcodeSerialLength]) = (unsigned long)(&repeater[4]);
 
     //
     // execute hook
@@ -432,20 +464,30 @@ bool wxbox::util::hook::InProcessDummyHook(void* pfnOriginal, void* pfnDummy)
  *    BEGIN_NAKED_STD_FUNCTION(relocate_intercept_hook_stub)
  *    {
  *        __asm {
- *    		push edx
- *    		mov edx, esp
- *    		add edx, 4
- *    		add edx, 8
- *    		mov edx, [edx]
- *    		push edx
- *    		call after_relocate_intercept_hook
- *    		add esp, 4
- *    		pop edx
- *    		ret
+ *		      push eax
+ *		      // get original entry esp
+ *		      mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_ESP_OFFSET+4]
+ *		      push [eax+4]
+ *		      call after_relocate_intercept_hook
+ *		      add esp, 4
+ *		      pop eax
+ *		      ret
  *        }
  *    }
  *    END_NAKED_STD_FUNCTION(relocate_intercept_hook_stub)
  *
+ * Stub Entry Stack Frame Structure:
+ * 
+ *    Ret Address      : [ESP](Stack Top)
+ *    Original EFLAGS  : [ESP+0x04]
+ *    Original EDI     : [ESP+0x08]
+ *    Original ESI     : [ESP+0x0C]
+ *    Original EBP     : [ESP+0x10]
+ *    Original ESP     : [ESP+0x14]
+ *    Original EBX     : [ESP+0x18]
+ *    Original EDX     : [ESP+0x1C]
+ *    Original ECX     : [ESP+0x20]
+ *    Original EAX     : [ESP+0x24]
  */
 bool wxbox::util::hook::InProcessIntercept(void* pfnOriginal, void* pfnStubEntry)
 {

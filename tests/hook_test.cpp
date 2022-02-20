@@ -47,15 +47,13 @@ BEGIN_NAKED_STD_FUNCTION(relocate_intercept_hook_stub)
     spdlog::info("relocate_intercept_hook_stub");
 
     __asm {
-		push edx
-		mov edx, esp
-		add edx, 4
-		add edx, 8
-		mov edx, [edx]
-		push edx
+		push eax
+		;  // get original entry esp
+		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_ESP_OFFSET+4]
+		push [eax+4]
 		call after_relocate_intercept_hook
 		add esp, 4
-		pop edx
+		pop eax
 		ret
     }
 }
@@ -92,15 +90,12 @@ BEGIN_NAKED_STD_FUNCTION(intercept_hook_stub)
     spdlog::info("intercept_hook_stub");
 
     __asm {
-		push edx
-		mov edx, esp
-		add edx, 4
-		add edx, 8
-		mov edx, [edx]
-		push edx
+		push eax
+		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_ESP_OFFSET+4]
+		push [eax+4]
 		call after_intercept_hook
 		add esp, 4
-		pop edx
+		pop eax
 		ret
     }
 }
@@ -140,15 +135,12 @@ BEGIN_NAKED_STD_FUNCTION(pre_relocate_intercept_hook_stub)
     spdlog::info("pre_relocate_intercept_hook_stub");
 
     __asm {
-		push edx
-		mov edx, esp
-		add edx, 4
-		add edx, 8
-		mov edx, [edx]
-		push edx
+		push eax
+		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_ESP_OFFSET+4]
+		push [eax+4]
 		call after_pre_relocate_intercept_hook
 		add esp, 4
-		pop edx
+		pop eax
 		ret
     }
 }
@@ -187,15 +179,12 @@ BEGIN_NAKED_STD_FUNCTION(preintercept_hook_stub)
     spdlog::info("preintercept_hook_stub");
 
     __asm {
-		push edx
-		mov edx, esp
-		add edx, 4
-		add edx, 8
-		mov edx, [edx]
-		push edx
+		push eax
+		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_ESP_OFFSET+4]
+		push [eax+4]
 		call after_preintercept_hook
 		add esp, 4
-		pop edx
+		pop eax
 		ret
     }
 }

@@ -167,8 +167,11 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
     }
 
     FnWaitForDebugEvent pfnWaitForDebugEvent = reinterpret_cast<FnWaitForDebugEvent>(GetProcAddress(hKernel32, "WaitForDebugEventEx"));
-    if (!pfnWaitForDebugEvent && !(pfnWaitForDebugEvent = reinterpret_cast<FnWaitForDebugEvent>(GetProcAddress(hKernel32, "WaitForDebugEvent")))) {
-        return false;
+    if (!pfnWaitForDebugEvent) {
+        pfnWaitForDebugEvent = reinterpret_cast<FnWaitForDebugEvent>(GetProcAddress(hKernel32, "WaitForDebugEvent"));
+        if (!pfnWaitForDebugEvent) {
+            return false;
+        }
     }
 
     for (;;) {
