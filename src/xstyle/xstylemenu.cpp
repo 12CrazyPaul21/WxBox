@@ -69,6 +69,18 @@ QAction& XStyleMenu::action(const char* name)
     return *actions[name];
 }
 
+bool XStyleMenu::connectAction(const char* name, QObject* receiver, XStyleMenuHandler handler)
+{
+    if (!receiver || !handler) {
+        return false;
+    }
+
+    QAction& actionItem = this->action(name);
+    actionItem.disconnect(SIGNAL(triggered()));
+    QObject::connect(&actionItem, &QAction::triggered, receiver, handler);
+    return true;
+}
+
 QAction& XStyleMenu::pushSeparator()
 {
     return *addSeparator();

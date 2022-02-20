@@ -35,6 +35,9 @@ class XStyleMenu : public QMenu
     // action visitor
     QAction& action(const char* name);
 
+    // connect
+    bool connectAction(const char* name, QObject* receiver, XStyleMenuHandler handler);
+
     QAction& pushSeparator();
     QMenu&   pushMenu(const char* title);
     QAction& pushAction(const char* name, QObject* receiver = nullptr, XStyleMenuHandler handler = nullptr, const QString& iconUrl = "", const QKeySequence& shortcut = QKeySequence());
