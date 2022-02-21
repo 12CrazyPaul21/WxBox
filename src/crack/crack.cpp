@@ -366,6 +366,23 @@ bool wxbox::crack::UnInjectWxBot(wxbox::util::process::PID pid)
 
 bool wxbox::crack::UnInjectWxBotBySelf()
 {
+    wb_process::ModuleInfo moduleInfo;
+    if (!wb_process::GetModuleInfo(wb_process::GetCurrentProcessId(), wb_crack::WXBOT_MODULE_NAME, moduleInfo)) {
+        return false;
+    }
+
+    wb_memory::init_internal_allocator();
+    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+
+    while (wb_process::HitTestAllOtherThreadCallFrame(moduleInfo.pModuleBaseAddr, moduleInfo.uModuleSize)) {
+        wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+    }
+
+    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+    wb_memory::deinit_internal_allocator();
+
     return wb_inject::UnloadModuleBySelf(wb_crack::WXBOT_MODULE_NAME, wb_process::GetCurrentThreadId());
 }
 
