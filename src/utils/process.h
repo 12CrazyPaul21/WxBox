@@ -171,7 +171,7 @@ namespace wxbox {
 
             PID  StartProcess(const std::string& binFilePath, bool isAttach);
             bool SuspendAllOtherThread(PID pid, TID tid);
-            void ResumeAllThread(PID pid);
+            void ResumeAllThread(PID pid, TID tid = 0);
 
             void        SetThreadName(THREAD_HANDLE hThread, const std::string& threadName);
             std::string GetThreadName(THREAD_HANDLE hThread);

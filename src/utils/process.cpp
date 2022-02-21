@@ -353,9 +353,9 @@ static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID t
     return SuspendOrResumeAllThread_Windows(pid, tid, true);
 }
 
-static void ResumeAllThread_Windows(wb_process::PID pid)
+static void ResumeAllThread_Windows(wb_process::PID pid, wb_process::TID tid)
 {
-    SuspendOrResumeAllThread_Windows(pid, 0, false);
+    SuspendOrResumeAllThread_Windows(pid, tid, false);
 }
 
 std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> GetAllThreadId_Windows(wb_process::PID pid, wb_process::TID excludeThreadId)
@@ -479,7 +479,7 @@ static bool SuspendAllOtherThread_Mac(wb_process::PID pid, wb_process::TID tid)
     return false;
 }
 
-static void ResumeAllThread_Mac(wb_process::PID pid)
+static void ResumeAllThread_Mac(wb_process::PID pid, wb_process::TID tid)
 {
     throw std::exception("SuspendAllOtherThread_Mac stub");
 }
@@ -698,12 +698,16 @@ bool wxbox::util::process::SuspendAllOtherThread(PID pid, TID tid)
 #endif
 }
 
-void wxbox::util::process::ResumeAllThread(PID pid)
+void wxbox::util::process::ResumeAllThread(PID pid, TID tid)
 {
+    if (tid == 0) {
+        tid = wb_process::GetCurrentThreadId();
+    }
+
 #if WXBOX_IN_WINDOWS_OS
-    return ResumeAllThread_Windows(pid);
+    return ResumeAllThread_Windows(pid, tid);
 #elif WXBOX_IN_MAC_OS
-    return ResumeAllThread_Mac(pid);
+    return ResumeAllThread_Mac(pid, tid);
 #endif
 }
 
