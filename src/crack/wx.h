@@ -103,6 +103,7 @@ namespace wxbox {
             bool ResolveWxEnvInfo(const std::string& installPath, const std::string& moduleFolderPath, WeChatEnvironmentInfo& wxEnvInfo);
 
             std::vector<wxbox::util::process::ProcessInfo> GetWeChatProcessList();
+            std::vector<wxbox::util::process::PID>         GetWeChatProcessIdList();
             bool                                           CheckWeChatProcessValid(wxbox::util::process::PID pid);
         }
     }

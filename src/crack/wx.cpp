@@ -222,6 +222,40 @@ std::vector<wb_process::ProcessInfo> wxbox::crack::wx::GetWeChatProcessList()
     return processLists;
 }
 
+std::vector<wxbox::util::process::PID> wxbox::crack::wx::GetWeChatProcessIdList()
+{
+#if WXBOX_IN_WINDOWS_OS
+    std::vector<wb_process::PID> vt;
+    HANDLE                       hSnapshot = NULL;
+    PROCESSENTRY32               pe32      = {0};
+
+    hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return vt;
+    }
+
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    if (!::Process32First(hSnapshot, &pe32)) {
+        ::CloseHandle(hSnapshot);
+        return vt;
+    }
+
+    do {
+        if (::_stricmp(pe32.szExeFile, WX_WE_CHAT_EXE)) {
+            continue;
+        }
+
+        vt.push_back(pe32.th32ProcessID);
+    } while (::Process32Next(hSnapshot, &pe32));
+
+    ::CloseHandle(hSnapshot);
+
+    return vt;
+#else
+    throw std::exception("GetWeChatProcessIdList stub");
+#endif
+}
+
 bool wxbox::crack::wx::CheckWeChatProcessValid(wxbox::util::process::PID pid)
 {
     wb_process::ProcessInfo pi;
