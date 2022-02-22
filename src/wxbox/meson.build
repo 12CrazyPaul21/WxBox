@@ -5,6 +5,7 @@ moc_headers = files([join_paths(wxbox_root, 'mainwindow.h'),
                         join_paths(wxbox_root, 'about.h'),
                         join_paths(wxbox_root, 'wxbox_server.hpp'),
                         join_paths(wxbox_root, 'wxbox_controller.h'),
+                        join_paths(wxbox_root, 'wxbox_client_status_model.h'),
                         join_paths(wxbox_root, 'download_dialog.h'),
                         join_paths(wxbox_internal, 'downloader.hpp')
 ])
@@ -31,6 +32,7 @@ wxbox_src = files([
     join_paths(wxbox_root, 'mainwindow.cpp'),
     join_paths(wxbox_root, 'wxbox_controller_error.h'),
     join_paths(wxbox_root, 'wxbox_controller.cpp'),
+    join_paths(wxbox_root, 'wxbox_client_status_model.cpp'),
     join_paths(wxbox_root, 'about.cpp'),
     join_paths(wxbox_root, 'download_dialog.cpp'),
     join_paths(wxbox_root, 'wxbox_server.cpp'),

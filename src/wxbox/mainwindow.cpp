@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget* parent)
   , appMenu("AppMenu", this)
   , appTray(this)
   , clientItemContextMenu("ClientItemContextMenu", this)
-  , wechatStatusModel(this)
+  , wxStatusModel(this)
   , controller(this)
 {
     // setup xstyle ui
@@ -135,7 +135,7 @@ void MainWindow::InitAppTray()
 void MainWindow::InitWidget()
 {
     // wechat status table view
-    ui->viewWeChatStatus->setModel(&wechatStatusModel);
+    ui->viewWeChatStatus->setModel(&wxStatusModel.model());
     ui->viewWeChatStatus->verticalHeader()->hide();
     ui->viewWeChatStatus->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->viewWeChatStatus->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -143,22 +143,17 @@ void MainWindow::InitWidget()
     ui->viewWeChatStatus->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
 
     // wechat status table model
-    wechatStatusModel.setHorizontalHeaderLabels(QStringList({"status", "pid", "wxid"}));
+    wxStatusModel.setContainer(ui->viewWeChatStatus);
+    wxStatusModel.model().setHorizontalHeaderLabels(QStringList({"status", "pid", "wxid"}));
 }
 
 void MainWindow::RegisterWidgetEventHandler()
 {
     QObject::connect(ui->viewWeChatStatus, &QWidget::customContextMenuRequested, this, [this](QPoint pos) {
-        auto selectedClients = this->ui->viewWeChatStatus->selectionModel()->selectedRows();
-        if (selectedClients.empty()) {
+        wb_process::PID pid = wxStatusModel.selection();
+        if (!pid) {
             return;
         }
-
-        auto pidItem = wechatStatusModel.item(selectedClients.at(0).row(), 1);
-        if (!pidItem) {
-            return;
-        }
-        auto pid = pidItem->text().toUInt();
 
         clientItemContextMenu.connectAction("inject", this, [this, pid]() {
             controller.InjectWxBotModule(pid);
@@ -198,7 +193,9 @@ void MainWindow::RegisterWidgetEventHandler()
         xstyle_manager.ChangeTheme("GreenTheme");*/
         /*       xstyle_manager.ChangeTheme("");
         xstyle_manager.ChangeLanguage("zh_cn");*/
-        controller.ChangeWeChatStatusMonitorInterval(2000);
+        //controller.ChangeWeChatStatusMonitorInterval(2000);
+        controller.StopWeChatStatusMonitor();
+        wxStatusModel.clear();
     });
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
         //UpdateWeChatFeatures();

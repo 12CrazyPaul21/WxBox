@@ -16,7 +16,6 @@
 #include <QDesktopServices>
 #include <QSystemTrayIcon>
 #include <QSplashScreen>
-#include <QStandardItemModel>
 
 #undef signals
 #include <utils/common.h>
@@ -37,6 +36,7 @@
 
 #include <about.h>
 #include <download_dialog.h>
+#include <wxbox_client_status_model.h>
 
 #define SHOW_SPLASH_SCREEN()                                                   \
     QSplashScreen* splash = new QSplashScreen(QPixmap(":/splash_screen.png")); \
@@ -123,13 +123,13 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     void RegisterWidgetEventHandler();
 
   private:
-    Ui::MainWindowBody* ui;
-    AboutWxBoxDialog    aboutDialog;
-    DownloadDialog      downloadDialog;
-    XStyleMenu          appMenu;
-    QSystemTrayIcon     appTray;
-    XStyleMenu          clientItemContextMenu;
-    QStandardItemModel  wechatStatusModel;
+    Ui::MainWindowBody*    ui;
+    AboutWxBoxDialog       aboutDialog;
+    DownloadDialog         downloadDialog;
+    XStyleMenu             appMenu;
+    QSystemTrayIcon        appTray;
+    XStyleMenu             clientItemContextMenu;
+    WxBoxClientStatusModel wxStatusModel;
 
     AppConfig&      config;
     WxBoxController controller;

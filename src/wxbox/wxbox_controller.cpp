@@ -14,6 +14,8 @@ WxBoxController::WxBoxController(MainWindow* view)
   , view(view)
   , server(nullptr)
   , statusMonitorTimerId(-1)
+  , statusMonitorInterval(0)
+  , lastUpdateStatusTimestamp(0)
 {
     // set thread name
     wb_process::SetThreadName(wb_process::GetCurrentThreadHandle(), "WxBoxMain");
@@ -69,7 +71,9 @@ void WxBoxController::StopWxBoxServer()
 
 void WxBoxController::StartWeChatStatusMonitor()
 {
-    statusMonitorTimerId = view->startTimer(config.wechat_status_monitor_interval());
+    UpdateWeChatStatus();
+    statusMonitorInterval = std::max<int>(config.wechat_status_monitor_interval(), 100);
+    statusMonitorTimerId  = view->startTimer(statusMonitorInterval);
 }
 
 void WxBoxController::StopWeChatStatusMonitor()
@@ -306,45 +310,72 @@ bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
 // WeChat Status
 //
 
+void WxBoxController::UpdateClientStatus(wb_process::PID pid) const noexcept
+{
+    auto client = view->wxStatusModel.get(pid);
+    if (!client) {
+        return;
+    }
+
+    client->status = GetClientStatus(pid);
+    client->update();
+}
+
 void WxBoxController::UpdateWeChatStatus()
 {
-    auto          wechatProcessList = wb_wx::GetWeChatProcessList();
-    auto&         model             = view->wechatStatusModel;
-    std::set<int> invalidRows;
+    time_t timestamp = wb_process::GetCurrentTimestamp();
+    if (timestamp - lastUpdateStatusTimestamp < statusMonitorInterval) {
+        return;
+    }
+    lastUpdateStatusTimestamp = timestamp;
 
-    for (int row = 0; row < model.rowCount(); row++) {
-        auto pidItem = model.item(row, 1);
-        if (!pidItem) {
+    auto                      wxProcessList = wb_wx::GetWeChatProcessIdList();
+    auto&                     model         = view->wxStatusModel;
+    std::set<wb_process::PID> invalidClients;
+
+    for (const auto& [pid, itemPtr] : model.all()) {
+        if (!itemPtr) {
             continue;
         }
 
-        auto pid = pidItem->text().toUInt();
-        auto it  = std::find_if(wechatProcessList.begin(), wechatProcessList.end(), [pid](const wb_process::ProcessInfo& processInfo) {
-            return processInfo.pid == pid;
+        auto it = std::find_if(wxProcessList.begin(), wxProcessList.end(), [pid](const wb_process::PID wxPid) {
+            return wxPid == pid;
         });
 
-        // invalid row
-        if (it == wechatProcessList.end()) {
-            invalidRows.insert(row);
+        // invalid client
+        if (it == wxProcessList.end()) {
+            invalidClients.insert(pid);
             continue;
         }
 
-        // update
-        auto statusItem = model.item(row, 0);
-        if (statusItem) {
-            statusItem->setText(QString("%1").arg(wb_crack::IsWxBotInjected(pid)));
+        //
+        // check update
+        //
+
+        bool dirty = false;
+        wxProcessList.erase(it);
+
+        WxBoxClientItemStatus newStatus = GetClientStatus(pid);
+        if (itemPtr->status != newStatus) {
+            itemPtr->status = newStatus;
+            dirty           = true;
         }
-        wechatProcessList.erase(it);
+
+        // execute update
+        if (dirty) {
+            itemPtr->update();
+        }
     }
 
-    // delete invalid rows
-    for (auto row : invalidRows) {
-        model.removeRow(row);
-    }
+    // delete invalid client items
+    model.removes(invalidClients);
 
     // add new wechat process items
-    for (auto wp : wechatProcessList) {
-        model.appendRow(QList<QStandardItem*>({new QStandardItem(QString("%1").arg(wb_crack::IsWxBotInjected(wp.pid))), new QStandardItem(QString("%1").arg(wp.pid))}));
+    for (auto pid : wxProcessList) {
+        auto item    = WxBoxClientStatusItem::New();
+        item->pid    = pid;
+        item->status = GetClientStatus(pid);
+        model.add(item);
     }
 }
 
@@ -378,12 +409,19 @@ void WxBoxController::WxBoxServerEvent(wxbox::WxBoxMessage message)
 {
     switch (message.type) {
         case wxbox::WxBoxMessageType::WxBoxClientConnected:
+            UpdateClientStatus(message.pid);
+
+            // only for test
             last_client_pid = message.pid;
             total_clients++;
             current_clients++;
             view->SetWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
             break;
+
         case wxbox::WxBoxMessageType::WxBoxClientDone:
+            UpdateClientStatus(message.pid);
+
+            // only for test
             last_client_pid = 0;
             current_clients--;
             view->SetWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));

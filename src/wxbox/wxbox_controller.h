@@ -14,6 +14,7 @@
 #include <app_log.hpp>
 #include <app_config.hpp>
 #include <wxbox_server.hpp>
+#include <wxbox_client_status_model.h>
 
 using wxbox::WxBoxServerStatus;
 
@@ -54,6 +55,16 @@ class WxBoxController final : public QObject
     // WeChat Status
     //
 
+    inline WxBoxClientItemStatus GetClientStatus(wb_process::PID pid) const noexcept
+    {
+        WxBoxClientItemStatus status = WxBoxClientItemStatus::Independent;
+        if (wb_crack::IsWxBotInjected(pid)) {
+            status = server->IsClientAlive(pid) ? WxBoxClientItemStatus::Normal : WxBoxClientItemStatus::Injected;
+        }
+        return status;
+    }
+
+    void UpdateClientStatus(wb_process::PID pid) const noexcept;
     void UpdateWeChatStatus();
 
     //
@@ -89,6 +100,8 @@ class WxBoxController final : public QObject
     wxbox::WxBoxServer*          server;
     wxbox::WxBoxServerWorker     worker;
     int                          statusMonitorTimerId;
+    int                          statusMonitorInterval;
+    time_t                       lastUpdateStatusTimestamp;
 };
 
 #endif  // #ifndef __WXBOX_CONTROLLER_H
