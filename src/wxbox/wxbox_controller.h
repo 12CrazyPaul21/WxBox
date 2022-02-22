@@ -55,11 +55,16 @@ class WxBoxController final : public QObject
     // WeChat Status
     //
 
+    inline bool IsClientAlive(wb_process::PID pid) const noexcept
+    {
+        return server && server->IsClientAlive(pid);
+    }
+
     inline WxBoxClientItemStatus GetClientStatus(wb_process::PID pid) const noexcept
     {
         WxBoxClientItemStatus status = WxBoxClientItemStatus::Independent;
         if (wb_crack::IsWxBotInjected(pid)) {
-            status = server->IsClientAlive(pid) ? WxBoxClientItemStatus::Normal : WxBoxClientItemStatus::Injected;
+            status = IsClientAlive(pid) ? WxBoxClientItemStatus::Normal : WxBoxClientItemStatus::Injected;
         }
         return status;
     }

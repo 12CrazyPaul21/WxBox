@@ -64,6 +64,7 @@ void WxBoxController::StartWxBoxServer()
 void WxBoxController::StopWxBoxServer()
 {
     if (worker.isRunning()) {
+        server = nullptr;
         worker.stopServer();
         spdlog::info("WxBox Server is already stoped");
     }
@@ -300,7 +301,7 @@ bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
         return false;
     }
 
-    if (!server->IsClientAlive(pid)) {
+    if (!IsClientAlive(pid)) {
         xstyle::information(view, "", WBC_TRANSMESSAGE(WBCErrorCode::WECHAT_PROCESS_WXBOT_MODULE_NOT_CONNECTED));
         return false;
     }
