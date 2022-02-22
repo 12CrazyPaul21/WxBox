@@ -98,18 +98,6 @@ class XStyleMessageBox : public XStyleWindow
             retval = XStyleMessageBoxButton::Close;
         }
 
-        if (retval == XStyleMessageBoxButton::Close) {
-            if (btnFlags == XStyleMessageBoxButtonType::ConfirmCancel) {
-                retval = XStyleMessageBoxButton::Cancel;
-            }
-            else if (btnFlags == XStyleMessageBoxButtonType::YesNo) {
-                retval = XStyleMessageBoxButton::No;
-            }
-            else if (btnFlags == XStyleMessageBoxButtonType::RetrySkip) {
-                retval = XStyleMessageBoxButton::Skip;
-            }
-        }
-
         return (XStyleMessageBoxButton)retval;
     }
 

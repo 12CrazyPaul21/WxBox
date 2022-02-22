@@ -133,7 +133,13 @@ bool WxBoxController::StartWeChatInstance()
     }
 
     WBCErrorCode errorCode     = WBCErrorCode::WBC_NO_ERROR;
-    bool         isInjectWxBot = xstyle::information(view, "", _wctr("Do you want to inject wxbot at the same time?"), XStyleMessageBoxButtonType::YesNo) == XStyleMessageBoxButton::Yes;
+    auto         quesStatus    = xstyle::information(view, "", _wctr("Do you want to inject wxbot at the same time?"), XStyleMessageBoxButtonType::YesNo);
+    bool         isInjectWxBot = (quesStatus == XStyleMessageBoxButton::Yes);
+
+    if (quesStatus == XStyleMessageBoxButton::Close) {
+        view->CloseMission();
+        return false;
+    }
 
     wxbox::internal::TaskInThreadPool::StartTask([this, isInjectWxBot, &errorCode]() {
         // open and wechat with multi boxing
