@@ -171,6 +171,8 @@ void wxbot::WxBot::PreHookWeChat()
     //
 
     wb_crack::PreInterceptWeChatExit(wxApis);
+    wb_crack::PreInterceptWeChatLogout(wxApis);
+    wb_crack::PreInterceptWeChatLogin(wxApis);
 
     //
     // record hook points
@@ -183,6 +185,15 @@ void wxbot::WxBot::PreHookWeChat()
     }
     if (wxApis.LogoutAndExitWeChat) {
         hookPoints.push_back((void*)wxApis.LogoutAndExitWeChat);
+    }
+    if (wxApis.Logouted) {
+        hookPoints.push_back((void*)wxApis.Logouted);
+    }
+    if (wxApis.LogoutedByMobile) {
+        hookPoints.push_back((void*)wxApis.LogoutedByMobile);
+    }
+    if (wxApis.Logined) {
+        hookPoints.push_back((void*)wxApis.Logined);
     }
 }
 
@@ -198,11 +209,15 @@ void wxbot::WxBot::ReleasePreHookWeChatHookPoint()
 void wxbot::WxBot::RegisterInterceptHanlders()
 {
     wb_crack::RegisterWeChatExitHandler(std::bind(&wxbot::WxBot::WeChatExitHandler, this));
+    wb_crack::RegisterWeChatLogoutHandler(std::bind(&wxbot::WxBot::WeChatLogoutHandler, this));
+    wb_crack::RegisterWeChatLoginHandler(std::bind(&wxbot::WxBot::WeChatLoginHandler, this));
 }
 
 void wxbot::WxBot::UnRegisterInterceptHanlders()
 {
     wb_crack::UnRegisterWeChatExitHandler();
+    wb_crack::UnRegisterWeChatLogoutHandler();
+    wb_crack::UnRegisterWeChatLoginHandler();
 }
 
 // must avoid system calling and memory alloc&free calling
@@ -246,6 +261,29 @@ void wxbot::WxBot::ExecuteHookWeChat(bool hook)
 void wxbot::WxBot::WeChatExitHandler()
 {
     Stop();
+}
+
+void wxbot::WxBot::WeChatLogoutHandler()
+{
+    //
+    // report logout
+    //
+
+    wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+    msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::PROFILE_RESPONSE);
+
+    auto profileResponse = msg.u.wxBotControlPacket.mutable_profileresponse();
+    profileResponse->set_logined(false);
+    profileResponse->set_nickname("");
+    profileResponse->set_wxnumber("");
+    profileResponse->set_wxid("");
+
+    client->PushMessageAsync(std::move(msg));
+}
+
+void wxbot::WxBot::WeChatLoginHandler()
+{
+    ResponseProfile();
 }
 
 //

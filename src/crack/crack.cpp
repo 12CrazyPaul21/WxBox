@@ -6,7 +6,9 @@
 //
 
 // hook point handler
-static wb_crack::FnWeChatExitHandler g_wechat_exit_handler = nullptr;
+static wb_crack::FnWeChatExitHandler   g_wechat_exit_handler   = nullptr;
+static wb_crack::FnWeChatLogoutHandler g_wechat_logout_handler = nullptr;
+static wb_crack::FnWeChatLoginHandler  g_wechat_login_handler  = nullptr;
 
 //
 // wechat intercept stubs
@@ -27,6 +29,38 @@ BEGIN_NAKED_STD_FUNCTION(internal_wechat_exit_handler_stub)
     }
 }
 END_NAKED_STD_FUNCTION(internal_wechat_exit_handler_stub)
+
+static void internal_wechat_logout_handler()
+{
+    if (g_wechat_logout_handler) {
+        g_wechat_logout_handler();
+    }
+}
+
+BEGIN_NAKED_STD_FUNCTION(internal_wechat_logout_handler_stub)
+{
+    __asm {
+		call internal_wechat_logout_handler
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(internal_wechat_logout_handler_stub)
+
+static void internal_wechat_login_handler()
+{
+    if (g_wechat_login_handler) {
+        g_wechat_login_handler();
+    }
+}
+
+BEGIN_NAKED_STD_FUNCTION(internal_wechat_login_handler_stub)
+{
+    __asm {
+		call internal_wechat_login_handler
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(internal_wechat_login_handler_stub)
 
 //
 // wxbox::crack
@@ -297,6 +331,9 @@ bool wxbox::crack::GenerateWxApis(const wb_feature::WxAPIHookPointVACollection& 
     SET_WX_API(WXSendFileMessage);
     SET_WX_API(CloseLoginWnd);
     SET_WX_API(LogoutAndExitWeChat);
+    SET_WX_API(Logouted);
+    SET_WX_API(LogoutedByMobile);
+    SET_WX_API(Logined);
 
     return success;
 }
@@ -321,6 +358,9 @@ bool wxbox::crack::VerifyWxApis(const WxApis& apis)
     CHECK_WX_API(WXSendFileMessage);
     CHECK_WX_API(CloseLoginWnd);
     CHECK_WX_API(LogoutAndExitWeChat);
+    CHECK_WX_API(Logouted);
+    CHECK_WX_API(LogoutedByMobile);
+    CHECK_WX_API(Logined);
 
     return true;
 }
@@ -404,6 +444,45 @@ void wxbox::crack::RegisterWeChatExitHandler(FnWeChatExitHandler handler)
 void wxbox::crack::UnRegisterWeChatExitHandler()
 {
     g_wechat_exit_handler = nullptr;
+}
+
+bool wxbox::crack::PreInterceptWeChatLogout(const WxApis& wxApis)
+{
+    return wb_hook::PreInProcessIntercept((void*)wxApis.Logouted, internal_wechat_logout_handler_stub) &&
+           wb_hook::PreInProcessIntercept((void*)wxApis.LogoutedByMobile, internal_wechat_logout_handler_stub);
+}
+
+void wxbox::crack::RegisterWeChatLogoutHandler(FnWeChatLogoutHandler handler)
+{
+    if (!handler) {
+        return;
+    }
+
+    g_wechat_logout_handler = handler;
+}
+
+void wxbox::crack::UnRegisterWeChatLogoutHandler()
+{
+    g_wechat_logout_handler = nullptr;
+}
+
+bool wxbox::crack::PreInterceptWeChatLogin(const WxApis& wxApis)
+{
+    return wb_hook::PreInProcessIntercept((void*)wxApis.Logined, internal_wechat_login_handler_stub);
+}
+
+void wxbox::crack::RegisterWeChatLoginHandler(FnWeChatLoginHandler handler)
+{
+    if (!handler) {
+        return;
+    }
+
+    g_wechat_login_handler = handler;
+}
+
+void wxbox::crack::UnRegisterWeChatLoginHandler()
+{
+    g_wechat_login_handler = nullptr;
 }
 
 //

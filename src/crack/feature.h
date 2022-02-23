@@ -23,6 +23,9 @@ namespace wxbox {
                 "WXSendFileMessage",
                 "CloseLoginWnd",
                 "LogoutAndExitWeChat",
+                "Logouted",
+                "LogoutedByMobile",
+                "Logined",
             };
 
             //

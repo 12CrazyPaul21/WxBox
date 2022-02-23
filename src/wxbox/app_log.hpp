@@ -75,6 +75,9 @@
         spdlog::info("WXSendFileMessage va : 0x{:08X}", WECHAT_APIS.WXSendFileMessage);                                                             \
         spdlog::info("CloseLoginWnd va : 0x{:08X}", WECHAT_APIS.CloseLoginWnd);                                                                     \
         spdlog::info("LogoutAndExitWeChat va : 0x{:08X}", WECHAT_APIS.LogoutAndExitWeChat);                                                         \
+        spdlog::info("Logouted va : 0x{:08X}", WECHAT_APIS.Logouted);                                                                               \
+        spdlog::info("LogoutedByMobile va : 0x{:08X}", WECHAT_APIS.LogoutedByMobile);                                                               \
+        spdlog::info("Logined va : 0x{:08X}", WECHAT_APIS.Logined);                                                                                 \
     }
 
 #define WXBOX_LOG_WECHAT_DATASTRUCTURE_SUPPLEMENT(WECHAT_DATASTRUCTURE_SUPPLEMENT)                                                          \

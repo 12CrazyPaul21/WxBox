@@ -67,6 +67,8 @@ namespace wxbot {
         //
 
         void WeChatExitHandler();
+        void WeChatLogoutHandler();
+        void WeChatLoginHandler();
 
         //
         // WxBoxClient & PluginVirtualMachine EventHandler

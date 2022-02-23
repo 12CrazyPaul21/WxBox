@@ -39,6 +39,9 @@ namespace wxbox {
             ucpulong_t WXSendFileMessage;
             ucpulong_t CloseLoginWnd;
             ucpulong_t LogoutAndExitWeChat;
+            ucpulong_t Logouted;
+            ucpulong_t LogoutedByMobile;
+            ucpulong_t Logined;
         } WxApis, *PWxApis;
 
         typedef struct _WxBotEntryParameter
@@ -63,7 +66,9 @@ namespace wxbox {
             ucpulong_t                uModuleSize;
         } OpenWxWithMultiBoxingResult, *POpenWxWithMultiBoxingResult;
 
-        using FnWeChatExitHandler = std::function<void(void)>;
+        using FnWeChatExitHandler   = std::function<void(void)>;
+        using FnWeChatLogoutHandler = std::function<void(void)>;
+        using FnWeChatLoginHandler  = std::function<void(void)>;
 
         //
         // Function
@@ -85,6 +90,14 @@ namespace wxbox {
         bool PreInterceptWeChatExit(const WxApis& wxApis);
         void RegisterWeChatExitHandler(FnWeChatExitHandler handler);
         void UnRegisterWeChatExitHandler();
+
+        bool PreInterceptWeChatLogout(const WxApis& wxApis);
+        void RegisterWeChatLogoutHandler(FnWeChatLogoutHandler handler);
+        void UnRegisterWeChatLogoutHandler();
+
+        bool PreInterceptWeChatLogin(const WxApis& wxApis);
+        void RegisterWeChatLoginHandler(FnWeChatLoginHandler handler);
+        void UnRegisterWeChatLoginHandler();
 
         //
         // wechat api
