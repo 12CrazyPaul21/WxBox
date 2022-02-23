@@ -93,6 +93,8 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     virtual void OnCloseMission() Q_DECL_OVERRIDE;
 
   private:
+    virtual bool eventFilter(QObject* obj, QEvent* e) Q_DECL_OVERRIDE;
+
     virtual bool BeforeClose() Q_DECL_OVERRIDE
     {
         return DeinitWxBox();

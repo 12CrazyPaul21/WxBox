@@ -33,6 +33,18 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+bool MainWindow::eventFilter(QObject* obj, QEvent* e)
+{
+    if (e->type() == QEvent::MouseButtonPress && obj == ui->viewWeChatStatus->viewport()) {
+        if (ui->viewWeChatStatus->indexAt(static_cast<QMouseEvent*>(e)->pos()).row() == -1) {
+            ui->viewWeChatStatus->clearSelection();
+            return true;
+        }
+    }
+
+    return XSTYLE_WINDOW_CLASS::eventFilter(obj, e);
+}
+
 bool MainWindow::CheckSystemVersionSupported()
 {
     if (controller.CheckSystemVersionSupported()) {
@@ -157,6 +169,11 @@ void MainWindow::InitWidget()
 
 void MainWindow::RegisterWidgetEventHandler()
 {
+    //
+    // wechat status table view
+    //
+
+    ui->viewWeChatStatus->viewport()->installEventFilter(this);
     QObject::connect(ui->viewWeChatStatus, &QWidget::customContextMenuRequested, this, [this](QPoint pos) {
         wb_process::PID pid = wxStatusModel.selection();
         if (!pid) {
