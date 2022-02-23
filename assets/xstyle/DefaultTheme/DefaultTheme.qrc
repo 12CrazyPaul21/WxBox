@@ -10,6 +10,12 @@
     <file>./image/error.png</file>
     <file>./image/menu-right-arrow.png</file>
     <file>./image/menu-right-arrow-hover.png</file>
+    <file>./image/independent_status.png</file>
+    <file>./image/injected_status.png</file>
+    <file>./image/normal_status.png</file>
+    <file>./image/disabled_login_status.png</file>
+    <file>./image/logined_status.png</file>
+    <file>./image/not_logined_status.png</file>
   </qresource>
   <qresource prefix="/XStyleTheme/DefaultTheme">
     <file>./DefaultTheme.qss</file>

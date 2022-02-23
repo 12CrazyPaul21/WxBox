@@ -61,11 +61,23 @@ namespace Ui {
     class MainWindowBody;
 }
 
+//
+// MainWindow
+//
+
+#define RegisterMainWindowProperty(Type, PropertyName, MemberName, Suffix, DefaultValue) \
+    DefineXStyleProperty(Type, PropertyName, MemberName, Suffix, DefaultValue)           \
+        Q_PROPERTY(Type PropertyName READ Get##Suffix WRITE Set##Suffix DESIGNABLE true SCRIPTABLE true)
+
 class MainWindow final : public XSTYLE_WINDOW_CLASS
 {
     friend class WxBoxController;
 
     Q_OBJECT
+
+  public:
+    RegisterMainWindowProperty(QString, status_icons, statusIcons, StatusIcons, DEFAULT_WXBOX_CLIENT_MODEL_STATUS_ICON_URLS);
+    RegisterMainWindowProperty(QString, login_status_icons, loginStatusIcons, LoginStatusIcons, DEFAULT_WXBOX_CLIENT_MODEL_LOGIN_STATUS_ICON_URLS);
 
   public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -92,6 +104,13 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         auto language = xstyle_manager.CurrentLanguage().toStdString();
         config.change_language(language);
         wb_coredump::ChangeDumperLanguage(language);
+
+        //
+        // retranslate ui text
+        //
+
+        wxStatusModel.model().setHorizontalHeaderLabels(TranslateStringList(WxBoxClientStatusHeader));
+        wxStatusModel.resize(false);
     }
 
     virtual void AfterThemeChanged(const QString& themeName) Q_DECL_OVERRIDE
@@ -99,6 +118,12 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         auto theme = themeName.toStdString();
         config.change_theme(theme);
         wb_coredump::ChangeTheme(theme);
+
+        //
+        // apply widget's theme
+        //
+
+        wxStatusModel.applyTheme(statusIcons, loginStatusIcons);
     }
 
     virtual void TurnCloseIsMinimizeToTray(bool toTray) Q_DECL_OVERRIDE
@@ -115,6 +140,15 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         if (event->timerId() == controller.statusMonitorTimerId) {
             controller.UpdateWeChatStatus();
         }
+    }
+
+    QStringList TranslateStringList(const QStringList& strs)
+    {
+        QStringList result;
+        for (auto str : strs) {
+            result.append(Translate(str));
+        }
+        return result;
     }
 
     void InitAppMenu();

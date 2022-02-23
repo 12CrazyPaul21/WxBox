@@ -116,6 +116,7 @@ void MainWindow::InitAppMenu()
     // client item context menu
     clientItemContextMenu.pushAction("inject");
     clientItemContextMenu.pushAction("uninject");
+    clientItemContextMenu.pushAction("refresh profile");
 }
 
 void MainWindow::InitAppTray()
@@ -134,7 +135,10 @@ void MainWindow::InitAppTray()
 
 void MainWindow::InitWidget()
 {
+    //
     // wechat status table view
+    //
+
     ui->viewWeChatStatus->setModel(&wxStatusModel.model());
     ui->viewWeChatStatus->verticalHeader()->hide();
     ui->viewWeChatStatus->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -144,7 +148,11 @@ void MainWindow::InitWidget()
 
     // wechat status table model
     wxStatusModel.setContainer(ui->viewWeChatStatus);
-    wxStatusModel.model().setHorizontalHeaderLabels(QStringList({"status", "pid", "wxid"}));
+    wxStatusModel.model().setHorizontalHeaderLabels(TranslateStringList(WxBoxClientStatusHeader));
+    wxStatusModel.resize();
+
+    // apply wechat status table view theme
+    wxStatusModel.applyTheme(statusIcons, loginStatusIcons);
 }
 
 void MainWindow::RegisterWidgetEventHandler()
@@ -161,6 +169,9 @@ void MainWindow::RegisterWidgetEventHandler()
         clientItemContextMenu.connectAction("uninject", this, [this, pid]() {
             controller.UnInjectWxBotModule(pid);
         });
+        clientItemContextMenu.connectAction("refresh profile", this, [this, pid]() {
+            controller.RequestProfile(pid);
+        });
         clientItemContextMenu.popup(this->ui->viewWeChatStatus->viewport()->mapToGlobal(pos));
     });
 
@@ -174,18 +185,22 @@ void MainWindow::RegisterWidgetEventHandler()
     });
 
     QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
+        xstyle_manager.ChangeLanguage("en");
+        xstyle_manager.ChangeTheme("GreenTheme");
+        /*xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
         xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
         xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
+        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);*/
         /*    xstyle_manager.ChangeLanguage("zh_cn");
         xstyle_manager.ChangeTheme("");*/
     });
     QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
-        xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
+        xstyle_manager.ChangeLanguage("zh_cn");
+        xstyle_manager.ChangeTheme("");
+        /* xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
         xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
         char* e = nullptr;
-        *e      = 0;
+        *e      = 0;*/
     });
     QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
         /*    xstyle::information(this, "information", "change to chinese and GreenTheme");

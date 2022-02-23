@@ -254,19 +254,28 @@ void wxbot::WxBot::WeChatExitHandler()
 
 void wxbot::WxBot::WxBoxClientEventHandler(wxbot::WxBotMessage message)
 {
-    if (message.type == wxbot::WxBotMessageType::WxBoxClientStatusChange) {
-        //spdlog::info("WxBoxClient status change, oldStatus<{}>, newStatus<{}>", ParseStatus(message.u.wxBoxClientStatus.oldStatus), ParseStatus(message.u.wxBoxClientStatus.newStatus));
+    switch (message.type) {
+        case wxbot::WxBotMessageType::WxBoxClientStatusChange:
+            //spdlog::info("WxBoxClient status change, oldStatus<{}>, newStatus<{}>", ParseStatus(message.u.wxBoxClientStatus.oldStatus), ParseStatus(message.u.wxBoxClientStatus.newStatus));
+            break;
+
+        case wxbot::WxBotMessageType::WxBoxRequestOrResponse:
+            WxBoxRequestOrResponseHandler(message);
+            break;
     }
-    else if (message.type == wxbot::WxBotMessageType::WxBoxRequestOrResponse) {
-        switch (message.u.wxBoxControlPacket.type()) {
-            case wxbox::ControlPacketType::PROFILE_REQUEST: {
-                ResponseProfile();
-                break;
-            }
-            case wxbox::ControlPacketType::UNINJECT_WXBOT_REQUEST: {
-                Stop();
-                break;
-            }
+}
+
+void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
+{
+    switch (message.u.wxBoxControlPacket.type()) {
+        case wxbox::ControlPacketType::PROFILE_REQUEST: {
+            ResponseProfile();
+            break;
+        }
+
+        case wxbox::ControlPacketType::UNINJECT_WXBOT_REQUEST: {
+            Stop();
+            break;
         }
     }
 }
@@ -281,12 +290,24 @@ void wxbot::WxBot::PluginVirtualMachineEventHandler(wb_plugin::PluginVirtualMach
 
 void wxbot::WxBot::ResponseProfile()
 {
+    // get wechat user profile
+    wxbox::crack::wx::WeChatProfile profile;
+    wb_crack::FetchProfile(args->wechat_apis, args->wechat_datastructure_supplement, profile);
+
+    //
+    // response
+    //
+
     wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
     msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::PROFILE_RESPONSE);
-    msg.u.wxBotControlPacket.mutable_profileresponse()->set_wxid("<is a wxid for test>");
-    if (client) {
-        client->PushMessageAsync(std::move(msg));
-    }
+
+    auto profileResponse = msg.u.wxBotControlPacket.mutable_profileresponse();
+    profileResponse->set_logined(profile.logined);
+    profileResponse->set_nickname(profile.nickname);
+    profileResponse->set_wxnumber(profile.wxnumber);
+    profileResponse->set_wxid(profile.wxid);
+
+    client->PushMessageAsync(std::move(msg));
 }
 
 //

@@ -41,7 +41,10 @@ message HandshakeResponse {
 }
 
 message ProfileResponse {
-    string wxid = 1;
+    bool logined = 1;
+    string nickname = 2;
+    string wxnumber = 3;
+    string wxid = 4;
 }
 
 message WxBotControlPacket {

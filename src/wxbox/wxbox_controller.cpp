@@ -149,7 +149,7 @@ bool WxBoxController::StartWeChatInstance()
             errorCode = WBCErrorCode::OPEN_WECHAT_FAILED;
             return;
         }
-        spdlog::info("new wechat process pid : {}, version : {}", openResult.pid, wxEnvInfo.version);
+        spdlog::info("New WeChat process pid : {}, version : {}", openResult.pid, wxEnvInfo.version);
 
         if (!isInjectWxBot) {
             return;
@@ -186,12 +186,17 @@ bool WxBoxController::StartWeChatInstance()
         wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
         wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
+        std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
+        wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
 
         // log wx core module info
         spdlog::info("WeChat Core Module baseaddr : 0x{:08X}, size : 0x{:08X}", (ucpulong_t)openResult.pModuleBaseAddr, openResult.uModuleSize);
 
         // log wx hook point
         WXBOX_LOG_WECHAT_APIS(wxbotEntryParameter.wechat_apis);
+
+        // log wx datastructure supplement
+        WXBOX_LOG_WECHAT_DATASTRUCTURE_SUPPLEMENT(wxbotEntryParameter.wechat_datastructure_supplement);
 
         // verify hook point
         if (!wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis)) {
@@ -262,6 +267,8 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
         wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
+        std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
+        wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
 
         // log wx core module info
         spdlog::info("Inject to WeChat Process(PID : {})", pid);
@@ -271,6 +278,9 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
 
         // log wx hook point
         WXBOX_LOG_WECHAT_APIS(wxbotEntryParameter.wechat_apis);
+
+        // log wx datastructure supplement
+        WXBOX_LOG_WECHAT_DATASTRUCTURE_SUPPLEMENT(wxbotEntryParameter.wechat_datastructure_supplement);
 
         // verify hook point
         if (!wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis)) {
@@ -316,6 +326,20 @@ bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
 //
 // WeChat Status
 //
+
+void WxBoxController::UpdateClientProfile(wb_process::PID pid, const wb_wx::WeChatProfile& profile)
+{
+    auto client = view->wxStatusModel.get(pid);
+    if (!client) {
+        return;
+    }
+
+    client->logined  = profile.logined;
+    client->nickname = profile.nickname.c_str();
+    client->wxnumber = profile.wxnumber.c_str();
+    client->wxid     = profile.wxid.c_str();
+    client->update();
+}
 
 void WxBoxController::UpdateClientStatus(wb_process::PID pid) const noexcept
 {
@@ -416,6 +440,7 @@ void WxBoxController::WxBoxServerEvent(wxbox::WxBoxMessage message)
 {
     switch (message.type) {
         case wxbox::WxBoxMessageType::WxBoxClientConnected:
+            RequestProfile(message.pid);
             UpdateClientStatus(message.pid);
 
             // only for test
@@ -433,7 +458,18 @@ void WxBoxController::WxBoxServerEvent(wxbox::WxBoxMessage message)
             current_clients--;
             view->SetWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
             break;
+
         case wxbox::WxBoxMessageType::WxBotRequestOrResponse: {
+            WxBotRequestOrResponseHandler(message);
+            break;
+        }
+    }
+}
+
+void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message)
+{
+    switch (message.u.wxBotControlPacket.type()) {
+        case wxbox::ControlPacketType::PROFILE_RESPONSE: {
             ProfileResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_profileresponse());
             break;
         }
@@ -446,10 +482,6 @@ void WxBoxController::WxBoxServerEvent(wxbox::WxBoxMessage message)
 
 void WxBoxController::RequestProfile(wb_process::PID clientPID)
 {
-    if (!clientPID) {
-        return;
-    }
-
     wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
     msg.pid = clientPID;
     msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::PROFILE_REQUEST);
@@ -462,7 +494,6 @@ void WxBoxController::RequestProfile(wb_process::PID clientPID)
 
 void WxBoxController::ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response)
 {
-    std::string wxid = response->wxid();
-    last_client_pid  = clientPID;
-    QMessageBox::information(view, "tips", QString("profile<%1> : %2").arg(last_client_pid).arg(QString::fromStdString(wxid.c_str())));
+    wb_wx::WeChatProfile profile(response->logined(), response->nickname(), response->wxnumber(), response->wxid());
+    UpdateClientProfile(clientPID, profile);
 }

@@ -69,6 +69,7 @@ class WxBoxController final : public QObject
         return status;
     }
 
+    void UpdateClientProfile(wb_process::PID pid, const wb_wx::WeChatProfile& profile);
     void UpdateClientStatus(wb_process::PID pid) const noexcept;
     void UpdateWeChatStatus();
 
@@ -95,6 +96,7 @@ class WxBoxController final : public QObject
 
     void WxBoxServerStatusChange(const WxBoxServerStatus oldStatus, const WxBoxServerStatus newStatus);
     void WxBoxServerEvent(wxbox::WxBoxMessage message);
+    void WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message);
 
   private:
     MainWindow* view;

@@ -144,3 +144,9 @@ feature:
       LocateActionFeatureStream: [0x68]
       LocateActionRange: 0x100
       HookPointOffset: 0
+datastructure:
+  '3.4.5.27':
+    ProfileDataStructureItemOffset:
+      NickName: 0xBC
+      WeChatNumber: 0x500
+      Wxid: 0x518

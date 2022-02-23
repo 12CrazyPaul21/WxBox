@@ -77,4 +77,11 @@
         spdlog::info("LogoutAndExitWeChat va : 0x{:08X}", WECHAT_APIS.LogoutAndExitWeChat);                                                         \
     }
 
+#define WXBOX_LOG_WECHAT_DATASTRUCTURE_SUPPLEMENT(WECHAT_DATASTRUCTURE_SUPPLEMENT)                                                          \
+    {                                                                                                                                       \
+        spdlog::info("WeChat Profile NickName item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.NickName);         \
+        spdlog::info("WeChat Profile WeChatNumber item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.WeChatNumber); \
+        spdlog::info("WeChat Profile Wxid item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.Wxid);                 \
+    }
+
 #endif  // #ifndef __WXBOX_APP_LOG_H

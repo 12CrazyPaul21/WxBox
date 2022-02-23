@@ -73,6 +73,7 @@ namespace wxbot {
         //
 
         void WxBoxClientEventHandler(WxBotMessage message);
+        void WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message);
         void PluginVirtualMachineEventHandler(wb_plugin::PluginVirtualMachineEventPtr event);
 
         //
