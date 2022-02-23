@@ -47,6 +47,26 @@
         <source>Skip</source>
         <translation>跳过</translation>
     </message>
+    <message>
+        <source>Not Injected</source>
+        <translation>未注入WxBot模块</translation>
+    </message>
+    <message>
+        <source>Injected</source>
+        <translation>已注入但未连接WxBot模块</translation>
+    </message>
+    <message>
+        <source>Connected WxBot</source>
+        <translation>已连接WxBot模块</translation>
+    </message>
+    <message>
+        <source>Logged-In</source>
+        <translation>已登录</translation>
+    </message>
+    <message>
+        <source>Not Logged-In</source>
+        <translation>未登录</translation>
+    </message>
 </context>
 <context>
     <name>SplashScreen</name>
@@ -118,10 +138,6 @@
 <context>
     <name>MainWindow_xstylewindow</name>
     <message>
-        <source>English</source>
-        <translation>简体中文</translation>
-    </message>
-    <message>
         <source>关于 WxBox</source>
         <translation>关于 WxBox</translation>
     </message>
@@ -152,6 +168,30 @@
     <message>
         <source>Feature Repository is already up to date</source>
         <translation>特征库已是最新版本</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>状态</translation>
+    </message>
+    <message>
+        <source>PID</source>
+        <translation>PID</translation>
+    </message>
+    <message>
+        <source>Login</source>
+        <translation>登录状态</translation>
+    </message>
+    <message>
+        <source>NickName</source>
+        <translation>昵称</translation>
+    </message>
+    <message>
+        <source>WeChatNumber</source>
+        <translation>微信号</translation>
+    </message>
+    <message>
+        <source>WXID</source>
+        <translation>WXID</translation>
     </message>
 </context>
 <context>

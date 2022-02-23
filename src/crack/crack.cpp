@@ -405,3 +405,48 @@ void wxbox::crack::UnRegisterWeChatExitHandler()
 {
     g_wechat_exit_handler = nullptr;
 }
+
+//
+// wechat api
+//
+
+uint8_t* wxbox::crack::FetchWeChatGlobalProfileContext(const WxApis& wxApis)
+{
+    return wxApis.FetchGlobalProfileContext ? (((uint8_t * (*)()) wxApis.FetchGlobalProfileContext)()) : nullptr;
+}
+
+bool wxbox::crack::IsLoign(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement)
+{
+    uint8_t* globalProfileContext = FetchWeChatGlobalProfileContext(wxApis);
+    if (!globalProfileContext || !wxDataSturctsupplement.profileItemOffset.WeChatNumber) {
+        return false;
+    }
+
+    return *(globalProfileContext + wxDataSturctsupplement.profileItemOffset.WeChatNumber) != '\0';
+}
+
+bool wxbox::crack::FetchProfile(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement, wxbox::crack::wx::WeChatProfile& profile)
+{
+    profile.logined  = false;
+    profile.nickname = "";
+    profile.wxnumber = "";
+    profile.wxid     = "";
+
+    uint8_t* globalProfileContext = FetchWeChatGlobalProfileContext(wxApis);
+    if (!globalProfileContext || !wxDataSturctsupplement.profileItemOffset.WeChatNumber || !wxDataSturctsupplement.profileItemOffset.Wxid) {
+        return false;
+    }
+
+    profile.logined = *(globalProfileContext + wxDataSturctsupplement.profileItemOffset.WeChatNumber) != '\0';
+    if (profile.logined) {
+        profile.nickname = (char*)(globalProfileContext + wxDataSturctsupplement.profileItemOffset.NickName);
+        profile.wxnumber = (char*)(globalProfileContext + wxDataSturctsupplement.profileItemOffset.WeChatNumber);
+
+        auto wxidRef = (char**)(globalProfileContext + wxDataSturctsupplement.profileItemOffset.Wxid);
+        if (wxidRef) {
+            profile.wxid = (char*)(*wxidRef);
+        }
+    }
+
+    return true;
+}

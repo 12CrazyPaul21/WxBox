@@ -83,6 +83,43 @@ namespace wxbox {
                 }
             } WeChatProcessEnvironmentInfo, *PWeChatProcessEnvironmentInfo;
 
+            typedef struct _WeChatProfile
+            {
+                bool        logined;
+                std::string nickname;
+                std::string wxnumber;
+                std::string wxid;
+
+                _WeChatProfile()
+                  : logined(false)
+                {
+                }
+
+                _WeChatProfile(bool logined, const std::string& nickname, const std::string& wxnumber, const std::string& wxid)
+                  : logined(logined)
+                  , nickname(nickname)
+                  , wxnumber(wxnumber)
+                  , wxid(wxid)
+                {
+                }
+
+                SETUP_COPY_METHOD(_WeChatProfile, other)
+                {
+                    logined  = other.logined;
+                    nickname = other.nickname;
+                    wxnumber = other.wxnumber;
+                    wxid     = other.wxid;
+                }
+
+                SETUP_MOVE_METHOD(_WeChatProfile, other)
+                {
+                    logined  = other.logined;
+                    nickname = std::move(other.nickname);
+                    wxnumber = std::move(other.wxnumber);
+                    wxid     = std::move(other.wxid);
+                }
+            } WeChatProfile, *PWeChatProfile;
+
             //
             // Function
             //

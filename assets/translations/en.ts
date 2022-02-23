@@ -47,6 +47,26 @@
         <source>Skip</source>
         <translation>Skip</translation>
     </message>
+    <message>
+        <source>Not Injected</source>
+        <translation>Not Injected</translation>
+    </message>
+    <message>
+        <source>Injected</source>
+        <translation>Injected</translation>
+    </message>
+    <message>
+        <source>Connected WxBot</source>
+        <translation>Connected WxBot</translation>
+    </message>
+    <message>
+        <source>Logged-In</source>
+        <translation>Logged-In</translation>
+    </message>
+    <message>
+        <source>Not Logged-In</source>
+        <translation>Not Logged-In</translation>
+    </message>
 </context>
 <context>
     <name>SplashScreen</name>
@@ -118,10 +138,6 @@
 <context>
     <name>MainWindow_xstylewindow</name>
     <message>
-        <source>English</source>
-        <translation>English</translation>
-    </message>
-    <message>
         <source>关于 WxBox</source>
         <translation>About WxBox</translation>
     </message>
@@ -152,6 +168,30 @@
     <message>
         <source>Feature Repository is already up to date</source>
         <translation>Feature Repository is already up to date</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>PID</source>
+        <translation>PID</translation>
+    </message>
+    <message>
+        <source>Login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <source>NickName</source>
+        <translation>NickName</translation>
+    </message>
+    <message>
+        <source>WeChatNumber</source>
+        <translation>WeChatNumber</translation>
+    </message>
+    <message>
+        <source>WXID</source>
+        <translation>WXID</translation>
     </message>
 </context>
 <context>

@@ -360,13 +360,30 @@ namespace wxbox {
 
             } WxAPIHookPointVACollection, *PWxAPIHookPointVACollection;
 
+            PRAGMA(pack(push, 1))
+
+            typedef struct _WxProfileItemOffset
+            {
+                ucpulong_t NickName;
+                ucpulong_t WeChatNumber;
+                ucpulong_t Wxid;
+            } WxProfileItemOffset, *PWxProfileItemOffset;
+
+            typedef struct _WxDataStructSupplement
+            {
+                WxProfileItemOffset profileItemOffset;
+            } WxDataStructSupplement, *PWxDataStructSupplement;
+
+            PRAGMA(pack(pop))
+
             typedef struct _WxApiFeatures
             {
-                std::string                                          platform;
-                std::string                                          featureFolderAbsPath;
-                std::vector<wxbox::util::file::VersionNumber>        featureVersionList;
-                std::unordered_map<std::string, WxAbsoluteHookInfo>  mapWxAbsoluteHookInfo;
-                std::unordered_map<std::string, WxHookPointFeatures> mapWxHookPointFeatures;
+                std::string                                             platform;
+                std::string                                             featureFolderAbsPath;
+                std::vector<wxbox::util::file::VersionNumber>           featureVersionList;
+                std::unordered_map<std::string, WxAbsoluteHookInfo>     mapWxAbsoluteHookInfo;
+                std::unordered_map<std::string, WxHookPointFeatures>    mapWxHookPointFeatures;
+                std::unordered_map<std::string, WxDataStructSupplement> mapWxDataStructSupplement;
 
                 //
                 // constructor
@@ -376,20 +393,22 @@ namespace wxbox {
 
                 SETUP_COPY_METHOD(_WxApiFeatures, other)
                 {
-                    platform               = other.platform;
-                    featureFolderAbsPath   = other.featureFolderAbsPath;
-                    featureVersionList     = other.featureVersionList;
-                    mapWxAbsoluteHookInfo  = other.mapWxAbsoluteHookInfo;
-                    mapWxHookPointFeatures = other.mapWxHookPointFeatures;
+                    platform                  = other.platform;
+                    featureFolderAbsPath      = other.featureFolderAbsPath;
+                    featureVersionList        = other.featureVersionList;
+                    mapWxAbsoluteHookInfo     = other.mapWxAbsoluteHookInfo;
+                    mapWxHookPointFeatures    = other.mapWxHookPointFeatures;
+                    mapWxDataStructSupplement = other.mapWxDataStructSupplement;
                 }
 
                 SETUP_MOVE_METHOD(_WxApiFeatures, other)
                 {
-                    platform               = std::move(other.platform);
-                    featureFolderAbsPath   = std::move(other.featureFolderAbsPath);
-                    featureVersionList     = std::move(other.featureVersionList);
-                    mapWxAbsoluteHookInfo  = std::move(other.mapWxAbsoluteHookInfo);
-                    mapWxHookPointFeatures = std::move(other.mapWxHookPointFeatures);
+                    platform                  = std::move(other.platform);
+                    featureFolderAbsPath      = std::move(other.featureFolderAbsPath);
+                    featureVersionList        = std::move(other.featureVersionList);
+                    mapWxAbsoluteHookInfo     = std::move(other.mapWxAbsoluteHookInfo);
+                    mapWxHookPointFeatures    = std::move(other.mapWxHookPointFeatures);
+                    mapWxDataStructSupplement = std::move(other.mapWxDataStructSupplement);
                 }
 
                 //
@@ -403,6 +422,7 @@ namespace wxbox {
                     featureVersionList.clear();
                     mapWxAbsoluteHookInfo.clear();
                     mapWxHookPointFeatures.clear();
+                    mapWxDataStructSupplement.clear();
                 }
 
                 bool        IsThisWxVersionExplicitLocated(const std::string& version);
@@ -452,11 +472,20 @@ namespace wxbox {
                 bool ObtainAbsoluteFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream);
                 bool ObtainFuzzyFillStream(const std::string& version, const std::string& api, std::vector<uint8_t>& stream);
 
+                //
+                // obtain datastructure supplement
+                //
+
+                bool ObtainDataStructureSupplement(const std::string& version, WxDataStructSupplement& wxDataStructSupplement);
+                bool ObtainAbsoluteDataStructureSupplement(const std::string& version, WxDataStructSupplement& wxDataStructSupplement);
+                bool ObtainFuzzyDataStructureSupplement(const std::string& version, WxDataStructSupplement& wxDataStructSupplement);
+
               private:
-                bool                 Inner_LoadFeature(const std::string& version);
-                WxAbsoluteHookInfo*  Inner_GetAbsoluteHookInfo(const std::string& version);
-                WxHookPointFeatures* Inner_GetHookPointFeatures(const std::string& version);
-                WxHookPointFeatures* Inner_GetSimilarHookPointFeatures(const std::string& version);
+                bool                    Inner_LoadFeature(const std::string& version);
+                WxAbsoluteHookInfo*     Inner_GetAbsoluteHookInfo(const std::string& version);
+                WxHookPointFeatures*    Inner_GetHookPointFeatures(const std::string& version);
+                WxHookPointFeatures*    Inner_GetSimilarHookPointFeatures(const std::string& version);
+                WxDataStructSupplement* Inner_GetDataStructureSupplement(const std::string& version);
 
             } WxApiFeatures, *PWxApiFeatures;
 

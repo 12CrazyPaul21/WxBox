@@ -43,14 +43,15 @@ namespace wxbox {
 
         typedef struct _WxBotEntryParameter
         {
-            ucpulong_t wxbox_pid;
-            char       wxbox_root[WXBOX_MAX_PATH];
-            char       wxbot_root[WXBOX_MAX_PATH];
-            char       plugins_root[WXBOX_MAX_PATH];
-            char       wxbox_server_uri[WXBOX_MAX_PATH];
-            int        wxbot_reconnect_interval;
-            int        plugin_long_task_timeout;
-            WxApis     wechat_apis;
+            ucpulong_t                                    wxbox_pid;
+            char                                          wxbox_root[WXBOX_MAX_PATH];
+            char                                          wxbot_root[WXBOX_MAX_PATH];
+            char                                          plugins_root[WXBOX_MAX_PATH];
+            char                                          wxbox_server_uri[WXBOX_MAX_PATH];
+            int                                           wxbot_reconnect_interval;
+            int                                           plugin_long_task_timeout;
+            WxApis                                        wechat_apis;
+            wxbox::crack::feature::WxDataStructSupplement wechat_datastructure_supplement;
         } WxBotEntryParameter, *PWxBotEntryParameter;
 
         PRAGMA(pack(pop))
@@ -84,6 +85,15 @@ namespace wxbox {
         bool PreInterceptWeChatExit(const WxApis& wxApis);
         void RegisterWeChatExitHandler(FnWeChatExitHandler handler);
         void UnRegisterWeChatExitHandler();
+
+        //
+        // wechat api
+        //
+
+        uint8_t* FetchWeChatGlobalProfileContext(const WxApis& wxApis);
+
+        bool IsLoign(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
+        bool FetchProfile(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement, wxbox::crack::wx::WeChatProfile& profile);
     }
 }
 

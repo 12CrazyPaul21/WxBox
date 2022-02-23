@@ -234,6 +234,37 @@ static inline bool UnwindFeatureInfo(const std::string& wxVersion, const YAML::N
     return true;
 }
 
+static inline bool UnwindWxDataStructSupplement(const YAML::Node& dataSupplement, wb_feature::WxDataStructSupplement& wxDataStructSupplement)
+{
+    std::memset(&wxDataStructSupplement, 0, sizeof(wb_feature::WxDataStructSupplement));
+
+    //
+    // ProfileDataStructureItemOffset
+    //
+
+    if (!dataSupplement["ProfileDataStructureItemOffset"].IsMap()) {
+        return false;
+    }
+
+    auto profileDataItemOffsetNode = dataSupplement["ProfileDataStructureItemOffset"];
+
+    if (!profileDataItemOffsetNode["NickName"].IsScalar()) {
+        return false;
+    }
+    if (!profileDataItemOffsetNode["WeChatNumber"].IsScalar()) {
+        return false;
+    }
+    if (!profileDataItemOffsetNode["Wxid"].IsScalar()) {
+        return false;
+    }
+
+    wxDataStructSupplement.profileItemOffset.NickName     = profileDataItemOffsetNode["NickName"].as<ucpulong_t>();
+    wxDataStructSupplement.profileItemOffset.WeChatNumber = profileDataItemOffsetNode["WeChatNumber"].as<ucpulong_t>();
+    wxDataStructSupplement.profileItemOffset.Wxid         = profileDataItemOffsetNode["Wxid"].as<ucpulong_t>();
+
+    return true;
+}
+
 static inline ucpulong_t LocateWxAPIHookPointVA_Step_Scan_Type_Ref(const wb_feature::LocateTarget& locateTarget, const wb_feature::HookPointFeatureInfo& hookPointFeatureInfo)
 {
     // find the location of the refFeatureStream
@@ -475,6 +506,7 @@ bool wb_feature::_WxApiFeatures::Inner_LoadFeature(const std::string& version)
 
     YAML::Node versionAbsoluteHookInfo = feature["absolute"];
     YAML::Node featureInfo             = feature["feature"];
+    YAML::Node datastructureSupplement = feature["datastructure"];
 
     // parse all absolute version info
     for (auto aVersion : versionAbsoluteHookInfo) {
@@ -514,6 +546,25 @@ bool wb_feature::_WxApiFeatures::Inner_LoadFeature(const std::string& version)
         mapWxHookPointFeatures[wxVersion] = std::move(wxHookPointFeatures);
     }
 
+    // parse all datastructure
+    for (auto aVersionDatastructure : datastructureSupplement) {
+        std::string wxVersion      = aVersionDatastructure.first.as<std::string>();
+        YAML::Node  dataSupplement = aVersionDatastructure.second;
+
+        if (!dataSupplement.IsMap()) {
+            continue;
+        }
+
+        // parse this version's datastructure supplement
+        wb_feature::WxDataStructSupplement wxDataStructSupplement;
+        if (!UnwindWxDataStructSupplement(dataSupplement, wxDataStructSupplement)) {
+            continue;
+        }
+
+        // record this version's hook datastructure supplement
+        mapWxDataStructSupplement.emplace(wxVersion, std::move(wxDataStructSupplement));
+    }
+
     return true;
 }
 
@@ -551,6 +602,19 @@ wb_feature::WxHookPointFeatures* wb_feature::_WxApiFeatures::Inner_GetSimilarHoo
     }
 
     return Inner_GetHookPointFeatures(similarVersion);
+}
+
+wb_feature::WxDataStructSupplement* wb_feature::_WxApiFeatures::Inner_GetDataStructureSupplement(const std::string& version)
+{
+    if (mapWxDataStructSupplement.find(version) != mapWxDataStructSupplement.end()) {
+        return &mapWxDataStructSupplement.at(version);
+    }
+
+    if (!Inner_LoadFeature(version) || mapWxDataStructSupplement.find(version) == mapWxDataStructSupplement.end()) {
+        return nullptr;
+    }
+
+    return &mapWxDataStructSupplement.at(version);
 }
 
 //
@@ -819,6 +883,42 @@ bool wb_feature::_WxApiFeatures::ObtainFuzzyFillStream(const std::string& versio
     }
 
     return ptr->GetApiHookFeatureFillStream(api, stream);
+}
+
+//
+// obtain datastructure supplement
+//
+
+bool wb_feature::_WxApiFeatures::ObtainDataStructureSupplement(const std::string& version, WxDataStructSupplement& wxDataStructSupplement)
+{
+    return IsThisWxVersionExplicitLocated(version) ? ObtainAbsoluteDataStructureSupplement(version, wxDataStructSupplement) : ObtainFuzzyDataStructureSupplement(version, wxDataStructSupplement);
+}
+
+bool wb_feature::_WxApiFeatures::ObtainAbsoluteDataStructureSupplement(const std::string& version, WxDataStructSupplement& wxDataStructSupplement)
+{
+    auto ptr = Inner_GetDataStructureSupplement(version);
+    if (!ptr) {
+        return false;
+    }
+
+    wxDataStructSupplement = *ptr;
+    return true;
+}
+
+bool wb_feature::_WxApiFeatures::ObtainFuzzyDataStructureSupplement(const std::string& version, WxDataStructSupplement& wxDataStructSupplement)
+{
+    auto similarVersion = FindSimilarVersion(version);
+    if (similarVersion.empty()) {
+        return false;
+    }
+
+    auto ptr = Inner_GetDataStructureSupplement(similarVersion);
+    if (!ptr) {
+        return false;
+    }
+
+    wxDataStructSupplement = *ptr;
+    return true;
 }
 
 //
