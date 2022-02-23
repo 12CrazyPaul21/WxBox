@@ -78,6 +78,7 @@
         spdlog::info("Logouted va : 0x{:08X}", WECHAT_APIS.Logouted);                                                                               \
         spdlog::info("LogoutedByMobile va : 0x{:08X}", WECHAT_APIS.LogoutedByMobile);                                                               \
         spdlog::info("Logined va : 0x{:08X}", WECHAT_APIS.Logined);                                                                                 \
+        spdlog::info("WeChatEventProc va : 0x{:08X}", WECHAT_APIS.WeChatEventProc);                                                                 \
     }
 
 #define WXBOX_LOG_WECHAT_DATASTRUCTURE_SUPPLEMENT(WECHAT_DATASTRUCTURE_SUPPLEMENT)                                                          \

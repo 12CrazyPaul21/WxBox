@@ -42,6 +42,7 @@ namespace wxbox {
             ucpulong_t Logouted;
             ucpulong_t LogoutedByMobile;
             ucpulong_t Logined;
+            ucpulong_t WeChatEventProc;
         } WxApis, *PWxApis;
 
         typedef struct _WxBotEntryParameter
@@ -107,6 +108,8 @@ namespace wxbox {
 
         bool IsLoign(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
         bool FetchProfile(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement, wxbox::crack::wx::WeChatProfile& profile);
+
+        bool Logout(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
     }
 }
 

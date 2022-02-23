@@ -315,6 +315,13 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
             Stop();
             break;
         }
+
+        case wxbox::ControlPacketType::LOGOUT_WECHAT_REQUEST: {
+            if (wb_crack::IsLoign(args->wechat_apis, args->wechat_datastructure_supplement)) {
+                wb_crack::Logout(args->wechat_apis, args->wechat_datastructure_supplement);
+            }
+            break;
+        }
     }
 }
 

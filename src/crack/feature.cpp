@@ -262,6 +262,16 @@ static inline bool UnwindWxDataStructSupplement(const YAML::Node& dataSupplement
     wxDataStructSupplement.profileItemOffset.WeChatNumber = profileDataItemOffsetNode["WeChatNumber"].as<ucpulong_t>();
     wxDataStructSupplement.profileItemOffset.Wxid         = profileDataItemOffsetNode["Wxid"].as<ucpulong_t>();
 
+    //
+    // WeChatLogoutTriggerEventId
+    //
+
+    if (!dataSupplement["WeChatLogoutTriggerEventId"].IsScalar()) {
+        return false;
+    }
+
+    wxDataStructSupplement.logoutTriggerEventId = dataSupplement["WeChatLogoutTriggerEventId"].as<ucpulong_t>();
+
     return true;
 }
 

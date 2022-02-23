@@ -26,6 +26,7 @@ namespace wxbox {
                 "Logouted",
                 "LogoutedByMobile",
                 "Logined",
+                "WeChatEventProc",
             };
 
             //
@@ -375,6 +376,7 @@ namespace wxbox {
             typedef struct _WxDataStructSupplement
             {
                 WxProfileItemOffset profileItemOffset;
+                ucpulong_t          logoutTriggerEventId;
             } WxDataStructSupplement, *PWxDataStructSupplement;
 
             PRAGMA(pack(pop))

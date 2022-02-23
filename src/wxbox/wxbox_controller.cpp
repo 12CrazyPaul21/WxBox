@@ -488,6 +488,19 @@ void WxBoxController::RequestProfile(wb_process::PID clientPID)
     PushMessageAsync(std::move(msg));
 }
 
+void WxBoxController::RequstLogoutWeChat(wb_process::PID clientPID)
+{
+    auto clientStatusItem = view->wxStatusModel.get(clientPID);
+    if (!clientStatusItem || !clientStatusItem->logined) {
+        return;
+    }
+
+    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
+    msg.pid = clientPID;
+    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::LOGOUT_WECHAT_REQUEST);
+    PushMessageAsync(std::move(msg));
+}
+
 //
 // WxBoxServer Response Handler
 //

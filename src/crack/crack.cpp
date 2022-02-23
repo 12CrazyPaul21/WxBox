@@ -268,12 +268,44 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
     return true;
 }
 
+static void Logout_Windows(const ucpulong_t eventId, const void* pWeChatEventProc)
+{
+    void* pcontext = new ucpulong_t[16];
+    std::memset(pcontext, 0, sizeof(ucpulong_t) * 16);
+
+    __asm {
+		mov ecx, pcontext
+		push 0
+		push 0
+		push 0
+		push eventId
+		call pWeChatEventProc
+    }
+
+    delete pcontext;
+}
+
 #elif WXBOX_IN_MAC_OS
 
 static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, wb_crack::POpenWxWithMultiBoxingResult pResult, bool keepAttach)
 {
     throw std::exception("OpenWxWithMultiBoxing_Mac stub");
     return false;
+}
+
+static void Logout_Mac(const ucpulong_t eventId, const void* pWeChatEventProc)
+{
+    ucpulong_t context  = 0;
+    void*      pcontext = &context;
+
+    __asm {
+		mov ecx, pcontext
+		push 0
+		push 0
+		push 0
+		push eventId
+		call pWeChatEventProc
+    }
 }
 
 #endif
@@ -334,6 +366,7 @@ bool wxbox::crack::GenerateWxApis(const wb_feature::WxAPIHookPointVACollection& 
     SET_WX_API(Logouted);
     SET_WX_API(LogoutedByMobile);
     SET_WX_API(Logined);
+    SET_WX_API(WeChatEventProc);
 
     return success;
 }
@@ -361,6 +394,7 @@ bool wxbox::crack::VerifyWxApis(const WxApis& apis)
     CHECK_WX_API(Logouted);
     CHECK_WX_API(LogoutedByMobile);
     CHECK_WX_API(Logined);
+    CHECK_WX_API(WeChatEventProc);
 
     return true;
 }
@@ -527,5 +561,19 @@ bool wxbox::crack::FetchProfile(const WxApis& wxApis, const wxbox::crack::featur
         }
     }
 
+    return true;
+}
+
+bool wxbox::crack::Logout(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement)
+{
+    if (!wxApis.WeChatEventProc || !wxDataSturctsupplement.logoutTriggerEventId) {
+        return false;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    std::async(Logout_Windows, wxDataSturctsupplement.logoutTriggerEventId, (void*)wxApis.WeChatEventProc).wait();
+#else
+    std::async(Logout_Mac, wxDataSturctsupplement.logoutTriggerEventId, (void*)wxApis.WeChatEventProc).wait();
+#endif
     return true;
 }
