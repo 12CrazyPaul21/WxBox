@@ -351,6 +351,9 @@ void WxBoxController::UpdateClientStatus(wb_process::PID pid) const noexcept
     }
 
     client->status = GetClientStatus(pid);
+    if (client->status != WxBoxClientItemStatus::Normal) {
+        client->logined = false;
+    }
     client->update();
 }
 

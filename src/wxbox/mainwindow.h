@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QOperatingSystemVersion>
+#include <QClipboard>
 #include <QMainWindow>
 #include <QStyleFactory>
 #include <QTranslator>

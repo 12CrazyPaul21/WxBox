@@ -4,18 +4,18 @@
 
 ​	注意：以下部分库存在编译好的版本或者我们自己编译过的Windows版本放在这个仓库上：https://gitee.com/phantom27/wxbox-public-storage
 
-- gRPC
-- protobuf
-- frida-gum
+- gRPC - v1.41.1
+- protobuf - v3.17.3
+- frida-gum(弃用)
 - TitanEngine(弃用)
 - Qt5
-- spdlog
-- meson+ninja
+- spdlog - v1.9.2
+- meson+ninja - >=v0.60.2
 - cmake
 - pkg-config
-- lua
-- googletest
-- yaml-cpp
+- lua - v5.4.3
+- googletest - v1.11.0
+- yaml-cpp - v0.7.0
 
 ## i18n支持
 

@@ -244,20 +244,55 @@
 <context>
     <name>AppMenu</name>
     <message>
-        <source>setting</source>
-        <translation>setting</translation>
+        <source>Setting</source>
+        <translation>Setting</translation>
     </message>
     <message>
-        <source>visit repository</source>
-        <translation>visit repository</translation>
+        <source>Visit Repository</source>
+        <translation>Visit Repository</translation>
     </message>
     <message>
-        <source>about wxbox</source>
-        <translation>about wxbox</translation>
+        <source>About WxBox</source>
+        <translation>About WxBox</translation>
     </message>
     <message>
-        <source>exit wxbox</source>
-        <translation>exit wxbox</translation>
+        <source>Exit WxBox</source>
+        <translation>Exit WxBox</translation>
+    </message>
+</context>
+<context>
+    <name>ClientItemContextMenu</name>
+    <message>
+        <source>Inject</source>
+        <translation>Inject</translation>
+    </message>
+    <message>
+        <source>UnInject</source>
+        <translation>UnInject</translation>
+    </message>
+    <message>
+        <source>Copy NickName</source>
+        <translation>Copy NickName</translation>
+    </message>
+    <message>
+        <source>Copy WxNumber</source>
+        <translation>Copy WxNumber</translation>
+    </message>
+    <message>
+        <source>Copy WXID</source>
+        <translation>Copy WXID</translation>
+    </message>
+    <message>
+        <source>Refresh Profile</source>
+        <translation>Refresh Profile</translation>
+    </message>
+    <message>
+        <source>All Contact</source>
+        <translation>All Contact</translation>
+    </message>
+    <message>
+        <source>Logout</source>
+        <translation>Logout</translation>
     </message>
 </context>
 <context>

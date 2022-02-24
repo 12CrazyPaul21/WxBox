@@ -244,20 +244,55 @@
 <context>
     <name>AppMenu</name>
     <message>
-        <source>setting</source>
+        <source>Setting</source>
         <translation>设置</translation>
     </message>
     <message>
-        <source>visit repository</source>
+        <source>Visit Repository</source>
         <translation>访问仓库</translation>
     </message>
     <message>
-        <source>about wxbox</source>
+        <source>About WxBox</source>
         <translation>关于WxBox</translation>
     </message>
     <message>
-        <source>exit wxbox</source>
+        <source>Exit WxBox</source>
         <translation>退出WxBox</translation>
+    </message>
+</context>
+<context>
+    <name>ClientItemContextMenu</name>
+    <message>
+        <source>Inject</source>
+        <translation>注入WxBot模块</translation>
+    </message>
+    <message>
+        <source>UnInject</source>
+        <translation>卸载WxBot模块</translation>
+    </message>
+    <message>
+        <source>Copy NickName</source>
+        <translation>复制昵称</translation>
+    </message>
+    <message>
+        <source>Copy WxNumber</source>
+        <translation>复制微信号</translation>
+    </message>
+    <message>
+        <source>Copy WXID</source>
+        <translation>复制WXID</translation>
+    </message>
+    <message>
+        <source>Refresh Profile</source>
+        <translation>刷新Profile</translation>
+    </message>
+    <message>
+        <source>All Contact</source>
+        <translation>获取所有联系人信息</translation>
+    </message>
+    <message>
+        <source>Logout</source>
+        <translation>退出登录</translation>
     </message>
 </context>
 <context>

@@ -119,19 +119,25 @@ void MainWindow::OnCloseMission()
 void MainWindow::InitAppMenu()
 {
     // application menu
-    appMenu.pushAction("setting");
+    appMenu.pushAction("Setting");
     appMenu.pushSeparator();
-    appMenu.pushAction("visit repository", this, std::bind(&QDesktopServices::openUrl, QUrl(WXBOX_REPOSITORY_URL)));
-    appMenu.pushAction("about wxbox", &aboutDialog, std::bind(&AboutWxBoxDialog::showApplicationModal, &aboutDialog));
+    appMenu.pushAction("Visit Repository", this, std::bind(&QDesktopServices::openUrl, QUrl(WXBOX_REPOSITORY_URL)));
+    appMenu.pushAction("About WxBox", &aboutDialog, std::bind(&AboutWxBoxDialog::showApplicationModal, &aboutDialog));
     appMenu.pushSeparator();
-    appMenu.pushAction("exit wxbox", this, std::bind(&MainWindow::quit, this));
+    appMenu.pushAction("Exit WxBox", this, std::bind(&MainWindow::quit, this));
 
     // client item context menu
-    clientItemContextMenu.pushAction("inject");
-    clientItemContextMenu.pushAction("uninject");
-    clientItemContextMenu.pushAction("refresh profile");
-    clientItemContextMenu.pushAction("logout");
-    clientItemContextMenu.pushAction("all contact");
+    clientItemContextMenu.pushAction("Inject");
+    clientItemContextMenu.pushAction("UnInject");
+    clientItemContextMenu.pushSeparator();
+    clientItemContextMenu.pushAction("Copy NickName");
+    clientItemContextMenu.pushAction("Copy WxNumber");
+    clientItemContextMenu.pushAction("Copy WXID");
+    clientItemContextMenu.pushSeparator();
+    clientItemContextMenu.pushAction("Refresh Profile");
+    clientItemContextMenu.pushAction("All Contact");
+    clientItemContextMenu.pushSeparator();
+    clientItemContextMenu.pushAction("Logout");
 }
 
 void MainWindow::InitAppTray()
@@ -183,21 +189,66 @@ void MainWindow::RegisterWidgetEventHandler()
             return;
         }
 
-        clientItemContextMenu.connectAction("inject", this, [this, pid]() {
-            controller.InjectWxBotModule(pid);
-        });
-        clientItemContextMenu.connectAction("uninject", this, [this, pid]() {
-            controller.UnInjectWxBotModule(pid);
-        });
-        clientItemContextMenu.connectAction("refresh profile", this, [this, pid]() {
-            controller.RequestProfile(pid);
-        });
-        clientItemContextMenu.connectAction("logout", this, [this, pid]() {
-            controller.RequstLogoutWeChat(pid);
-        });
-        clientItemContextMenu.connectAction("all contact", this, [this, pid]() {
-            controller.RequstAllContact(pid);
-        });
+        auto item = wxStatusModel.get(pid);
+        if (!item) {
+            return;
+        }
+
+        QString nickname = item->nickname;
+        QString wxnumber = item->wxnumber;
+        QString wxid     = item->wxid;
+
+        if (item->status == WxBoxClientItemStatus::Independent) {
+            clientItemContextMenu.connectAction("Inject", this, [this, pid]() {
+                controller.InjectWxBotModule(pid);
+            });
+            clientItemContextMenu.show("Inject");
+            clientItemContextMenu.hide("UnInject");
+        }
+        else {
+            clientItemContextMenu.connectAction("UnInject", this, [this, pid]() {
+                controller.UnInjectWxBotModule(pid);
+            });
+            clientItemContextMenu.show("UnInject");
+            clientItemContextMenu.hide("Inject");
+        }
+
+        if (item->logined) {
+            clientItemContextMenu.enable("Copy NickName");
+            clientItemContextMenu.enable("Copy WxNumber");
+            clientItemContextMenu.enable("Copy WXID");
+            clientItemContextMenu.enable("Refresh Profile");
+            clientItemContextMenu.enable("All Contact");
+            clientItemContextMenu.enable("Logout");
+
+            clientItemContextMenu.connectAction("Copy NickName", this, [this, nickname]() {
+                QApplication::clipboard()->setText(nickname);
+            });
+            clientItemContextMenu.connectAction("Copy WxNumber", this, [this, wxnumber]() {
+                QApplication::clipboard()->setText(wxnumber);
+            });
+            clientItemContextMenu.connectAction("Copy WXID", this, [this, wxid]() {
+                QApplication::clipboard()->setText(wxid);
+            });
+            clientItemContextMenu.connectAction("Refresh Profile", this, [this, pid]() {
+                controller.RequestProfile(pid);
+            });
+            clientItemContextMenu.connectAction("All Contact", this, [this, pid]() {
+                controller.RequstAllContact(pid);
+            });
+            clientItemContextMenu.connectAction("Logout", this, [this, pid]() {
+                controller.RequstLogoutWeChat(pid);
+            });
+        }
+        else {
+            clientItemContextMenu.disable("Copy NickName");
+            clientItemContextMenu.disable("Copy WxNumber");
+            clientItemContextMenu.disable("Copy WXID");
+            clientItemContextMenu.disable("Refresh Profile");
+            clientItemContextMenu.disable("All Contact");
+            clientItemContextMenu.disable("Logout");
+        }
+
         clientItemContextMenu.popup(this->ui->viewWeChatStatus->viewport()->mapToGlobal(pos));
     });
 
