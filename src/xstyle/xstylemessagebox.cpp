@@ -26,7 +26,7 @@ void XStyleMessageBox::SetupMessageLayout(QFrame* bodyFrame)
     msgLayout->setSpacing(10);
 
     // message icon
-    if (msgType != XStyleMessageBoxType::Message) {
+    if (msgType != XStyleMessageBoxType::Report && msgType != XStyleMessageBoxType::Message) {
         labelMessageIcon = new QLabel(bodyFrame);
         labelMessageIcon->setFixedSize(QSize(XSTYLE_MESSAGE_BOX_ICON_FIXED_WIDTH, XSTYLE_MESSAGE_BOX_ICON_FIXED_HEIGHT));
         labelMessageIcon->setScaledContents(true);
@@ -63,6 +63,9 @@ void XStyleMessageBox::SetupMessageLayout(QFrame* bodyFrame)
     labelMessageText->setText(message);
     labelMessageText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     labelMessageText->adjustSize();
+    if (msgType == XStyleMessageBoxType::Report) {
+        labelMessageText->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    }
     msgLayout->addWidget(labelMessageText);
 
     bodyFrame->layout()->addItem(msgLayout);
@@ -118,6 +121,11 @@ void XStyleMessageBox::SetupButtonLayout(QFrame* bodyFrame)
 //
 // XStyleMessageBox warpper
 //
+
+XStyleMessageBoxButton xstyle::report(QWidget* parent, const QString& title, const QString& msg, XStyleMessageBoxButtonType flags)
+{
+    return XStyleMessageBox(parent, title, msg, XStyleMessageBoxType::Report, flags, false).exec();
+}
 
 XStyleMessageBoxButton xstyle::message(QWidget* parent, const QString& title, const QString& msg, XStyleMessageBoxButtonType flags)
 {

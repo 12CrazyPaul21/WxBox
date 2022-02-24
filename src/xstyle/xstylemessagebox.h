@@ -10,7 +10,8 @@
 
 typedef enum class XStyleMessageBoxType
 {
-    Message = 0,
+    Report = 0,
+    Message,
     Information,
     Warning,
     Error
@@ -122,6 +123,7 @@ class XStyleMessageBox : public XStyleWindow
 };
 
 namespace xstyle {
+    XStyleMessageBoxButton report(QWidget* parent, const QString& title, const QString& msg, XStyleMessageBoxButtonType flags = XStyleMessageBoxButtonType::Ok);
     XStyleMessageBoxButton message(QWidget* parent, const QString& title, const QString& msg, XStyleMessageBoxButtonType flags = XStyleMessageBoxButtonType::Ok);
     XStyleMessageBoxButton information(QWidget* parent, const QString& title, const QString& msg, XStyleMessageBoxButtonType flags = XStyleMessageBoxButtonType::Ok);
     XStyleMessageBoxButton warning(QWidget* parent, const QString& title, const QString& msg, XStyleMessageBoxButtonType flags = XStyleMessageBoxButtonType::Ok);

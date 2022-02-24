@@ -67,6 +67,14 @@
         <source>Not Logged-In</source>
         <translation>Not Logged-In</translation>
     </message>
+    <message>
+        <source>Locate Failed</source>
+        <translation>Locate Failed</translation>
+    </message>
+    <message>
+        <source>UnSupported</source>
+        <translation>UnSupported</translation>
+    </message>
 </context>
 <context>
     <name>SplashScreen</name>
@@ -269,6 +277,10 @@
     <message>
         <source>UnInject</source>
         <translation>UnInject</translation>
+    </message>
+    <message>
+        <source>Show Feature Info</source>
+        <translation>Show Feature Info</translation>
     </message>
     <message>
         <source>Copy NickName</source>

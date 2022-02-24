@@ -67,6 +67,14 @@
         <source>Not Logged-In</source>
         <translation>未登录</translation>
     </message>
+    <message>
+        <source>Locate Failed</source>
+        <translation>定位失败</translation>
+    </message>
+    <message>
+        <source>UnSupported</source>
+        <translation>不支持</translation>
+    </message>
 </context>
 <context>
     <name>SplashScreen</name>
@@ -269,6 +277,10 @@
     <message>
         <source>UnInject</source>
         <translation>卸载WxBot模块</translation>
+    </message>
+    <message>
+        <source>Show Feature Info</source>
+        <translation>查看注入特征信息</translation>
     </message>
     <message>
         <source>Copy NickName</source>
