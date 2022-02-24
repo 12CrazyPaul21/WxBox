@@ -118,7 +118,7 @@ void WxBoxClientStatusModel::applyTheme(const QString& statusIconUrls, const QSt
     auto statusIconUrlSplited      = statusIconUrls.split('|');
     auto loginStatusIconUrlSplited = loginStatusIconUrls.split('|');
 
-    if (statusIconUrlSplited.count() != 3 || loginStatusIconUrlSplited.count() != 3) {
+    if (statusIconUrlSplited.count() != 4 || loginStatusIconUrlSplited.count() != 3) {
         return;
     }
 
@@ -142,6 +142,11 @@ void WxBoxClientStatusModel::applyTheme(const QString& statusIconUrls, const QSt
     // Normal
     if (QFile(statusIconUrlSplited[2]).exists()) {
         statusIcons.addPixmap(QPixmap(statusIconUrlSplited[2]), QIcon::Normal, QIcon::On);
+    }
+
+    // Normal but not full feature
+    if (QFile(statusIconUrlSplited[3]).exists()) {
+        statusIcons.addPixmap(QPixmap(statusIconUrlSplited[3]), QIcon::Selected, QIcon::On);
     }
 
     //
@@ -210,9 +215,15 @@ void WxBoxClientStatusModel::paint(QPainter* painter, const QStyleOptionViewItem
             case WxBoxClientItemStatus::Injected:
                 pixmap = statusIcons.pixmap(qsize, QIcon::Active, QIcon::On);
                 break;
-            case WxBoxClientItemStatus::Normal:
-                pixmap = statusIcons.pixmap(qsize, QIcon::Normal, QIcon::On);
+            case WxBoxClientItemStatus::Normal: {
+                bool isFullFeature         = false;
+                auto isFullFeatureItemData = item->data(Qt::UserRole + 1);
+                if (!isFullFeatureItemData.isNull()) {
+                    isFullFeature = isFullFeatureItemData.toBool();
+                }
+                pixmap = statusIcons.pixmap(qsize, isFullFeature ? QIcon::Normal : QIcon::Selected, QIcon::On);
                 break;
+            }
         }
     }
     else if (index.column() == 2) {

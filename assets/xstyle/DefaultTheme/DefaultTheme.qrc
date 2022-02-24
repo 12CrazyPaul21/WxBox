@@ -13,6 +13,7 @@
     <file>./image/independent_status.png</file>
     <file>./image/injected_status.png</file>
     <file>./image/normal_status.png</file>
+    <file>./image/normal_status_but_not_full_feature.png</file>
     <file>./image/disabled_login_status.png</file>
     <file>./image/logined_status.png</file>
     <file>./image/not_logined_status.png</file>

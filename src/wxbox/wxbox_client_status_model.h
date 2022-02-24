@@ -17,8 +17,10 @@
         "Status", "PID", "Login", "NickName", "WeChatNumber", "WXID" \
     }
 
-#define DEFAULT_WXBOX_CLIENT_MODEL_STATUS_ICON_URLS ":/XStyleTheme/DefaultTheme/image/independent_status.png|:/XStyleTheme/DefaultTheme/image/injected_status.png|:/XStyleTheme/DefaultTheme/image/normal_status.png"
-#define DEFAULT_WXBOX_CLIENT_MODEL_LOGIN_STATUS_ICON_URLS ":/XStyleTheme/DefaultTheme/image/disabled_login_status.png|:/XStyleTheme/DefaultTheme/image/logined_status.png|:/XStyleTheme/DefaultTheme/image/not_logined_status.png"
+#define DEFAULT_WXBOX_CLIENT_MODEL_STATUS_ICON_URLS \
+    ":/XStyleTheme/DefaultTheme/image/independent_status.png|:/XStyleTheme/DefaultTheme/image/injected_status.png|:/XStyleTheme/DefaultTheme/image/normal_status.png|:/XStyleTheme/DefaultTheme/image/normal_status_but_not_full_feature.png"
+#define DEFAULT_WXBOX_CLIENT_MODEL_LOGIN_STATUS_ICON_URLS \
+    ":/XStyleTheme/DefaultTheme/image/disabled_login_status.png|:/XStyleTheme/DefaultTheme/image/logined_status.png|:/XStyleTheme/DefaultTheme/image/not_logined_status.png"
 
 enum class WxBoxClientItemStatus
 {
@@ -36,6 +38,7 @@ typedef struct _WxBoxClientStatusItem
     QString               nickname;
     QString               wxnumber;
     QString               wxid;
+    bool                  fullFeatures;
 
     QStandardItem* statusItem;
     QStandardItem* pidItem;
@@ -55,6 +58,7 @@ typedef struct _WxBoxClientStatusItem
       , nicknameItem(nullptr)
       , wxnumberItem(nullptr)
       , wxidItem(nullptr)
+      , fullFeatures(true)
     {
     }
 
@@ -89,6 +93,7 @@ typedef struct _WxBoxClientStatusItem
         }
 
         statusItem->setData((int)status, Qt::UserRole);
+        statusItem->setData(fullFeatures, Qt::UserRole + 1);
         loginedItem->setData(logined, Qt::UserRole);
 
         switch (status) {
@@ -99,7 +104,7 @@ typedef struct _WxBoxClientStatusItem
                 statusItem->setToolTip(xstyle_manager.Translate("xstyle_meta", "Injected"));
                 break;
             case WxBoxClientItemStatus::Normal:
-                statusItem->setToolTip(xstyle_manager.Translate("xstyle_meta", "Connected WxBot"));
+                statusItem->setToolTip(xstyle_manager.Translate("xstyle_meta", fullFeatures ? "Connected WxBot" : "Connected WxBot, But not Complete Features"));
                 break;
         }
 

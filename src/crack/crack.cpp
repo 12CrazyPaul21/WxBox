@@ -399,6 +399,26 @@ bool wxbox::crack::VerifyWxApis(const WxApis& apis)
     return true;
 }
 
+bool wxbox::crack::IsFullFeaturesValid(const WxBotEntryParameter& parameter)
+{
+    const ucpulong_t* apiCursor        = reinterpret_cast<const ucpulong_t*>(&parameter.wechat_apis);
+    const ucpulong_t* supplementCursor = reinterpret_cast<const ucpulong_t*>(&parameter.wechat_datastructure_supplement);
+
+    for (int i = 0; i < sizeof(WxApis) / sizeof(ucpulong_t); i++) {
+        if (!*apiCursor++) {
+            return false;
+        }
+    }
+
+    for (int i = 0; i < sizeof(wxbox::crack::feature::WxDataStructSupplement) / sizeof(ucpulong_t); i++) {
+        if (!*supplementCursor++) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool wxbox::crack::OpenWxWithMultiBoxing(const wb_wx::WeChatEnvironmentInfo& wxEnvInfo, wb_feature::WxApiFeatures& wxApiFeatures, POpenWxWithMultiBoxingResult pResult, bool keepAttach)
 {
 #if WXBOX_IN_WINDOWS_OS

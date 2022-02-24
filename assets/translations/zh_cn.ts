@@ -60,6 +60,10 @@
         <translation>已连接WxBot模块</translation>
     </message>
     <message>
+        <source>Connected WxBot, But not Complete Features</source>
+        <translation>已连接WxBot模块，但定位到的API不完整</translation>
+    </message>
+    <message>
         <source>Logged-In</source>
         <translation>已登录</translation>
     </message>
@@ -313,13 +317,6 @@
     <message>
         <source>Logout</source>
         <translation>退出登录</translation>
-    </message>
-</context>
-<context>
-    <name>AboutWxBoxDialog</name>
-    <message>
-        <source>关于 WxBox</source>
-        <translation>关于 WxBox</translation>
     </message>
 </context>
 <context>

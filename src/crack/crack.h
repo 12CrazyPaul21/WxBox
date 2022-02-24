@@ -81,6 +81,7 @@ namespace wxbox {
 
         bool GenerateWxApis(const wxbox::crack::feature::WxAPIHookPointVACollection& collection, WxApis& apis);
         bool VerifyWxApis(const WxApis& apis);
+        bool IsFullFeaturesValid(const WxBotEntryParameter& parameter);
 
         bool OpenWxWithMultiBoxing(const wxbox::crack::wx::WeChatEnvironmentInfo& wxEnvInfo, wxbox::crack::feature::WxApiFeatures& wxApiFeatures, POpenWxWithMultiBoxingResult pResult = nullptr, bool keepAttach = false);
 

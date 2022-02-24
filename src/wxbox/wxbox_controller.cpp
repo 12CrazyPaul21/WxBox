@@ -482,6 +482,11 @@ void WxBoxController::UpdateWeChatStatus()
         auto item    = WxBoxClientStatusItem::New();
         item->pid    = pid;
         item->status = GetClientStatus(pid);
+
+        if (clientInjectArgs.find(pid) != clientInjectArgs.end()) {
+            item->fullFeatures = wb_crack::IsFullFeaturesValid(clientInjectArgs.at(pid));
+        }
+
         model.add(item);
     }
 }
@@ -622,6 +627,13 @@ void WxBoxController::InjectArgsResponseHandle(wb_process::PID clientPID, wxbox:
 
     wb_crack::WxBotEntryParameter injectArgs;
     std::memcpy(&injectArgs, pInjectArgsResponseBuffer.data(), sizeof(wb_crack::WxBotEntryParameter));
+
+    auto client = view->wxStatusModel.get(clientPID);
+    if (client) {
+        client->fullFeatures = wb_crack::IsFullFeaturesValid(injectArgs);
+        client->update();
+    }
+
     clientInjectArgs.emplace(clientPID, std::move(injectArgs));
 }
 

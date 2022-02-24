@@ -60,6 +60,10 @@
         <translation>Connected WxBot</translation>
     </message>
     <message>
+        <source>Connected WxBot, But not Complete Features</source>
+        <translation>Connected WxBot, But not Complete Features</translation>
+    </message>
+    <message>
         <source>Logged-In</source>
         <translation>Logged-In</translation>
     </message>
@@ -313,13 +317,6 @@
     <message>
         <source>Logout</source>
         <translation>Logout</translation>
-    </message>
-</context>
-<context>
-    <name>AboutWxBoxDialog</name>
-    <message>
-        <source>关于 WxBox</source>
-        <translation>About WxBox</translation>
     </message>
 </context>
 <context>
