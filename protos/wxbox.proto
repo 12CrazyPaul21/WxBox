@@ -32,6 +32,7 @@ enum ControlPacketType {
     UNINJECT_WXBOT_REQUEST = 4;
     LOGOUT_WECHAT_REQUEST = 5;
     ALL_CONTACT_REQUEST = 6;
+    ALL_CONTACT_RESPONSE = 7;
 }
 
 message HandshakeRequest {
@@ -49,12 +50,25 @@ message ProfileResponse {
     string wxid = 4;
 }
 
+message ContactProfile {
+    bool chatroom = 1;
+    string nickname = 2;
+    string wxnumber = 3;
+    string wxid = 4;
+    string remark = 5;
+}
+
+message AllContactResponse {
+    repeated ContactProfile contacts = 1;
+}
+
 message WxBotControlPacket {
     ControlPacketType type = 1;
     uint64 pid = 2;
     oneof packet {
         HandshakeRequest handshakeRequest = 10;
         ProfileResponse profileResponse = 11;
+        AllContactResponse allContactResponse = 12;
     }
 }
 

@@ -86,6 +86,7 @@ class WxBoxController final : public QObject
     //
 
     void ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response);
+    void AllContactResponseHandler(wb_process::PID clientPID, wxbox::AllContactResponse* response);
 
   signals:
     void PushMessageAsync(wxbox::WxBoxMessage message);

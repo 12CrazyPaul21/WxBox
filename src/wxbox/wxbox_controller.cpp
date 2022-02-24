@@ -475,6 +475,10 @@ void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message
             ProfileResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_profileresponse());
             break;
         }
+        case wxbox::ControlPacketType::ALL_CONTACT_RESPONSE: {
+            AllContactResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_allcontactresponse());
+            break;
+        }
     }
 }
 
@@ -522,6 +526,22 @@ void WxBoxController::RequstAllContact(wb_process::PID clientPID)
 
 void WxBoxController::ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response)
 {
+    if (!response) {
+        return;
+    }
+
     wb_wx::WeChatProfile profile(response->logined(), response->nickname(), response->wxnumber(), response->wxid());
     UpdateClientProfile(clientPID, profile);
+}
+
+void WxBoxController::AllContactResponseHandler(wb_process::PID clientPID, wxbox::AllContactResponse* response)
+{
+    if (!response) {
+        return;
+    }
+
+    std::vector<std::string> contacts;
+    for (auto contact : response->contacts()) {
+        contacts.emplace_back(wb_wx::WeChatContact(contact.chatroom(), contact.nickname(), contact.wxnumber(), contact.wxid(), contact.remark()));
+    }
 }
