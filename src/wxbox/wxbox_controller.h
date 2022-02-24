@@ -49,6 +49,7 @@ class WxBoxController final : public QObject
     bool StartWeChatInstance();
     bool InjectWxBotModule(wb_process::PID pid);
     bool UnInjectWxBotModule(wb_process::PID pid);
+    void DisplayClientInjectArgs(wb_process::PID pid);
 
   private:
     //
@@ -70,13 +71,14 @@ class WxBoxController final : public QObject
     }
 
     void UpdateClientProfile(wb_process::PID pid, const wb_wx::WeChatProfile& profile);
-    void UpdateClientStatus(wb_process::PID pid) const noexcept;
+    void UpdateClientStatus(wb_process::PID pid) noexcept;
     void UpdateWeChatStatus();
 
     //
     // WxBoxServer Wrapper Request Methods
     //
 
+    void RequestInjectArgs(wb_process::PID clientPID);
     void RequestProfile(wb_process::PID clientPID);
     void RequstLogoutWeChat(wb_process::PID clientPID);
     void RequstAllContact(wb_process::PID clientPID);
@@ -85,6 +87,7 @@ class WxBoxController final : public QObject
     // WxBoxServer Response Handler
     //
 
+    void InjectArgsResponseHandle(wb_process::PID clientPID, wxbox::InjectArgsResponse* response);
     void ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response);
     void AllContactResponseHandler(wb_process::PID clientPID, wxbox::AllContactResponse* response);
 
@@ -105,13 +108,14 @@ class WxBoxController final : public QObject
     MainWindow* view;
     AppConfig&  config;
 
-    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
-    wb_feature::WxApiFeatures    wxApiFeatures;
-    wxbox::WxBoxServer*          server;
-    wxbox::WxBoxServerWorker     worker;
-    int                          statusMonitorTimerId;
-    int                          statusMonitorInterval;
-    time_t                       lastUpdateStatusTimestamp;
+    wb_wx::WeChatEnvironmentInfo                                               wxEnvInfo;
+    wb_feature::WxApiFeatures                                                  wxApiFeatures;
+    wxbox::WxBoxServer*                                                        server;
+    wxbox::WxBoxServerWorker                                                   worker;
+    int                                                                        statusMonitorTimerId;
+    int                                                                        statusMonitorInterval;
+    time_t                                                                     lastUpdateStatusTimestamp;
+    mutable std::unordered_map<wb_process::PID, wb_crack::WxBotEntryParameter> clientInjectArgs;
 };
 
 #endif  // #ifndef __WXBOX_CONTROLLER_H

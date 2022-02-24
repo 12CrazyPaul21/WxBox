@@ -327,6 +327,11 @@ void wxbot::WxBot::WxBoxClientEventHandler(wxbot::WxBotMessage message)
 void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
 {
     switch (message.u.wxBoxControlPacket.type()) {
+        case wxbox::ControlPacketType::INJECT_ARGS_REQUEST: {
+            ResponseInjectArgs();
+            break;
+        }
+
         case wxbox::ControlPacketType::PROFILE_REQUEST: {
             ResponseProfile();
             break;
@@ -358,6 +363,21 @@ void wxbot::WxBot::PluginVirtualMachineEventHandler(wb_plugin::PluginVirtualMach
 //
 // WxBoxClient Wrapper Response Methods
 //
+
+void wxbot::WxBot::ResponseInjectArgs()
+{
+    if (!args) {
+        return;
+    }
+
+    wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+    msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::INJECT_ARGS_RESPONSE);
+
+    auto injectArgsResponse = msg.u.wxBotControlPacket.mutable_injectargsresponse();
+    injectArgsResponse->set_args(args.get(), sizeof(wb_crack::WxBotEntryParameter));
+
+    client->PushMessageAsync(std::move(msg));
+}
 
 void wxbot::WxBot::ResponseProfile()
 {

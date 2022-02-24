@@ -325,6 +325,71 @@ bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
     return true;
 }
 
+void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
+{
+    if (clientInjectArgs.find(pid) == clientInjectArgs.end()) {
+        return;
+    }
+
+    wb_crack::WxBotEntryParameter& injectArgs = clientInjectArgs.at(pid);
+
+    QString     title = QString("WeChat %1").arg(xstyle_manager.Translate("xstyle_meta", "Feature"));
+    QString     reportText;
+    QTextStream reportTextStream(&reportText);
+
+    reportTextStream << "WeChat Process ID : " << pid << "(0x" << Qt::hex << Qt::uppercasedigits << pid << ")" << XSTYLE_REPORT_ENDL;
+    reportTextStream << "WeChat Version : " << injectArgs.wechat_version << XSTYLE_REPORT_ENDL
+                     << XSTYLE_REPORT_ENDL;
+
+    reportTextStream.setIntegerBase(16);
+    reportTextStream.setNumberFlags(QTextStream::ShowBase | QTextStream::UppercaseDigits);
+
+#define REPORT_WXAPI(API)                                                                                                                                               \
+    {                                                                                                                                                                   \
+        reportTextStream << #API##" : "                                                                                                                                 \
+                         << injectArgs.wechat_apis.API                                                                                                                  \
+                         << (injectArgs.wechat_apis.API ? "" : QString(" [<font color=\"red\">%1</font>]").arg(xstyle_manager.Translate("xstyle_meta", "UnSupported"))) \
+                         << XSTYLE_REPORT_ENDL;                                                                                                                         \
+    }
+
+#define REPORT_WX_DATASTRUCT(DESC, MEMBER)                                                                                                                                                     \
+    {                                                                                                                                                                                          \
+        reportTextStream << "&nbsp;&nbsp;&nbsp;&nbsp;"##DESC##" : "                                                                                                                            \
+                         << injectArgs.wechat_datastructure_supplement.MEMBER                                                                                                                  \
+                         << (injectArgs.wechat_datastructure_supplement.MEMBER ? "" : QString(" [<font color=\"red\">%1</font>]").arg(xstyle_manager.Translate("xstyle_meta", "UnSupported"))) \
+                         << XSTYLE_REPORT_ENDL;                                                                                                                                                \
+    }
+
+    REPORT_WXAPI(CheckAppSingleton);
+    REPORT_WXAPI(FetchGlobalContactContextAddress);
+    REPORT_WXAPI(InitWeChatContactItem);
+    REPORT_WXAPI(DeinitWeChatContactItem);
+    REPORT_WXAPI(FindAndDeepCopyWeChatContactItemWithWXIDWrapper);
+    REPORT_WXAPI(FetchGlobalProfileContext);
+    REPORT_WXAPI(HandleRawMessages);
+    REPORT_WXAPI(HandleReceivedMessages);
+    REPORT_WXAPI(WXSendTextMessage);
+    REPORT_WXAPI(FetchGlobalSendMessageContext);
+    REPORT_WXAPI(WXSendFileMessage);
+    REPORT_WXAPI(CloseLoginWnd);
+    REPORT_WXAPI(LogoutAndExitWeChat);
+    REPORT_WXAPI(Logouted);
+    REPORT_WXAPI(LogoutedByMobile);
+    REPORT_WXAPI(Logined);
+    REPORT_WXAPI(WeChatEventProc);
+    reportTextStream << XSTYLE_REPORT_ENDL;
+
+    reportTextStream << "DataStructure : " << XSTYLE_REPORT_ENDL;
+    REPORT_WX_DATASTRUCT("Profile NickName Offset", profileItemOffset.NickName);
+    REPORT_WX_DATASTRUCT("Profile NickName WeChatNumber", profileItemOffset.WeChatNumber);
+    REPORT_WX_DATASTRUCT("Profile NickName WXID", profileItemOffset.Wxid);
+    REPORT_WX_DATASTRUCT("Logout Event ID", logoutTriggerEventId);
+    REPORT_WX_DATASTRUCT("Contact Header Item Offset", weChatContactHeaderItemOffset);
+    REPORT_WX_DATASTRUCT("Contact Data Begin Offset", weChatContactDataBeginOffset);
+
+    xstyle::report(view, title, reportText);
+}
+
 //
 // WeChat Status
 //
@@ -343,7 +408,7 @@ void WxBoxController::UpdateClientProfile(wb_process::PID pid, const wb_wx::WeCh
     client->update();
 }
 
-void WxBoxController::UpdateClientStatus(wb_process::PID pid) const noexcept
+void WxBoxController::UpdateClientStatus(wb_process::PID pid) noexcept
 {
     auto client = view->wxStatusModel.get(pid);
     if (!client) {
@@ -353,6 +418,12 @@ void WxBoxController::UpdateClientStatus(wb_process::PID pid) const noexcept
     client->status = GetClientStatus(pid);
     if (client->status != WxBoxClientItemStatus::Normal) {
         client->logined = false;
+    }
+    if (client->status == WxBoxClientItemStatus::Independent) {
+        auto it = clientInjectArgs.find(pid);
+        if (it != clientInjectArgs.end()) {
+            clientInjectArgs.erase(it);
+        }
     }
     client->update();
 }
@@ -445,6 +516,7 @@ void WxBoxController::WxBoxServerEvent(wxbox::WxBoxMessage message)
 {
     switch (message.type) {
         case wxbox::WxBoxMessageType::WxBoxClientConnected:
+            RequestInjectArgs(message.pid);
             RequestProfile(message.pid);
             UpdateClientStatus(message.pid);
 
@@ -478,8 +550,14 @@ void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message
             ProfileResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_profileresponse());
             break;
         }
+
         case wxbox::ControlPacketType::ALL_CONTACT_RESPONSE: {
             AllContactResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_allcontactresponse());
+            break;
+        }
+
+        case wxbox::ControlPacketType::INJECT_ARGS_RESPONSE: {
+            InjectArgsResponseHandle(message.pid, message.u.wxBotControlPacket.mutable_injectargsresponse());
             break;
         }
     }
@@ -488,6 +566,14 @@ void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message
 //
 // WxBoxServer Wrapper Request Methods
 //
+
+void WxBoxController::RequestInjectArgs(wb_process::PID clientPID)
+{
+    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
+    msg.pid = clientPID;
+    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::INJECT_ARGS_REQUEST);
+    PushMessageAsync(std::move(msg));
+}
 
 void WxBoxController::RequestProfile(wb_process::PID clientPID)
 {
@@ -526,6 +612,18 @@ void WxBoxController::RequstAllContact(wb_process::PID clientPID)
 //
 // WxBoxServer Response Handler
 //
+
+void WxBoxController::InjectArgsResponseHandle(wb_process::PID clientPID, wxbox::InjectArgsResponse* response)
+{
+    const std::string& pInjectArgsResponseBuffer = response->args();
+    if (pInjectArgsResponseBuffer.empty() || pInjectArgsResponseBuffer.size() != sizeof(wb_crack::WxBotEntryParameter)) {
+        return;
+    }
+
+    wb_crack::WxBotEntryParameter injectArgs;
+    std::memcpy(&injectArgs, pInjectArgsResponseBuffer.data(), sizeof(wb_crack::WxBotEntryParameter));
+    clientInjectArgs.emplace(clientPID, std::move(injectArgs));
+}
 
 void WxBoxController::ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response)
 {

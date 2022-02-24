@@ -129,6 +129,7 @@ void MainWindow::InitAppMenu()
     // client item context menu
     clientItemContextMenu.pushAction("Inject");
     clientItemContextMenu.pushAction("UnInject");
+    clientItemContextMenu.pushAction("Show Feature Info");
     clientItemContextMenu.pushSeparator();
     clientItemContextMenu.pushAction("Copy NickName");
     clientItemContextMenu.pushAction("Copy WxNumber");
@@ -204,6 +205,7 @@ void MainWindow::RegisterWidgetEventHandler()
             });
             clientItemContextMenu.show("Inject");
             clientItemContextMenu.hide("UnInject");
+            clientItemContextMenu.hide("Show Feature Info");
         }
         else {
             clientItemContextMenu.connectAction("UnInject", this, [this, pid]() {
@@ -211,6 +213,13 @@ void MainWindow::RegisterWidgetEventHandler()
             });
             clientItemContextMenu.show("UnInject");
             clientItemContextMenu.hide("Inject");
+
+            if (item->status == WxBoxClientItemStatus::Normal && controller.clientInjectArgs.find(pid) != controller.clientInjectArgs.end()) {
+                clientItemContextMenu.connectAction("Show Feature Info", this, [this, pid]() {
+                    controller.DisplayClientInjectArgs(pid);
+                });
+                clientItemContextMenu.show("Show Feature Info");
+            }
         }
 
         if (item->logined) {

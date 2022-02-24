@@ -7,6 +7,7 @@
 #include <QFrame>
 
 #define MESSAGE_WXBOX_NAME "XStyleMessageBox"
+#define XSTYLE_REPORT_ENDL "<br/>"
 
 typedef enum class XStyleMessageBoxType
 {

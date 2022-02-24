@@ -16,14 +16,6 @@ service WxBox {
     rpc Communication(stream WxBotControlPacket) returns (stream WxBoxControlPacket) {}
 }
 
-message WxBoxHelloRequest {
-    uint64 pid = 1;
-}
-
-message WxBoxHelloResponse {
-    bool pong = 1;
-}
-
 enum ControlPacketType {
     HANDSHAKE_REQUEST = 0;
     HANDSHAKE_RESPONSE = 1;
@@ -33,6 +25,16 @@ enum ControlPacketType {
     LOGOUT_WECHAT_REQUEST = 5;
     ALL_CONTACT_REQUEST = 6;
     ALL_CONTACT_RESPONSE = 7;
+    INJECT_ARGS_REQUEST = 8;
+    INJECT_ARGS_RESPONSE = 9;
+}
+
+message WxBoxHelloRequest {
+    uint64 pid = 1;
+}
+
+message WxBoxHelloResponse {
+    bool pong = 1;
 }
 
 message HandshakeRequest {
@@ -62,6 +64,10 @@ message AllContactResponse {
     repeated ContactProfile contacts = 1;
 }
 
+message InjectArgsResponse {
+    bytes args = 1;
+}
+
 message WxBotControlPacket {
     ControlPacketType type = 1;
     uint64 pid = 2;
@@ -69,6 +75,7 @@ message WxBotControlPacket {
         HandshakeRequest handshakeRequest = 10;
         ProfileResponse profileResponse = 11;
         AllContactResponse allContactResponse = 12;
+        InjectArgsResponse injectArgsResponse = 13;
     }
 }
 

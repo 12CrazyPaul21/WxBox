@@ -75,6 +75,14 @@
         <source>UnSupported</source>
         <translation>UnSupported</translation>
     </message>
+    <message>
+        <source>Process</source>
+        <translation>Process</translation>
+    </message>
+    <message>
+        <source>Feature</source>
+        <translation>Feature</translation>
+    </message>
 </context>
 <context>
     <name>SplashScreen</name>

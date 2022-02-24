@@ -89,6 +89,7 @@ namespace wxbot {
         // WxBoxClient Wrapper Response Methods
         //
 
+        void ResponseInjectArgs();
         void ResponseProfile();
         void ResponseAllContact();
 

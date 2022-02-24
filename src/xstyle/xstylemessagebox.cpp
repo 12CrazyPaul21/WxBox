@@ -64,6 +64,7 @@ void XStyleMessageBox::SetupMessageLayout(QFrame* bodyFrame)
     labelMessageText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     labelMessageText->adjustSize();
     if (msgType == XStyleMessageBoxType::Report) {
+        labelMessageText->setTextFormat(Qt::RichText);
         labelMessageText->setTextInteractionFlags(Qt::TextSelectableByMouse);
     }
     msgLayout->addWidget(labelMessageText);

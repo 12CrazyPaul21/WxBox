@@ -75,6 +75,14 @@
         <source>UnSupported</source>
         <translation>不支持</translation>
     </message>
+    <message>
+        <source>Process</source>
+        <translation>进程</translation>
+    </message>
+    <message>
+        <source>Feature</source>
+        <translation>特征</translation>
+    </message>
 </context>
 <context>
     <name>SplashScreen</name>
