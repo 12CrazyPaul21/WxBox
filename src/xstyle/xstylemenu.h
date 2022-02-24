@@ -42,6 +42,12 @@ class XStyleMenu : public QMenu
     QMenu&   pushMenu(const char* title);
     QAction& pushAction(const char* name, QObject* receiver = nullptr, XStyleMenuHandler handler = nullptr, const QString& iconUrl = "", const QKeySequence& shortcut = QKeySequence());
 
+    // change action status
+    void show(const char* name);
+    void hide(const char* name);
+    void disable(const char* name);
+    void enable(const char* name);
+
   protected:
     QString                                  rootTitle;
     std::unordered_map<QString, QAction*>    actions;

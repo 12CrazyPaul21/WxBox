@@ -124,3 +124,39 @@ QAction& XStyleMenu::pushAction(const char* name, QObject* receiver, XStyleMenuH
 
     return *action;
 }
+
+void XStyleMenu::show(const char* name)
+{
+    if (!name || !strlen(name)) {
+        return;
+    }
+
+    action(name).setVisible(true);
+}
+
+void XStyleMenu::hide(const char* name)
+{
+    if (!name || !strlen(name)) {
+        return;
+    }
+
+    action(name).setVisible(false);
+}
+
+void XStyleMenu::disable(const char* name)
+{
+    if (!name || !strlen(name)) {
+        return;
+    }
+
+    action(name).setDisabled(true);
+}
+
+void XStyleMenu::enable(const char* name)
+{
+    if (!name || !strlen(name)) {
+        return;
+    }
+
+    action(name).setEnabled(true);
+}

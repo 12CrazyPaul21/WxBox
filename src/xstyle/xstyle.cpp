@@ -201,6 +201,10 @@ QMenu::item {
 QMenu::item:selected {
     background-color: rgba(175, 175, 182, 120);
 }
+
+QMenu::item:disabled {
+    color: gray;
+}
 	)")
             .arg(DEFAULT_XSTYLE_WINDOW_TITLE_HEIGHT)
             .arg(DEFAULT_XSTYLE_WINDOW_FOOTER_HEIGHT)
