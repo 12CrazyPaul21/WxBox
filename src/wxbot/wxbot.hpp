@@ -54,6 +54,13 @@ namespace wxbot {
         bool HookWeChat();
         void UnHookWeChat();
 
+        //
+        // WeChat API Wrapper
+        //
+
+        bool GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact);
+        bool GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact);
+
       private:
         void PreHookWeChat();
         void ReleasePreHookWeChatHookPoint();

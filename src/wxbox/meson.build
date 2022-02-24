@@ -7,10 +7,11 @@ moc_headers = files([join_paths(wxbox_root, 'mainwindow.h'),
                         join_paths(wxbox_root, 'wxbox_controller.h'),
                         join_paths(wxbox_root, 'wxbox_client_status_model.h'),
                         join_paths(wxbox_root, 'download_dialog.h'),
-                        join_paths(wxbox_internal, 'downloader.hpp')
+                        join_paths(wxbox_internal, 'downloader.hpp'),
+                        join_paths(wxbox_root, 'contact_list_dialog.h'),
 ])
 # moc_sources = files([join_paths(wxbox_root, 'mainwindow.cpp'), join_paths(wxbox_root, 'about.cpp')])
-ui_files = files([join_paths(wxbox_ui, 'mainwindow.ui'), join_paths(wxbox_ui, 'about.ui'), join_paths(wxbox_ui, 'download.ui')])
+ui_files = files([join_paths(wxbox_ui, 'mainwindow.ui'), join_paths(wxbox_ui, 'about.ui'), join_paths(wxbox_ui, 'download.ui'), join_paths(wxbox_ui, 'contact_list_dialog.ui')])
 qt_resources = files([join_paths(assets_root, 'wxbox.qrc')])
 
 # process about qt
@@ -35,6 +36,7 @@ wxbox_src = files([
     join_paths(wxbox_root, 'wxbox_client_status_model.cpp'),
     join_paths(wxbox_root, 'about.cpp'),
     join_paths(wxbox_root, 'download_dialog.cpp'),
+    join_paths(wxbox_root, 'contact_list_dialog.cpp'),
     join_paths(wxbox_root, 'wxbox_server.cpp'),
     join_paths(wxbox_root, 'app_log.hpp'),
     join_paths(wxbox_root, 'app_config.hpp'),

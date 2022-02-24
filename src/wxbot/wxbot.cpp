@@ -159,6 +159,28 @@ void wxbot::WxBot::UnHookWeChat()
 }
 
 //
+// WeChat API Wrapper
+//
+
+bool wxbot::WxBot::GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact)
+{
+    if (!args) {
+        return false;
+    }
+
+    return wb_crack::GetContactWithWxNumber(wxnumber, args.get(), contact);
+}
+
+bool wxbot::WxBot::GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact)
+{
+    if (!args) {
+        return false;
+    }
+
+    return wb_crack::GetContactWithWxid(wxid, args.get(), contact);
+}
+
+//
 // internal
 //
 
@@ -294,7 +316,6 @@ void wxbot::WxBot::WxBoxClientEventHandler(wxbot::WxBotMessage message)
 {
     switch (message.type) {
         case wxbot::WxBotMessageType::WxBoxClientStatusChange:
-            //spdlog::info("WxBoxClient status change, oldStatus<{}>, newStatus<{}>", ParseStatus(message.u.wxBoxClientStatus.oldStatus), ParseStatus(message.u.wxBoxClientStatus.newStatus));
             break;
 
         case wxbot::WxBotMessageType::WxBoxRequestOrResponse:

@@ -36,6 +36,7 @@
 
 #include <about.h>
 #include <download_dialog.h>
+#include <contact_list_dialog.h>
 #include <wxbox_client_status_model.h>
 
 #define SHOW_SPLASH_SCREEN()                                                   \
@@ -144,15 +145,6 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         }
     }
 
-    QStringList TranslateStringList(const QStringList& strs)
-    {
-        QStringList result;
-        for (auto str : strs) {
-            result.append(Translate(str));
-        }
-        return result;
-    }
-
     void InitAppMenu();
     void InitAppTray();
     void InitWidget();
@@ -162,6 +154,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     Ui::MainWindowBody*    ui;
     AboutWxBoxDialog       aboutDialog;
     DownloadDialog         downloadDialog;
+    ContactListDialog      contactListDialog;
     XStyleMenu             appMenu;
     QSystemTrayIcon        appTray;
     XStyleMenu             clientItemContextMenu;

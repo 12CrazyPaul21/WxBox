@@ -268,6 +268,29 @@
     </message>
 </context>
 <context>
+    <name>ContactListDialog_xstylewindow</name>
+    <message>
+        <source> All Contacts :</source>
+        <translation> All Contacts :</translation>
+    </message>
+    <message>
+        <source>NickName</source>
+        <translation>NickName</translation>
+    </message>
+    <message>
+        <source>Remark</source>
+        <translation>Remark</translation>
+    </message>
+    <message>
+        <source>WeChatNumber</source>
+        <translation>WeChatNumber</translation>
+    </message>
+    <message>
+        <source>WXID</source>
+        <translation>WXID</translation>
+    </message>
+</context>
+<context>
     <name>DownloadDialog</name>
     <message>
         <source>Cancel</source>

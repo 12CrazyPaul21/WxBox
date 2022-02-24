@@ -540,8 +540,15 @@ void WxBoxController::AllContactResponseHandler(wb_process::PID clientPID, wxbox
         return;
     }
 
-    std::vector<std::string> contacts;
+    std::vector<wb_wx::WeChatContact> contacts;
     for (auto contact : response->contacts()) {
         contacts.emplace_back(wb_wx::WeChatContact(contact.chatroom(), contact.nickname(), contact.wxnumber(), contact.wxid(), contact.remark()));
     }
+
+    auto client = view->wxStatusModel.get(clientPID);
+    if (!client) {
+        return;
+    }
+
+    view->contactListDialog.DisplayContactList(client->wxnumber, contacts);
 }

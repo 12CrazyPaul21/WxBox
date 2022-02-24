@@ -32,7 +32,7 @@
    <string>关于 WxBox</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../assets/wxbox.qrc">
+   <iconset resource="../../../assets/wxbox.qrc">
     <normaloff>:/icon/app.ico</normaloff>:/icon/app.ico</iconset>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
@@ -64,7 +64,7 @@
     <string/>
    </property>
    <property name="pixmap">
-    <pixmap resource="../../assets/wxbox.qrc">:/icon/app.ico</pixmap>
+    <pixmap resource="../../../assets/wxbox.qrc">:/icon/app.ico</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>
@@ -91,6 +91,7 @@
   </widget>
  </widget>
  <resources>
+  <include location="../../../assets/wxbox.qrc"/>
   <include location="../../assets/wxbox.qrc"/>
  </resources>
  <connections/>

@@ -266,6 +266,15 @@ class XStyleWindow : public QMainWindow
         return QCoreApplication::translate(objectName().toLocal8Bit(), key.toLocal8Bit());
     }
 
+    QStringList TranslateStringList(const QStringList& strs)
+    {
+        QStringList result;
+        for (auto str : strs) {
+            result.append(Translate(str));
+        }
+        return result;
+    }
+
     virtual void RetranslateUi()
     {
     }

@@ -105,7 +105,7 @@ void WxBoxClientStatusModel::resize(bool inited)
         header->resizeSection(1, header->sectionSize(1) + 30);
         header->resizeSection(3, header->sectionSize(3) + 60);
         header->resizeSection(4, header->sectionSize(4) + 80);
-        header->resizeSection(5, header->sectionSize(5) + 100);
+        header->setSectionResizeMode(5, QHeaderView::Stretch);
     }
 }
 
