@@ -556,7 +556,7 @@ bool wxbox::crack::FetchProfile(const WxApis& wxApis, const wxbox::crack::featur
         profile.wxnumber = (char*)(globalProfileContext + wxDataSturctsupplement.profileItemOffset.WeChatNumber);
 
         auto wxidRef = (char**)(globalProfileContext + wxDataSturctsupplement.profileItemOffset.Wxid);
-        if (wxidRef) {
+        if (wxidRef && *wxidRef) {
             profile.wxid = (char*)(*wxidRef);
         }
     }
@@ -576,4 +576,399 @@ bool wxbox::crack::Logout(const WxApis& wxApis, const wxbox::crack::feature::WxD
     std::async(Logout_Mac, wxDataSturctsupplement.logoutTriggerEventId, (void*)wxApis.WeChatEventProc).wait();
 #endif
     return true;
+}
+
+uint8_t* wxbox::crack::FetchWeChatGlobalContactContextAddress(const WxApis& wxApis)
+{
+    return wxApis.FetchGlobalContactContextAddress ? (((uint8_t * (*)()) wxApis.FetchGlobalContactContextAddress)()) : nullptr;
+}
+
+uint8_t* wxbox::crack::FetchContactHeaderAddress(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement)
+{
+    uint8_t* globalContactContext = FetchWeChatGlobalContactContextAddress(wxApis);
+    if (!globalContactContext || !wxDataSturctsupplement.weChatContactHeaderItemOffset) {
+        return nullptr;
+    }
+
+    uint8_t** ppHeader = reinterpret_cast<uint8_t**>(globalContactContext + wxDataSturctsupplement.weChatContactHeaderItemOffset);
+    if (!ppHeader) {
+        return nullptr;
+    }
+
+    return *ppHeader;
+}
+
+bool wxbox::crack::InitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem)
+{
+    void* pInitWeChatContactItem = reinterpret_cast<void*>(wxApis.InitWeChatContactItem);
+
+    if (!pInitWeChatContactItem || !contactItem) {
+        return false;
+    }
+
+    __asm {
+		mov ecx, contactItem
+		call pInitWeChatContactItem
+    }
+
+    return true;
+}
+
+bool wxbox::crack::DeinitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem)
+{
+    void* pDeinitWeChatContactItem = reinterpret_cast<void*>(wxApis.DeinitWeChatContactItem);
+
+    if (!pDeinitWeChatContactItem || !contactItem) {
+        return false;
+    }
+
+    __asm {
+		mov ecx, contactItem
+		call pDeinitWeChatContactItem
+    }
+
+    return true;
+}
+
+static inline bool Inner_CollectSingleContact(uint8_t* contactItemData, wxbox::crack::wx::WeChatContact& contact)
+{
+    wb_wx::PWeChatWString wxidStringStruct     = WECHAT_CONTACT_ITEM_WXID(contactItemData);
+    wb_wx::PWeChatWString wxnumberStringStruct = WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
+    wb_wx::PWeChatWString remarkStringStruct   = WECHAT_CONTACT_ITEM_REMARK(contactItemData);
+    wb_wx::PWeChatWString nicknameStringStruct = WECHAT_CONTACT_ITEM_NICKNAME(contactItemData);
+
+    if (wxidStringStruct && wxidStringStruct->str && wxidStringStruct->length) {
+        contact.wxid = wb_string::ToString(wxidStringStruct->str);
+    }
+
+    if (wxnumberStringStruct && wxnumberStringStruct->str && wxnumberStringStruct->length) {
+        contact.wxnumber = wb_string::ToString(wxnumberStringStruct->str);
+    }
+
+    if (remarkStringStruct && remarkStringStruct->str && remarkStringStruct->length) {
+        contact.remark = wb_string::ToString(remarkStringStruct->str);
+    }
+
+    if (nicknameStringStruct && nicknameStringStruct->str && nicknameStringStruct->length) {
+        contact.nickname = wb_string::ToString(nicknameStringStruct->str);
+    }
+
+    contact.chatroom = (!contact.wxid.empty() && contact.wxid.rfind("@chatroom") != std::string::npos);
+
+    return true;
+}
+
+typedef struct _Inner_CollectAllContact_below_3_5_0_46_Parameter
+{
+    wb_wx::PWeChatContactItem_below_3_5_0_46      end;
+    ucpulong_t                                    weChatContactDataBeginOffset;
+    std::vector<wxbox::crack::wx::WeChatContact>& contacts;
+
+    _Inner_CollectAllContact_below_3_5_0_46_Parameter(wb_wx::PWeChatContactItem_below_3_5_0_46 end, ucpulong_t weChatContactDataBeginOffset, std::vector<wxbox::crack::wx::WeChatContact>& contacts)
+      : end(end)
+      , weChatContactDataBeginOffset(weChatContactDataBeginOffset)
+      , contacts(contacts)
+    {
+    }
+} Inner_CollectAllContact_below_3_5_0_46_Parameter;
+
+static void Inner_CollectAllContact_below_3_5_0_46_Do(wb_wx::PWeChatContactItem_below_3_5_0_46 item, Inner_CollectAllContact_below_3_5_0_46_Parameter& parameter)
+{
+    if (!item || item == parameter.end) {
+        return;
+    }
+
+    wxbox::crack::wx::WeChatContact contact;
+    if (Inner_CollectSingleContact(((uint8_t*)item) + parameter.weChatContactDataBeginOffset, contact)) {
+        parameter.contacts.emplace_back(std::move(contact));
+    }
+
+    Inner_CollectAllContact_below_3_5_0_46_Do(item->left, parameter);
+    Inner_CollectAllContact_below_3_5_0_46_Do(item->right, parameter);
+}
+
+static bool Inner_CollectAllContact_below_3_5_0_46(uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, std::vector<wxbox::crack::wx::WeChatContact>& contacts)
+{
+    wb_wx::PWeChatContactHeader_below_3_5_0_46 contactHeader = (wb_wx::PWeChatContactHeader_below_3_5_0_46)contactHeaderAddress;
+
+    Inner_CollectAllContact_below_3_5_0_46_Parameter parameter((wb_wx::PWeChatContactItem_below_3_5_0_46)contactHeader, weChatContactDataBeginOffset, contacts);
+    Inner_CollectAllContact_below_3_5_0_46_Do(contactHeader->begin, parameter);
+    return true;
+}
+
+static bool Inner_CollectAllContact_above_3_5_0_46(uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, std::vector<wxbox::crack::wx::WeChatContact>& contacts)
+{
+    wb_wx::PWeChatContactHeader_above_3_5_0_46 contactHeader = (wb_wx::PWeChatContactHeader_above_3_5_0_46)contactHeaderAddress;
+    wb_wx::PWeChatContactItem_above_3_5_0_46   cursor        = contactHeader->begin;
+
+    while (cursor) {
+        wxbox::crack::wx::WeChatContact contact;
+        if (Inner_CollectSingleContact(((uint8_t*)cursor) + weChatContactDataBeginOffset, contact)) {
+            contacts.emplace_back(std::move(contact));
+        }
+
+        if (cursor == contactHeader->end) {
+            break;
+        }
+
+        cursor = cursor->next;
+    }
+
+    return true;
+}
+
+bool wxbox::crack::CollectAllContact(const PWxBotEntryParameter args, std::vector<wxbox::crack::wx::WeChatContact>& contacts)
+{
+    if (!args) {
+        return false;
+    }
+
+    uint8_t* contactHeaderAddress = FetchContactHeaderAddress(args->wechat_apis, args->wechat_datastructure_supplement);
+    if (!contactHeaderAddress || !args->wechat_datastructure_supplement.weChatContactDataBeginOffset) {
+        return false;
+    }
+
+    wb_file::VersionNumber v3_5_0_46;
+    if (!wb_file::UnwindVersionNumber("3.5.0.46", v3_5_0_46)) {
+        return false;
+    }
+
+    wb_file::VersionNumber versionNumber;
+    if (!wb_file::UnwindVersionNumber(args->wechat_version, versionNumber)) {
+        return false;
+    }
+
+    if (versionNumber < v3_5_0_46) {
+        return Inner_CollectAllContact_below_3_5_0_46(contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contacts);
+    }
+    else {
+        return Inner_CollectAllContact_above_3_5_0_46(contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contacts);
+    }
+}
+
+typedef struct _Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter
+{
+    const std::string&                       wxnumber;
+    wb_wx::PWeChatContactItem_below_3_5_0_46 end;
+    ucpulong_t                               weChatContactDataBeginOffset;
+    wxbox::crack::wx::WeChatContact&         contact;
+
+    _Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter(const std::string& wxnumber, wb_wx::PWeChatContactItem_below_3_5_0_46 end, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
+      : wxnumber(wxnumber)
+      , end(end)
+      , weChatContactDataBeginOffset(weChatContactDataBeginOffset)
+      , contact(contact)
+    {
+    }
+} Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter;
+
+static bool Inner_GetContactWithWxNumber_below_3_5_0_46_Do(wb_wx::PWeChatContactItem_below_3_5_0_46 item, Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter& parameter)
+{
+    if (!item || item == parameter.end) {
+        return false;
+    }
+
+    uint8_t*              contactItemData      = ((uint8_t*)item) + parameter.weChatContactDataBeginOffset;
+    wb_wx::PWeChatWString wxnumberStringStruct = WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
+
+    if (wxnumberStringStruct && wxnumberStringStruct->str && wxnumberStringStruct->length) {
+        if (!wb_string::ToString(wxnumberStringStruct->str).compare(parameter.wxnumber)) {
+            Inner_CollectSingleContact(contactItemData, parameter.contact);
+            return true;
+        }
+    }
+
+    if (Inner_GetContactWithWxNumber_below_3_5_0_46_Do(item->left, parameter)) {
+        return true;
+    }
+
+    if (Inner_GetContactWithWxNumber_below_3_5_0_46_Do(item->right, parameter)) {
+        return true;
+    }
+
+    return false;
+}
+
+static bool Inner_GetContactWithWxNumber_below_3_5_0_46(const std::string& wxnumber, uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
+{
+    wb_wx::PWeChatContactHeader_below_3_5_0_46 contactHeader = (wb_wx::PWeChatContactHeader_below_3_5_0_46)contactHeaderAddress;
+
+    Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter parameter(wxnumber, (wb_wx::PWeChatContactItem_below_3_5_0_46)contactHeader, weChatContactDataBeginOffset, contact);
+    return Inner_GetContactWithWxNumber_below_3_5_0_46_Do(contactHeader->begin, parameter);
+}
+
+static bool Inner_GetContactWithWxNumber_above_3_5_0_46(const std::string& wxnumber, uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
+{
+    wb_wx::PWeChatContactHeader_above_3_5_0_46 contactHeader = (wb_wx::PWeChatContactHeader_above_3_5_0_46)contactHeaderAddress;
+    wb_wx::PWeChatContactItem_above_3_5_0_46   cursor        = contactHeader->begin;
+
+    while (cursor) {
+        uint8_t*              contactItemData      = ((uint8_t*)cursor) + weChatContactDataBeginOffset;
+        wb_wx::PWeChatWString wxnumberStringStruct = WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
+
+        if (wxnumberStringStruct && wxnumberStringStruct->str && wxnumberStringStruct->length) {
+            if (!wb_string::ToString(wxnumberStringStruct->str).compare(wxnumber)) {
+                return Inner_CollectSingleContact(contactItemData, contact);
+            }
+        }
+
+        if (cursor == contactHeader->end) {
+            break;
+        }
+
+        cursor = cursor->next;
+    }
+
+    return false;
+}
+
+bool wxbox::crack::GetContactWithWxNumber(const std::string& wxnumber, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact)
+{
+    if (wxnumber.empty() || !args) {
+        return false;
+    }
+
+    uint8_t* contactHeaderAddress = FetchContactHeaderAddress(args->wechat_apis, args->wechat_datastructure_supplement);
+    if (!contactHeaderAddress || !args->wechat_datastructure_supplement.weChatContactDataBeginOffset) {
+        return false;
+    }
+
+    wb_file::VersionNumber v3_5_0_46;
+    if (!wb_file::UnwindVersionNumber("3.5.0.46", v3_5_0_46)) {
+        return false;
+    }
+
+    wb_file::VersionNumber versionNumber;
+    if (!wb_file::UnwindVersionNumber(args->wechat_version, versionNumber)) {
+        return false;
+    }
+
+    if (versionNumber < v3_5_0_46) {
+        return Inner_GetContactWithWxNumber_below_3_5_0_46(wxnumber, contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contact);
+    }
+    else {
+        return Inner_GetContactWithWxNumber_above_3_5_0_46(wxnumber, contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contact);
+    }
+}
+
+static bool Inner_FindAndDeepCopyWeChatContactItemWithWXIDWrapper_below_3_5_0_46(void* pFindAndDeepCopyWeChatContactItemWithWXIDWrapper, uint8_t* globalContactContext, void* contactItem, wb_wx::PWeChatWString pWxidString)
+{
+    bool result = false;
+
+    __asm {
+		push contactItem
+		push pWxidString
+		mov ecx, globalContactContext
+		call pFindAndDeepCopyWeChatContactItemWithWXIDWrapper
+		mov result, al
+    }
+
+    return result;
+}
+
+static bool Inner_FindAndDeepCopyWeChatContactItemWithWXIDWrapper_above_3_5_0_46(void* pFindAndDeepCopyWeChatContactItemWithWXIDWrapper, uint8_t* globalContactContext, void* contactItem, wb_wx::PWeChatWString pWxidString)
+{
+    bool     result = false;
+    wchar_t* p      = pWxidString->str;
+    uint32_t len    = pWxidString->length;
+
+    __asm {
+		push contactItem
+		push 0
+		push 0
+		push len
+		push len
+		push p
+		mov ecx, globalContactContext
+		call pFindAndDeepCopyWeChatContactItemWithWXIDWrapper
+		mov result, al
+    }
+
+    return result;
+}
+
+bool wxbox::crack::GetContactWithWxid(const std::string& wxid, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact)
+{
+    if (wxid.empty() || !args || !args->wechat_apis.FindAndDeepCopyWeChatContactItemWithWXIDWrapper) {
+        return false;
+    }
+
+    //
+    // compare wechat version number
+    //
+
+    wb_file::VersionNumber v3_5_0_46;
+    if (!wb_file::UnwindVersionNumber("3.5.0.46", v3_5_0_46)) {
+        return false;
+    }
+
+    wb_file::VersionNumber versionNumber;
+    if (!wb_file::UnwindVersionNumber(args->wechat_version, versionNumber)) {
+        return false;
+    }
+
+    bool below_3_5_0_46 = versionNumber < v3_5_0_46;
+
+    //
+    // get global contact context
+    //
+
+    uint8_t* globalContactContext = FetchWeChatGlobalContactContextAddress(args->wechat_apis);
+    if (!globalContactContext || !args->wechat_datastructure_supplement.weChatContactHeaderItemOffset) {
+        return false;
+    }
+
+    //
+    // allocate contact buffer
+    //
+
+    std::unique_ptr<uint8_t[]> contactBuffer = std::make_unique<uint8_t[]>(args->wechat_datastructure_supplement.weChatContactDataBeginOffset + 0x1000);
+    if (!contactBuffer) {
+        return false;
+    }
+
+    // calc contact item start position
+    uint8_t* contactItem = contactBuffer.get() + args->wechat_datastructure_supplement.weChatContactDataBeginOffset;
+
+    // init contact item
+    if (!InitWeChatContactItem(args->wechat_apis, contactItem)) {
+        return false;
+    }
+
+    //
+    // build wxid string struct
+    //
+
+    std::wstring         wWxidStr = wb_string::ToWString(wxid);
+    wb_wx::WeChatWString wxidStr;
+    wxidStr.str      = const_cast<wchar_t*>(wWxidStr.c_str());
+    wxidStr.length   = wWxidStr.length();
+    wxidStr.length2  = wxidStr.length;
+    wxidStr.unknown1 = 0;
+    wxidStr.unknown2 = 0;
+
+    //
+    // call FindAndDeepCopyWeChatContactItemWithWXIDWrapper
+    //
+
+    bool  success                                          = false;
+    void* pFindAndDeepCopyWeChatContactItemWithWXIDWrapper = reinterpret_cast<void*>(args->wechat_apis.FindAndDeepCopyWeChatContactItemWithWXIDWrapper);
+
+    if (below_3_5_0_46) {
+        success = Inner_FindAndDeepCopyWeChatContactItemWithWXIDWrapper_below_3_5_0_46(pFindAndDeepCopyWeChatContactItemWithWXIDWrapper, globalContactContext, contactItem, &wxidStr);
+    }
+    else {
+        success = Inner_FindAndDeepCopyWeChatContactItemWithWXIDWrapper_above_3_5_0_46(pFindAndDeepCopyWeChatContactItemWithWXIDWrapper, globalContactContext, contactItem, &wxidStr);
+    }
+
+    if (!success) {
+        DeinitWeChatContactItem(args->wechat_apis, contactItem);
+        return false;
+    }
+
+    // record contact
+    success = Inner_CollectSingleContact(contactItem, contact);
+
+    DeinitWeChatContactItem(args->wechat_apis, contactItem);
+    return success;
 }

@@ -377,6 +377,8 @@ namespace wxbox {
             {
                 WxProfileItemOffset profileItemOffset;
                 ucpulong_t          logoutTriggerEventId;
+                ucpulong_t          weChatContactHeaderItemOffset;
+                ucpulong_t          weChatContactDataBeginOffset;
             } WxDataStructSupplement, *PWxDataStructSupplement;
 
             PRAGMA(pack(pop))

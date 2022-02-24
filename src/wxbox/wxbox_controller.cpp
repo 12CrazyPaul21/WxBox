@@ -185,6 +185,7 @@ bool WxBoxController::StartWeChatInstance()
         strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
         wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
         wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
+        strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxEnvInfo.version.c_str());
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
         wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
@@ -266,9 +267,10 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
         wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
         wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
+        strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxProcessEnvInfo.wxEnvInfo.version.c_str());
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
-        wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
+        wxApiFeatures.ObtainDataStructureSupplement(wxProcessEnvInfo.wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
 
         // log wx core module info
         spdlog::info("Inject to WeChat Process(PID : {})", pid);
@@ -498,6 +500,19 @@ void WxBoxController::RequstLogoutWeChat(wb_process::PID clientPID)
     wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
     msg.pid = clientPID;
     msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::LOGOUT_WECHAT_REQUEST);
+    PushMessageAsync(std::move(msg));
+}
+
+void WxBoxController::RequstAllContact(wb_process::PID clientPID)
+{
+    auto clientStatusItem = view->wxStatusModel.get(clientPID);
+    if (!clientStatusItem || !clientStatusItem->logined) {
+        return;
+    }
+
+    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
+    msg.pid = clientPID;
+    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::ALL_CONTACT_REQUEST);
     PushMessageAsync(std::move(msg));
 }
 

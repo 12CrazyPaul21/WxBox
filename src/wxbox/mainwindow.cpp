@@ -130,6 +130,7 @@ void MainWindow::InitAppMenu()
     clientItemContextMenu.pushAction("uninject");
     clientItemContextMenu.pushAction("refresh profile");
     clientItemContextMenu.pushAction("logout");
+    clientItemContextMenu.pushAction("all contact");
 }
 
 void MainWindow::InitAppTray()
@@ -192,6 +193,9 @@ void MainWindow::RegisterWidgetEventHandler()
         });
         clientItemContextMenu.connectAction("logout", this, [this, pid]() {
             controller.RequstLogoutWeChat(pid);
+        });
+        clientItemContextMenu.connectAction("all contact", this, [this, pid]() {
+            controller.RequstAllContact(pid);
         });
         clientItemContextMenu.popup(this->ui->viewWeChatStatus->viewport()->mapToGlobal(pos));
     });

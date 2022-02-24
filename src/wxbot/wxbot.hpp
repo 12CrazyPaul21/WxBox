@@ -83,6 +83,7 @@ namespace wxbot {
         //
 
         void ResponseProfile();
+        void ResponseAllContact();
 
       private:
         std::unique_ptr<wb_crack::WxBotEntryParameter> args;

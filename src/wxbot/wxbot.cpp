@@ -322,6 +322,11 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
             }
             break;
         }
+
+        case wxbox::ControlPacketType::ALL_CONTACT_REQUEST: {
+            ResponseAllContact();
+            break;
+        }
     }
 }
 
@@ -353,6 +358,28 @@ void wxbot::WxBot::ResponseProfile()
     profileResponse->set_wxid(profile.wxid);
 
     client->PushMessageAsync(std::move(msg));
+}
+
+void wxbot::WxBot::ResponseAllContact()
+{
+    std::vector<wxbox::crack::wx::WeChatContact> contacts;
+    if (!wb_crack::CollectAllContact(args.get(), contacts)) {
+        return;
+    }
+
+    if (contacts.empty()) {
+        return;
+    }
+
+    wxbox::crack::wx::WeChatContact c1;
+    if (!wb_crack::GetContactWithWxNumber("woshizhiqino", args.get(), c1)) {
+        return;
+    }
+
+    wxbox::crack::wx::WeChatContact c2;
+    if (!wb_crack::GetContactWithWxid("wxid_zk4tzr9uk8z321", args.get(), c2)) {
+        return;
+    }
 }
 
 //

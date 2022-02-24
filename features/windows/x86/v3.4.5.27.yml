@@ -191,3 +191,5 @@ datastructure:
       WeChatNumber: 0x500
       Wxid: 0x518
     WeChatLogoutTriggerEventId: 0x31F
+    WeChatContactHeaderItemOffset: 0xBC
+    WeChatContactDataBeginOffset: 0x28

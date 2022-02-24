@@ -83,6 +83,10 @@ namespace wxbox {
                 }
             } WeChatProcessEnvironmentInfo, *PWeChatProcessEnvironmentInfo;
 
+            //
+            // WeChat Profile
+            //
+
             typedef struct _WeChatProfile
             {
                 bool        logined;
@@ -121,11 +125,91 @@ namespace wxbox {
             } WeChatProfile, *PWeChatProfile;
 
             //
+            // WeChat Contact
+            //
+
+            typedef struct _WeChatWString
+            {
+                wchar_t* str;
+                uint32_t length;
+                uint32_t length2;
+                uint32_t unknown1;
+                uint32_t unknown2;
+            } WeChatWString, *PWeChatWString;
+
+            typedef struct _WeChatContactItem_below_3_5_0_46
+            {
+                _WeChatContactItem_below_3_5_0_46* left;
+                _WeChatContactItem_below_3_5_0_46* parent;
+                _WeChatContactItem_below_3_5_0_46* right;
+            } WeChatContactItem_below_3_5_0_46, *PWeChatContactItem_below_3_5_0_46;
+
+            typedef struct _WeChatContactHeader_below_3_5_0_46
+            {
+                PWeChatContactItem_below_3_5_0_46 _left;
+                PWeChatContactItem_below_3_5_0_46 begin;
+                PWeChatContactItem_below_3_5_0_46 _right;
+            } WeChatContactHeader_below_3_5_0_46, *PWeChatContactHeader_below_3_5_0_46;
+
+            typedef struct _WeChatContactItem_above_3_5_0_46
+            {
+                _WeChatContactItem_above_3_5_0_46* next;
+                _WeChatContactItem_above_3_5_0_46* prev;
+            } WeChatContactItem_above_3_5_0_46, *PWeChatContactItem_above_3_5_0_46;
+
+            typedef struct _WeChatContactHeader_above_3_5_0_46
+            {
+                PWeChatContactItem_above_3_5_0_46 begin;
+                PWeChatContactItem_above_3_5_0_46 end;
+            } WeChatContactHeader_above_3_5_0_46, *PWeChatContactHeader_above_3_5_0_46;
+
+            // """ utf8 format """
+            typedef struct _WeChatContact
+            {
+                bool        chatroom;
+                std::string nickname;
+                std::string wxnumber;
+                std::string wxid;
+                std::string remark;
+
+                _WeChatContact()
+                  : chatroom(false)
+                {
+                }
+
+                _WeChatContact(bool chatroom, const std::string& nickname, const std::string& wxnumber, const std::string& wxid, const std::string& remark)
+                  : chatroom(chatroom)
+                  , nickname(nickname)
+                  , wxnumber(wxnumber)
+                  , wxid(wxid)
+                  , remark(remark)
+                {
+                }
+
+                SETUP_COPY_METHOD(_WeChatContact, other)
+                {
+                    chatroom = other.chatroom;
+                    nickname = other.nickname;
+                    wxnumber = other.wxnumber;
+                    wxid     = other.wxid;
+                    remark   = other.remark;
+                }
+
+                SETUP_MOVE_METHOD(_WeChatContact, other)
+                {
+                    chatroom = other.chatroom;
+                    nickname = std::move(other.nickname);
+                    wxnumber = std::move(other.wxnumber);
+                    wxid     = std::move(other.wxid);
+                    remark   = std::move(other.remark);
+                }
+            } WeChatContact, *PWeChatContact;
+
+            //
             // Function
             //
 
-            std::string
-                        GetWxInstallationPath();
+            std::string GetWxInstallationPath();
             std::string GetWxModuleFolderPath(const std::string& installPath);
 
             std::string GetWxVersion(const std::string& moduleFolderPath);
@@ -145,5 +229,15 @@ namespace wxbox {
         }
     }
 }
+
+#define WECHAT_CONTACT_ITEM_WXID_OFFSET 0x10
+#define WECHAT_CONTACT_ITEM_WXNUMBER_OFFSET 0x24
+#define WECHAT_CONTACT_ITEM_REMARK_OFFSET 0x58
+#define WECHAT_CONTACT_ITEM_NICKNAME_OFFSET 0x6C
+
+#define WECHAT_CONTACT_ITEM_WXID(CONTACT_ITEM) ((wb_wx::PWeChatWString)(reinterpret_cast<uint8_t*>(CONTACT_ITEM) + WECHAT_CONTACT_ITEM_WXID_OFFSET))
+#define WECHAT_CONTACT_ITEM_WXNUMBER(CONTACT_ITEM) ((wb_wx::PWeChatWString)(reinterpret_cast<uint8_t*>(CONTACT_ITEM) + WECHAT_CONTACT_ITEM_WXNUMBER_OFFSET))
+#define WECHAT_CONTACT_ITEM_REMARK(CONTACT_ITEM) ((wb_wx::PWeChatWString)(reinterpret_cast<uint8_t*>(CONTACT_ITEM) + WECHAT_CONTACT_ITEM_REMARK_OFFSET))
+#define WECHAT_CONTACT_ITEM_NICKNAME(CONTACT_ITEM) ((wb_wx::PWeChatWString)(reinterpret_cast<uint8_t*>(CONTACT_ITEM) + WECHAT_CONTACT_ITEM_NICKNAME_OFFSET))
 
 #endif  // #ifndef __WXBOX_CRACK_WX_H

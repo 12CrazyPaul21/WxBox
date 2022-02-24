@@ -54,6 +54,7 @@ namespace wxbox {
             char                                          wxbox_server_uri[WXBOX_MAX_PATH];
             int                                           wxbot_reconnect_interval;
             int                                           plugin_long_task_timeout;
+            char                                          wechat_version[WXBOX_MAX_PATH];
             WxApis                                        wechat_apis;
             wxbox::crack::feature::WxDataStructSupplement wechat_datastructure_supplement;
         } WxBotEntryParameter, *PWxBotEntryParameter;
@@ -110,6 +111,14 @@ namespace wxbox {
         bool FetchProfile(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement, wxbox::crack::wx::WeChatProfile& profile);
 
         bool Logout(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
+
+        uint8_t* FetchWeChatGlobalContactContextAddress(const WxApis& wxApis);
+        uint8_t* FetchContactHeaderAddress(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
+        bool     InitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem);
+        bool     DeinitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem);
+        bool     CollectAllContact(const PWxBotEntryParameter args, std::vector<wxbox::crack::wx::WeChatContact>& contacts);
+        bool     GetContactWithWxNumber(const std::string& wxnumber, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
+        bool     GetContactWithWxid(const std::string& wxid, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
     }
 }
 

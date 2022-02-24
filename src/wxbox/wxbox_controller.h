@@ -79,6 +79,7 @@ class WxBoxController final : public QObject
 
     void RequestProfile(wb_process::PID clientPID);
     void RequstLogoutWeChat(wb_process::PID clientPID);
+    void RequstAllContact(wb_process::PID clientPID);
 
     //
     // WxBoxServer Response Handler

@@ -31,6 +31,7 @@ enum ControlPacketType {
     PROFILE_RESPONSE = 3;
     UNINJECT_WXBOT_REQUEST = 4;
     LOGOUT_WECHAT_REQUEST = 5;
+    ALL_CONTACT_REQUEST = 6;
 }
 
 message HandshakeRequest {

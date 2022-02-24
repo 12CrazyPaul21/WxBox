@@ -272,6 +272,26 @@ static inline bool UnwindWxDataStructSupplement(const YAML::Node& dataSupplement
 
     wxDataStructSupplement.logoutTriggerEventId = dataSupplement["WeChatLogoutTriggerEventId"].as<ucpulong_t>();
 
+    //
+    // WeChatContactHeaderItemOffset
+    //
+
+    if (!dataSupplement["WeChatContactHeaderItemOffset"].IsScalar()) {
+        return false;
+    }
+
+    wxDataStructSupplement.weChatContactHeaderItemOffset = dataSupplement["WeChatContactHeaderItemOffset"].as<ucpulong_t>();
+
+    //
+    // WeChatContactDataBeginOffset
+    //
+
+    if (!dataSupplement["WeChatContactDataBeginOffset"].IsScalar()) {
+        return false;
+    }
+
+    wxDataStructSupplement.weChatContactDataBeginOffset = dataSupplement["WeChatContactDataBeginOffset"].as<ucpulong_t>();
+
     return true;
 }
 
