@@ -56,6 +56,66 @@ static inline std::string GetWxModuleFolderPath_Windows(const std::string& insta
     return std::get<1>(newerModuleInfo);
 }
 
+typedef struct _RaiseWeChatWindowToForeground_EnumWindowProc_Parameter
+{
+    wb_process::PID pid;
+    HWND&           hWndWeChat;
+    bool            findMainWindow;
+} RaiseWeChatWindowToForeground_EnumWindowProc_Parameter, *PRaiseWeChatWindowToForeground_EnumWindowProc_Parameter;
+
+static BOOL CALLBACK RaiseWeChatWindowToForeground_EnumWindowProc(HWND hWnd, LPARAM lParam)
+{
+    PRaiseWeChatWindowToForeground_EnumWindowProc_Parameter parameter = reinterpret_cast<PRaiseWeChatWindowToForeground_EnumWindowProc_Parameter>(lParam);
+    if (!parameter) {
+        return FALSE;
+    }
+
+    DWORD dwPid = 0;
+    GetWindowThreadProcessId(hWnd, &dwPid);
+    if (dwPid != parameter->pid) {
+        return TRUE;
+    }
+
+    char wndClassName[MAX_PATH] = {0};
+    if (!GetClassNameA(hWnd, wndClassName, sizeof(wndClassName))) {
+        return TRUE;
+    }
+
+    if (parameter->findMainWindow && !strcmp(wndClassName, WX_WE_CHAT_MAIN_WINDOW_CLASS_NAME)) {
+        parameter->hWndWeChat = hWnd;
+        return FALSE;
+    }
+
+    if (!parameter->findMainWindow && !strcmp(wndClassName, WX_WE_CHAT_LOGIN_WINDOW_CLASS_NAME)) {
+        parameter->hWndWeChat = hWnd;
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static bool RaiseWeChatWindowToForeground_Windows(const wb_process::PID& pid)
+{
+    HWND                                                   hWnd = NULL;
+    RaiseWeChatWindowToForeground_EnumWindowProc_Parameter parameter{pid, hWnd, true};
+
+    // try to find main window
+    ::EnumWindows(RaiseWeChatWindowToForeground_EnumWindowProc, (LPARAM)&parameter);
+    if (!hWnd) {
+        // try to find login window
+        parameter.findMainWindow = false;
+        ::EnumWindows(RaiseWeChatWindowToForeground_EnumWindowProc, (LPARAM)&parameter);
+        if (!hWnd) {
+            return false;
+        }
+    }
+
+    ShowWindow(hWnd, SW_SHOWNORMAL);
+    SetActiveWindow(hWnd);
+    SetForegroundWindow(hWnd);
+    return true;
+}
+
 #elif WXBOX_IN_MAC_OS
 
 static inline std::string GetWxInstallationPath_Mac()
@@ -68,6 +128,12 @@ static inline std::string GetWxModuleFolderPath_Mac(const std::string& installPa
 {
     throw std::exception("GetWxModuleFolderPath_Mac stub");
     return "";
+}
+
+static bool RaiseWeChatWindowToForeground_Mac(const wb_process::PID& pid)
+{
+    throw std::exception("RaiseWeChatWindowToForeground_Mac stub");
+    return false;
 }
 
 #endif
@@ -264,4 +330,13 @@ bool wxbox::crack::wx::CheckWeChatProcessValid(wxbox::util::process::PID pid)
     }
 
     return !::_stricmp(pi.filename.c_str(), WX_WE_CHAT_EXE);
+}
+
+bool wxbox::crack::wx::RaiseWeChatWindowToForeground(const wb_process::PID& pid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return RaiseWeChatWindowToForeground_Windows(pid);
+#elif WXBOX_IN_MAC_OS
+    return RaiseWeChatWindowToForeground_Mac(pid);
+#endif
 }

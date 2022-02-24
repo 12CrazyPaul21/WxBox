@@ -291,6 +291,10 @@
         <translation>卸载WxBot模块</translation>
     </message>
     <message>
+        <source>Raise To Foreground</source>
+        <translation>切到前台</translation>
+    </message>
+    <message>
         <source>Show Feature Info</source>
         <translation>查看注入特征信息</translation>
     </message>

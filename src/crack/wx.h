@@ -12,9 +12,13 @@ namespace wxbox {
 #if WXBOX_IN_WINDOWS_OS
 #define WX_WE_CHAT_EXE "WeChat.exe"
 #define WX_WE_CHAT_CORE_MODULE "WeChatWin.dll"
+#define WX_WE_CHAT_MAIN_WINDOW_CLASS_NAME "WeChatMainWndForPC"
+#define WX_WE_CHAT_LOGIN_WINDOW_CLASS_NAME "WeChatLoginWndForPC"
 #elif WXBOX_IN_MAC_OS
 #define WX_WE_CHAT_EXE ""
 #define WX_WE_CHAT_CORE_MODULE ""
+#define WX_WE_CHAT_MAIN_WINDOW_CLASS_NAME ""
+#define WX_WE_CHAT_LOGIN_WINDOW_CLASS_NAME ""
 #endif
 
             //
@@ -226,6 +230,8 @@ namespace wxbox {
             std::vector<wxbox::util::process::ProcessInfo> GetWeChatProcessList();
             std::vector<wxbox::util::process::PID>         GetWeChatProcessIdList();
             bool                                           CheckWeChatProcessValid(wxbox::util::process::PID pid);
+
+            bool RaiseWeChatWindowToForeground(const wxbox::util::process::PID& pid);
         }
     }
 }

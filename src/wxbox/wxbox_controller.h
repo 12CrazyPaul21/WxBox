@@ -49,6 +49,7 @@ class WxBoxController final : public QObject
     bool StartWeChatInstance();
     bool InjectWxBotModule(wb_process::PID pid);
     bool UnInjectWxBotModule(wb_process::PID pid);
+    void RaiseClientWindowToForeground(wb_process::PID pid);
     void DisplayClientInjectArgs(wb_process::PID pid);
 
   private:

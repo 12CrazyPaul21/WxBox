@@ -291,6 +291,10 @@
         <translation>UnInject</translation>
     </message>
     <message>
+        <source>Raise To Foreground</source>
+        <translation>Raise To Foreground</translation>
+    </message>
+    <message>
         <source>Show Feature Info</source>
         <translation>Show Feature Info</translation>
     </message>

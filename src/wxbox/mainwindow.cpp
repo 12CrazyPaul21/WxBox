@@ -129,6 +129,7 @@ void MainWindow::InitAppMenu()
     // client item context menu
     clientItemContextMenu.pushAction("Inject");
     clientItemContextMenu.pushAction("UnInject");
+    clientItemContextMenu.pushAction("Raise To Foreground");
     clientItemContextMenu.pushAction("Show Feature Info");
     clientItemContextMenu.pushSeparator();
     clientItemContextMenu.pushAction("Copy NickName");
@@ -257,6 +258,10 @@ void MainWindow::RegisterWidgetEventHandler()
             clientItemContextMenu.disable("All Contact");
             clientItemContextMenu.disable("Logout");
         }
+
+        clientItemContextMenu.connectAction("Raise To Foreground", this, [this, pid]() {
+            controller.RaiseClientWindowToForeground(pid);
+        });
 
         clientItemContextMenu.popup(this->ui->viewWeChatStatus->viewport()->mapToGlobal(pos));
     });

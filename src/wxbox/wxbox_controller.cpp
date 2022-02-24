@@ -325,6 +325,11 @@ bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
     return true;
 }
 
+void WxBoxController::RaiseClientWindowToForeground(wb_process::PID pid)
+{
+    wb_wx::RaiseWeChatWindowToForeground(pid);
+}
+
 void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
 {
     if (clientInjectArgs.find(pid) == clientInjectArgs.end()) {
