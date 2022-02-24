@@ -83,14 +83,16 @@ class WxBoxController final : public QObject
     void RequestProfile(wb_process::PID clientPID);
     void RequstLogoutWeChat(wb_process::PID clientPID);
     void RequstAllContact(wb_process::PID clientPID);
+    void RequestExecutePluginScript(wb_process::PID clientPID, const std::string& statement);
 
     //
     // WxBoxServer Response Handler
     //
 
-    void InjectArgsResponseHandle(wb_process::PID clientPID, wxbox::InjectArgsResponse* response);
+    void InjectArgsResponseHandler(wb_process::PID clientPID, wxbox::InjectArgsResponse* response);
     void ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response);
     void AllContactResponseHandler(wb_process::PID clientPID, wxbox::AllContactResponse* response);
+    void ExecutePluginScriptResponseHandler(wb_process::PID clientPID, wxbox::ExecutePluginScriptResponse* response);
 
   signals:
     void PushMessageAsync(wxbox::WxBoxMessage message);

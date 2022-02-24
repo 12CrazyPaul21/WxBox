@@ -97,3 +97,24 @@ QMenu::right-arrow:selected {
     font: normal bold 14px "Microsoft YaHei";
     color: white;
 }
+
+#labelCommandPrefix {
+    font: normal bold 12px "Microsoft YaHei";
+    color: white;
+}
+
+#lineCommand {
+    font: normal bold 12px "Microsoft YaHei";
+}
+
+#viewCommandExecuteLogger {
+    font: normal bold 12px "Microsoft YaHei";
+}
+
+#viewWeChatStatus::item:selected:active {
+    selection-background-color: rgb(51, 133, 255);
+}
+
+#viewWeChatStatus::item:selected:!active {
+    selection-background-color: rgb(51, 133, 255);
+}

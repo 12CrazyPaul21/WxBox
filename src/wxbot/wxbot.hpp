@@ -61,6 +61,12 @@ namespace wxbot {
         bool GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact);
         bool GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact);
 
+        //
+        // Plugin API
+        //
+
+        std::string ExecutePluginScript(const std::string& statement);
+
       private:
         void PreHookWeChat();
         void ReleasePreHookWeChatHookPoint();
@@ -92,6 +98,7 @@ namespace wxbot {
         void ResponseInjectArgs();
         void ResponseProfile();
         void ResponseAllContact();
+        void ResponseExecutePluginResult(const std::string& result);
 
       private:
         std::unique_ptr<wb_crack::WxBotEntryParameter> args;

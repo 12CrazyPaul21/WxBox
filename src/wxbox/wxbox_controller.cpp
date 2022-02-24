@@ -567,7 +567,12 @@ void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message
         }
 
         case wxbox::ControlPacketType::INJECT_ARGS_RESPONSE: {
-            InjectArgsResponseHandle(message.pid, message.u.wxBotControlPacket.mutable_injectargsresponse());
+            InjectArgsResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_injectargsresponse());
+            break;
+        }
+
+        case wxbox::ControlPacketType::EXECUTE_PLUGIN_SCRIPT_RESPONSE: {
+            ExecutePluginScriptResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_executepluginscriptresponse());
             break;
         }
     }
@@ -619,11 +624,23 @@ void WxBoxController::RequstAllContact(wb_process::PID clientPID)
     PushMessageAsync(std::move(msg));
 }
 
+void WxBoxController::RequestExecutePluginScript(wb_process::PID clientPID, const std::string& statement)
+{
+    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
+    msg.pid = clientPID;
+    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::EXECUTE_PLUGIN_SCRIPT_REQUEST);
+
+    auto executePluginScriptRequest = msg.u.wxBoxControlPacket.mutable_executepluginscriptrequest();
+    executePluginScriptRequest->set_statement(statement.c_str());
+
+    PushMessageAsync(std::move(msg));
+}
+
 //
 // WxBoxServer Response Handler
 //
 
-void WxBoxController::InjectArgsResponseHandle(wb_process::PID clientPID, wxbox::InjectArgsResponse* response)
+void WxBoxController::InjectArgsResponseHandler(wb_process::PID clientPID, wxbox::InjectArgsResponse* response)
 {
     const std::string& pInjectArgsResponseBuffer = response->args();
     if (pInjectArgsResponseBuffer.empty() || pInjectArgsResponseBuffer.size() != sizeof(wb_crack::WxBotEntryParameter)) {
@@ -669,4 +686,13 @@ void WxBoxController::AllContactResponseHandler(wb_process::PID clientPID, wxbox
     }
 
     view->contactListDialog.DisplayContactList(client->wxnumber, contacts);
+}
+
+void WxBoxController::ExecutePluginScriptResponseHandler(wb_process::PID clientPID, wxbox::ExecutePluginScriptResponse* response)
+{
+    if (!response) {
+        return;
+    }
+
+    view->AppendExecuteCommandResult(QString("[<font color=\"blue\">%1</font>] : %2").arg(clientPID).arg(response->result().c_str()));
 }

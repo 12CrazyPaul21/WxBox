@@ -181,6 +181,15 @@ bool wxbot::WxBot::GetContactWithWxid(const std::string& wxid, wb_wx::WeChatCont
 }
 
 //
+// Plugin API
+//
+
+std::string wxbot::WxBot::ExecutePluginScript(const std::string& statement)
+{
+    return statement;
+}
+
+//
 // internal
 //
 
@@ -353,6 +362,11 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
             ResponseAllContact();
             break;
         }
+
+        case wxbox::ControlPacketType::EXECUTE_PLUGIN_SCRIPT_REQUEST: {
+            ResponseExecutePluginResult(ExecutePluginScript(message.u.wxBoxControlPacket.mutable_executepluginscriptrequest()->statement()));
+            break;
+        }
     }
 }
 
@@ -436,6 +450,21 @@ void wxbot::WxBot::ResponseAllContact()
         pContact->set_wxid(contact.wxid);
         pContact->set_remark(contact.remark);
     }
+
+    client->PushMessageAsync(std::move(msg));
+}
+
+void wxbot::WxBot::ResponseExecutePluginResult(const std::string& result)
+{
+    if (result.empty()) {
+        return;
+    }
+
+    wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+    msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::EXECUTE_PLUGIN_SCRIPT_RESPONSE);
+
+    auto executePluginScriptResponse = msg.u.wxBotControlPacket.mutable_executepluginscriptresponse();
+    executePluginScriptResponse->set_result(result);
 
     client->PushMessageAsync(std::move(msg));
 }

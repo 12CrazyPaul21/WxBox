@@ -213,6 +213,14 @@
         <source>WXID</source>
         <translation>WXID</translation>
     </message>
+    <message>
+        <source>No client has been selected</source>
+        <translation>No client has been selected</translation>
+    </message>
+    <message>
+        <source>Client not connected</source>
+        <translation>Client not connected</translation>
+    </message>
 </context>
 <context>
     <name>WxBoxController</name>

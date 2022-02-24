@@ -37,9 +37,19 @@ MainWindow::~MainWindow()
 bool MainWindow::eventFilter(QObject* obj, QEvent* e)
 {
     if (e->type() == QEvent::MouseButtonPress && obj == ui->viewWeChatStatus->viewport()) {
-        if (ui->viewWeChatStatus->indexAt(static_cast<QMouseEvent*>(e)->pos()).row() == -1) {
-            ui->viewWeChatStatus->clearSelection();
-            return true;
+        auto mouseEvent = static_cast<QMouseEvent*>(e);
+        if (mouseEvent->buttons() & Qt::LeftButton) {
+            auto hitRow = ui->viewWeChatStatus->indexAt(mouseEvent->pos()).row();
+            if (hitRow == -1) {
+                ui->viewWeChatStatus->clearSelection();
+                return true;
+            }
+
+            auto selectedRows = ui->viewWeChatStatus->selectionModel()->selectedRows();
+            if (!selectedRows.empty() && selectedRows[0].row() == hitRow) {
+                ui->viewWeChatStatus->clearSelection();
+                return true;
+            }
         }
     }
 
@@ -102,6 +112,16 @@ void MainWindow::UpdateWeChatFeatures()
 
     // reload features
     controller.ReloadFeatures();
+}
+
+void MainWindow::AppendExecuteCommandResult(const QString& result)
+{
+    if (result.isEmpty()) {
+        return;
+    }
+
+    ui->viewCommandExecuteLogger->append(result);
+    ui->viewCommandExecuteLogger->moveCursor(QTextCursor::End);
 }
 
 void MainWindow::OnBeginMission()
@@ -176,6 +196,12 @@ void MainWindow::InitWidget()
 
     // apply wechat status table view theme
     wxStatusModel.applyTheme(statusIcons, loginStatusIcons);
+
+    //
+    // wxbox plugin statement widgets
+    //
+
+    ui->lineCommand->setEnabled(false);
 }
 
 void MainWindow::RegisterWidgetEventHandler()
@@ -185,6 +211,9 @@ void MainWindow::RegisterWidgetEventHandler()
     //
 
     ui->viewWeChatStatus->viewport()->installEventFilter(this);
+    QObject::connect(ui->viewWeChatStatus->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
+        ui->lineCommand->setEnabled(!selected.isEmpty());
+    });
     QObject::connect(ui->viewWeChatStatus, &QWidget::customContextMenuRequested, this, [this](QPoint pos) {
         wb_process::PID pid = wxStatusModel.selection();
         if (!pid) {
@@ -264,6 +293,35 @@ void MainWindow::RegisterWidgetEventHandler()
         });
 
         clientItemContextMenu.popup(this->ui->viewWeChatStatus->viewport()->mapToGlobal(pos));
+    });
+
+    //
+    // command line
+    //
+
+    QObject::connect(ui->lineCommand, &QLineEdit::returnPressed, this, [this]() {
+        auto statement = ui->lineCommand->text();
+        if (statement.isEmpty()) {
+            return;
+        }
+
+        wb_process::PID pid = wxStatusModel.selection();
+        if (!pid) {
+            AppendExecuteCommandResult(QString("[<font color=\"blue\">WxBox</font>] : %1").arg(statement));
+            AppendExecuteCommandResult(QString("[<font color=\"blue\">WxBox</font>] : %1").arg(Translate("No client has been selected")));
+            ui->lineCommand->clear();
+            return;
+        }
+
+        auto client = wxStatusModel.get(pid);
+        if (!client || client->status != WxBoxClientItemStatus::Normal) {
+            AppendExecuteCommandResult(QString("[<font color=\"blue\">WxBox</font>] : [<font color=\"red\">%1</font>] %2").arg(pid).arg(Translate("Client not connected")));
+            ui->lineCommand->clear();
+            return;
+        }
+
+        this->controller.RequestExecutePluginScript(pid, statement.toStdString());
+        ui->lineCommand->clear();
     });
 
     QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);

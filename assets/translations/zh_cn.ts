@@ -213,6 +213,14 @@
         <source>WXID</source>
         <translation>WXID</translation>
     </message>
+    <message>
+        <source>No client has been selected</source>
+        <translation>未选中Client，无法执行命令，请先在WeChat列表中选择一个Client然后再执行</translation>
+    </message>
+    <message>
+        <source>Client not connected</source>
+        <translation>客户端的WxBot未与WxBox连接</translation>
+    </message>
 </context>
 <context>
     <name>WxBoxController</name>

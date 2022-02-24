@@ -27,6 +27,8 @@ enum ControlPacketType {
     ALL_CONTACT_RESPONSE = 7;
     INJECT_ARGS_REQUEST = 8;
     INJECT_ARGS_RESPONSE = 9;
+    EXECUTE_PLUGIN_SCRIPT_REQUEST = 10;
+    EXECUTE_PLUGIN_SCRIPT_RESPONSE = 11;
 }
 
 message WxBoxHelloRequest {
@@ -68,6 +70,14 @@ message InjectArgsResponse {
     bytes args = 1;
 }
 
+message ExecutePluginScriptRequest {
+    string statement = 1;
+}
+
+message ExecutePluginScriptResponse {
+    string result = 1;
+}
+
 message WxBotControlPacket {
     ControlPacketType type = 1;
     uint64 pid = 2;
@@ -76,6 +86,7 @@ message WxBotControlPacket {
         ProfileResponse profileResponse = 11;
         AllContactResponse allContactResponse = 12;
         InjectArgsResponse injectArgsResponse = 13;
+        ExecutePluginScriptResponse executePluginScriptResponse = 14;
     }
 }
 
@@ -83,5 +94,6 @@ message WxBoxControlPacket {
     ControlPacketType type = 1;
     oneof packet {
         HandshakeResponse handshakeResponse = 10;
+        ExecutePluginScriptRequest executePluginScriptRequest = 11;
     }
 }

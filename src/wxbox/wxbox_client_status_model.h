@@ -165,8 +165,7 @@ class WxBoxClientStatusModel : public QStyledItemDelegate
         modelContainer = p;
 
         if (p) {
-            p->setItemDelegateForColumn(0, this);
-            p->setItemDelegateForColumn(2, this);
+            p->setItemDelegate(this);
         }
     }
 

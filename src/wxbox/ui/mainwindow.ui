@@ -73,21 +73,66 @@
        </widget>
       </item>
       <item>
-       <widget class="QTableView" name="viewWeChatStatus"/>
-      </item>
-      <item>
-       <widget class="QProgressBar" name="progressBar">
-        <property name="value">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="closeIsMinimizeTray">
         <property name="text">
          <string>closeIsMinimizeTray</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QTableView" name="viewWeChatStatus"/>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayoutCommand">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="QTextEdit" name="viewCommandExecuteLogger">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutCommand">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="labelCommandPrefix">
+            <property name="text">
+             <string>&gt;&gt;</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineCommand"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

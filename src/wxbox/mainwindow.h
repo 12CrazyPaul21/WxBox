@@ -17,6 +17,7 @@
 #include <QDesktopServices>
 #include <QSystemTrayIcon>
 #include <QSplashScreen>
+#include <QTextEdit>
 
 #undef signals
 #include <utils/common.h>
@@ -87,6 +88,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
 
     bool CheckSystemVersionSupported();
     void UpdateWeChatFeatures();
+    void AppendExecuteCommandResult(const QString& result);
 
     bool InitWxBox(QSplashScreen* splash);
     bool DeinitWxBox();

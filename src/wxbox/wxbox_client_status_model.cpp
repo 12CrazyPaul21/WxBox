@@ -171,7 +171,14 @@ void WxBoxClientStatusModel::applyTheme(const QString& statusIconUrls, const QSt
 
 void WxBoxClientStatusModel::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    QStyledItemDelegate::paint(painter, option, index);
+    QStyleOptionViewItem opt = option;
+    opt.state                = opt.state & ~QStyle::State_HasFocus;
+    QStyledItemDelegate::paint(painter, opt, index);
+
+    auto column = index.column();
+    if (column != 0 && column != 2) {
+        return;
+    }
 
     auto item = statusItemModel.itemFromIndex(index);
     if (!item) {
@@ -203,7 +210,7 @@ void WxBoxClientStatusModel::paint(QPainter* painter, const QStyleOptionViewItem
 
     QPixmap pixmap;
 
-    if (index.column() == 0) {
+    if (column == 0) {
         //
         // status
         //
@@ -226,7 +233,7 @@ void WxBoxClientStatusModel::paint(QPainter* painter, const QStyleOptionViewItem
             }
         }
     }
-    else if (index.column() == 2) {
+    else if (column == 2) {
         //
         // login status
         //
