@@ -435,8 +435,17 @@ void WxBoxController::UpdateClientStatus(wb_process::PID pid) noexcept
 
 void WxBoxController::UpdateWeChatStatus()
 {
+    if (view->isMinimized()) {
+        return;
+    }
+
+    auto monitorInterval = statusMonitorInterval;
+    if (!view->isActiveWindow()) {
+        monitorInterval *= 2;
+    }
+
     time_t timestamp = wb_process::GetCurrentTimestamp();
-    if (timestamp - lastUpdateStatusTimestamp < statusMonitorInterval) {
+    if (timestamp - lastUpdateStatusTimestamp < monitorInterval) {
         return;
     }
     lastUpdateStatusTimestamp = timestamp;
