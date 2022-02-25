@@ -287,6 +287,7 @@ bool wxbot::WxBot::NotifyAllChatroomContact(const std::string& roomWxid)
 {
     return wb_crack::SendTextMessageWithNotifyList(args.get(), roomWxid, {"notify@all"}, "");
 }
+
 bool wxbot::WxBot::NotifyAllChatroomContactWithTextMessage(const std::string& roomWxid, const std::string& message)
 {
     return wb_crack::SendTextMessageWithNotifyList(args.get(), roomWxid, {"notify@all"}, message);
