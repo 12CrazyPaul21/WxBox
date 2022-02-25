@@ -75,6 +75,7 @@ namespace wxbox {
         using FnWeChatLoginHandler            = std::function<void(void)>;
         using FnWeChatRawMessageHandler       = std::function<void(wxbox::crack::wx::WeChatMessageType, wxbox::crack::wx::PWeChatMessage)>;
         using FnWeChatReceivedMessagesHandler = std::function<void(wxbox::crack::wx::PWeChatMessageCollection)>;
+        using FnWeChatSendMessageHandler      = std::function<bool(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute)>;
 
         //
         // Function
@@ -113,6 +114,10 @@ namespace wxbox {
         bool PreInterceptWeChatHandleReceviedMessages(const WxApis& wxApis);
         void RegisterWeChatReceviedMessagesHandler(FnWeChatReceivedMessagesHandler handler);
         void UnRegisterWeChatReceviedMessagesHandler();
+
+        bool PreInterceptWeChatSendTextMessage(const WxApis& wxApis);
+        void RegisterWeChatSendTextMessageHandler(FnWeChatSendMessageHandler handler);
+        void UnRegisterWeChatSendTextMessageHandler();
 
         //
         // wechat api

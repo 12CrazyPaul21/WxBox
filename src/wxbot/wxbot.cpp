@@ -329,6 +329,7 @@ void wxbot::WxBot::PreHookWeChat()
     wb_crack::PreInterceptWeChatLogin(wxApis);
     wb_crack::PreInterceptWeChatHandleRawMessage(wxApis);
     wb_crack::PreInterceptWeChatHandleReceviedMessages(wxApis);
+    wb_crack::PreInterceptWeChatSendTextMessage(wxApis);
 
     //
     // record hook points
@@ -357,6 +358,9 @@ void wxbot::WxBot::PreHookWeChat()
     if (wxApis.HandleReceivedMessages) {
         hookPoints.push_back((void*)wxApis.HandleReceivedMessages);
     }
+    if (wxApis.WXSendTextMessage) {
+        hookPoints.push_back((void*)wxApis.WXSendTextMessage);
+    }
 }
 
 void wxbot::WxBot::ReleasePreHookWeChatHookPoint()
@@ -375,6 +379,7 @@ void wxbot::WxBot::RegisterInterceptHanlders()
     wb_crack::RegisterWeChatLoginHandler(std::bind(&wxbot::WxBot::WeChatLoginHandler, this));
     wb_crack::RegisterWeChatRawMessageHandler(std::bind(&wxbot::WxBot::WeChatRawMessageHandler, this, std::placeholders::_1, std::placeholders::_2));
     wb_crack::RegisterWeChatReceviedMessagesHandler(std::bind(&wxbot::WxBot::WeChatReceivedMessagesHandler, this, std::placeholders::_1));
+    wb_crack::RegisterWeChatSendTextMessageHandler(std::bind(&wxbot::WxBot::WeChatSendMessageHandler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 }
 
 void wxbot::WxBot::UnRegisterInterceptHanlders()
@@ -384,6 +389,7 @@ void wxbot::WxBot::UnRegisterInterceptHanlders()
     wb_crack::UnRegisterWeChatLoginHandler();
     wb_crack::UnRegisterWeChatRawMessageHandler();
     wb_crack::UnRegisterWeChatReceviedMessagesHandler();
+    wb_crack::UnRegisterWeChatSendTextMessageHandler();
 }
 
 // must avoid system calling and memory alloc&free calling
@@ -464,6 +470,15 @@ void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection
     if (!messageCollection || !messageCollection->begin || !messageCollection->end) {
         return;
     }
+}
+
+bool wxbot::WxBot::WeChatSendMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute)
+{
+    if (!wxid || !message) {
+        return false;
+    }
+
+    return false;
 }
 
 //

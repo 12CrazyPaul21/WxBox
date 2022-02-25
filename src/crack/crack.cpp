@@ -13,6 +13,7 @@ static wb_crack::FnWeChatLogoutHandler           g_wechat_logout_handler        
 static wb_crack::FnWeChatLoginHandler            g_wechat_login_handler             = nullptr;
 static wb_crack::FnWeChatRawMessageHandler       g_wechat_raw_message_handler       = nullptr;
 static wb_crack::FnWeChatReceivedMessagesHandler g_wechat_received_messages_handler = nullptr;
+static wb_crack::FnWeChatSendMessageHandler      g_wechat_send_message_handler      = nullptr;
 
 //
 // wechat intercept stubs
@@ -116,6 +117,92 @@ BEGIN_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
     }
 }
 END_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
+
+static inline bool internal_substitute_wechat_wstring(wxbox::crack::wx::PWeChatWString original, const std::wstring& substitute)
+{
+    if (!original || !original->str || substitute.empty()) {
+        return false;
+    }
+
+    auto substituteLength     = substitute.length();
+    auto substituteBufferSize = (substituteLength + 1) * sizeof(wchar_t);
+
+    if (original->length >= substituteLength) {
+        std::memcpy(original->str, substitute.data(), substituteBufferSize);
+        original->length  = substituteLength;
+        original->length2 = original->length;
+        return true;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    void* rp = HeapAlloc(::GetProcessHeap(), HEAP_ZERO_MEMORY, substituteBufferSize);
+    if (!rp) {
+        return false;
+    }
+
+    if (!::HeapFree(::GetProcessHeap(), 0, original->str)) {
+        ::HeapFree(::GetProcessHeap(), 0, rp);
+        return false;
+    }
+
+    original->str = reinterpret_cast<wchar_t*>(rp);
+#else
+    uint8_t* rp = realloc(original->str, substituteBufferSize);
+    if (!rp) {
+        return false;
+    }
+
+    original->str = reinterpret_cast<wchar_t*>(rp);
+#endif
+
+    std::memcpy(original->str, substitute.data(), substituteBufferSize);
+    original->length  = substituteLength;
+    original->length2 = original->length;
+
+    return true;
+}
+
+static void internal_wechat_send_message_handler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message)
+{
+    std::wstring wxidSubstitute;
+    std::wstring messageSubstitute;
+
+    if (!wxid || !message || !wxid->str || !message->str) {
+        return;
+    }
+
+    if (g_wechat_send_message_handler) {
+        if (g_wechat_send_message_handler(wxid, message, wxidSubstitute, messageSubstitute)) {
+            if (!wxidSubstitute.empty()) {
+                internal_substitute_wechat_wstring(wxid, wxidSubstitute);
+            }
+
+            if (!messageSubstitute.empty()) {
+                internal_substitute_wechat_wstring(message, messageSubstitute);
+            }
+        }
+    }
+}
+
+BEGIN_NAKED_STD_FUNCTION(internal_wechat_send_message_handler_stub)
+{
+    __asm {
+        // get wxid info
+		mov edx, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_EDX_OFFSET]
+
+        // push message info
+		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_ESP_OFFSET]
+		push [eax+4]
+
+        // push wxid info
+		push edx
+
+		call internal_wechat_send_message_handler
+		add esp, 0x8
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(internal_wechat_send_message_handler_stub)
 
 //
 // wxbox::crack
@@ -350,8 +437,8 @@ static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo&
 
 static void Logout_Mac(const ucpulong_t eventId, const void* pWeChatEventProc)
 {
-    ucpulong_t context  = 0;
-    void*      pcontext = &context;
+    ucpulong_t context = 0;
+    void* pcontext = &context;
 
     __asm {
 		mov ecx, pcontext
@@ -640,6 +727,25 @@ void wxbox::crack::RegisterWeChatReceviedMessagesHandler(FnWeChatReceivedMessage
 void wxbox::crack::UnRegisterWeChatReceviedMessagesHandler()
 {
     g_wechat_received_messages_handler = nullptr;
+}
+
+bool wxbox::crack::PreInterceptWeChatSendTextMessage(const WxApis& wxApis)
+{
+    return wb_hook::PreInProcessIntercept((void*)wxApis.WXSendTextMessage, internal_wechat_send_message_handler_stub);
+}
+
+void wxbox::crack::RegisterWeChatSendTextMessageHandler(FnWeChatSendMessageHandler handler)
+{
+    if (!handler) {
+        return;
+    }
+
+    g_wechat_send_message_handler = handler;
+}
+
+void wxbox::crack::UnRegisterWeChatSendTextMessageHandler()
+{
+    g_wechat_send_message_handler = nullptr;
 }
 
 //
