@@ -5,10 +5,14 @@
 // Globals
 //
 
+static cpulong_t g_wechat_raw_message_type_point_offset = 0;
+
 // hook point handler
-static wb_crack::FnWeChatExitHandler   g_wechat_exit_handler   = nullptr;
-static wb_crack::FnWeChatLogoutHandler g_wechat_logout_handler = nullptr;
-static wb_crack::FnWeChatLoginHandler  g_wechat_login_handler  = nullptr;
+static wb_crack::FnWeChatExitHandler             g_wechat_exit_handler              = nullptr;
+static wb_crack::FnWeChatLogoutHandler           g_wechat_logout_handler            = nullptr;
+static wb_crack::FnWeChatLoginHandler            g_wechat_login_handler             = nullptr;
+static wb_crack::FnWeChatRawMessageHandler       g_wechat_raw_message_handler       = nullptr;
+static wb_crack::FnWeChatReceivedMessagesHandler g_wechat_received_messages_handler = nullptr;
 
 //
 // wechat intercept stubs
@@ -61,6 +65,57 @@ BEGIN_NAKED_STD_FUNCTION(internal_wechat_login_handler_stub)
     }
 }
 END_NAKED_STD_FUNCTION(internal_wechat_login_handler_stub)
+
+static void internal_wechat_raw_message_handler(wxbox::crack::wx::WeChatMessageType type, wxbox::crack::wx::PWeChatMessage message)
+{
+    if (g_wechat_raw_message_handler) {
+        g_wechat_raw_message_handler(type, message);
+    }
+}
+
+BEGIN_NAKED_STD_FUNCTION(internal_wechat_raw_message_handler_stub)
+{
+    __asm {
+        // origianl ebp
+		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_EBP_OFFSET]
+
+        // original eax
+		mov ebx, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_EAX_OFFSET]
+
+        // calc message start position and push
+		add eax, g_wechat_raw_message_type_point_offset
+		sub eax, WECHAT_MESSAGE_ITEM_TYPE_OFFSET
+		push eax
+
+                // push message type
+		push ebx
+		
+		call internal_wechat_raw_message_handler
+		add esp, 0x8
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(internal_wechat_raw_message_handler_stub)
+
+static void internal_wechat_received_messages_handler(wxbox::crack::wx::PWeChatMessageCollection messageCollection)
+{
+    if (g_wechat_received_messages_handler) {
+        g_wechat_received_messages_handler(messageCollection);
+    }
+}
+
+BEGIN_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
+{
+    __asm {
+		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_EAX_OFFSET]
+		mov eax, [eax+0x5C]
+		push eax
+		call internal_wechat_received_messages_handler
+		add esp, 0x4
+		ret
+    }
+}
+END_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
 
 //
 // wxbox::crack
@@ -537,6 +592,54 @@ void wxbox::crack::RegisterWeChatLoginHandler(FnWeChatLoginHandler handler)
 void wxbox::crack::UnRegisterWeChatLoginHandler()
 {
     g_wechat_login_handler = nullptr;
+}
+
+bool wxbox::crack::PreInterceptWeChatHandleRawMessage(const WxApis& wxApis)
+{
+    if (!wxApis.HandleRawMessages) {
+        return false;
+    }
+
+#if WXBOX_CPU_IS_X86
+    g_wechat_raw_message_type_point_offset = *(reinterpret_cast<signed long*>(wxApis.HandleRawMessages) - 1);
+#else
+    g_wechat_raw_message_type_point_offset = *(reinterpret_cast<signed long*>(wxApis.HandleRawMessages) - 1);
+#endif
+
+    return wb_hook::PreInProcessIntercept((void*)wxApis.HandleRawMessages, internal_wechat_raw_message_handler_stub);
+}
+
+void wxbox::crack::RegisterWeChatRawMessageHandler(FnWeChatRawMessageHandler handler)
+{
+    if (!handler) {
+        return;
+    }
+
+    g_wechat_raw_message_handler = handler;
+}
+
+void wxbox::crack::UnRegisterWeChatRawMessageHandler()
+{
+    g_wechat_raw_message_handler = nullptr;
+}
+
+bool wxbox::crack::PreInterceptWeChatHandleReceviedMessages(const WxApis& wxApis)
+{
+    return wb_hook::PreInProcessIntercept((void*)wxApis.HandleReceivedMessages, internal_wechat_received_messages_handler_stub);
+}
+
+void wxbox::crack::RegisterWeChatReceviedMessagesHandler(FnWeChatReceivedMessagesHandler handler)
+{
+    if (!handler) {
+        return;
+    }
+
+    g_wechat_received_messages_handler = handler;
+}
+
+void wxbox::crack::UnRegisterWeChatReceviedMessagesHandler()
+{
+    g_wechat_received_messages_handler = nullptr;
 }
 
 //

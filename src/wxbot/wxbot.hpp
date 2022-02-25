@@ -104,6 +104,8 @@ namespace wxbot {
         void WeChatExitHandler();
         void WeChatLogoutHandler();
         void WeChatLoginHandler();
+        void WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message);
+        void WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection);
 
         //
         // WxBoxClient & PluginVirtualMachine EventHandler

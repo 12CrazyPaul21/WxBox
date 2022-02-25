@@ -327,6 +327,8 @@ void wxbot::WxBot::PreHookWeChat()
     wb_crack::PreInterceptWeChatExit(wxApis);
     wb_crack::PreInterceptWeChatLogout(wxApis);
     wb_crack::PreInterceptWeChatLogin(wxApis);
+    wb_crack::PreInterceptWeChatHandleRawMessage(wxApis);
+    wb_crack::PreInterceptWeChatHandleReceviedMessages(wxApis);
 
     //
     // record hook points
@@ -349,6 +351,12 @@ void wxbot::WxBot::PreHookWeChat()
     if (wxApis.Logined) {
         hookPoints.push_back((void*)wxApis.Logined);
     }
+    if (wxApis.HandleRawMessages) {
+        hookPoints.push_back((void*)wxApis.HandleRawMessages);
+    }
+    if (wxApis.HandleReceivedMessages) {
+        hookPoints.push_back((void*)wxApis.HandleReceivedMessages);
+    }
 }
 
 void wxbot::WxBot::ReleasePreHookWeChatHookPoint()
@@ -365,6 +373,8 @@ void wxbot::WxBot::RegisterInterceptHanlders()
     wb_crack::RegisterWeChatExitHandler(std::bind(&wxbot::WxBot::WeChatExitHandler, this));
     wb_crack::RegisterWeChatLogoutHandler(std::bind(&wxbot::WxBot::WeChatLogoutHandler, this));
     wb_crack::RegisterWeChatLoginHandler(std::bind(&wxbot::WxBot::WeChatLoginHandler, this));
+    wb_crack::RegisterWeChatRawMessageHandler(std::bind(&wxbot::WxBot::WeChatRawMessageHandler, this, std::placeholders::_1, std::placeholders::_2));
+    wb_crack::RegisterWeChatReceviedMessagesHandler(std::bind(&wxbot::WxBot::WeChatReceivedMessagesHandler, this, std::placeholders::_1));
 }
 
 void wxbot::WxBot::UnRegisterInterceptHanlders()
@@ -372,6 +382,8 @@ void wxbot::WxBot::UnRegisterInterceptHanlders()
     wb_crack::UnRegisterWeChatExitHandler();
     wb_crack::UnRegisterWeChatLogoutHandler();
     wb_crack::UnRegisterWeChatLoginHandler();
+    wb_crack::UnRegisterWeChatRawMessageHandler();
+    wb_crack::UnRegisterWeChatReceviedMessagesHandler();
 }
 
 // must avoid system calling and memory alloc&free calling
@@ -438,6 +450,20 @@ void wxbot::WxBot::WeChatLogoutHandler()
 void wxbot::WxBot::WeChatLoginHandler()
 {
     ResponseProfile();
+}
+
+void wxbot::WxBot::WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message)
+{
+    if (!message) {
+        return;
+    }
+}
+
+void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection)
+{
+    if (!messageCollection || !messageCollection->begin || !messageCollection->end) {
+        return;
+    }
 }
 
 //

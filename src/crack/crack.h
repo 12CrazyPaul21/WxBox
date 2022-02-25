@@ -70,9 +70,11 @@ namespace wxbox {
             ucpulong_t                uModuleSize;
         } OpenWxWithMultiBoxingResult, *POpenWxWithMultiBoxingResult;
 
-        using FnWeChatExitHandler   = std::function<void(void)>;
-        using FnWeChatLogoutHandler = std::function<void(void)>;
-        using FnWeChatLoginHandler  = std::function<void(void)>;
+        using FnWeChatExitHandler             = std::function<void(void)>;
+        using FnWeChatLogoutHandler           = std::function<void(void)>;
+        using FnWeChatLoginHandler            = std::function<void(void)>;
+        using FnWeChatRawMessageHandler       = std::function<void(wxbox::crack::wx::WeChatMessageType, wxbox::crack::wx::PWeChatMessage)>;
+        using FnWeChatReceivedMessagesHandler = std::function<void(wxbox::crack::wx::PWeChatMessageCollection)>;
 
         //
         // Function
@@ -103,6 +105,14 @@ namespace wxbox {
         bool PreInterceptWeChatLogin(const WxApis& wxApis);
         void RegisterWeChatLoginHandler(FnWeChatLoginHandler handler);
         void UnRegisterWeChatLoginHandler();
+
+        bool PreInterceptWeChatHandleRawMessage(const WxApis& wxApis);
+        void RegisterWeChatRawMessageHandler(FnWeChatRawMessageHandler handler);
+        void UnRegisterWeChatRawMessageHandler();
+
+        bool PreInterceptWeChatHandleReceviedMessages(const WxApis& wxApis);
+        void RegisterWeChatReceviedMessagesHandler(FnWeChatReceivedMessagesHandler handler);
+        void UnRegisterWeChatReceviedMessagesHandler();
 
         //
         // wechat api

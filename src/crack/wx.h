@@ -221,6 +221,25 @@ namespace wxbox {
             } ChatRoomNotifyList, *PChatRoomNotifyList;
 
             //
+            // WeChat Message
+            //
+
+            enum class WeChatMessageType
+            {
+
+            };
+
+            typedef struct _WeChatMessage
+            {
+            } WeChatMessage, *PWeChatMessage;
+
+            typedef struct _WeChatMessageCollection
+            {
+                PWeChatMessage begin;
+                PWeChatMessage end;
+            } WeChatMessageCollection, *PWeChatMessageCollection;
+
+            //
             // Function
             //
 
@@ -247,6 +266,10 @@ namespace wxbox {
     }
 }
 
+//
+// WeChat Contact
+//
+
 #define WECHAT_CONTACT_ITEM_WXID_OFFSET 0x10
 #define WECHAT_CONTACT_ITEM_WXNUMBER_OFFSET 0x24
 #define WECHAT_CONTACT_ITEM_REMARK_OFFSET 0x58
@@ -256,5 +279,11 @@ namespace wxbox {
 #define WECHAT_CONTACT_ITEM_WXNUMBER(CONTACT_ITEM) ((wb_wx::PWeChatWString)(reinterpret_cast<uint8_t*>(CONTACT_ITEM) + WECHAT_CONTACT_ITEM_WXNUMBER_OFFSET))
 #define WECHAT_CONTACT_ITEM_REMARK(CONTACT_ITEM) ((wb_wx::PWeChatWString)(reinterpret_cast<uint8_t*>(CONTACT_ITEM) + WECHAT_CONTACT_ITEM_REMARK_OFFSET))
 #define WECHAT_CONTACT_ITEM_NICKNAME(CONTACT_ITEM) ((wb_wx::PWeChatWString)(reinterpret_cast<uint8_t*>(CONTACT_ITEM) + WECHAT_CONTACT_ITEM_NICKNAME_OFFSET))
+
+//
+// WeChat Message
+//
+
+#define WECHAT_MESSAGE_ITEM_TYPE_OFFSET 0x38
 
 #endif  // #ifndef __WXBOX_CRACK_WX_H
