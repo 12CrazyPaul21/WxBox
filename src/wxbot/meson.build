@@ -11,7 +11,11 @@ wxbot_src = files([
     join_paths(wxbot_root, 'wxbot.hpp'),
     join_paths(wxbot_root, 'wxbot.cpp'),
     join_paths(wxbot_root, 'wxbox_client.hpp'),
-    join_paths(wxbot_root, 'wxbox_client.cpp')
+    join_paths(wxbot_root, 'wxbox_client.cpp'),
+    join_paths(wxbot_root, 'wxbot_intercept_handler.cpp'),
+    join_paths(wxbot_root, 'wxbot_wechat_api_wrapper.cpp'),
+    join_paths(wxbot_root, 'wxbot_client_response_wrapper.cpp'),
+    join_paths(wxbot_root, 'wxbot_plugin_api_wrapper.cpp'),
 ])
 
 # resources
