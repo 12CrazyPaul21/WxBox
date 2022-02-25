@@ -105,7 +105,8 @@ namespace wxbot {
         void WeChatLogoutHandler();
         void WeChatLoginHandler();
         void WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message);
-        void WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection);
+        void WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message);
+        void WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection, ucpulong_t count, ucpulong_t presize);
         bool WeChatSendMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute);
 
         //

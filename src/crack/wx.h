@@ -226,11 +226,47 @@ namespace wxbox {
 
             enum class WeChatMessageType
             {
-
+                PLAINTEXT           = 0x01,
+                PICTURE             = 0x03,
+                AUDIO               = 0x22,
+                VIDEO               = 0x2B,
+                EMOJI               = 0x2F,
+                FILE                = 0x31,
+                WAKE_CONTACT_DIALOG = 0x33,
+                REVOKE_MESSAGE      = 0x2712
             };
 
             typedef struct _WeChatMessage
             {
+                uint8_t _offset_0x00_unknown[0x38];
+
+                // message type
+                uint32_t message_type;
+
+                uint32_t _offset_0x3C_message_type;
+                uint32_t _offset_0x40_message_type;
+                uint32_t _offset_0x44_message_type;
+
+                // talker wxid
+                wchar_t* talker_wxid;
+                uint32_t talker_wxid_length;
+                uint32_t _offset_0x50_talker_wxid_length2;
+
+                uint8_t _offset_0x54_unknown[0x1C];
+
+                // message
+                wchar_t* message;
+                uint32_t message_length;
+                uint32_t _offset_0x78_message_length2;
+
+                uint8_t _offset_0x7C_unknown[0xF4];
+
+                // talker wxid in chatroom, empty is yourself
+                wchar_t* chatroom_talker_wxid;
+                uint32_t chatroom_talker_wxid_length;
+                uint32_t _offset_0x178_chatroom_talker_wxid_length2;
+
+                uint8_t _offset_0x17C_unknown[0xFC];
             } WeChatMessage, *PWeChatMessage;
 
             typedef struct _WeChatMessageCollection
@@ -285,5 +321,15 @@ namespace wxbox {
 //
 
 #define WECHAT_MESSAGE_ITEM_TYPE_OFFSET 0x38
+
+#define TO_WECHAT_MESSASGE_TYPE(t) ((wxbox::crack::wx::WeChatMessageType)(t))
+#define IS_WECHAT_TEXT_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::PLAINTEXT)
+#define IS_WECHAT_PICTURE_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::PICTURE)
+#define IS_WECHAT_AUDIO_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::AUDIO)
+#define IS_WECHAT_VIDEO_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::VIDEO)
+#define IS_WECHAT_EMOJI_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::EMOJI)
+#define IS_WECHAT_FILE_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::FILE)
+#define IS_WECHAT_WAKE_CONTACT_DIALOG_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::WAKE_CONTACT_DIALOG)
+#define IS_WECHAT_REVOKE_MESSAGE(t) ((wxbox::crack::wx::WeChatMessageType)(t) == wxbox::crack::wx::WeChatMessageType::REVOKE_MESSAGE)
 
 #endif  // #ifndef __WXBOX_CRACK_WX_H

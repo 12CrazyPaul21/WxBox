@@ -100,9 +100,20 @@ END_NAKED_STD_FUNCTION(internal_wechat_raw_message_handler_stub)
 
 static void internal_wechat_received_messages_handler(wxbox::crack::wx::PWeChatMessageCollection messageCollection)
 {
-    if (g_wechat_received_messages_handler) {
-        g_wechat_received_messages_handler(messageCollection);
+    if (!g_wechat_received_messages_handler) {
+        return;
     }
+
+    if (!messageCollection || !messageCollection->begin || !messageCollection->end || messageCollection->begin == messageCollection->end) {
+        return;
+    }
+
+    auto stubWeChatMessageSize = sizeof(wb_wx::WeChatMessage);
+    auto collectionSize        = (ucpulong_t)messageCollection->end - (ucpulong_t)messageCollection->begin;
+    auto collectionCount       = collectionSize / stubWeChatMessageSize;
+    auto turnWeChatMessageSize = collectionCount ? collectionSize / collectionCount : 0;
+
+    g_wechat_received_messages_handler(messageCollection, collectionCount, turnWeChatMessageSize);
 }
 
 BEGIN_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)

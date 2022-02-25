@@ -378,7 +378,7 @@ void wxbot::WxBot::RegisterInterceptHanlders()
     wb_crack::RegisterWeChatLogoutHandler(std::bind(&wxbot::WxBot::WeChatLogoutHandler, this));
     wb_crack::RegisterWeChatLoginHandler(std::bind(&wxbot::WxBot::WeChatLoginHandler, this));
     wb_crack::RegisterWeChatRawMessageHandler(std::bind(&wxbot::WxBot::WeChatRawMessageHandler, this, std::placeholders::_1, std::placeholders::_2));
-    wb_crack::RegisterWeChatReceviedMessagesHandler(std::bind(&wxbot::WxBot::WeChatReceivedMessagesHandler, this, std::placeholders::_1));
+    wb_crack::RegisterWeChatReceviedMessagesHandler(std::bind(&wxbot::WxBot::WeChatReceivedMessagesHandler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     wb_crack::RegisterWeChatSendTextMessageHandler(std::bind(&wxbot::WxBot::WeChatSendMessageHandler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 }
 
@@ -460,20 +460,39 @@ void wxbot::WxBot::WeChatLoginHandler()
 
 void wxbot::WxBot::WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message)
 {
+    WXBOX_UNREF(type);
+
     if (!message) {
         return;
     }
 }
 
-void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection)
+void wxbot::WxBot::WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message)
 {
-    if (!messageCollection || !messageCollection->begin || !messageCollection->end) {
+}
+
+void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection, ucpulong_t count, ucpulong_t presize)
+{
+    if (!messageCollection || !count || !presize) {
         return;
+    }
+
+    wb_wx::PWeChatMessage cursor = messageCollection->begin;
+
+    for (ucpulong_t i = 0; i < count && cursor; i++) {
+        WeChatPreReceivedMessageHandler(cursor);
+        cursor = reinterpret_cast<wb_wx::PWeChatMessage>((((uint8_t*)(cursor)) + presize));
+        if (cursor >= messageCollection->end) {
+            break;
+        }
     }
 }
 
 bool wxbot::WxBot::WeChatSendMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute)
 {
+    WXBOX_UNREF(wxidSubstitute);
+    WXBOX_UNREF(messageSubstitute);
+
     if (!wxid || !message) {
         return false;
     }
