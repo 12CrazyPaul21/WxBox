@@ -11,6 +11,7 @@ REGISTER_CONFIG_KEY(WXBOX_THEME_PATH);
 REGISTER_CONFIG_KEY(WXBOX_THEME_NAME);
 REGISTER_CONFIG_KEY(WXBOX_PLUGINS_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_PLUGIN_LONG_TASK_TIMEOUT);
+REGISTER_CONFIG_KEY(WXBOX_PLUGIN_LOG_MAX_LINE);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PATH);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PREFIX);
 REGISTER_CONFIG_KEY(WXBOX_CRASHDUMPER);
@@ -70,6 +71,7 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_THEME_NAME);
         CHECK_DEFAULT_CONFIG(WXBOX_PLUGINS_RELPATH);
         CHECK_DEFAULT_CONFIG(WXBOX_PLUGIN_LONG_TASK_TIMEOUT);
+        CHECK_DEFAULT_CONFIG(WXBOX_PLUGIN_LOG_MAX_LINE);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PATH);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PREFIX);
         CHECK_DEFAULT_CONFIG(WXBOX_CRASHDUMPER);
@@ -414,6 +416,7 @@ class AppConfig final : public wb_config::Config
     void change_wxbox_client_reconnect_interval(int interval)
     {
         this->operator[](WXBOX_CLIENT_RECONNECT_INTERVAL_KEY) = interval;
+        submit();
     }
 
     //
@@ -465,6 +468,18 @@ class AppConfig final : public wb_config::Config
     void change_plugin_long_task_timeout(int timeout)
     {
         this->operator[](WXBOX_PLUGIN_LONG_TASK_TIMEOUT_KEY) = timeout;
+        submit();
+    }
+
+    int plugin_log_max_line() const
+    {
+        return this->operator[](WXBOX_PLUGIN_LOG_MAX_LINE_KEY).safe_as<int>();
+    }
+
+    void change_plugin_log_max_line(int maxline)
+    {
+        this->operator[](WXBOX_PLUGIN_LOG_MAX_LINE_KEY) = maxline;
+        submit();
     }
 
     //

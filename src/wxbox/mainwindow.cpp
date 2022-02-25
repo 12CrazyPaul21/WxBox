@@ -120,6 +120,15 @@ void MainWindow::AppendExecuteCommandResult(const QString& result)
         return;
     }
 
+    if (ui->viewCommandExecuteLogger->document()->lineCount() > config.plugin_log_max_line()) {
+        QTextCursor cursor = ui->viewCommandExecuteLogger->textCursor();
+        cursor.movePosition(QTextCursor::Start);
+        cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, 0);
+        cursor.select(QTextCursor::LineUnderCursor);
+        cursor.removeSelectedText();
+        cursor.deleteChar();
+    }
+
     ui->viewCommandExecuteLogger->append(result);
     ui->viewCommandExecuteLogger->moveCursor(QTextCursor::End);
 }

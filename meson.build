@@ -124,6 +124,7 @@ all_default_config = {
     '/wxbox/theme/name': true,
     '/wxbox/plugins_relpath': true,
     '/wxbox/plugin_long_task_timeout': false,
+    '/wxbox/plugin_log_max_line': false,
     '/wxbox/coredump_path': true,
     '/wxbox/coredump_prefix': true,
     '/wxbox/crashdumper': true,
