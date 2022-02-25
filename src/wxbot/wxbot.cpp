@@ -158,6 +158,28 @@ void wxbot::WxBot::UnHookWeChat()
     ReleasePreHookWeChatHookPoint();
 }
 
+void wxbot::WxBot::log(wxbox::WxBotLogLevel level, const char* format, ...)
+{
+    if (!format) {
+        return;
+    }
+
+    char    message[1024] = {0};
+    va_list vargs;
+    va_start(vargs, format);
+    vsnprintf(message, sizeof(message), format, vargs);
+    va_end(vargs);
+
+    wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+    msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::LOG_REQUEST);
+
+    auto logRequest = msg.u.wxBotControlPacket.mutable_logrequest();
+    logRequest->set_level(level);
+    logRequest->set_msg(message);
+
+    client->PushMessageAsync(std::move(msg));
+}
+
 //
 // internal
 //

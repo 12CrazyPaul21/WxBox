@@ -590,6 +590,11 @@ void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message
             ExecutePluginScriptResponseHandler(message.pid, message.u.wxBotControlPacket.mutable_executepluginscriptresponse());
             break;
         }
+
+        case wxbox::ControlPacketType::LOG_REQUEST: {
+            WxBotLogRequestHandler(message.pid, message.u.wxBotControlPacket.mutable_logrequest());
+            break;
+        }
     }
 }
 
@@ -734,4 +739,33 @@ void WxBoxController::ExecutePluginScriptResponseHandler(wb_process::PID clientP
     }
 
     view->AppendExecuteCommandResult(QString("[<font color=\"blue\">%1</font>] : %2").arg(clientPID).arg(response->result().c_str()));
+}
+
+void WxBoxController::WxBotLogRequestHandler(wb_process::PID clientPID, wxbox::LogRequest* logRequest)
+{
+    if (!logRequest) {
+        return;
+    }
+
+    auto message = logRequest->msg();
+
+    switch (logRequest->level()) {
+        case wxbox::WxBotLogLevel::Information: {
+            WXBOT_LOG_INFO(message);
+            view->AppendExecuteCommandResult(QString("[<font color=\"blue\">%1</font>] [<font color=\"blue\">info</font>] : %2").arg(clientPID).arg(message.c_str()));
+            break;
+        }
+
+        case wxbox::WxBotLogLevel::Warning: {
+            WXBOT_LOG_WARNING(message);
+            view->AppendExecuteCommandResult(QString("[<font color=\"blue\">%1</font>] [<font color=\"yellow\">warning</font>] : %2").arg(clientPID).arg(message.c_str()));
+            break;
+        }
+
+        case wxbox::WxBotLogLevel::Error: {
+            WXBOT_LOG_ERROR(message);
+            view->AppendExecuteCommandResult(QString("[<font color=\"blue\">%1</font>] [<font color=\"red\">error</font>] : %2").arg(clientPID).arg(message.c_str()));
+            break;
+        }
+    }
 }

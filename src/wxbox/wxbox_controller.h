@@ -93,6 +93,7 @@ class WxBoxController final : public QObject
     void ProfileResponseHandler(wb_process::PID clientPID, wxbox::ProfileResponse* response);
     void AllContactResponseHandler(wb_process::PID clientPID, wxbox::AllContactResponse* response);
     void ExecutePluginScriptResponseHandler(wb_process::PID clientPID, wxbox::ExecutePluginScriptResponse* response);
+    void WxBotLogRequestHandler(wb_process::PID clientPID, wxbox::LogRequest* logRequest);
 
   signals:
     void PushMessageAsync(wxbox::WxBoxMessage message);

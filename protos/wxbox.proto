@@ -29,6 +29,13 @@ enum ControlPacketType {
     INJECT_ARGS_RESPONSE = 9;
     EXECUTE_PLUGIN_SCRIPT_REQUEST = 10;
     EXECUTE_PLUGIN_SCRIPT_RESPONSE = 11;
+    LOG_REQUEST = 12;
+}
+
+enum WxBotLogLevel {
+    Information = 0;
+    Warning = 1;
+    Error = 2;
 }
 
 message WxBoxHelloRequest {
@@ -78,6 +85,11 @@ message ExecutePluginScriptResponse {
     string result = 1;
 }
 
+message LogRequest {
+    WxBotLogLevel level = 1;
+    string msg = 2;
+}
+
 message WxBotControlPacket {
     ControlPacketType type = 1;
     uint64 pid = 2;
@@ -87,6 +99,7 @@ message WxBotControlPacket {
         AllContactResponse allContactResponse = 12;
         InjectArgsResponse injectArgsResponse = 13;
         ExecutePluginScriptResponse executePluginScriptResponse = 14;
+        LogRequest logRequest = 15;
     }
 }
 

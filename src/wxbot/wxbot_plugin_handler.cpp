@@ -22,6 +22,16 @@ void wxbot::WxBot::DispatchPluginResult(const std::string& result, bool fromFile
     }
 }
 
+void wxbot::WxBot::DispatchPluginErrorReport(const std::string& errorMsg, bool fromFilehelper)
+{
+    if (fromFilehelper) {
+        SendTextMessageToFileHelper(errorMsg);
+    }
+    else {
+        log(wxbox::WxBotLogLevel::Error, errorMsg.c_str());
+    }
+}
+
 //
 // Plugin Handler
 //
@@ -33,7 +43,7 @@ void wxbot::WxBot::PluginExecuteResultEventHandler(const wb_plugin::PluginVirtua
     }
 
     if (!resultEvent->status) {
-        DispatchPluginResult(resultEvent->error, resultEvent->fromFilehelper);
+        DispatchPluginErrorReport(resultEvent->error, resultEvent->fromFilehelper);
         return;
     }
 

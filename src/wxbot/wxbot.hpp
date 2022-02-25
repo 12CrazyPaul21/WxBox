@@ -54,6 +54,8 @@ namespace wxbot {
         bool HookWeChat();
         void UnHookWeChat();
 
+        void log(wxbox::WxBotLogLevel level, const char* format, ...);
+
         //
         // WeChat API Wrapper
         //
@@ -89,6 +91,7 @@ namespace wxbot {
 
         void ExecutePluginScript(const std::string& statement);
         void DispatchPluginResult(const std::string& result, bool fromFilehelper);
+        void DispatchPluginErrorReport(const std::string& errorMsg, bool fromFilehelper);
 
       private:
         void PreHookWeChat();
