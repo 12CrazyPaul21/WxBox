@@ -268,6 +268,10 @@
         <source>Do you want to inject wxbot at the same time?</source>
         <translation>Do you want to inject wxbot at the same time?</translation>
     </message>
+    <message>
+        <source>UnSupported this feature</source>
+        <translation>UnSupported this feature</translation>
+    </message>
 </context>
 <context>
     <name>AppMenu</name>

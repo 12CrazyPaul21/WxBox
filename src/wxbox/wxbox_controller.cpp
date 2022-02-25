@@ -607,6 +607,14 @@ void WxBoxController::RequestInjectArgs(wb_process::PID clientPID)
 
 void WxBoxController::RequestProfile(wb_process::PID clientPID)
 {
+    if (clientInjectArgs.find(clientPID) != clientInjectArgs.end()) {
+        auto injectArgs = clientInjectArgs.at(clientPID);
+        if (!injectArgs.wechat_apis.FetchGlobalProfileContext) {
+            xstyle::warning(view, "", _wctr("UnSupported this feature"));
+            return;
+        }
+    }
+
     wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
     msg.pid = clientPID;
     msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::PROFILE_REQUEST);
@@ -615,6 +623,14 @@ void WxBoxController::RequestProfile(wb_process::PID clientPID)
 
 void WxBoxController::RequstLogoutWeChat(wb_process::PID clientPID)
 {
+    if (clientInjectArgs.find(clientPID) != clientInjectArgs.end()) {
+        auto injectArgs = clientInjectArgs.at(clientPID);
+        if (!injectArgs.wechat_apis.WeChatEventProc) {
+            xstyle::warning(view, "", _wctr("UnSupported this feature"));
+            return;
+        }
+    }
+
     auto clientStatusItem = view->wxStatusModel.get(clientPID);
     if (!clientStatusItem || !clientStatusItem->logined) {
         return;
@@ -628,6 +644,14 @@ void WxBoxController::RequstLogoutWeChat(wb_process::PID clientPID)
 
 void WxBoxController::RequstAllContact(wb_process::PID clientPID)
 {
+    if (clientInjectArgs.find(clientPID) != clientInjectArgs.end()) {
+        auto injectArgs = clientInjectArgs.at(clientPID);
+        if (!injectArgs.wechat_apis.FetchGlobalContactContextAddress) {
+            xstyle::warning(view, "", _wctr("UnSupported this feature"));
+            return;
+        }
+    }
+
     auto clientStatusItem = view->wxStatusModel.get(clientPID);
     if (!clientStatusItem || !clientStatusItem->logined) {
         return;

@@ -268,6 +268,10 @@
         <source>Do you want to inject wxbot at the same time?</source>
         <translation>是否同时注入WxBot模块？</translation>
     </message>
+    <message>
+        <source>UnSupported this feature</source>
+        <translation>该特性定位失败，不支持该功能</translation>
+    </message>
 </context>
 <context>
     <name>AppMenu</name>
