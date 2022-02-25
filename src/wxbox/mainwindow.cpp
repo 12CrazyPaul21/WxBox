@@ -320,7 +320,7 @@ void MainWindow::RegisterWidgetEventHandler()
             return;
         }
 
-        this->controller.RequestExecutePluginScript(pid, statement.toStdString());
+        this->controller.RequestExecutePluginScript(pid, ">>" + statement.toStdString());
         ui->lineCommand->clear();
     });
 

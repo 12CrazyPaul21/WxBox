@@ -87,7 +87,8 @@ namespace wxbot {
         // Plugin API
         //
 
-        std::string ExecutePluginScript(const std::string& statement);
+        void ExecutePluginScript(const std::string& statement);
+        void DispatchPluginResult(const std::string& result, bool fromFilehelper);
 
       private:
         void PreHookWeChat();
@@ -108,6 +109,13 @@ namespace wxbot {
         void WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message);
         void WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection, ucpulong_t count, ucpulong_t presize);
         bool WeChatSendMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute);
+
+        //
+        // Plugin Handler
+        //
+
+        void PluginExecuteResultEventHandler(const wb_plugin::PluginVirtualMachineExecuteResultEventPtr& resultEvent);
+        void PluginToHostEventHandler(const wb_plugin::PluginVirtualMachinePluginToHostEventPtr& pluginToHostEvent);
 
         //
         // WxBoxClient & PluginVirtualMachine EventHandler

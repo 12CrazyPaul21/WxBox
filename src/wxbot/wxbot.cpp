@@ -319,7 +319,7 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
         }
 
         case wxbox::ControlPacketType::EXECUTE_PLUGIN_SCRIPT_REQUEST: {
-            ResponseExecutePluginResult(ExecutePluginScript(message.u.wxBoxControlPacket.mutable_executepluginscriptrequest()->statement()));
+            ExecutePluginScript(message.u.wxBoxControlPacket.mutable_executepluginscriptrequest()->statement());
             break;
         }
     }
@@ -327,6 +327,17 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
 
 void wxbot::WxBot::PluginVirtualMachineEventHandler(wb_plugin::PluginVirtualMachineEventPtr event)
 {
+    switch (event->type) {
+        case wb_plugin::PluginVirtualMachineEventType::ExecuteResult: {
+            PluginExecuteResultEventHandler(wb_plugin::CastPluginVirtualMachineEventPtr<wb_plugin::PluginVirtualMachineEventType::ExecuteResult>(event));
+            break;
+        }
+
+        case wb_plugin::PluginVirtualMachineEventType::PluginToHost: {
+            PluginToHostEventHandler(wb_plugin::CastPluginVirtualMachineEventPtr<wb_plugin::PluginVirtualMachineEventType::PluginToHost>(event));
+            break;
+        }
+    }
 }
 
 //
