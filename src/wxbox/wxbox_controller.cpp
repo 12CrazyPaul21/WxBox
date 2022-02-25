@@ -186,6 +186,8 @@ bool WxBoxController::StartWeChatInstance()
         wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
         wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
         strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxEnvInfo.version.c_str());
+        strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxEnvInfo.installPath.c_str());
+        strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxEnvInfo.coreModuleAbsPath.c_str());
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
         wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
@@ -268,6 +270,8 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
         wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
         strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxProcessEnvInfo.wxEnvInfo.version.c_str());
+        strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxProcessEnvInfo.wxEnvInfo.installPath.c_str());
+        strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxProcessEnvInfo.wxEnvInfo.coreModuleAbsPath.c_str());
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
         wxApiFeatures.ObtainDataStructureSupplement(wxProcessEnvInfo.wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
@@ -343,7 +347,9 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
     QTextStream reportTextStream(&reportText);
 
     reportTextStream << "WeChat Process ID : " << pid << "(0x" << Qt::hex << Qt::uppercasedigits << pid << ")" << XSTYLE_REPORT_ENDL;
-    reportTextStream << "WeChat Version : " << injectArgs.wechat_version << XSTYLE_REPORT_ENDL
+    reportTextStream << "WeChat Version : " << injectArgs.wechat_version << XSTYLE_REPORT_ENDL;
+    reportTextStream << "WeChat Install Path : " << injectArgs.wechat_install_path << XSTYLE_REPORT_ENDL;
+    reportTextStream << "WeChat CoreModule : " << injectArgs.wechat_coremodule_abspath << XSTYLE_REPORT_ENDL
                      << XSTYLE_REPORT_ENDL;
 
     reportTextStream.setIntegerBase(16);

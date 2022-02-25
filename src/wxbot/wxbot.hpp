@@ -61,6 +61,28 @@ namespace wxbot {
         bool GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact);
         bool GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact);
 
+        std::string WxNumberToWxid(const std::string& wxnumber);
+        std::string WxidToWxNumber(const std::string& wxid);
+
+        bool SendTextMessageToContact(const std::string& wxid, const std::string& message);
+        bool SendTextMessageToContactWithWxNumber(const std::string& wxnumber, const std::string& message);
+        bool SendPictureToContact(const std::string& wxid, const std::string& imgPath);
+        bool SendPictureToContactWithWxNumber(const std::string& wxnumber, const std::string& imgPath);
+        bool SendFileToContact(const std::string& wxid, const std::string& filePath);
+        bool SendFileToContactWithWxNumber(const std::string& wxnumber, const std::string& filePath);
+
+        bool SendTextMessageToFileHelper(const std::string& message);
+        bool SendPictureToFileHelper(const std::string& imgPath);
+        bool SendFileToFileHelper(const std::string& filePath);
+
+        bool SendTextMessageToChatroom(const std::string& roomWxid, const std::string& message);
+        bool SendTextMessageToChatroomWithNotifyList(const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message);
+        bool NotifyChatroomContacts(const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists);
+        bool NotifyAllChatroomContact(const std::string& roomWxid);
+        bool NotifyAllChatroomContactWithTextMessage(const std::string& roomWxid, const std::string& message);
+        bool SendPictureToChatroom(const std::string& roomWxid, const std::string& imgPath);
+        bool SendFileToChatroom(const std::string& roomWxid, const std::string& filePath);
+
         //
         // Plugin API
         //

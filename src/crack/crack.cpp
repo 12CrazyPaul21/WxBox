@@ -992,3 +992,231 @@ bool wxbox::crack::GetContactWithWxid(const std::string& wxid, const PWxBotEntry
     DeinitWeChatContactItem(args->wechat_apis, contactItem);
     return success;
 }
+
+static bool Inner_SendTextMessage(const wb_crack::PWxBotEntryParameter args, const std::string& wxid, const std::string& message, const wb_wx::PChatRoomNotifyList pNotifyList, const wchar_t* messageNotifyListSuffix = nullptr)
+{
+    if (!args || !args->wechat_apis.WXSendTextMessage || wxid.empty() || (message.empty() && !messageNotifyListSuffix) || !pNotifyList) {
+        return false;
+    }
+
+    //
+    // build wxid info
+    //
+
+    std::wstring          wWxid = wb_string::ToWString(wxid);
+    wb_wx::WeChatWString  wxidInfo;
+    wb_wx::PWeChatWString pWxidInfo = &wxidInfo;
+    wxidInfo.str                    = const_cast<wchar_t*>(wWxid.c_str());
+    wxidInfo.length                 = wWxid.length();
+    wxidInfo.length2                = wxidInfo.length;
+    wxidInfo.unknown1               = 0;
+    wxidInfo.unknown2               = 0;
+
+    //
+    // build message info
+    //
+
+    std::wstring wMessage = wb_string::ToWString(message);
+    if (messageNotifyListSuffix) {
+        wMessage += messageNotifyListSuffix;
+    }
+
+    wb_wx::WeChatWString  messageInfo;
+    wb_wx::PWeChatWString pMessageInfo = &messageInfo;
+    messageInfo.str                    = const_cast<wchar_t*>(wMessage.c_str());
+    messageInfo.length                 = wMessage.length();
+    messageInfo.length2                = messageInfo.length;
+    messageInfo.unknown1               = 0;
+    messageInfo.unknown2               = 0;
+
+    //
+    // build fake WeChatMessageStructure structure
+    //
+
+    std::unique_ptr<uint8_t[]> fakeWeChatMessageStructure = std::make_unique<uint8_t[]>(0x1000);
+    if (!fakeWeChatMessageStructure) {
+        return false;
+    }
+
+    uint8_t* pFakeWeChatMessageStructure = fakeWeChatMessageStructure.get();
+    std::memset(pFakeWeChatMessageStructure, 0, 0x1000);
+
+    //
+    // execute
+    //
+
+    void* result             = nullptr;
+    void* pWXSendTextMessage = reinterpret_cast<void*>(args->wechat_apis.WXSendTextMessage);
+
+    __asm {
+		push 1
+		push pNotifyList
+		push pMessageInfo
+		mov edx, pWxidInfo
+		mov ecx, pFakeWeChatMessageStructure
+		call pWXSendTextMessage
+		add esp, 0xC
+		mov result, eax
+    }
+
+    return result != nullptr;
+}
+
+bool wxbox::crack::SendTextMessage(const PWxBotEntryParameter args, const std::string& wxid, const std::string& message)
+{
+    //
+    // build fake ChatRoomNotifyList structure
+    //
+
+    std::unique_ptr<uint8_t[]> fakeChatRoomNotifyList = std::make_unique<uint8_t[]>(0x1000);
+    if (!fakeChatRoomNotifyList) {
+        return false;
+    }
+
+    uint8_t* pFakeChatRoomNotifyList = fakeChatRoomNotifyList.get();
+
+    //
+    // execute
+    //
+
+    return Inner_SendTextMessage(args, wxid, message, reinterpret_cast<wb_wx::PChatRoomNotifyList>(pFakeChatRoomNotifyList));
+}
+
+static inline std::wstring Inner_GenerateNotifyMessage(const std::string& nickname)
+{
+    return L"@" + wb_string::ToWString(nickname) + L"\x2005";
+}
+
+bool wxbox::crack::SendTextMessageWithNotifyList(const PWxBotEntryParameter args, const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message)
+{
+    //
+    // build ChatRoomNotifyList
+    //
+
+    wb_wx::ChatRoomNotifyList notifyList;
+    std::memset(&notifyList, 0, sizeof(notifyList));
+
+    std::vector<std::wstring>         vtNotifyWxidListsBuffer;
+    std::vector<wb_wx::WeChatWString> vtNotifyWxidLists;
+    for (auto wxid : notifyWxidLists) {
+        wb_wx::WeChatWString wxidInfo;
+        std::wstring         wWxid = wb_string::ToWString(wxid);
+        wxidInfo.str               = const_cast<wchar_t*>(wWxid.c_str());
+        wxidInfo.length            = wWxid.length();
+        wxidInfo.length2           = wxidInfo.length;
+        wxidInfo.unknown1          = 0;
+        wxidInfo.unknown2          = 0;
+
+        vtNotifyWxidListsBuffer.emplace_back(std::move(wWxid));
+        vtNotifyWxidLists.emplace_back(wxidInfo);
+    }
+
+    if (!vtNotifyWxidLists.empty()) {
+        notifyList.begin = vtNotifyWxidLists.data();
+        notifyList.end   = notifyList.begin + vtNotifyWxidLists.size();
+    }
+
+    //
+    // generate notify list messsage suffix
+    //
+
+    std::wstringstream                 ssMsgSuffix;
+    std::map<std::string, std::string> mapNickname;
+    for (auto wxid : notifyWxidLists) {
+        if (mapNickname.find(wxid) != mapNickname.end()) {
+            ssMsgSuffix << Inner_GenerateNotifyMessage(mapNickname.at(wxid));
+            continue;
+        }
+
+        std::string nickname;
+        if (wxid.compare("notify@all")) {
+            wb_wx::WeChatContact contact;
+            if (!GetContactWithWxid(wxid, args, contact)) {
+                continue;
+            }
+            nickname = contact.nickname;
+        }
+        else {
+            nickname = "\xE6\x89\x80\xE6\x9C\x89\xE4\xBA\xBA";
+        }
+
+        mapNickname[wxid] = nickname;
+        ssMsgSuffix << Inner_GenerateNotifyMessage(nickname);
+    }
+    std::wstring msgSuffix = ssMsgSuffix.str();
+
+    //
+    // execute
+    //
+
+    return Inner_SendTextMessage(args, roomWxid, message, &notifyList, msgSuffix.empty() ? nullptr : msgSuffix.c_str());
+}
+
+bool wxbox::crack::SendFile(const PWxBotEntryParameter args, const std::string& wxid, const std::string& filePath)
+{
+    if (!args || !args->wechat_apis.WXSendFileMessage || !args->wechat_apis.FetchGlobalSendMessageContext || wxid.empty() || filePath.empty() || !wb_file::IsPathExists(filePath)) {
+        return false;
+    }
+
+    //
+    // build wxid info
+    //
+
+    std::wstring          wWxid = wb_string::ToWString(wxid);
+    wb_wx::WeChatWString  wxidInfo;
+    wb_wx::PWeChatWString pWxidInfo = &wxidInfo;
+    wxidInfo.str                    = const_cast<wchar_t*>(wWxid.c_str());
+    wxidInfo.length                 = wWxid.length();
+    wxidInfo.length2                = wxidInfo.length;
+    wxidInfo.unknown1               = 0;
+    wxidInfo.unknown2               = 0;
+
+    //
+    // build file path info
+    //
+
+    std::wstring          wFilePath = wb_string::ToWString(filePath);
+    wb_wx::WeChatWString  filePathInfo;
+    wb_wx::PWeChatWString pFilePathInfo = &filePathInfo;
+    filePathInfo.str                    = const_cast<wchar_t*>(wFilePath.c_str());
+    filePathInfo.length                 = wFilePath.length();
+    filePathInfo.length2                = filePathInfo.length;
+    filePathInfo.unknown1               = 0;
+    filePathInfo.unknown2               = 0;
+
+    //
+    // build fake WeChatMessageStructure structure
+    //
+
+    std::unique_ptr<uint8_t[]> fakeWeChatMessageStructure = std::make_unique<uint8_t[]>(0x1000);
+    if (!fakeWeChatMessageStructure) {
+        return false;
+    }
+
+    uint8_t* pFakeWeChatMessageStructure = fakeWeChatMessageStructure.get();
+    std::memset(pFakeWeChatMessageStructure, 0, 0x1000);
+
+    //
+    // execute
+    //
+
+    void* result                         = nullptr;
+    void* pFetchGlobalSendMessageContext = reinterpret_cast<void*>(args->wechat_apis.FetchGlobalSendMessageContext);
+    void* pWXSendFileMessage             = reinterpret_cast<void*>(args->wechat_apis.WXSendFileMessage);
+
+    __asm {
+		push 0
+		push 0
+		push pFilePathInfo
+		push pWxidInfo
+
+		call pFetchGlobalSendMessageContext
+		mov ecx, eax
+
+		push pFakeWeChatMessageStructure
+		call pWXSendFileMessage
+		mov result, eax
+    }
+
+    return result != nullptr;
+}

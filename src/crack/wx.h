@@ -210,6 +210,17 @@ namespace wxbox {
             } WeChatContact, *PWeChatContact;
 
             //
+            // ChatRoomNotifyList
+            //
+
+            typedef struct _ChatRoomNotifyList
+            {
+                WeChatWString* begin;
+                WeChatWString* end;
+                uint32_t       reserve[100];
+            } ChatRoomNotifyList, *PChatRoomNotifyList;
+
+            //
             // Function
             //
 

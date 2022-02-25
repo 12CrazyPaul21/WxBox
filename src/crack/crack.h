@@ -55,6 +55,8 @@ namespace wxbox {
             int                                           wxbot_reconnect_interval;
             int                                           plugin_long_task_timeout;
             char                                          wechat_version[WXBOX_MAX_PATH];
+            char                                          wechat_install_path[WXBOX_MAX_PATH];
+            char                                          wechat_coremodule_abspath[WXBOX_MAX_PATH];
             WxApis                                        wechat_apis;
             wxbox::crack::feature::WxDataStructSupplement wechat_datastructure_supplement;
         } WxBotEntryParameter, *PWxBotEntryParameter;
@@ -120,6 +122,10 @@ namespace wxbox {
         bool     CollectAllContact(const PWxBotEntryParameter args, std::vector<wxbox::crack::wx::WeChatContact>& contacts);
         bool     GetContactWithWxNumber(const std::string& wxnumber, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
         bool     GetContactWithWxid(const std::string& wxid, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
+
+        bool SendTextMessage(const PWxBotEntryParameter args, const std::string& wxid, const std::string& message);
+        bool SendTextMessageWithNotifyList(const PWxBotEntryParameter args, const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message);
+        bool SendFile(const PWxBotEntryParameter args, const std::string& wxid, const std::string& filePath);
     }
 }
 
