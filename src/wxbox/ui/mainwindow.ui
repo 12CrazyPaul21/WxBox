@@ -128,7 +128,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineCommand"/>
+           <widget class="XStyleCommandLine" name="lineCommand"/>
           </item>
          </layout>
         </item>
@@ -139,6 +139,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XStyleCommandLine</class>
+   <extends>QLineEdit</extends>
+   <header>xstyle/xstylecommandline.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

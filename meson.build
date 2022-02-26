@@ -125,6 +125,7 @@ all_default_config = {
     '/wxbox/plugins_relpath': true,
     '/wxbox/plugin_long_task_timeout': false,
     '/wxbox/plugin_log_max_line': false,
+    '/wxbox/plugin_command_max_history_line': false,
     '/wxbox/coredump_path': true,
     '/wxbox/coredump_prefix': true,
     '/wxbox/crashdumper': true,
@@ -405,7 +406,7 @@ xstyle_src = files([
     join_paths(xstyle_root, 'xstyle.cpp'),
     join_paths(xstyle_root, 'xstylewindow.cpp'),
     join_paths(xstyle_root, 'xstylemessagebox.cpp'),
-    join_paths(xstyle_root, 'xstylemenu.cpp')
+    join_paths(xstyle_root, 'xstylemenu.cpp'),
 ])
 
 xstyle_moc_headers = files([
@@ -413,7 +414,8 @@ xstyle_moc_headers = files([
     join_paths(xstyle_root, 'xstylewindow.h'),
     join_paths(xstyle_root, 'xstylebutton.hpp'),
     join_paths(xstyle_root, 'xstylemessagebox.h'),
-    join_paths(xstyle_root, 'xstylemenu.h')
+    join_paths(xstyle_root, 'xstylemenu.h'),
+    join_paths(xstyle_root, 'xstylecommandline.hpp'),
 ])
 
 xstyle_resources = files([xstyle_assets_root + '/DefaultTheme/DefaultTheme.qrc'])

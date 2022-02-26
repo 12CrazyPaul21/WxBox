@@ -207,9 +207,10 @@ void MainWindow::InitWidget()
     wxStatusModel.applyTheme(statusIcons, loginStatusIcons);
 
     //
-    // wxbox plugin statement widgets
+    // wxbox plugin command line edit
     //
 
+    ui->lineCommand->SetMaxHistoryLine(config.plugin_command_max_history_line());
     ui->lineCommand->setEnabled(false);
 }
 
@@ -308,12 +309,7 @@ void MainWindow::RegisterWidgetEventHandler()
     // command line
     //
 
-    QObject::connect(ui->lineCommand, &QLineEdit::returnPressed, this, [this]() {
-        auto statement = ui->lineCommand->text();
-        if (statement.isEmpty()) {
-            return;
-        }
-
+    ui->lineCommand->RegisterExecuteHandler([this](const QString& statement) {
         wb_process::PID pid = wxStatusModel.selection();
         if (!pid) {
             AppendExecuteCommandResult(QString("[<font color=\"blue\">WxBox</font>] : %1").arg(statement));
