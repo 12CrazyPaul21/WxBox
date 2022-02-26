@@ -57,6 +57,7 @@ namespace wxbox {
             char                                          wechat_version[WXBOX_MAX_PATH];
             char                                          wechat_install_path[WXBOX_MAX_PATH];
             char                                          wechat_coremodule_abspath[WXBOX_MAX_PATH];
+            bool                                          avoidRevokeMessage;
             WxApis                                        wechat_apis;
             wxbox::crack::feature::WxDataStructSupplement wechat_datastructure_supplement;
         } WxBotEntryParameter, *PWxBotEntryParameter;
@@ -141,6 +142,8 @@ namespace wxbox {
         bool SendTextMessage(const PWxBotEntryParameter args, const std::string& wxid, const std::string& message);
         bool SendTextMessageWithNotifyList(const PWxBotEntryParameter args, const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message);
         bool SendFile(const PWxBotEntryParameter args, const std::string& wxid, const std::string& filePath);
+
+        bool SubstituteWeChatWString(wxbox::crack::wx::PWeChatWString original, const std::wstring& substitute);
     }
 }
 

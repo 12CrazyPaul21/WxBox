@@ -142,6 +142,7 @@ all_default_config = {
     '/wxbox/wechat_feature_update_timestamp': true,
     '/wxbox/wechat_multi_bloxing_quota': false,
     '/wxbox/wechat_status_monitor_interval': false,
+    '/wxbox/wechat_avoid_revoke_message': false,
     '/wxbox/close_is_minimize_to_tray': false,
     '/wxbox/loading_icon_type': false,
     '/wxbox/loading_icon_animation_use_cache': false

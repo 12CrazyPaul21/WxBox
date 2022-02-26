@@ -141,50 +141,6 @@ BEGIN_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
 }
 END_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
 
-static inline bool internal_substitute_wechat_wstring(wxbox::crack::wx::PWeChatWString original, const std::wstring& substitute)
-{
-    if (!original || !original->str || substitute.empty()) {
-        return false;
-    }
-
-    auto substituteLength     = substitute.length();
-    auto substituteBufferSize = (substituteLength + 1) * sizeof(wchar_t);
-
-    if (original->length >= substituteLength) {
-        std::memcpy(original->str, substitute.data(), substituteBufferSize);
-        original->length  = substituteLength;
-        original->length2 = original->length;
-        return true;
-    }
-
-#if WXBOX_IN_WINDOWS_OS
-    void* rp = HeapAlloc(::GetProcessHeap(), HEAP_ZERO_MEMORY, substituteBufferSize);
-    if (!rp) {
-        return false;
-    }
-
-    if (!::HeapFree(::GetProcessHeap(), 0, original->str)) {
-        ::HeapFree(::GetProcessHeap(), 0, rp);
-        return false;
-    }
-
-    original->str = reinterpret_cast<wchar_t*>(rp);
-#else
-    uint8_t* rp = realloc(original->str, substituteBufferSize);
-    if (!rp) {
-        return false;
-    }
-
-    original->str = reinterpret_cast<wchar_t*>(rp);
-#endif
-
-    std::memcpy(original->str, substitute.data(), substituteBufferSize);
-    original->length  = substituteLength;
-    original->length2 = original->length;
-
-    return true;
-}
-
 static void internal_wechat_send_message_handler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message)
 {
     std::wstring wxidSubstitute;
@@ -197,11 +153,11 @@ static void internal_wechat_send_message_handler(wxbox::crack::wx::PWeChatWStrin
     if (g_wechat_send_message_handler) {
         if (g_wechat_send_message_handler(wxid, message, wxidSubstitute, messageSubstitute)) {
             if (!wxidSubstitute.empty()) {
-                internal_substitute_wechat_wstring(wxid, wxidSubstitute);
+                wb_crack::SubstituteWeChatWString(wxid, wxidSubstitute);
             }
 
             if (!messageSubstitute.empty()) {
-                internal_substitute_wechat_wstring(message, messageSubstitute);
+                wb_crack::SubstituteWeChatWString(message, messageSubstitute);
             }
         }
     }
@@ -460,8 +416,8 @@ static inline bool OpenWxWithMultiBoxing_Mac(const wb_wx::WeChatEnvironmentInfo&
 
 static void Logout_Mac(const ucpulong_t eventId, const void* pWeChatEventProc)
 {
-    ucpulong_t context = 0;
-    void* pcontext = &context;
+    ucpulong_t context  = 0;
+    void*      pcontext = &context;
 
     __asm {
 		mov ecx, pcontext
@@ -1451,4 +1407,48 @@ bool wxbox::crack::SendFile(const PWxBotEntryParameter args, const std::string& 
     }
 
     return result != nullptr;
+}
+
+bool wxbox::crack::SubstituteWeChatWString(wxbox::crack::wx::PWeChatWString original, const std::wstring& substitute)
+{
+    if (!original || !original->str || substitute.empty()) {
+        return false;
+    }
+
+    auto substituteLength     = substitute.length();
+    auto substituteBufferSize = (substituteLength + 1) * sizeof(wchar_t);
+
+    if (original->length >= substituteLength) {
+        std::memcpy(original->str, substitute.data(), substituteBufferSize);
+        original->length  = substituteLength;
+        original->length2 = original->length;
+        return true;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    void* rp = HeapAlloc(::GetProcessHeap(), HEAP_ZERO_MEMORY, substituteBufferSize);
+    if (!rp) {
+        return false;
+    }
+
+    if (!::HeapFree(::GetProcessHeap(), 0, original->str)) {
+        ::HeapFree(::GetProcessHeap(), 0, rp);
+        return false;
+    }
+
+    original->str = reinterpret_cast<wchar_t*>(rp);
+#else
+    uint8_t* rp = realloc(original->str, substituteBufferSize);
+    if (!rp) {
+        return false;
+    }
+
+    original->str = reinterpret_cast<wchar_t*>(rp);
+#endif
+
+    std::memcpy(original->str, substitute.data(), substituteBufferSize);
+    original->length  = substituteLength;
+    original->length2 = original->length;
+
+    return true;
 }

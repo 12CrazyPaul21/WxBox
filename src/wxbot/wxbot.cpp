@@ -344,6 +344,11 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
             ExecutePluginScript(message.u.wxBoxControlPacket.mutable_executepluginscriptrequest()->statement());
             break;
         }
+
+        case wxbox::ControlPacketType::CHANGE_CONFIG_REQUEST: {
+            args->avoidRevokeMessage = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->avoidrevokemessage();
+            break;
+        }
     }
 }
 

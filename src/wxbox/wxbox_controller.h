@@ -84,6 +84,7 @@ class WxBoxController final : public QObject
     void RequstLogoutWeChat(wb_process::PID clientPID);
     void RequstAllContact(wb_process::PID clientPID);
     void RequestExecutePluginScript(wb_process::PID clientPID, const std::string& statement);
+    void RequestChangeAvoidRevokeMessageConfig(bool avoid);
 
     //
     // WxBoxServer Response Handler

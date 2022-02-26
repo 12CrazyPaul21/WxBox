@@ -141,6 +141,14 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         qApp->setQuitOnLastWindowClosed(!toTray);
     }
 
+    void TurnAvoidRevokeMessage(bool avoid)
+    {
+        if (config.wechat_avoid_revoke_message() != avoid) {
+            config.change_wechat_avoid_revoke_message(avoid);
+            controller.RequestChangeAvoidRevokeMessageConfig(avoid);
+        }
+    }
+
     virtual void timerEvent(QTimerEvent* event) Q_DECL_OVERRIDE
     {
         if (event->timerId() == controller.statusMonitorTimerId) {

@@ -30,6 +30,7 @@ enum ControlPacketType {
     EXECUTE_PLUGIN_SCRIPT_REQUEST = 10;
     EXECUTE_PLUGIN_SCRIPT_RESPONSE = 11;
     LOG_REQUEST = 12;
+    CHANGE_CONFIG_REQUEST = 13;
 }
 
 enum WxBotLogLevel {
@@ -90,6 +91,10 @@ message LogRequest {
     string msg = 2;
 }
 
+message ChangeConfigRequest {
+    bool avoidRevokeMessage = 1;
+}
+
 message WxBotControlPacket {
     ControlPacketType type = 1;
     uint64 pid = 2;
@@ -108,5 +113,6 @@ message WxBoxControlPacket {
     oneof packet {
         HandshakeResponse handshakeResponse = 10;
         ExecutePluginScriptRequest executePluginScriptRequest = 11;
+        ChangeConfigRequest changeConfigRequest = 12;
     }
 }

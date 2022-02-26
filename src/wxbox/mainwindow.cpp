@@ -343,6 +343,11 @@ void MainWindow::RegisterWidgetEventHandler()
         TurnCloseIsMinimizeToTray(state == Qt::Checked);
     });
 
+    ui->avoidRevokeMessage->setChecked(config.wechat_avoid_revoke_message());
+    QObject::connect(ui->avoidRevokeMessage, &QCheckBox::stateChanged, this, [this](int state) {
+        TurnAvoidRevokeMessage(state == Qt::Checked);
+    });
+
     QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
         xstyle_manager.ChangeLanguage("en");
         xstyle_manager.ChangeTheme("GreenTheme");

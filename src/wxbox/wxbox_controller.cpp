@@ -188,6 +188,7 @@ bool WxBoxController::StartWeChatInstance()
         strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxEnvInfo.version.c_str());
         strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxEnvInfo.installPath.c_str());
         strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxEnvInfo.coreModuleAbsPath.c_str());
+        wxbotEntryParameter.avoidRevokeMessage = config.wechat_avoid_revoke_message();
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
         wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
@@ -272,6 +273,7 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxProcessEnvInfo.wxEnvInfo.version.c_str());
         strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxProcessEnvInfo.wxEnvInfo.installPath.c_str());
         strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxProcessEnvInfo.wxEnvInfo.coreModuleAbsPath.c_str());
+        wxbotEntryParameter.avoidRevokeMessage = config.wechat_avoid_revoke_message();
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
         wxApiFeatures.ObtainDataStructureSupplement(wxProcessEnvInfo.wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
@@ -678,6 +680,20 @@ void WxBoxController::RequestExecutePluginScript(wb_process::PID clientPID, cons
     executePluginScriptRequest->set_statement(statement.c_str());
 
     PushMessageAsync(std::move(msg));
+}
+
+void WxBoxController::RequestChangeAvoidRevokeMessageConfig(bool avoid)
+{
+    wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
+    msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::CHANGE_CONFIG_REQUEST);
+
+    auto changeConfigRequest = msg.u.wxBoxControlPacket.mutable_changeconfigrequest();
+    changeConfigRequest->set_avoidrevokemessage(avoid);
+
+    for (const auto& client : clientInjectArgs) {
+        msg.pid = client.first;
+        PushMessageAsync(msg);
+    }
 }
 
 //

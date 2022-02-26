@@ -73,11 +73,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="closeIsMinimizeTray">
-        <property name="text">
-         <string>closeIsMinimizeTray</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="avoidRevokeMessage">
+          <property name="text">
+           <string>avoidRevokeMessage</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="closeIsMinimizeTray">
+          <property name="text">
+           <string>closeIsMinimizeTray</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QTableView" name="viewWeChatStatus"/>
