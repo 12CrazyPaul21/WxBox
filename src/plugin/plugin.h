@@ -102,9 +102,25 @@ namespace wxbox {
         // Host Event Model [plugin -> host]
         //
 
+        enum class PluginLogLevel
+        {
+            Information = 0,
+            Warning     = 1,
+            Error       = 2
+        };
+
+        typedef struct _PluginLog
+        {
+            PluginLogLevel level;
+            std::string    message;
+        } PluginLog, *PPluginLog;
+
+        using PluginLogPtr = std::shared_ptr<PluginLog>;
+
         enum class HostEventType
         {
             SendTextMesage = 0,
+            Log,
             _TotalHostEventType
         };
 
@@ -113,6 +129,7 @@ namespace wxbox {
             HostEventType type;
             std::string   wxid;
             std::string   textMessage;
+            PluginLogPtr  log;
         };
 
         using HostEventModelPtr = std::shared_ptr<HostEventModel>;

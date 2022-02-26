@@ -106,4 +106,17 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
     if (!pluginToHostEvent || !pluginToHostEvent->hostEvent) {
         return;
     }
+
+    auto event = pluginToHostEvent->hostEvent;
+
+    switch (event->type) {
+        case wb_plugin::HostEventType::Log: {
+            if (!event->log) {
+                break;
+            }
+
+            this->log((wxbox::WxBotLogLevel)event->log->level, event->log->message.c_str());
+            break;
+        }
+    }
 }

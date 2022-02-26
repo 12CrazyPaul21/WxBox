@@ -24,6 +24,8 @@ end
 
 function example.receive_raw_message(event)
     -- event:filter_message()
+    -- wxbox.info(event:wxid())
+    -- wxbox.info(event:message())
 end
 
 function example.receive_text_message(event)

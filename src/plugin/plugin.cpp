@@ -6,6 +6,7 @@
 
 static const char* HostEventNames[] = {
     "SendTextMesage",
+    "Log",
 };
 
 static const char* PluginEventNames[] = {
@@ -293,7 +294,14 @@ std::string wxbox::plugin::HostEventTypeToString(HostEventType type)
 
 wxbox::plugin::HostEventModelPtr wxbox::plugin::BuildHostEventModel()
 {
-    return std::make_shared<wxbox::plugin::HostEventModel>();
+    auto ptr = std::make_shared<wxbox::plugin::HostEventModel>();
+    if (!ptr) {
+        return nullptr;
+    }
+
+    ptr->log = nullptr;
+
+    return ptr;
 }
 
 wxbox::plugin::HostEventModelPtr wxbox::plugin::CopyHostEventModel(HostEventModel* model)

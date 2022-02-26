@@ -36,6 +36,44 @@ static int __wxbox_dispatch_host_event(lua_State* L)
     return 0;
 }
 
+static int __wxbox_dispatch_log(lua_State* L, wb_plugin::PluginLogLevel level)
+{
+    const char* message = luaL_checkstring(L, 1);
+    luaL_argcheck(L, message != nullptr, 1, "invalid log message");
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type = wb_plugin::HostEventType::Log;
+    event->log  = std::make_shared<wb_plugin::PluginLog>();
+    if (!event->log) {
+        return 0;
+    }
+
+    event->log->level   = level;
+    event->log->message = message;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
+static int __wxbox_info(lua_State* L)
+{
+    return __wxbox_dispatch_log(L, wb_plugin::PluginLogLevel::Information);
+}
+
+static int __wxbox_warning(lua_State* L)
+{
+    return __wxbox_dispatch_log(L, wb_plugin::PluginLogLevel::Warning);
+}
+
+static int __wxbox_error(lua_State* L)
+{
+    return __wxbox_dispatch_log(L, wb_plugin::PluginLogLevel::Error);
+}
+
 //
 // export module
 //
@@ -44,6 +82,9 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"version", __wxbox_version},
     {"package_storage_path", __wxbox_package_storage_path},
     {"dispatch_host_event", __wxbox_dispatch_host_event},
+    {"info", __wxbox_info},
+    {"warning", __wxbox_warning},
+    {"error", __wxbox_error},
     {NULL, NULL},
 };
 

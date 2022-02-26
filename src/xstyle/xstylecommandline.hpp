@@ -55,7 +55,7 @@ class XStyleCommandLine : public QLineEdit
         history.clear();
 
         for (auto item : collection) {
-            history.push_back(item.c_str());
+            history.push_back(QUrl::fromPercentEncoding(item.c_str()));
 
             if (history.size() >= maxLine) {
                 break;
@@ -75,7 +75,7 @@ class XStyleCommandLine : public QLineEdit
 
         std::vector<std::string> result;
         for (; index < history.size(); index++) {
-            result.push_back(history.at(index).toStdString());
+            result.push_back(QUrl::toPercentEncoding(history.at(index)).data());
         }
 
         return result;
