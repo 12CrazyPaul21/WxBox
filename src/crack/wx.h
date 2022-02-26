@@ -326,6 +326,8 @@ namespace wxbox {
 // WeChat Message
 //
 
+#define TO_WECHAT_MESSAGE(p) ((wb_wx::PWeChatMessage)(p))
+
 #define WECHAT_MESSAGE_ITEM_TYPE_OFFSET 0x38
 
 #define TO_WECHAT_MESSASGE_TYPE(t) ((wxbox::crack::wx::WeChatMessageType)(t))
