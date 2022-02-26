@@ -317,7 +317,6 @@ void MainWindow::RegisterWidgetEventHandler()
     ui->lineCommand->RegisterExecuteHandler([this](const QString& statement) {
         wb_process::PID pid = wxStatusModel.selection();
         if (!pid) {
-            AppendExecuteCommandResult(QString("[<font color=\"blue\">WxBox</font>] : %1").arg(statement));
             AppendExecuteCommandResult(QString("[<font color=\"blue\">WxBox</font>] : %1").arg(Translate("No client has been selected")));
             ui->lineCommand->clear();
             return;
