@@ -59,6 +59,14 @@ bool wxbot::WxBot::Startup()
         return false;
     }
 
+    // register plugin wechat api bridge
+    wb_plugin_wechat::RegisterFetchProfileBridge(std::bind(&WxBot::FetchProfile, this, std::placeholders::_1));
+    wb_plugin_wechat::RegisterGetAllContactsBridge(std::bind(&WxBot::GetAllContacts, this, std::placeholders::_1));
+    wb_plugin_wechat::RegisterGetContactWithWxNumberBridge(std::bind(&WxBot::GetContactWithWxNumber, this, std::placeholders::_1, std::placeholders::_2));
+    wb_plugin_wechat::RegisterGetContactWithWxidBridge(std::bind(&WxBot::GetContactWithWxid, this, std::placeholders::_1, std::placeholders::_2));
+    wb_plugin_wechat::RegisterWxNumberToWxidBridge(std::bind(&WxBot::WxNumberToWxid, this, std::placeholders::_1));
+    wb_plugin_wechat::RegisterWxidToWxNumberBridge(std::bind(&WxBot::WxidToWxNumber, this, std::placeholders::_1));
+
     running = true;
     return true;
 }
@@ -80,6 +88,9 @@ void wxbot::WxBot::Stop()
 
     // stop plugin virtual machine
     wb_plugin::StopPluginVirtualMachine();
+
+    // unregister plugin wechat api bridge
+    wb_plugin_wechat::UnRegisterBridge();
 
     // stop wxbox client
     client->Stop();

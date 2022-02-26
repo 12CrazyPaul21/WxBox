@@ -373,6 +373,8 @@ plugin_src = files([
     join_paths(plugin_root, 'plugin_virtual_machine.cpp'),
     join_paths(plugin_root, 'plugin_command_parser.h'),
     join_paths(plugin_root, 'plugin_command_parser.cpp'),
+    join_paths(plugin_root, 'plugin_wechat_api_bridge.h'),
+    join_paths(plugin_root, 'plugin_wechat_api_bridge.cpp'),
     join_paths(plugin_root, 'internal/plugin_internal_functions.h'),
     join_paths(plugin_root, 'internal/plugin_internal_functions.cpp'),
     join_paths(plugin_root, 'internal/plugin_internal_modules.h'),

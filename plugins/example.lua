@@ -69,14 +69,22 @@ function example.hello()
 end
 
 function example.test()
-    wxbox.info(wxbox.WeChatMessageType.PLAINTEXT)
-    wxbox.info(wxbox.WeChatMessageType.PICTURE)
-    wxbox.info(wxbox.WeChatMessageType.AUDIO)
-    wxbox.info(wxbox.WeChatMessageType.VIDEO)
-    wxbox.info(wxbox.WeChatMessageType.EMOJI)
-    wxbox.info(wxbox.WeChatMessageType.FILE)
-    wxbox.info(wxbox.WeChatMessageType.WAKE_CONTACT_DIALOG)
-    wxbox.info(wxbox.WeChatMessageType.REVOKE_MESSAGE)
+    -- wxbox.info(wxbox.WeChatMessageType.PLAINTEXT)
+    -- wxbox.info(wxbox.WeChatMessageType.PICTURE)
+    -- wxbox.info(wxbox.WeChatMessageType.AUDIO)
+    -- wxbox.info(wxbox.WeChatMessageType.VIDEO)
+    -- wxbox.info(wxbox.WeChatMessageType.EMOJI)
+    -- wxbox.info(wxbox.WeChatMessageType.FILE)
+    -- wxbox.info(wxbox.WeChatMessageType.WAKE_CONTACT_DIALOG)
+    -- wxbox.info(wxbox.WeChatMessageType.REVOKE_MESSAGE)
+
+    -- contact = wxbox.get_contact_with_wxnumber('ITXXXL')
+    -- if (contact) then
+    --     return contact.nickname
+    -- end
+
+    -- contacts = wxbox.get_all_contacts()
+    -- return contacts[1].nickname
 end
 
 function example.dispatch_message()

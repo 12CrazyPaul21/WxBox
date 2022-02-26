@@ -306,12 +306,14 @@ namespace wxbox {
 #include <plugin/internal/plugin_internal_modules.h>
 #include <plugin/plugin_virtual_machine.h>
 #include <plugin/plugin_command_parser.h>
+#include <plugin/plugin_wechat_api_bridge.h>
 
 //
 // Short namespace
 //
 
 namespace wb_plugin          = wxbox::plugin;
+namespace wb_plugin_wechat   = wxbox::plugin::wechat;
 namespace wb_plugin_internal = wxbox::plugin::internal;
 
 #endif  // #ifndef __WXBOX_PLUGIN_H

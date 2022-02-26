@@ -4,6 +4,16 @@
 // WeChat API Wrapper
 //
 
+bool wxbot::WxBot::FetchProfile(wxbox::crack::wx::WeChatProfile& profile)
+{
+    return wb_crack::FetchProfile(args->wechat_apis, args->wechat_datastructure_supplement, profile);
+}
+
+bool wxbot::WxBot::GetAllContacts(std::vector<wxbox::crack::wx::WeChatContact>& contacts)
+{
+    return wb_crack::CollectAllContact(args.get(), contacts);
+}
+
 bool wxbot::WxBot::GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact)
 {
     if (!args) {

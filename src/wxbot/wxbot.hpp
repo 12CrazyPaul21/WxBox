@@ -60,6 +60,9 @@ namespace wxbot {
         // WeChat API Wrapper
         //
 
+        bool FetchProfile(wxbox::crack::wx::WeChatProfile& profile);
+        bool GetAllContacts(std::vector<wxbox::crack::wx::WeChatContact>& contacts);
+
         bool GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact);
         bool GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact);
 

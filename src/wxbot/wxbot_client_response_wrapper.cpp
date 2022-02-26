@@ -23,7 +23,7 @@ void wxbot::WxBot::ResponseProfile()
 {
     // get wechat user profile
     wxbox::crack::wx::WeChatProfile profile;
-    wb_crack::FetchProfile(args->wechat_apis, args->wechat_datastructure_supplement, profile);
+    FetchProfile(profile);
 
     //
     // response
@@ -44,7 +44,7 @@ void wxbot::WxBot::ResponseProfile()
 void wxbot::WxBot::ResponseAllContact()
 {
     std::vector<wxbox::crack::wx::WeChatContact> contacts;
-    if (!wb_crack::CollectAllContact(args.get(), contacts)) {
+    if (!GetAllContacts(contacts)) {
         return;
     }
 

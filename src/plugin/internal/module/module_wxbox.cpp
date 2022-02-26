@@ -104,6 +104,120 @@ static int __wxbox_logout(lua_State* L)
     return 0;
 }
 
+static int __wxbox_profile_wxid(lua_State* L)
+{
+    wb_wx::WeChatProfile profile;
+    wb_plugin_wechat::FetchProfile(profile);
+    lua_pushstring(L, profile.wxid.c_str());
+    return 1;
+}
+
+static int __wxbox_profile_wxnumber(lua_State* L)
+{
+    wb_wx::WeChatProfile profile;
+    wb_plugin_wechat::FetchProfile(profile);
+    lua_pushstring(L, profile.wxnumber.c_str());
+    return 1;
+}
+
+static int __wxbox_profile_nickname(lua_State* L)
+{
+    wb_wx::WeChatProfile profile;
+    wb_plugin_wechat::FetchProfile(profile);
+    lua_pushstring(L, profile.nickname.c_str());
+    return 1;
+}
+
+static int __wxbox_wxid_to_wxnumber(lua_State* L)
+{
+    const char* wxid = luaL_checkstring(L, 1);
+    luaL_argcheck(L, wxid != nullptr, 1, "wxid is required");
+
+    std::string wxnumber = wb_plugin_wechat::WxidToWxNumber(wxid);
+    lua_pushstring(L, wxnumber.c_str());
+    return 1;
+}
+
+static int __wxbox_wxnumber_to_wxid(lua_State* L)
+{
+    const char* wxnumber = luaL_checkstring(L, 1);
+    luaL_argcheck(L, wxnumber != nullptr, 1, "wxnumber is required");
+
+    std::string wxid = wb_plugin_wechat::WxNumberToWxid(wxnumber);
+    lua_pushstring(L, wxid.c_str());
+    return 1;
+}
+
+static bool __wxbox_profile_inner_push_contact(lua_State* L, const wb_wx::WeChatContact& contact)
+{
+    lua_newtable(L);
+
+    lua_pushboolean(L, contact.chatroom);
+    lua_setfield(L, -2, "chatroom");
+
+    lua_pushstring(L, contact.nickname.c_str());
+    lua_setfield(L, -2, "nickname");
+
+    lua_pushstring(L, contact.wxnumber.c_str());
+    lua_setfield(L, -2, "wxnumber");
+
+    lua_pushstring(L, contact.wxid.c_str());
+    lua_setfield(L, -2, "wxid");
+
+    lua_pushstring(L, contact.remark.c_str());
+    lua_setfield(L, -2, "remark");
+
+    return true;
+}
+
+static int __wxbox_profile_get_contact_with_wxid(lua_State* L)
+{
+    const char* wxid = luaL_checkstring(L, 1);
+    luaL_argcheck(L, wxid != nullptr, 1, "wxid is required");
+
+    wb_wx::WeChatContact contact;
+    if (!wb_plugin_wechat::GetContactWithWxid(wxid, contact)) {
+        return 0;
+    }
+
+    return __wxbox_profile_inner_push_contact(L, contact) ? 1 : 0;
+}
+
+static int __wxbox_profile_get_contact_with_wxnumber(lua_State* L)
+{
+    const char* wxnumber = luaL_checkstring(L, 1);
+    luaL_argcheck(L, wxnumber != nullptr, 1, "wxnumber is required");
+
+    wb_wx::WeChatContact contact;
+    if (!wb_plugin_wechat::GetContactWithWxNumber(wxnumber, contact)) {
+        return 0;
+    }
+
+    return __wxbox_profile_inner_push_contact(L, contact) ? 1 : 0;
+}
+
+static int __wxbox_profile_get_all_contacts(lua_State* L)
+{
+    std::vector<wb_wx::WeChatContact> contacts;
+    if (!wb_plugin_wechat::GetAllContacts(contacts)) {
+        return 0;
+    }
+
+    if (contacts.empty()) {
+        return 0;
+    }
+
+    // build contacts table
+    lua_newtable(L);
+
+    for (size_t i = 0; i < contacts.size(); i++) {
+        __wxbox_profile_inner_push_contact(L, contacts.at(i));
+        lua_rawseti(L, -2, i);
+    }
+
+    return 1;
+}
+
 //
 // export module
 //
@@ -117,6 +231,14 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"error", __wxbox_error},
     {"clear", __wxbox_clear},
     {"logout", __wxbox_logout},
+    {"profile_wxid", __wxbox_profile_wxid},
+    {"profile_wxnumber", __wxbox_profile_wxnumber},
+    {"profile_nickname", __wxbox_profile_nickname},
+    {"wxid_to_wxnumber", __wxbox_wxid_to_wxnumber},
+    {"wxnumber_to_wxid", __wxbox_wxnumber_to_wxid},
+    {"get_contact_with_wxid", __wxbox_profile_get_contact_with_wxid},
+    {"get_contact_with_wxnumber", __wxbox_profile_get_contact_with_wxnumber},
+    {"get_all_contacts", __wxbox_profile_get_all_contacts},
     {NULL, NULL},
 };
 
