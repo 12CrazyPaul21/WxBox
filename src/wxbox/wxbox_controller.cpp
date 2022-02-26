@@ -597,6 +597,11 @@ void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message
             WxBotLogRequestHandler(message.pid, message.u.wxBotControlPacket.mutable_logrequest());
             break;
         }
+
+        case wxbox::ControlPacketType::CLEAR_COMMAND_LOG_REQUEST: {
+            view->ClearCommandResultScreen();
+            break;
+        }
     }
 }
 

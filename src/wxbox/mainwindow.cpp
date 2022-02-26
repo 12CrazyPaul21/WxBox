@@ -133,6 +133,11 @@ void MainWindow::AppendExecuteCommandResult(const QString& result)
     ui->viewCommandExecuteLogger->moveCursor(QTextCursor::End);
 }
 
+void MainWindow::ClearCommandResultScreen()
+{
+    ui->viewCommandExecuteLogger->clear();
+}
+
 void MainWindow::OnBeginMission()
 {
     XSTYLE_WINDOW_CLASS::OnBeginMission();
@@ -315,6 +320,13 @@ void MainWindow::RegisterWidgetEventHandler()
     //
 
     ui->lineCommand->RegisterExecuteHandler([this](const QString& statement) {
+        // clear line result screen
+        if (!statement.compare("wxbox.clear")) {
+            ui->viewCommandExecuteLogger->clear();
+            ui->lineCommand->clear();
+            return;
+        }
+
         wb_process::PID pid = wxStatusModel.selection();
         if (!pid) {
             AppendExecuteCommandResult(QString("[<font color=\"blue\">WxBox</font>] : %1").arg(Translate("No client has been selected")));

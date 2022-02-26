@@ -31,6 +31,7 @@ enum ControlPacketType {
     EXECUTE_PLUGIN_SCRIPT_RESPONSE = 11;
     LOG_REQUEST = 12;
     CHANGE_CONFIG_REQUEST = 13;
+    CLEAR_COMMAND_LOG_REQUEST = 14;
 }
 
 enum WxBotLogLevel {

@@ -89,6 +89,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     bool CheckSystemVersionSupported();
     void UpdateWeChatFeatures();
     void AppendExecuteCommandResult(const QString& result);
+    void ClearCommandResultScreen();
 
     bool InitWxBox(QSplashScreen* splash);
     bool DeinitWxBox();

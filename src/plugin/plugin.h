@@ -121,6 +121,7 @@ namespace wxbox {
         {
             SendTextMesage = 0,
             Log,
+            ClearCommandResultScreen,
             _TotalHostEventType
         };
 

@@ -74,6 +74,21 @@ static int __wxbox_error(lua_State* L)
     return __wxbox_dispatch_log(L, wb_plugin::PluginLogLevel::Error);
 }
 
+static int __wxbox_clear(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type = wb_plugin::HostEventType::ClearCommandResultScreen;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
 //
 // export module
 //
@@ -85,6 +100,7 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"info", __wxbox_info},
     {"warning", __wxbox_warning},
     {"error", __wxbox_error},
+    {"clear", __wxbox_clear},
     {NULL, NULL},
 };
 

@@ -260,5 +260,12 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
             this->log((wxbox::WxBotLogLevel)event->log->level, event->log->message.c_str());
             break;
         }
+
+        case wb_plugin::HostEventType::ClearCommandResultScreen: {
+            wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+            msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::CLEAR_COMMAND_LOG_REQUEST);
+            client->PushMessageAsync(std::move(msg));
+            break;
+        }
     }
 }
