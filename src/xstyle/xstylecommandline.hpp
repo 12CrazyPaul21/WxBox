@@ -50,6 +50,37 @@ class XStyleCommandLine : public QLineEdit
         handler = fn;
     }
 
+    void LoadHistory(const std::vector<std::string>& collection)
+    {
+        history.clear();
+
+        for (auto item : collection) {
+            history.push_back(item.c_str());
+
+            if (history.size() >= maxLine) {
+                break;
+            }
+        }
+
+        cursor = history.size();
+        Balance();
+    }
+
+    std::vector<std::string> SaveHistory(const size_t maxPersistenceLine)
+    {
+        size_t index = 0;
+        if (history.size() > maxPersistenceLine) {
+            index = history.size() - maxPersistenceLine;
+        }
+
+        std::vector<std::string> result;
+        for (; index < history.size(); index++) {
+            result.push_back(history.at(index).toStdString());
+        }
+
+        return result;
+    }
+
     void Balance()
     {
         if (history.size() > maxLine) {

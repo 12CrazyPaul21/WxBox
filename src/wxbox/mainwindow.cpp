@@ -211,6 +211,7 @@ void MainWindow::InitWidget()
     //
 
     ui->lineCommand->SetMaxHistoryLine(config.plugin_command_max_history_line());
+    ui->lineCommand->LoadHistory(config.load_plugin_command_history());
     ui->lineCommand->setEnabled(false);
 }
 
@@ -222,7 +223,11 @@ void MainWindow::RegisterWidgetEventHandler()
 
     ui->viewWeChatStatus->viewport()->installEventFilter(this);
     QObject::connect(ui->viewWeChatStatus->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-        ui->lineCommand->setEnabled(!selected.isEmpty());
+        bool empty = selected.isEmpty();
+        ui->lineCommand->setEnabled(!empty);
+        if (!empty) {
+            ui->lineCommand->setFocus();
+        }
     });
     QObject::connect(ui->viewWeChatStatus, &QWidget::customContextMenuRequested, this, [this](QPoint pos) {
         wb_process::PID pid = wxStatusModel.selection();
@@ -425,5 +430,8 @@ bool MainWindow::DeinitWxBox()
 
     // stop wxbox server
     controller.StopWxBoxServer();
+
+    // save command history
+    config.save_plugin_command_history(ui->lineCommand->SaveHistory(config.plugin_command_max_history_persistence_line()));
     return true;
 }

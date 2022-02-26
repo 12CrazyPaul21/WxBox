@@ -13,6 +13,7 @@ REGISTER_CONFIG_KEY(WXBOX_PLUGINS_RELPATH);
 REGISTER_CONFIG_KEY(WXBOX_PLUGIN_LONG_TASK_TIMEOUT);
 REGISTER_CONFIG_KEY(WXBOX_PLUGIN_LOG_MAX_LINE);
 REGISTER_CONFIG_KEY(WXBOX_PLUGIN_COMMAND_MAX_HISTORY_LINE);
+REGISTER_CONFIG_KEY(WXBOX_PLUGIN_COMMAND_MAX_HISTORY_PERSISTENCE_LINE);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PATH);
 REGISTER_CONFIG_KEY(WXBOX_COREDUMP_PREFIX);
 REGISTER_CONFIG_KEY(WXBOX_CRASHDUMPER);
@@ -74,6 +75,7 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_PLUGIN_LONG_TASK_TIMEOUT);
         CHECK_DEFAULT_CONFIG(WXBOX_PLUGIN_LOG_MAX_LINE);
         CHECK_DEFAULT_CONFIG(WXBOX_PLUGIN_COMMAND_MAX_HISTORY_LINE);
+        CHECK_DEFAULT_CONFIG(WXBOX_PLUGIN_COMMAND_MAX_HISTORY_PERSISTENCE_LINE);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PATH);
         CHECK_DEFAULT_CONFIG(WXBOX_COREDUMP_PREFIX);
         CHECK_DEFAULT_CONFIG(WXBOX_CRASHDUMPER);
@@ -492,6 +494,28 @@ class AppConfig final : public wb_config::Config
     void change_plugin_command_max_history_line(int maxline)
     {
         this->operator[](WXBOX_PLUGIN_COMMAND_MAX_HISTORY_LINE_KEY) = maxline;
+        submit();
+    }
+
+    int plugin_command_max_history_persistence_line() const
+    {
+        return this->operator[](WXBOX_PLUGIN_COMMAND_MAX_HISTORY_PERSISTENCE_LINE_KEY).safe_as<int>();
+    }
+
+    void change_plugin_command_max_history_persistence_line(int maxline)
+    {
+        this->operator[](WXBOX_PLUGIN_COMMAND_MAX_HISTORY_PERSISTENCE_LINE_KEY) = maxline;
+        submit();
+    }
+
+    std::vector<std::string> load_plugin_command_history() const
+    {
+        return this->operator[]("/wxbox/plugin_command_persistence_history"_conf).safe_as<std::vector<std::string>>();
+    }
+
+    void save_plugin_command_history(const std::vector<std::string>& history)
+    {
+        this->operator[]("/wxbox/plugin_command_persistence_history"_conf) = history;
         submit();
     }
 

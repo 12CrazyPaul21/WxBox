@@ -126,6 +126,7 @@ all_default_config = {
     '/wxbox/plugin_long_task_timeout': false,
     '/wxbox/plugin_log_max_line': false,
     '/wxbox/plugin_command_max_history_line': false,
+    '/wxbox/plugin_command_max_history_persistence_line': false,
     '/wxbox/coredump_path': true,
     '/wxbox/coredump_prefix': true,
     '/wxbox/crashdumper': true,
