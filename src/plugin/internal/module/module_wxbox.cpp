@@ -38,7 +38,7 @@ static int __wxbox_dispatch_host_event(lua_State* L)
 
 static int __wxbox_dispatch_log(lua_State* L, wb_plugin::PluginLogLevel level)
 {
-    const char* message = luaL_checkstring(L, 1);
+    const char* message = lua_tostring(L, 1);
     luaL_argcheck(L, message != nullptr, 1, "invalid log message");
 
     auto event = wb_plugin::BuildHostEventModel();
@@ -107,6 +107,33 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
 int wxbox::plugin::internal::__luaopen_wxbox_module(lua_State* L)
 {
     luaL_newlib(L, WxBoxModuleMethods);
+
+    //
+    // build wechat message type enum
+    //
+
+    lua_newtable(L);
+
+    lua_pushinteger(L, 0x01);
+    lua_setfield(L, -2, "PLAINTEXT");
+    lua_pushinteger(L, 0x03);
+    lua_setfield(L, -2, "PICTURE");
+    lua_pushinteger(L, 0x22);
+    lua_setfield(L, -2, "AUDIO");
+    lua_pushinteger(L, 0x2B);
+    lua_setfield(L, -2, "VIDEO");
+    lua_pushinteger(L, 0x2F);
+    lua_setfield(L, -2, "EMOJI");
+    lua_pushinteger(L, 0x31);
+    lua_setfield(L, -2, "FILE");
+    lua_pushinteger(L, 0x33);
+    lua_setfield(L, -2, "WAKE_CONTACT_DIALOG");
+    lua_pushinteger(L, 0x2712);
+    lua_setfield(L, -2, "REVOKE_MESSAGE");
+
+    // record WeChatMessageType in wxbox module
+    lua_setfield(L, -2, "WeChatMessageType");
+
     return 1;
 }
 

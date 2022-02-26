@@ -63,6 +63,17 @@ function example.hello()
     return 'hello'
 end
 
+function example.test()
+    wxbox.info(wxbox.WeChatMessageType.PLAINTEXT)
+    wxbox.info(wxbox.WeChatMessageType.PICTURE)
+    wxbox.info(wxbox.WeChatMessageType.AUDIO)
+    wxbox.info(wxbox.WeChatMessageType.VIDEO)
+    wxbox.info(wxbox.WeChatMessageType.EMOJI)
+    wxbox.info(wxbox.WeChatMessageType.FILE)
+    wxbox.info(wxbox.WeChatMessageType.WAKE_CONTACT_DIALOG)
+    wxbox.info(wxbox.WeChatMessageType.REVOKE_MESSAGE)
+end
+
 function example.dispatch_message()
     local hostEvent = wxbox_host_event.create()
     hostEvent:set_type(wxbox_host_event.SendTextMesage)
