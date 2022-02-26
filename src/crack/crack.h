@@ -147,4 +147,6 @@ namespace wxbox {
     }
 }
 
+#define WECHAT_MESSAGE_FILTER(MESSAGE) (MESSAGE ? ((wxbox::crack::wx::PWeChatMessage)(MESSAGE))->message_type = 0 : 0)
+
 #endif  // #ifndef __WXBOX_CRACK_H
