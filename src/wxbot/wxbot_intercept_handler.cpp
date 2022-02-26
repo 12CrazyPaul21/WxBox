@@ -39,6 +39,15 @@ void wxbot::WxBot::WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx:
     if (!message) {
         return;
     }
+
+    // if (IS_WECHAT_REVOKE_MESSAGE(type)) {
+    //     message->message_type = 0;
+    //     message->message[0]   = L'0';
+    // }
+    //
+    // if (IS_WECHAT_TEXT_MESSAGE(type)) {
+    //     message->message_type = 0;
+    // }
 }
 
 void wxbot::WxBot::WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message)

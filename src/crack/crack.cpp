@@ -67,31 +67,43 @@ BEGIN_NAKED_STD_FUNCTION(internal_wechat_login_handler_stub)
 }
 END_NAKED_STD_FUNCTION(internal_wechat_login_handler_stub)
 
-static void internal_wechat_raw_message_handler(wxbox::crack::wx::WeChatMessageType type, wxbox::crack::wx::PWeChatMessage message)
+static uint32_t internal_wechat_raw_message_handler(wxbox::crack::wx::WeChatMessageType type, wxbox::crack::wx::PWeChatMessage message)
 {
-    if (g_wechat_raw_message_handler) {
-        g_wechat_raw_message_handler(type, message);
+    if (!g_wechat_raw_message_handler || !message) {
+        return (uint32_t)(type);
     }
+
+    g_wechat_raw_message_handler(type, message);
+    if ((uint32_t)type != message->message_type) {
+        return message->message_type;
+    }
+
+    return (uint32_t)(type);
 }
 
 BEGIN_NAKED_STD_FUNCTION(internal_wechat_raw_message_handler_stub)
 {
     __asm {
-        // origianl ebp
+        ;  // origianl ebp
 		mov eax, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_EBP_OFFSET]
 
-        // original eax
+        ;  // original eax
 		mov ebx, [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_EAX_OFFSET]
 
-        // calc message start position and push
+        ;  // calc message start position and push
 		add eax, g_wechat_raw_message_type_point_offset
 		sub eax, WECHAT_MESSAGE_ITEM_TYPE_OFFSET
 		push eax
 
-                // push message type
+        ;  // push message type
 		push ebx
-		
+
+		;  // call raw message handler
 		call internal_wechat_raw_message_handler
+
+		;  // cover new message type
+		mov [esp+WXBOX_INTERCEPT_STUB_ORIGINAL_EAX_OFFSET+0x8], eax
+
 		add esp, 0x8
 		ret
     }
