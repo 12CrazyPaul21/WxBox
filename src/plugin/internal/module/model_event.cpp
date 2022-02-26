@@ -17,15 +17,6 @@ static int __plugin_event_get_type(lua_State* L)
     return 1;
 }
 
-static int __plugin_event_get_data_ptr(lua_State* L)
-{
-    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
-    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
-
-    lua_pushinteger(L, (lua_Integer)ptr->pData1);
-    return 1;
-}
-
 static int __plugin_event_get_message_type(lua_State* L)
 {
     wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
@@ -62,12 +53,36 @@ static int __plugin_event_get_chatroom_talker_xwid(lua_State* L)
     return 1;
 }
 
+static int __plugin_event_get_data1(lua_State* L)
+{
+    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
+    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
+
+    lua_pushinteger(L, (lua_Integer)ptr->pData1);
+    return 1;
+}
+
+static int __plugin_event_get_data2(lua_State* L)
+{
+    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
+    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
+
+    lua_pushinteger(L, (lua_Integer)ptr->pData2);
+    return 1;
+}
+
+// only for receive raw message
 static int __plugin_event_filter_message(lua_State* L)
 {
     wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
     luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
 
     if (!ptr->pData1) {
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    if (ptr->type != wb_plugin::PluginEventType::ReceiveRawMessage) {
         lua_pushboolean(L, false);
         return 1;
     }
@@ -87,11 +102,12 @@ const struct luaL_Reg wxbox::plugin::internal::PluginEventModelMethods[] = {
 
 const struct luaL_Reg wxbox::plugin::internal::PluginEventModelObjectMethods[] = {
     {"type", __plugin_event_get_type},
-    {"data_ptr", __plugin_event_get_data_ptr},
     {"message_type", __plugin_event_get_message_type},
     {"wxid", __plugin_event_get_wxid},
     {"message", __plugin_event_get_message},
     {"chatroom_talker_xwid", __plugin_event_get_chatroom_talker_xwid},
+    {"pdata1", __plugin_event_get_data1},
+    {"pdata2", __plugin_event_get_data2},
     {"filter_message", __plugin_event_filter_message},
     {NULL, NULL},
 };

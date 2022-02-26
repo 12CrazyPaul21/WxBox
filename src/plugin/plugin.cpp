@@ -8,6 +8,7 @@ static const char* HostEventNames[] = {
     "SendTextMesage",
     "Log",
     "ClearCommandResultScreen",
+    "Logout",
 };
 
 static const char* PluginEventNames[] = {

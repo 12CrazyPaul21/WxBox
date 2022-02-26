@@ -89,6 +89,21 @@ static int __wxbox_clear(lua_State* L)
     return 0;
 }
 
+static int __wxbox_logout(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type = wb_plugin::HostEventType::Logout;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
 //
 // export module
 //
@@ -101,6 +116,7 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"warning", __wxbox_warning},
     {"error", __wxbox_error},
     {"clear", __wxbox_clear},
+    {"logout", __wxbox_logout},
     {NULL, NULL},
 };
 

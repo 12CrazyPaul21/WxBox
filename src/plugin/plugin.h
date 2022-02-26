@@ -122,6 +122,7 @@ namespace wxbox {
             SendTextMesage = 0,
             Log,
             ClearCommandResultScreen,
+            Logout,
             _TotalHostEventType
         };
 

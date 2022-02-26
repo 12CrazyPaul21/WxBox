@@ -1177,6 +1177,14 @@ static bool Inner_SendTextMessage(const wb_crack::PWxBotEntryParameter args, con
     }
 
     //
+    // check logged-in
+    //
+
+    if (!wb_crack::IsLoign(args->wechat_apis, args->wechat_datastructure_supplement)) {
+        return false;
+    }
+
+    //
     // build wxid info
     //
 
@@ -1332,6 +1340,14 @@ bool wxbox::crack::SendTextMessageWithNotifyList(const PWxBotEntryParameter args
 bool wxbox::crack::SendFile(const PWxBotEntryParameter args, const std::string& wxid, const std::string& filePath)
 {
     if (!args || !args->wechat_apis.WXSendFileMessage || !args->wechat_apis.FetchGlobalSendMessageContext || wxid.empty() || filePath.empty() || !wb_file::IsPathExists(filePath)) {
+        return false;
+    }
+
+    //
+    // check logged-in
+    //
+
+    if (!wb_crack::IsLoign(args->wechat_apis, args->wechat_datastructure_supplement)) {
         return false;
     }
 
