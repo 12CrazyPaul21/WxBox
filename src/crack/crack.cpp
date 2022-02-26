@@ -7,6 +7,8 @@
 
 static cpulong_t g_wechat_raw_message_type_point_offset = 0;
 
+static std::mutex g_mutex;
+
 // hook point handler
 static wb_crack::FnWeChatExitHandler             g_wechat_exit_handler              = nullptr;
 static wb_crack::FnWeChatLogoutHandler           g_wechat_logout_handler            = nullptr;
@@ -920,6 +922,8 @@ bool wxbox::crack::CollectAllContact(const PWxBotEntryParameter args, std::vecto
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(g_mutex);
+
     uint8_t* contactHeaderAddress = FetchContactHeaderAddress(args->wechat_apis, args->wechat_datastructure_supplement);
     if (!contactHeaderAddress || !args->wechat_datastructure_supplement.weChatContactDataBeginOffset) {
         return false;
@@ -1025,6 +1029,8 @@ bool wxbox::crack::GetContactWithWxNumber(const std::string& wxnumber, const PWx
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(g_mutex);
+
     uint8_t* contactHeaderAddress = FetchContactHeaderAddress(args->wechat_apis, args->wechat_datastructure_supplement);
     if (!contactHeaderAddress || !args->wechat_datastructure_supplement.weChatContactDataBeginOffset) {
         return false;
@@ -1089,6 +1095,8 @@ bool wxbox::crack::GetContactWithWxid(const std::string& wxid, const PWxBotEntry
     if (wxid.empty() || !args || !args->wechat_apis.FindAndDeepCopyWeChatContactItemWithWXIDWrapper) {
         return false;
     }
+
+    std::lock_guard<std::mutex> lock(g_mutex);
 
     //
     // compare wechat version number
@@ -1175,6 +1183,8 @@ static bool Inner_SendTextMessage(const wb_crack::PWxBotEntryParameter args, con
     if (!args || !args->wechat_apis.WXSendTextMessage || wxid.empty() || (message.empty() && !messageNotifyListSuffix) || !pNotifyList) {
         return false;
     }
+
+    std::lock_guard<std::mutex> lock(g_mutex);
 
     //
     // check logged-in
@@ -1342,6 +1352,8 @@ bool wxbox::crack::SendFile(const PWxBotEntryParameter args, const std::string& 
     if (!args || !args->wechat_apis.WXSendFileMessage || !args->wechat_apis.FetchGlobalSendMessageContext || wxid.empty() || filePath.empty() || !wb_file::IsPathExists(filePath)) {
         return false;
     }
+
+    std::lock_guard<std::mutex> lock(g_mutex);
 
     //
     // check logged-in
