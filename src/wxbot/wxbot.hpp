@@ -93,6 +93,12 @@ namespace wxbot {
         void DispatchPluginResult(const std::string& result, bool fromFilehelper);
         void DispatchPluginErrorReport(const std::string& errorMsg, bool fromFilehelper);
         void DispatchPluginReceiveRawWeChatMessage(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message, bool sync = true);
+        void DispatchPluginReceiveWeChatMessage(wb_wx::PWeChatMessage message, bool sync = false);
+        void DispatchPluginReceiveTextWeChatMessage(wb_wx::PWeChatMessage message, bool sync = false);
+        void DispatchPluginSendTextWeChatMessage(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message, bool sync = true);
+        void DispatchPluginLoginWeChatMessage(bool sync = false);
+        void DispatchPluginLogoutWeChatMessage(bool sync = false);
+        void DispatchPluginExitWeChatMessage(bool sync = false);
 
       private:
         void PreHookWeChat();
@@ -112,7 +118,7 @@ namespace wxbot {
         void WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message);
         void WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message);
         void WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection, ucpulong_t count, ucpulong_t presize);
-        bool WeChatSendTextMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute);
+        void WeChatSendTextMessageHandler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message);
 
         //
         // Plugin Handler

@@ -6,11 +6,18 @@
 
 void wxbot::WxBot::WeChatExitHandler()
 {
+    DispatchPluginExitWeChatMessage(false);
     Stop();
 }
 
 void wxbot::WxBot::WeChatLogoutHandler()
 {
+    //
+    // dispatch event to plugin
+    //
+
+    DispatchPluginLogoutWeChatMessage(false);
+
     //
     // report logout
     //
@@ -29,13 +36,21 @@ void wxbot::WxBot::WeChatLogoutHandler()
 
 void wxbot::WxBot::WeChatLoginHandler()
 {
+    //
+    // dispatch event to plugin
+    //
+
+    DispatchPluginLoginWeChatMessage(false);
+
+    //
+    // report profile
+    //
+
     ResponseProfile();
 }
 
 void wxbot::WxBot::WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message)
 {
-    WXBOX_UNREF(type);
-
     if (!message) {
         return;
     }
@@ -51,7 +66,12 @@ void wxbot::WxBot::WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx:
 
 void wxbot::WxBot::WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message)
 {
-    WXBOX_UNREF(message);
+    if (!message) {
+        return;
+    }
+
+    IS_WECHAT_TEXT_MESSAGE(message->message_type) ? DispatchPluginReceiveTextWeChatMessage(message, false)
+                                                  : DispatchPluginReceiveWeChatMessage(message, false);
 }
 
 void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection, ucpulong_t count, ucpulong_t presize)
@@ -71,14 +91,11 @@ void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection
     }
 }
 
-bool wxbot::WxBot::WeChatSendTextMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute)
+void wxbot::WxBot::WeChatSendTextMessageHandler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message)
 {
-    WXBOX_UNREF(wxidSubstitute);
-    WXBOX_UNREF(messageSubstitute);
-
     if (!wxid || !message) {
-        return false;
+        return;
     }
 
-    return false;
+    DispatchPluginSendTextWeChatMessage(wxid, message, true);
 }

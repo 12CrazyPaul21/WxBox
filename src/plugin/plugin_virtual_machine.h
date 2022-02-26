@@ -11,11 +11,9 @@ namespace wxbox {
         enum class PluginVirtualMachineCommandType
         {
             Unknown = 0,
-            GC,
-            Eval,
-            ReceiveRawWxChatMessage,
-            ReceiveWxChatTextMessage,
-            SendWxChatTextMessage
+            GC,                      // lua gc
+            Eval,                    // wxbox execute plugin command
+            WeChatLifeEventMessage,  // dispatch wechat lifetime event to all plugin
         };
 
         struct PluginVirtualMachineCommand
@@ -29,25 +27,9 @@ namespace wxbox {
             std::string command;
         };
 
-        struct PluginVirtualMachineCommandReceiveRawWxChatMessage : public PluginVirtualMachineCommand
+        struct PluginVirtualMachineCommandWeChatLifeEventMessage : public PluginVirtualMachineCommand
         {
-            void*       rawMessagePtr;
-            uint32_t    messageType;
-            std::string wxid;
-            std::string rawMessage;
-            std::string chatroomTalkerWxid;
-        };
-
-        struct PluginVirtualMachineCommandReceiveWxChatTextMessage : public PluginVirtualMachineCommand
-        {
-            std::string wxid;
-            std::string textMessage;
-        };
-
-        struct PluginVirtualMachineCommandSendWxChatTextMessage : public PluginVirtualMachineCommand
-        {
-            std::string wxid;
-            std::string textMessage;
+            wxbox::plugin::PluginEventModelPtr event;
         };
 
         template<PluginVirtualMachineCommandType type>
@@ -280,9 +262,7 @@ namespace wxbox {
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::Unknown, PluginVirtualMachineCommand);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::GC, PluginVirtualMachineCommand);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::Eval, PluginVirtualMachineCommandEval);
-RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::ReceiveRawWxChatMessage, PluginVirtualMachineCommandReceiveRawWxChatMessage);
-RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::ReceiveWxChatTextMessage, PluginVirtualMachineCommandReceiveWxChatTextMessage);
-RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::SendWxChatTextMessage, PluginVirtualMachineCommandSendWxChatTextMessage);
+RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage, PluginVirtualMachineCommandWeChatLifeEventMessage);
 
 // register plugin virtual machine event type
 RegisterPluginVirtualMachineEventType(wxbox::plugin::PluginVirtualMachineEventType::Unknown, PluginVirtualMachineEvent);

@@ -17,21 +17,12 @@ static int __plugin_event_get_type(lua_State* L)
     return 1;
 }
 
-static int __plugin_event_get_command_ptr(lua_State* L)
-{
-    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
-    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
-
-    lua_pushinteger(L, (lua_Integer)ptr->pCommand);
-    return 1;
-}
-
 static int __plugin_event_get_data_ptr(lua_State* L)
 {
     wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
     luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
 
-    lua_pushinteger(L, (lua_Integer)ptr->pData);
+    lua_pushinteger(L, (lua_Integer)ptr->pData1);
     return 1;
 }
 
@@ -76,12 +67,12 @@ static int __plugin_event_filter_message(lua_State* L)
     wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
     luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
 
-    if (!ptr->pData) {
+    if (!ptr->pData1) {
         lua_pushboolean(L, false);
         return 1;
     }
 
-    WECHAT_MESSAGE_FILTER(ptr->pData);
+    WECHAT_MESSAGE_FILTER(ptr->pData1);
     lua_pushboolean(L, true);
     return 1;
 }
@@ -96,7 +87,6 @@ const struct luaL_Reg wxbox::plugin::internal::PluginEventModelMethods[] = {
 
 const struct luaL_Reg wxbox::plugin::internal::PluginEventModelObjectMethods[] = {
     {"type", __plugin_event_get_type},
-    {"command_ptr", __plugin_event_get_command_ptr},
     {"data_ptr", __plugin_event_get_data_ptr},
     {"message_type", __plugin_event_get_message_type},
     {"wxid", __plugin_event_get_wxid},

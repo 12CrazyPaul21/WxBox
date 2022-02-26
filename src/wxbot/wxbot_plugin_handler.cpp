@@ -38,25 +38,167 @@ void wxbot::WxBot::DispatchPluginReceiveRawWeChatMessage(wb_wx::WeChatMessageTyp
         return;
     }
 
-    auto command           = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::ReceiveRawWxChatMessage>();
-    command->rawMessagePtr = message;
-    command->messageType   = (uint32_t)type;
+    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    command->event = wb_plugin::BuildPluginEventModel();
+    if (!command->event) {
+        return;
+    }
+
+    command->event->type        = wb_plugin::PluginEventType::ReceiveRawMessage;
+    command->event->pData1      = message;
+    command->event->messageType = (uint32_t)type;
 
     if (message->talker_wxid) {
-        command->wxid = wb_string::ToString(message->talker_wxid);
+        command->event->wxid = wb_string::ToString(message->talker_wxid);
     }
     if (message->message) {
-        command->rawMessage = wb_string::ToString(message->message);
+        command->event->message = wb_string::ToString(message->message);
     }
     if (message->chatroom_talker_wxid) {
-        command->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
+        command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
     }
 
     wb_plugin::PushPluginVirtualMachineCommand(command);
     if (sync) {
         command->signal.get_future().wait();
     }
-    return;
+}
+
+void wxbot::WxBot::DispatchPluginReceiveWeChatMessage(wb_wx::PWeChatMessage message, bool sync)
+{
+    if (!message) {
+        return;
+    }
+
+    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    command->event = wb_plugin::BuildPluginEventModel();
+    if (!command->event) {
+        return;
+    }
+
+    command->event->type        = wb_plugin::PluginEventType::ReceiveMessage;
+    command->event->pData1      = message;
+    command->event->messageType = message->message_type;
+
+    if (message->talker_wxid) {
+        command->event->wxid = wb_string::ToString(message->talker_wxid);
+    }
+    if (message->message) {
+        command->event->message = wb_string::ToString(message->message);
+    }
+    if (message->chatroom_talker_wxid) {
+        command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
+    }
+
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+    if (sync) {
+        command->signal.get_future().wait();
+    }
+}
+
+void wxbot::WxBot::DispatchPluginReceiveTextWeChatMessage(wb_wx::PWeChatMessage message, bool sync)
+{
+    if (!message) {
+        return;
+    }
+
+    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    command->event = wb_plugin::BuildPluginEventModel();
+    if (!command->event) {
+        return;
+    }
+
+    command->event->type        = wb_plugin::PluginEventType::ReceiveTextMessage;
+    command->event->pData1      = message;
+    command->event->messageType = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
+
+    if (message->talker_wxid) {
+        command->event->wxid = wb_string::ToString(message->talker_wxid);
+    }
+    if (message->message) {
+        command->event->message = wb_string::ToString(message->message);
+    }
+    if (message->chatroom_talker_wxid) {
+        command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
+    }
+
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+    if (sync) {
+        command->signal.get_future().wait();
+    }
+}
+
+void wxbot::WxBot::DispatchPluginSendTextWeChatMessage(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message, bool sync)
+{
+    if (!wxid || !message || !wxid->str || !message->str) {
+        return;
+    }
+
+    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    command->event = wb_plugin::BuildPluginEventModel();
+    if (!command->event) {
+        return;
+    }
+
+    command->event->type        = wb_plugin::PluginEventType::SendTextMessage;
+    command->event->messageType = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
+    command->event->pData1      = wxid;
+    command->event->pData2      = message;
+    command->event->wxid        = wb_string::ToString(wxid->str);
+    command->event->message     = wb_string::ToString(message->str);
+
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+    if (sync) {
+        command->signal.get_future().wait();
+    }
+}
+
+void wxbot::WxBot::DispatchPluginLoginWeChatMessage(bool sync)
+{
+    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    command->event = wb_plugin::BuildPluginEventModel();
+    if (!command->event) {
+        return;
+    }
+
+    command->event->type = wb_plugin::PluginEventType::LoginWeChatEvent;
+
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+    if (sync) {
+        command->signal.get_future().wait();
+    }
+}
+
+void wxbot::WxBot::DispatchPluginLogoutWeChatMessage(bool sync)
+{
+    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    command->event = wb_plugin::BuildPluginEventModel();
+    if (!command->event) {
+        return;
+    }
+
+    command->event->type = wb_plugin::PluginEventType::LogoutWeChatEvent;
+
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+    if (sync) {
+        command->signal.get_future().wait();
+    }
+}
+
+void wxbot::WxBot::DispatchPluginExitWeChatMessage(bool sync)
+{
+    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    command->event = wb_plugin::BuildPluginEventModel();
+    if (!command->event) {
+        return;
+    }
+
+    command->event->type = wb_plugin::PluginEventType::ExitWeChatEvent;
+
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+    if (sync) {
+        command->signal.get_future().wait();
+    }
 }
 
 //

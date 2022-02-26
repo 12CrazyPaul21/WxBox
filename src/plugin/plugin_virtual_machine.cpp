@@ -41,8 +41,7 @@ static bool                                 IsModuleRegistered(wxbox::plugin::PP
 static const char*                          VerifyCommandInfo(wxbox::plugin::PPluginVirtualMachine vm, wb_plugin::CommandExecuteInfoPtr commandInfo);
 static void                                 ExecuteCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::CommandParseResultPtr parseResult, bool fromFilehelper);
 static void                                 HandleEvalCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandEvalPtr command);
-static void                                 HandleReceiveWxChatTextMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandReceiveWxChatTextMessagePtr command);
-static void                                 HandleSendWxChatTextMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandSendWxChatTextMessagePtr command);
+static void                                 HandleWeChatLifeEventMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandWeChatLifeEventMessagePtr command);
 static void                                 HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandPtr command);
 static void                                 PluginVirtualMachineMessageLoop(wxbox::plugin::PPluginVirtualMachine vm);
 static void                                 PluginVirtualMachineRoutine(wxbox::plugin::PPluginVirtualMachine vm);
@@ -708,67 +707,26 @@ static void HandleEvalCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::pl
     ExecuteCommand(vm, wb_plugin::ParseCommandStatement(command->command.c_str()), false);
 }
 
-static void HandleReceiveRawWxChatMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandReceiveRawWxChatMessagePtr command)
+static void HandleWeChatLifeEventMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandWeChatLifeEventMessagePtr command)
 {
     assert(vm != nullptr && vm->state != nullptr);
-    if (!command) {
+
+    if (!command || !command->event) {
         return;
     }
 
-    // dispatch event to all plugins
-    auto pluginEvent                = wb_plugin::BuildPluginEventModel();
-    pluginEvent->type               = wb_plugin::PluginEventType::ReceiveRawMessage;
-    pluginEvent->pCommand           = command.get();
-    pluginEvent->pData              = command->rawMessagePtr;
-    pluginEvent->messageType        = command->messageType;
-    pluginEvent->wxid               = command->wxid;
-    pluginEvent->message            = command->rawMessage;
-    pluginEvent->chatroomTalkerWxid = command->chatroomTalkerWxid;
-    DispatchPluginEvent(vm, pluginEvent);
-}
-
-static void HandleReceiveWxChatTextMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandReceiveWxChatTextMessagePtr command)
-{
-    assert(vm != nullptr && vm->state != nullptr);
-    if (!command) {
-        return;
-    }
-
-    if (!command->wxid.compare(WXBOX_WECHAT_EXECUTOR_WXID)) {
-        // parse command statement
-        auto parseResult = wb_plugin::ParseCommandStatement(command->textMessage.c_str());
-        if (parseResult && parseResult->status != wb_plugin::CommandParseStatus::NotCommand) {
-            ExecuteCommand(vm, parseResult, true);
-            return;
+    if (command->event->type == wb_plugin::PluginEventType::ReceiveTextMessage) {
+        if (!command->event->wxid.compare(WXBOX_WECHAT_EXECUTOR_WXID)) {
+            // parse command statement
+            auto parseResult = wb_plugin::ParseCommandStatement(command->event->message.c_str());
+            if (parseResult && parseResult->status != wb_plugin::CommandParseStatus::NotCommand) {
+                ExecuteCommand(vm, parseResult, true);
+                return;
+            }
         }
     }
 
-    // dispatch event to all plugins
-    auto pluginEvent         = wb_plugin::BuildPluginEventModel();
-    pluginEvent->type        = wb_plugin::PluginEventType::ReceiveTextMessage;
-    pluginEvent->pCommand    = command.get();
-    pluginEvent->messageType = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
-    pluginEvent->wxid        = command->wxid;
-    pluginEvent->message     = command->textMessage;
-    DispatchPluginEvent(vm, pluginEvent);
-}
-
-static void HandleSendWxChatTextMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandSendWxChatTextMessagePtr command)
-{
-    assert(vm != nullptr && vm->state != nullptr);
-
-    if (!command) {
-        return;
-    }
-
-    // dispatch event to all plugins
-    auto pluginEvent         = wb_plugin::BuildPluginEventModel();
-    pluginEvent->type        = wb_plugin::PluginEventType::SendTextMessage;
-    pluginEvent->pCommand    = command.get();
-    pluginEvent->messageType = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
-    pluginEvent->wxid        = command->wxid;
-    pluginEvent->message     = command->textMessage;
-    DispatchPluginEvent(vm, pluginEvent);
+    DispatchPluginEvent(vm, command->event);
 }
 
 static void HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandPtr command)
@@ -782,14 +740,8 @@ static void HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachi
         case wb_plugin::PluginVirtualMachineCommandType::Eval:
             HandleEvalCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::Eval>(command));
             break;
-        case wb_plugin::PluginVirtualMachineCommandType::ReceiveRawWxChatMessage:
-            HandleReceiveRawWxChatMessageCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::ReceiveRawWxChatMessage>(command));
-            break;
-        case wb_plugin::PluginVirtualMachineCommandType::ReceiveWxChatTextMessage:
-            HandleReceiveWxChatTextMessageCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::ReceiveWxChatTextMessage>(command));
-            break;
-        case wb_plugin::PluginVirtualMachineCommandType::SendWxChatTextMessage:
-            HandleSendWxChatTextMessageCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::SendWxChatTextMessage>(command));
+        case wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage:
+            HandleWeChatLifeEventMessageCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>(command));
             break;
     }
 

@@ -143,21 +143,25 @@ namespace wxbox {
             Load = 0,
             PreReload,
             UnLoad,
-            ReceiveRawMessage,
-            ReceiveTextMessage,
-            SendTextMessage,
+            ReceiveRawMessage,   // all raw messages
+            ReceiveMessage,      // audio, video, file, picture, emoji ... messages
+            ReceiveTextMessage,  // only test message(include plugin command statement)
+            SendTextMessage,     // only before send 'text' message
+            LoginWeChatEvent,    // wechat logged-in
+            LogoutWeChatEvent,   // wechat logouted
+            ExitWeChatEvent,     // wechat exit
             _TotalPluginEventType
         };
 
         struct PluginEventModel
         {
             PluginEventType type;
-            void*           pCommand;
-            void*           pData;
             uint32_t        messageType;
             std::string     wxid;
             std::string     message;
             std::string     chatroomTalkerWxid;
+            void*           pData1;
+            void*           pData2;
         };
 
         using PluginEventModelPtr = std::shared_ptr<PluginEventModel>;

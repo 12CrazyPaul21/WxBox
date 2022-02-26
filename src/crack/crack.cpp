@@ -143,23 +143,12 @@ END_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
 
 static void internal_wechat_send_text_message_handler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message)
 {
-    std::wstring wxidSubstitute;
-    std::wstring messageSubstitute;
-
     if (!wxid || !message || !wxid->str || !message->str) {
         return;
     }
 
     if (g_wechat_send_text_message_handler) {
-        if (g_wechat_send_text_message_handler(wxid, message, wxidSubstitute, messageSubstitute)) {
-            if (!wxidSubstitute.empty()) {
-                wb_crack::SubstituteWeChatWString(wxid, wxidSubstitute);
-            }
-
-            if (!messageSubstitute.empty()) {
-                wb_crack::SubstituteWeChatWString(message, messageSubstitute);
-            }
-        }
+        g_wechat_send_text_message_handler(wxid, message);
     }
 }
 

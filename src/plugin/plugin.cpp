@@ -14,8 +14,12 @@ static const char* PluginEventNames[] = {
     "prereload",
     "unload",
     "receive_raw_message",
+    "receive_message",
     "receive_text_message",
     "send_text_message",
+    "login_wechat_event",
+    "logout_wechat_event",
+    "exit_wechat_event",
 };
 
 //
@@ -53,6 +57,14 @@ static int __plugin_on_receive_raw_message_stub(lua_State* L)
     return 0;
 }
 
+static int __plugin_on_receive_message_stub(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    // do nothing
+    return 0;
+}
+
 static int __plugin_on_receive_text_message_stub(lua_State* L)
 {
     WXBOX_UNREF(L);
@@ -62,6 +74,30 @@ static int __plugin_on_receive_text_message_stub(lua_State* L)
 }
 
 static int __plugin_on_send_text_message_stub(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    // do nothing
+    return 0;
+}
+
+static int __plugin_on_login_wechat_event(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    // do nothing
+    return 0;
+}
+
+static int __plugin_on_logout_wechat_event(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    // do nothing
+    return 0;
+}
+
+static int __plugin_on_exit_wechat_event(lua_State* L)
 {
     WXBOX_UNREF(L);
 
@@ -91,8 +127,12 @@ int wxbox::plugin::__declare_plugin(lua_State* L)
         {"prereload", __plugin_on_prereload_stub},
         {"unload", __plugin_on_unload_stub},
         {"receive_raw_message", __plugin_on_receive_raw_message_stub},
+        {"receive_message", __plugin_on_receive_message_stub},
         {"receive_text_message", __plugin_on_receive_text_message_stub},
         {"send_text_message", __plugin_on_send_text_message_stub},
+        {"login_wechat_event", __plugin_on_login_wechat_event},
+        {"logout_wechat_event", __plugin_on_logout_wechat_event},
+        {"exit_wechat_event", __plugin_on_exit_wechat_event},
         {NULL, NULL},
     };
 
@@ -327,8 +367,8 @@ wxbox::plugin::PluginEventModelPtr wxbox::plugin::BuildPluginEventModel()
         return nullptr;
     }
 
-    ptr->pCommand    = nullptr;
-    ptr->pData       = nullptr;
+    ptr->pData1      = nullptr;
+    ptr->pData2      = nullptr;
     ptr->messageType = 0;
 
     return ptr;
