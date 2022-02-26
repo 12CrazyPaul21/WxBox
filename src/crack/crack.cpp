@@ -13,7 +13,7 @@ static wb_crack::FnWeChatLogoutHandler           g_wechat_logout_handler        
 static wb_crack::FnWeChatLoginHandler            g_wechat_login_handler             = nullptr;
 static wb_crack::FnWeChatRawMessageHandler       g_wechat_raw_message_handler       = nullptr;
 static wb_crack::FnWeChatReceivedMessagesHandler g_wechat_received_messages_handler = nullptr;
-static wb_crack::FnWeChatSendMessageHandler      g_wechat_send_message_handler      = nullptr;
+static wb_crack::FnWeChatSendMessageHandler      g_wechat_send_text_message_handler = nullptr;
 
 //
 // wechat intercept stubs
@@ -141,7 +141,7 @@ BEGIN_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
 }
 END_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
 
-static void internal_wechat_send_message_handler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message)
+static void internal_wechat_send_text_message_handler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message)
 {
     std::wstring wxidSubstitute;
     std::wstring messageSubstitute;
@@ -150,8 +150,8 @@ static void internal_wechat_send_message_handler(wxbox::crack::wx::PWeChatWStrin
         return;
     }
 
-    if (g_wechat_send_message_handler) {
-        if (g_wechat_send_message_handler(wxid, message, wxidSubstitute, messageSubstitute)) {
+    if (g_wechat_send_text_message_handler) {
+        if (g_wechat_send_text_message_handler(wxid, message, wxidSubstitute, messageSubstitute)) {
             if (!wxidSubstitute.empty()) {
                 wb_crack::SubstituteWeChatWString(wxid, wxidSubstitute);
             }
@@ -163,7 +163,7 @@ static void internal_wechat_send_message_handler(wxbox::crack::wx::PWeChatWStrin
     }
 }
 
-BEGIN_NAKED_STD_FUNCTION(internal_wechat_send_message_handler_stub)
+BEGIN_NAKED_STD_FUNCTION(internal_wechat_send_text_message_handler_stub)
 {
     __asm {
         // get wxid info
@@ -176,12 +176,12 @@ BEGIN_NAKED_STD_FUNCTION(internal_wechat_send_message_handler_stub)
         // push wxid info
 		push edx
 
-		call internal_wechat_send_message_handler
+		call internal_wechat_send_text_message_handler
 		add esp, 0x8
 		ret
     }
 }
-END_NAKED_STD_FUNCTION(internal_wechat_send_message_handler_stub)
+END_NAKED_STD_FUNCTION(internal_wechat_send_text_message_handler_stub)
 
 //
 // wxbox::crack
@@ -710,7 +710,7 @@ void wxbox::crack::UnRegisterWeChatReceviedMessagesHandler()
 
 bool wxbox::crack::PreInterceptWeChatSendTextMessage(const WxApis& wxApis)
 {
-    return wb_hook::PreInProcessIntercept((void*)wxApis.WXSendTextMessage, internal_wechat_send_message_handler_stub);
+    return wb_hook::PreInProcessIntercept((void*)wxApis.WXSendTextMessage, internal_wechat_send_text_message_handler_stub);
 }
 
 void wxbox::crack::RegisterWeChatSendTextMessageHandler(FnWeChatSendMessageHandler handler)
@@ -719,12 +719,12 @@ void wxbox::crack::RegisterWeChatSendTextMessageHandler(FnWeChatSendMessageHandl
         return;
     }
 
-    g_wechat_send_message_handler = handler;
+    g_wechat_send_text_message_handler = handler;
 }
 
 void wxbox::crack::UnRegisterWeChatSendTextMessageHandler()
 {
-    g_wechat_send_message_handler = nullptr;
+    g_wechat_send_text_message_handler = nullptr;
 }
 
 //

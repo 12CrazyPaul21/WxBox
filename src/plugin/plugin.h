@@ -126,6 +126,7 @@ namespace wxbox {
             Load = 0,
             PreReload,
             UnLoad,
+            ReceiveRawMessage,
             ReceiveTextMessage,
             SendTextMessage,
             _TotalPluginEventType
@@ -134,8 +135,12 @@ namespace wxbox {
         struct PluginEventModel
         {
             PluginEventType type;
+            void*           pCommand;
+            void*           pData;
+            uint32_t        messageType;
             std::string     wxid;
-            std::string     textMessage;
+            std::string     message;
+            std::string     chatroomTalkerWxid;
         };
 
         using PluginEventModelPtr = std::shared_ptr<PluginEventModel>;

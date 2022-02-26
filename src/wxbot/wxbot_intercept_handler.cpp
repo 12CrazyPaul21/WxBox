@@ -43,7 +43,10 @@ void wxbot::WxBot::WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx:
     if (IS_WECHAT_REVOKE_MESSAGE(type) && args->avoidRevokeMessage) {
         message->message_type = 0;
         message->message[0]   = L'0';
+        return;
     }
+
+    DispatchPluginReceiveRawWeChatMessage(type, message, true);
 }
 
 void wxbot::WxBot::WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message)
@@ -68,7 +71,7 @@ void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection
     }
 }
 
-bool wxbot::WxBot::WeChatSendMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute)
+bool wxbot::WxBot::WeChatSendTextMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute)
 {
     WXBOX_UNREF(wxidSubstitute);
     WXBOX_UNREF(messageSubstitute);

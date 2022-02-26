@@ -32,6 +32,33 @@ void wxbot::WxBot::DispatchPluginErrorReport(const std::string& errorMsg, bool f
     }
 }
 
+void wxbot::WxBot::DispatchPluginReceiveRawWeChatMessage(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message, bool sync)
+{
+    if (!message) {
+        return;
+    }
+
+    auto command           = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::ReceiveRawWxChatMessage>();
+    command->rawMessagePtr = message;
+    command->messageType   = (uint32_t)type;
+
+    if (message->talker_wxid) {
+        command->wxid = wb_string::ToString(message->talker_wxid);
+    }
+    if (message->message) {
+        command->rawMessage = wb_string::ToString(message->message);
+    }
+    if (message->chatroom_talker_wxid) {
+        command->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
+    }
+
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+    if (sync) {
+        command->signal.get_future().wait();
+    }
+    return;
+}
+
 //
 // Plugin Handler
 //

@@ -22,16 +22,20 @@ function example.unload()
     print("example.unload")
 end
 
+function example.receive_raw_message(event)
+    -- event:filter_message()
+end
+
 function example.receive_text_message(event)
     print("example.receive_text_message")
     print("    wxid : " .. event:wxid())
-    print("    message : " .. event:text_message())
+    print("    message : " .. event:message())
 end
 
 function example.send_text_message(event)
     print("example.send_text_message")
     print("    wxid : " .. event:wxid())
-    print("    message : " .. event:text_message())
+    print("    message : " .. event:message())
 end
 
 function example.hello()

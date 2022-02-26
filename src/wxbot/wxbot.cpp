@@ -247,7 +247,7 @@ void wxbot::WxBot::RegisterInterceptHanlders()
     wb_crack::RegisterWeChatLoginHandler(std::bind(&wxbot::WxBot::WeChatLoginHandler, this));
     wb_crack::RegisterWeChatRawMessageHandler(std::bind(&wxbot::WxBot::WeChatRawMessageHandler, this, std::placeholders::_1, std::placeholders::_2));
     wb_crack::RegisterWeChatReceviedMessagesHandler(std::bind(&wxbot::WxBot::WeChatReceivedMessagesHandler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    wb_crack::RegisterWeChatSendTextMessageHandler(std::bind(&wxbot::WxBot::WeChatSendMessageHandler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    wb_crack::RegisterWeChatSendTextMessageHandler(std::bind(&wxbot::WxBot::WeChatSendTextMessageHandler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 }
 
 void wxbot::WxBot::UnRegisterInterceptHanlders()

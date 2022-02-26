@@ -13,6 +13,7 @@ namespace wxbox {
             Unknown = 0,
             GC,
             Eval,
+            ReceiveRawWxChatMessage,
             ReceiveWxChatTextMessage,
             SendWxChatTextMessage
         };
@@ -26,6 +27,15 @@ namespace wxbox {
         struct PluginVirtualMachineCommandEval : public PluginVirtualMachineCommand
         {
             std::string command;
+        };
+
+        struct PluginVirtualMachineCommandReceiveRawWxChatMessage : public PluginVirtualMachineCommand
+        {
+            void*       rawMessagePtr;
+            uint32_t    messageType;
+            std::string wxid;
+            std::string rawMessage;
+            std::string chatroomTalkerWxid;
         };
 
         struct PluginVirtualMachineCommandReceiveWxChatTextMessage : public PluginVirtualMachineCommand
@@ -270,6 +280,7 @@ namespace wxbox {
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::Unknown, PluginVirtualMachineCommand);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::GC, PluginVirtualMachineCommand);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::Eval, PluginVirtualMachineCommandEval);
+RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::ReceiveRawWxChatMessage, PluginVirtualMachineCommandReceiveRawWxChatMessage);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::ReceiveWxChatTextMessage, PluginVirtualMachineCommandReceiveWxChatTextMessage);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::SendWxChatTextMessage, PluginVirtualMachineCommandSendWxChatTextMessage);
 

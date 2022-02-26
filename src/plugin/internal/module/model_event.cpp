@@ -17,6 +17,33 @@ static int __plugin_event_get_type(lua_State* L)
     return 1;
 }
 
+static int __plugin_event_get_command_ptr(lua_State* L)
+{
+    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
+    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
+
+    lua_pushinteger(L, (lua_Integer)ptr->pCommand);
+    return 1;
+}
+
+static int __plugin_event_get_data_ptr(lua_State* L)
+{
+    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
+    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
+
+    lua_pushinteger(L, (lua_Integer)ptr->pData);
+    return 1;
+}
+
+static int __plugin_event_get_message_type(lua_State* L)
+{
+    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
+    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
+
+    lua_pushinteger(L, (lua_Integer)ptr->messageType);
+    return 1;
+}
+
 static int __plugin_event_get_wxid(lua_State* L)
 {
     wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
@@ -26,12 +53,36 @@ static int __plugin_event_get_wxid(lua_State* L)
     return 1;
 }
 
-static int __plugin_event_get_text_message(lua_State* L)
+static int __plugin_event_get_message(lua_State* L)
 {
     wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
     luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
 
-    lua_pushstring(L, ptr->textMessage.c_str());
+    lua_pushstring(L, ptr->message.c_str());
+    return 1;
+}
+
+static int __plugin_event_get_chatroom_talker_xwid(lua_State* L)
+{
+    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
+    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
+
+    lua_pushstring(L, ptr->chatroomTalkerWxid.c_str());
+    return 1;
+}
+
+static int __plugin_event_filter_message(lua_State* L)
+{
+    wb_plugin::PluginEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(L);
+    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
+
+    if (!ptr->pData) {
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    WECHAT_MESSAGE_FILTER(ptr->pData);
+    lua_pushboolean(L, true);
     return 1;
 }
 
@@ -45,8 +96,13 @@ const struct luaL_Reg wxbox::plugin::internal::PluginEventModelMethods[] = {
 
 const struct luaL_Reg wxbox::plugin::internal::PluginEventModelObjectMethods[] = {
     {"type", __plugin_event_get_type},
+    {"command_ptr", __plugin_event_get_command_ptr},
+    {"data_ptr", __plugin_event_get_data_ptr},
+    {"message_type", __plugin_event_get_message_type},
     {"wxid", __plugin_event_get_wxid},
-    {"text_message", __plugin_event_get_text_message},
+    {"message", __plugin_event_get_message},
+    {"chatroom_talker_xwid", __plugin_event_get_chatroom_talker_xwid},
+    {"filter_message", __plugin_event_filter_message},
     {NULL, NULL},
 };
 

@@ -12,6 +12,7 @@ static const char* PluginEventNames[] = {
     "load",
     "prereload",
     "unload",
+    "receive_raw_message",
     "receive_text_message",
     "send_text_message",
 };
@@ -36,6 +37,14 @@ static int __plugin_on_prereload_stub(lua_State* L)
 }
 
 static int __plugin_on_unload_stub(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    // do nothing
+    return 0;
+}
+
+static int __plugin_on_receive_raw_message_stub(lua_State* L)
 {
     WXBOX_UNREF(L);
 
@@ -80,6 +89,7 @@ int wxbox::plugin::__declare_plugin(lua_State* L)
         {"load", __plugin_on_load_stub},
         {"prereload", __plugin_on_prereload_stub},
         {"unload", __plugin_on_unload_stub},
+        {"receive_raw_message", __plugin_on_receive_raw_message_stub},
         {"receive_text_message", __plugin_on_receive_text_message_stub},
         {"send_text_message", __plugin_on_send_text_message_stub},
         {NULL, NULL},
@@ -304,5 +314,14 @@ std::string wxbox::plugin::PluginEventTypeToString(PluginEventType type)
 
 wxbox::plugin::PluginEventModelPtr wxbox::plugin::BuildPluginEventModel()
 {
-    return std::make_shared<wxbox::plugin::PluginEventModel>();
+    auto ptr = std::make_shared<wxbox::plugin::PluginEventModel>();
+    if (!ptr) {
+        return nullptr;
+    }
+
+    ptr->pCommand    = nullptr;
+    ptr->pData       = nullptr;
+    ptr->messageType = 0;
+
+    return ptr;
 }

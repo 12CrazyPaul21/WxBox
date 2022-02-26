@@ -92,6 +92,7 @@ namespace wxbot {
         void ExecutePluginScript(const std::string& statement);
         void DispatchPluginResult(const std::string& result, bool fromFilehelper);
         void DispatchPluginErrorReport(const std::string& errorMsg, bool fromFilehelper);
+        void DispatchPluginReceiveRawWeChatMessage(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message, bool sync = true);
 
       private:
         void PreHookWeChat();
@@ -111,7 +112,7 @@ namespace wxbot {
         void WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx::PWeChatMessage message);
         void WeChatPreReceivedMessageHandler(wb_wx::PWeChatMessage message);
         void WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection messageCollection, ucpulong_t count, ucpulong_t presize);
-        bool WeChatSendMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute);
+        bool WeChatSendTextMessageHandler(const wxbox::crack::wx::PWeChatWString wxid, const wxbox::crack::wx::PWeChatWString message, std::wstring& wxidSubstitute, std::wstring& messageSubstitute);
 
         //
         // Plugin Handler
