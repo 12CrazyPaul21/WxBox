@@ -89,6 +89,75 @@ static int __wxbox_clear(lua_State* L)
     return 0;
 }
 
+/**
+ * avoid_revoke
+ * enable_raw_message_hook
+ * enable_send_text_message_hook
+ */
+static int __wxbox_set_config(lua_State* L)
+{
+    if (lua_gettop(L) != 2) {
+        return 0;
+    }
+
+    const bool  enabled    = lua_toboolean(L, 2);
+    const char* configName = lua_tostring(L, 1);
+    luaL_argcheck(L, configName != nullptr, 1, "invalid config");
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type         = wb_plugin::HostEventType::ChangeConfig;
+    event->changeConfig = std::make_shared<wb_plugin::PluginChangeConfigMessage>();
+    if (!event->changeConfig) {
+        return 0;
+    }
+
+    event->changeConfig->configName = configName;
+    event->changeConfig->enabled    = enabled;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
+static int __wxbox_uninject_wxbot(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type = wb_plugin::HostEventType::UnInject;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
+static int __wxbox_exit_wxbox(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type = wb_plugin::HostEventType::ExitWxBox;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
+static int __wxbox_is_logined(lua_State* L)
+{
+    lua_pushboolean(L, wb_crack::IsLoign());
+    return 1;
+}
+
 static int __wxbox_logout(lua_State* L)
 {
     WXBOX_UNREF(L);
@@ -717,8 +786,13 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"warning", __wxbox_warning},
     {"error", __wxbox_error},
     {"clear", __wxbox_clear},
-    {"logout", __wxbox_logout},
 
+    {"set_config", __wxbox_set_config},
+    {"uninject_wxbot", __wxbox_uninject_wxbot},
+    {"exit_wxbox", __wxbox_exit_wxbox},
+
+    {"is_logined", __wxbox_is_logined},
+    {"logout", __wxbox_logout},
     {"profile_wxid", __wxbox_profile_wxid},
     {"profile_wxnumber", __wxbox_profile_wxnumber},
     {"profile_nickname", __wxbox_profile_nickname},

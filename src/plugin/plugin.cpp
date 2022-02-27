@@ -9,6 +9,9 @@ static const char* HostEventNames[] = {
     "Log",
     "ClearCommandResultScreen",
     "Logout",
+    "ChangeConfig",
+    "UnInject",
+    "ExitWxBox",
 };
 
 static const char* PluginEventNames[] = {
@@ -343,6 +346,7 @@ wxbox::plugin::HostEventModelPtr wxbox::plugin::BuildHostEventModel()
 
     ptr->sendMessageArgs = nullptr;
     ptr->log             = nullptr;
+    ptr->changeConfig    = nullptr;
 
     return ptr;
 }

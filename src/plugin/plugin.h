@@ -102,21 +102,6 @@ namespace wxbox {
         // Host Event Model [plugin -> host]
         //
 
-        enum class PluginLogLevel
-        {
-            Information = 0,
-            Warning     = 1,
-            Error       = 2
-        };
-
-        typedef struct _PluginLog
-        {
-            PluginLogLevel level;
-            std::string    message;
-        } PluginLog, *PPluginLog;
-
-        using PluginLogPtr = std::shared_ptr<PluginLog>;
-
         typedef struct _PluginSendWeChatMessage
         {
             uint32_t                 messageType;
@@ -132,20 +117,47 @@ namespace wxbox {
 
         using PluginSendWeChatMessagePtr = std::shared_ptr<PluginSendWeChatMessage>;
 
+        enum class PluginLogLevel
+        {
+            Information = 0,
+            Warning     = 1,
+            Error       = 2
+        };
+
+        typedef struct _PluginLog
+        {
+            PluginLogLevel level;
+            std::string    message;
+        } PluginLog, *PPluginLog;
+
+        using PluginLogPtr = std::shared_ptr<PluginLog>;
+
+        typedef struct _PluginChangeConfigMessage
+        {
+            std::string configName;
+            bool        enabled;
+        } PluginChangeConfigMessage, *PPluginChangeConfigMessage;
+
+        using PluginChangeConfigMessagePtr = std::shared_ptr<PluginChangeConfigMessage>;
+
         enum class HostEventType
         {
             SendMesage = 0,
             Log,
             ClearCommandResultScreen,
             Logout,
+            ChangeConfig,
+            UnInject,
+            ExitWxBox,
             _TotalHostEventType
         };
 
         struct HostEventModel
         {
-            HostEventType              type;
-            PluginSendWeChatMessagePtr sendMessageArgs;
-            PluginLogPtr               log;
+            HostEventType                type;
+            PluginSendWeChatMessagePtr   sendMessageArgs;
+            PluginLogPtr                 log;
+            PluginChangeConfigMessagePtr changeConfig;
         };
 
         using HostEventModelPtr = std::shared_ptr<HostEventModel>;

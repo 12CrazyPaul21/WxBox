@@ -315,5 +315,35 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
             }
             break;
         }
+
+        case wb_plugin::HostEventType::ChangeConfig: {
+            if (!event->changeConfig) {
+                break;
+            }
+
+            if (!event->changeConfig->configName.compare("avoid_revoke")) {
+                args->avoidRevokeMessage = event->changeConfig->enabled;
+            }
+            else if (!event->changeConfig->configName.compare("enable_raw_message_hook")) {
+                args->enableRawMessageHook = event->changeConfig->enabled;
+            }
+            else if (!event->changeConfig->configName.compare("enable_send_text_message_hook")) {
+                args->enableSendTextMessageHook = event->changeConfig->enabled;
+            }
+
+            break;
+        }
+
+        case wb_plugin::HostEventType::UnInject: {
+            Stop();
+            break;
+        }
+
+        case wb_plugin::HostEventType::ExitWxBox: {
+            wxbot::WxBotMessage msg(wxbot::MsgRole::WxBot, wxbot::WxBotMessageType::WxBotResponse);
+            msg.u.wxBotControlPacket.set_type(wxbox::ControlPacketType::EXIT_WXBOX_REQUEST);
+            client->PushMessageAsync(std::move(msg));
+            break;
+        }
     }
 }

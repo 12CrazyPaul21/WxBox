@@ -32,6 +32,7 @@ enum ControlPacketType {
     LOG_REQUEST = 12;
     CHANGE_CONFIG_REQUEST = 13;
     CLEAR_COMMAND_LOG_REQUEST = 14;
+    EXIT_WXBOX_REQUEST = 15;
 }
 
 enum WxBotLogLevel {

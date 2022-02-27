@@ -607,6 +607,11 @@ void WxBoxController::WxBotRequestOrResponseHandler(wxbox::WxBoxMessage& message
             view->ClearCommandResultScreen();
             break;
         }
+
+        case wxbox::ControlPacketType::EXIT_WXBOX_REQUEST: {
+            view->quit();
+            break;
+        }
     }
 }
 
