@@ -4,43 +4,6 @@
 // WeChat API Wrapper
 //
 
-bool wxbot::WxBot::FetchProfile(wxbox::crack::wx::WeChatProfile& profile)
-{
-    return wb_crack::FetchProfile(args->wechat_apis, args->wechat_datastructure_supplement, profile);
-}
-
-bool wxbot::WxBot::GetAllContacts(std::vector<wxbox::crack::wx::WeChatContact>& contacts)
-{
-    return wb_crack::CollectAllContact(args.get(), contacts);
-}
-
-bool wxbot::WxBot::GetContactWithNickName(const std::string& nickname, wb_wx::WeChatContact& contact)
-{
-    if (!args) {
-        return false;
-    }
-
-    return wb_crack::GetContactWithNickName(nickname, args.get(), contact);
-}
-
-bool wxbot::WxBot::GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact)
-{
-    if (!args) {
-        return false;
-    }
-
-    return wb_crack::GetContactWithWxNumber(wxnumber, args.get(), contact);
-}
-
-bool wxbot::WxBot::GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact)
-{
-    if (!args) {
-        return false;
-    }
-
-    return wb_crack::GetContactWithWxid(wxid, args.get(), contact);
-}
-
 std::string wxbot::WxBot::WxNumberToWxid(const std::string& wxnumber)
 {
     if (wxnumber.empty()) {
@@ -48,7 +11,7 @@ std::string wxbot::WxBot::WxNumberToWxid(const std::string& wxnumber)
     }
 
     wb_wx::WeChatContact contact;
-    if (!GetContactWithWxNumber(wxnumber, contact)) {
+    if (!wb_crack::GetContactWithWxNumber(wxnumber, contact)) {
         return "";
     }
 
@@ -62,7 +25,7 @@ std::string wxbot::WxBot::WxidToWxNumber(const std::string& wxid)
     }
 
     wb_wx::WeChatContact contact;
-    if (!GetContactWithWxid(wxid, contact)) {
+    if (!wb_crack::GetContactWithWxid(wxid, contact)) {
         return "";
     }
 
@@ -71,7 +34,7 @@ std::string wxbot::WxBot::WxidToWxNumber(const std::string& wxid)
 
 bool wxbot::WxBot::SendTextMessageToContact(const std::string& wxid, const std::string& message)
 {
-    return wb_crack::SendTextMessage(args.get(), wxid, message);
+    return wb_crack::SendTextMessage(wxid, message);
 }
 
 bool wxbot::WxBot::SendTextMessageToContactWithWxNumber(const std::string& wxnumber, const std::string& message)
@@ -86,7 +49,7 @@ bool wxbot::WxBot::SendTextMessageToContactWithWxNumber(const std::string& wxnum
 
 bool wxbot::WxBot::SendPictureToContact(const std::string& wxid, const std::string& imgPath)
 {
-    return wb_crack::SendFile(args.get(), wxid, imgPath);
+    return wb_crack::SendFile(wxid, imgPath);
 }
 
 bool wxbot::WxBot::SendPictureToContactWithWxNumber(const std::string& wxnumber, const std::string& imgPath)
@@ -101,7 +64,7 @@ bool wxbot::WxBot::SendPictureToContactWithWxNumber(const std::string& wxnumber,
 
 bool wxbot::WxBot::SendFileToContact(const std::string& wxid, const std::string& filePath)
 {
-    return wb_crack::SendFile(args.get(), wxid, filePath);
+    return wb_crack::SendFile(wxid, filePath);
 }
 
 bool wxbot::WxBot::SendFileToContactWithWxNumber(const std::string& wxnumber, const std::string& filePath)
@@ -131,35 +94,35 @@ bool wxbot::WxBot::SendFileToFileHelper(const std::string& filePath)
 
 bool wxbot::WxBot::SendTextMessageToChatroom(const std::string& roomWxid, const std::string& message)
 {
-    return wb_crack::SendTextMessage(args.get(), roomWxid, message);
+    return wb_crack::SendTextMessage(roomWxid, message);
 }
 
 bool wxbot::WxBot::SendTextMessageToChatroomWithNotifyList(const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message)
 {
-    return wb_crack::SendTextMessageWithNotifyList(args.get(), roomWxid, notifyWxidLists, message);
+    return wb_crack::SendTextMessageWithNotifyList(roomWxid, notifyWxidLists, message);
 }
 
 bool wxbot::WxBot::NotifyChatroomContacts(const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists)
 {
-    return wb_crack::SendTextMessageWithNotifyList(args.get(), roomWxid, notifyWxidLists, "");
+    return wb_crack::SendTextMessageWithNotifyList(roomWxid, notifyWxidLists, "");
 }
 
 bool wxbot::WxBot::NotifyAllChatroomContact(const std::string& roomWxid)
 {
-    return wb_crack::SendTextMessageWithNotifyList(args.get(), roomWxid, {"notify@all"}, "");
+    return wb_crack::SendTextMessageWithNotifyList(roomWxid, {"notify@all"}, "");
 }
 
 bool wxbot::WxBot::NotifyAllChatroomContactWithTextMessage(const std::string& roomWxid, const std::string& message)
 {
-    return wb_crack::SendTextMessageWithNotifyList(args.get(), roomWxid, {"notify@all"}, message);
+    return wb_crack::SendTextMessageWithNotifyList(roomWxid, {"notify@all"}, message);
 }
 
 bool wxbot::WxBot::SendPictureToChatroom(const std::string& roomWxid, const std::string& imgPath)
 {
-    return wb_crack::SendFile(args.get(), roomWxid, imgPath);
+    return wb_crack::SendFile(roomWxid, imgPath);
 }
 
 bool wxbot::WxBot::SendFileToChatroom(const std::string& roomWxid, const std::string& filePath)
 {
-    return wb_crack::SendFile(args.get(), roomWxid, filePath);
+    return wb_crack::SendFile(roomWxid, filePath);
 }

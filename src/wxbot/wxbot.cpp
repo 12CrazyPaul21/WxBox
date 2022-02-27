@@ -59,15 +59,6 @@ bool wxbot::WxBot::Startup()
         return false;
     }
 
-    // register plugin wechat api bridge
-    wb_plugin_wechat::RegisterFetchProfileBridge(std::bind(&WxBot::FetchProfile, this, std::placeholders::_1));
-    wb_plugin_wechat::RegisterGetAllContactsBridge(std::bind(&WxBot::GetAllContacts, this, std::placeholders::_1));
-    wb_plugin_wechat::RegisterGetContactWithNickNameBridge(std::bind(&WxBot::GetContactWithNickName, this, std::placeholders::_1, std::placeholders::_2));
-    wb_plugin_wechat::RegisterGetContactWithWxNumberBridge(std::bind(&WxBot::GetContactWithWxNumber, this, std::placeholders::_1, std::placeholders::_2));
-    wb_plugin_wechat::RegisterGetContactWithWxidBridge(std::bind(&WxBot::GetContactWithWxid, this, std::placeholders::_1, std::placeholders::_2));
-    wb_plugin_wechat::RegisterWxNumberToWxidBridge(std::bind(&WxBot::WxNumberToWxid, this, std::placeholders::_1));
-    wb_plugin_wechat::RegisterWxidToWxNumberBridge(std::bind(&WxBot::WxidToWxNumber, this, std::placeholders::_1));
-
     // init crack environment
     wb_crack::InitWeChatApiCrackEnvironment(args);
 
@@ -92,9 +83,6 @@ void wxbot::WxBot::Stop()
 
     // stop plugin virtual machine
     wb_plugin::StopPluginVirtualMachine();
-
-    // unregister plugin wechat api bridge
-    wb_plugin_wechat::UnRegisterBridge();
 
     // stop wxbox client
     client->Stop();
@@ -347,8 +335,8 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
         }
 
         case wxbox::ControlPacketType::LOGOUT_WECHAT_REQUEST: {
-            if (wb_crack::IsLoign(args->wechat_apis, args->wechat_datastructure_supplement)) {
-                wb_crack::Logout(args->wechat_apis, args->wechat_datastructure_supplement);
+            if (wb_crack::IsLoign()) {
+                wb_crack::Logout();
             }
             break;
         }

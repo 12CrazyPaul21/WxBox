@@ -129,25 +129,25 @@ namespace wxbox {
         void InitWeChatApiCrackEnvironment(WxBotEntryParameterPtr& args);
         void DeInitWeChatApiCrackEnvironment();
 
-        uint8_t* FetchWeChatGlobalProfileContext(const WxApis& wxApis);
+        uint8_t* FetchWeChatGlobalProfileContext();
 
-        bool IsLoign(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
-        bool FetchProfile(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement, wxbox::crack::wx::WeChatProfile& profile);
+        bool IsLoign();
+        bool FetchProfile(wxbox::crack::wx::WeChatProfile& profile);
 
-        bool Logout(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
+        bool Logout();
 
-        uint8_t* FetchWeChatGlobalContactContextAddress(const WxApis& wxApis);
-        uint8_t* FetchContactHeaderAddress(const WxApis& wxApis, const wxbox::crack::feature::WxDataStructSupplement& wxDataSturctsupplement);
-        bool     InitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem);
-        bool     DeinitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem);
-        bool     CollectAllContact(const PWxBotEntryParameter args, std::vector<wxbox::crack::wx::WeChatContact>& contacts);
-        bool     GetContactWithNickName(const std::string& nickname, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
-        bool     GetContactWithWxNumber(const std::string& wxnumber, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
-        bool     GetContactWithWxid(const std::string& wxid, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
+        uint8_t* FetchWeChatGlobalContactContextAddress();
+        uint8_t* FetchContactHeaderAddress();
+        bool     InitWeChatContactItem(uint8_t* contactItem);
+        bool     DeinitWeChatContactItem(uint8_t* contactItem);
+        bool     CollectAllContact(std::vector<wxbox::crack::wx::WeChatContact>& contacts);
+        bool     GetContactWithNickName(const std::string& nickname, wxbox::crack::wx::WeChatContact& contact);
+        bool     GetContactWithWxNumber(const std::string& wxnumber, wxbox::crack::wx::WeChatContact& contact);
+        bool     GetContactWithWxid(const std::string& wxid, wxbox::crack::wx::WeChatContact& contact);
 
-        bool SendTextMessage(const PWxBotEntryParameter args, const std::string& wxid, const std::string& message);
-        bool SendTextMessageWithNotifyList(const PWxBotEntryParameter args, const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message);
-        bool SendFile(const PWxBotEntryParameter args, const std::string& wxid, const std::string& filePath);
+        bool SendTextMessage(const std::string& wxid, const std::string& message);
+        bool SendTextMessageWithNotifyList(const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message);
+        bool SendFile(const std::string& wxid, const std::string& filePath);
 
         bool SubstituteWeChatWString(wxbox::crack::wx::PWeChatWString original, const std::wstring& substitute);
     }

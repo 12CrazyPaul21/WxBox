@@ -107,7 +107,7 @@ static int __wxbox_logout(lua_State* L)
 static int __wxbox_profile_wxid(lua_State* L)
 {
     wb_wx::WeChatProfile profile;
-    wb_plugin_wechat::FetchProfile(profile);
+    wb_crack::FetchProfile(profile);
     lua_pushstring(L, profile.wxid.c_str());
     return 1;
 }
@@ -115,7 +115,7 @@ static int __wxbox_profile_wxid(lua_State* L)
 static int __wxbox_profile_wxnumber(lua_State* L)
 {
     wb_wx::WeChatProfile profile;
-    wb_plugin_wechat::FetchProfile(profile);
+    wb_crack::FetchProfile(profile);
     lua_pushstring(L, profile.wxnumber.c_str());
     return 1;
 }
@@ -123,7 +123,7 @@ static int __wxbox_profile_wxnumber(lua_State* L)
 static int __wxbox_profile_nickname(lua_State* L)
 {
     wb_wx::WeChatProfile profile;
-    wb_plugin_wechat::FetchProfile(profile);
+    wb_crack::FetchProfile(profile);
     lua_pushstring(L, profile.nickname.c_str());
     return 1;
 }
@@ -134,7 +134,7 @@ static int __wxbox_nickname_to_wxid(lua_State* L)
     luaL_argcheck(L, nickname != nullptr, 1, "nickname is required");
 
     wb_wx::WeChatContact contact;
-    if (!wb_plugin_wechat::GetContactWithNickName(nickname, contact)) {
+    if (!wb_crack::GetContactWithNickName(nickname, contact)) {
         lua_pushstring(L, "");
         return 1;
     }
@@ -148,8 +148,13 @@ static int __wxbox_wxid_to_wxnumber(lua_State* L)
     const char* wxid = luaL_checkstring(L, 1);
     luaL_argcheck(L, wxid != nullptr, 1, "wxid is required");
 
-    std::string wxnumber = wb_plugin_wechat::WxidToWxNumber(wxid);
-    lua_pushstring(L, wxnumber.c_str());
+    wb_wx::WeChatContact contact;
+    if (!wb_crack::GetContactWithWxid(wxid, contact)) {
+        lua_pushstring(L, "");
+        return 1;
+    }
+
+    lua_pushstring(L, contact.wxnumber.c_str());
     return 1;
 }
 
@@ -158,8 +163,13 @@ static int __wxbox_wxnumber_to_wxid(lua_State* L)
     const char* wxnumber = luaL_checkstring(L, 1);
     luaL_argcheck(L, wxnumber != nullptr, 1, "wxnumber is required");
 
-    std::string wxid = wb_plugin_wechat::WxNumberToWxid(wxnumber);
-    lua_pushstring(L, wxid.c_str());
+    wb_wx::WeChatContact contact;
+    if (!wb_crack::GetContactWithWxNumber(wxnumber, contact)) {
+        lua_pushstring(L, "");
+        return 1;
+    }
+
+    lua_pushstring(L, contact.wxid.c_str());
     return 1;
 }
 
@@ -191,7 +201,7 @@ static int __wxbox_profile_get_contact_with_wxid(lua_State* L)
     luaL_argcheck(L, wxid != nullptr, 1, "wxid is required");
 
     wb_wx::WeChatContact contact;
-    if (!wb_plugin_wechat::GetContactWithWxid(wxid, contact)) {
+    if (!wb_crack::GetContactWithWxid(wxid, contact)) {
         return 0;
     }
 
@@ -204,7 +214,7 @@ static int __wxbox_profile_get_contact_with_wxnumber(lua_State* L)
     luaL_argcheck(L, wxnumber != nullptr, 1, "wxnumber is required");
 
     wb_wx::WeChatContact contact;
-    if (!wb_plugin_wechat::GetContactWithWxNumber(wxnumber, contact)) {
+    if (!wb_crack::GetContactWithWxNumber(wxnumber, contact)) {
         return 0;
     }
 
@@ -214,7 +224,7 @@ static int __wxbox_profile_get_contact_with_wxnumber(lua_State* L)
 static int __wxbox_profile_get_all_contacts(lua_State* L)
 {
     std::vector<wb_wx::WeChatContact> contacts;
-    if (!wb_plugin_wechat::GetAllContacts(contacts)) {
+    if (!wb_crack::CollectAllContact(contacts)) {
         return 0;
     }
 

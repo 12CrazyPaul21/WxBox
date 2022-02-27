@@ -310,8 +310,8 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
         }
 
         case wb_plugin::HostEventType::Logout: {
-            if (wb_crack::IsLoign(args->wechat_apis, args->wechat_datastructure_supplement)) {
-                wb_crack::Logout(args->wechat_apis, args->wechat_datastructure_supplement);
+            if (wb_crack::IsLoign()) {
+                wb_crack::Logout();
             }
             break;
         }
