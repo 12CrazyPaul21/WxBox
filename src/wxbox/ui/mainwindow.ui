@@ -96,6 +96,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="topMost">
+          <property name="text">
+           <string>topMost</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="closeIsMinimizeTray">
           <property name="text">
            <string>closeIsMinimizeTray</string>

@@ -354,6 +354,11 @@ void MainWindow::RegisterWidgetEventHandler()
         TurnCloseIsMinimizeToTray(state == Qt::Checked);
     });
 
+    ui->topMost->setChecked(config.always_top_most());
+    QObject::connect(ui->topMost, &QCheckBox::stateChanged, this, [this](int state) {
+        TurnAlwaysTopMost(state == Qt::Checked);
+    });
+
     ui->avoidRevokeMessage->setChecked(config.wechat_avoid_revoke_message());
     QObject::connect(ui->avoidRevokeMessage, &QCheckBox::stateChanged, this, [this](int state) {
         TurnAvoidRevokeMessage(state == Qt::Checked);
@@ -414,6 +419,9 @@ bool MainWindow::InitWxBox(QSplashScreen* splash)
 {
     // press close button is minimize to tray not quit
     TurnCloseIsMinimizeToTray(config.close_is_minimize_to_tray());
+
+    // wxbox window whether always top most
+    TurnAlwaysTopMost(config.always_top_most());
 
     // loading icon
     SetWindowLoadingIconType(WindowLoadingIconType(config.loading_icon_type()));

@@ -257,6 +257,15 @@ class XStyleWindow : public QMainWindow
         closeIsMinimizeToTray = toTray;
     }
 
+    Q_INVOKABLE virtual void TurnAlwaysTopMost(bool enabled)
+    {
+#if _WIN32
+        SetWindowPos((HWND)winId(), enabled ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+#else
+        setWindowFlag(Qt::WindowStaysOnTopHint, enabled);
+#endif
+    }
+
     //
     // i18n
     //

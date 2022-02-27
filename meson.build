@@ -146,6 +146,7 @@ all_default_config = {
     '/wxbox/wechat_enable_raw_message_hook': false,
     '/wxbox/wechat_enable_send_text_message_hook': false,
     '/wxbox/close_is_minimize_to_tray': false,
+    '/wxbox/always_top_most': false,
     '/wxbox/loading_icon_type': false,
     '/wxbox/loading_icon_animation_use_cache': false
 }

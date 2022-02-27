@@ -142,6 +142,14 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         qApp->setQuitOnLastWindowClosed(!toTray);
     }
 
+    virtual void TurnAlwaysTopMost(bool enabled) Q_DECL_OVERRIDE
+    {
+        XSTYLE_WINDOW_CLASS::TurnAlwaysTopMost(enabled);
+        if (config.always_top_most() != enabled) {
+            config.change_always_top_most(enabled);
+        }
+    }
+
     void TurnAvoidRevokeMessage(bool avoid)
     {
         if (config.wechat_avoid_revoke_message() != avoid) {
