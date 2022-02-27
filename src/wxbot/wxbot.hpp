@@ -63,6 +63,7 @@ namespace wxbot {
         bool FetchProfile(wxbox::crack::wx::WeChatProfile& profile);
         bool GetAllContacts(std::vector<wxbox::crack::wx::WeChatContact>& contacts);
 
+        bool GetContactWithNickName(const std::string& nickname, wb_wx::WeChatContact& contact);
         bool GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact);
         bool GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact);
 
@@ -128,6 +129,7 @@ namespace wxbot {
         //
 
         void PluginExecuteResultEventHandler(const wb_plugin::PluginVirtualMachineExecuteResultEventPtr& resultEvent);
+        void PluginSendMessageHandler(const wb_plugin::PluginSendWeChatMessagePtr& sendMessageArgs);
         void PluginToHostEventHandler(const wb_plugin::PluginVirtualMachinePluginToHostEventPtr& pluginToHostEvent);
 
         //

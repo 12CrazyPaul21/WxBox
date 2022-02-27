@@ -11,6 +11,7 @@ namespace wxbox {
 
             using FetchProfileBridge           = std::function<bool(wxbox::crack::wx::WeChatProfile& profile)>;
             using GetAllContactsBridge         = std::function<bool(std::vector<wxbox::crack::wx::WeChatContact>& contacts)>;
+            using GetContactWithNickNameBridge = std::function<bool(const std::string& nickname, wb_wx::WeChatContact& contact)>;
             using GetContactWithWxNumberBridge = std::function<bool(const std::string& wxnumber, wb_wx::WeChatContact& contact)>;
             using GetContactWithWxidBridge     = std::function<bool(const std::string& wxid, wb_wx::WeChatContact& contact)>;
             using WxNumberToWxidBridge         = std::function<std::string(const std::string& wxnumber)>;
@@ -22,6 +23,7 @@ namespace wxbox {
 
             void RegisterFetchProfileBridge(FetchProfileBridge bridge);
             void RegisterGetAllContactsBridge(GetAllContactsBridge bridge);
+            void RegisterGetContactWithNickNameBridge(GetContactWithNickNameBridge bridge);
             void RegisterGetContactWithWxNumberBridge(GetContactWithWxNumberBridge bridge);
             void RegisterGetContactWithWxidBridge(GetContactWithWxidBridge bridge);
             void RegisterWxNumberToWxidBridge(WxNumberToWxidBridge bridge);
@@ -35,6 +37,7 @@ namespace wxbox {
 
             bool        FetchProfile(wxbox::crack::wx::WeChatProfile& profile);
             bool        GetAllContacts(std::vector<wxbox::crack::wx::WeChatContact>& contacts);
+            bool        GetContactWithNickName(const std::string& nickname, wb_wx::WeChatContact& contact);
             bool        GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact);
             bool        GetContactWithWxid(const std::string& wxid, wb_wx::WeChatContact& contact);
             std::string WxNumberToWxid(const std::string& wxnumber);

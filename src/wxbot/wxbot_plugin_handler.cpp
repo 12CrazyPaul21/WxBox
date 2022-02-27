@@ -48,13 +48,13 @@ void wxbot::WxBot::DispatchPluginReceiveRawWeChatMessage(wb_wx::WeChatMessageTyp
     command->event->pData1      = message;
     command->event->messageType = (uint32_t)type;
 
-    if (message->talker_wxid) {
+    if (message->talker_wxid && message->talker_wxid_length) {
         command->event->wxid = wb_string::ToString(message->talker_wxid);
     }
-    if (message->message) {
+    if (message->message && message->message_length) {
         command->event->message = wb_string::ToString(message->message);
     }
-    if (message->chatroom_talker_wxid) {
+    if (message->chatroom_talker_wxid && message->chatroom_talker_wxid_length) {
         command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
     }
 
@@ -80,13 +80,13 @@ void wxbot::WxBot::DispatchPluginReceiveWeChatMessage(wb_wx::PWeChatMessage mess
     command->event->pData1      = message;
     command->event->messageType = message->message_type;
 
-    if (message->talker_wxid) {
+    if (message->talker_wxid && message->talker_wxid_length) {
         command->event->wxid = wb_string::ToString(message->talker_wxid);
     }
-    if (message->message) {
+    if (message->message && message->message_length) {
         command->event->message = wb_string::ToString(message->message);
     }
-    if (message->chatroom_talker_wxid) {
+    if (message->chatroom_talker_wxid && message->chatroom_talker_wxid_length) {
         command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
     }
 
@@ -112,13 +112,13 @@ void wxbot::WxBot::DispatchPluginReceiveTextWeChatMessage(wb_wx::PWeChatMessage 
     command->event->pData1      = message;
     command->event->messageType = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
 
-    if (message->talker_wxid) {
+    if (message->talker_wxid && message->talker_wxid_length) {
         command->event->wxid = wb_string::ToString(message->talker_wxid);
     }
-    if (message->message) {
+    if (message->message && message->message_length) {
         command->event->message = wb_string::ToString(message->message);
     }
-    if (message->chatroom_talker_wxid) {
+    if (message->chatroom_talker_wxid && message->chatroom_talker_wxid_length) {
         command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
     }
 
@@ -243,6 +243,38 @@ void wxbot::WxBot::PluginExecuteResultEventHandler(const wb_plugin::PluginVirtua
     DispatchPluginResult(resultText.str(), resultEvent->fromFilehelper);
 }
 
+void wxbot::WxBot::PluginSendMessageHandler(const wb_plugin::PluginSendWeChatMessagePtr& sendMessageArgs)
+{
+    if (!sendMessageArgs) {
+        return;
+    }
+
+    switch (TO_WECHAT_MESSASGE_TYPE(sendMessageArgs->messageType)) {
+        case wb_wx::WeChatMessageType::PLAINTEXT: {
+            if (!sendMessageArgs->chatroom) {
+                sendMessageArgs->useWxNumber ? SendTextMessageToContactWithWxNumber(sendMessageArgs->wxnumber, sendMessageArgs->message)
+                                             : SendTextMessageToContact(sendMessageArgs->wxid, sendMessageArgs->message);
+            }
+            else {
+                SendTextMessageToChatroomWithNotifyList(sendMessageArgs->wxid, sendMessageArgs->notifyWxidLists, sendMessageArgs->message);
+            }
+            break;
+        }
+
+        case wb_wx::WeChatMessageType::PICTURE: {
+            sendMessageArgs->useWxNumber ? SendPictureToContactWithWxNumber(sendMessageArgs->wxnumber, sendMessageArgs->imgPath)
+                                         : SendPictureToContact(sendMessageArgs->wxid, sendMessageArgs->imgPath);
+            break;
+        }
+
+        case wb_wx::WeChatMessageType::FILE: {
+            sendMessageArgs->useWxNumber ? SendFileToContactWithWxNumber(sendMessageArgs->wxnumber, sendMessageArgs->filePath)
+                                         : SendFileToContact(sendMessageArgs->wxid, sendMessageArgs->filePath);
+            break;
+        }
+    }
+}
+
 void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachinePluginToHostEventPtr& pluginToHostEvent)
 {
     if (!pluginToHostEvent || !pluginToHostEvent->hostEvent) {
@@ -252,6 +284,15 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
     auto event = pluginToHostEvent->hostEvent;
 
     switch (event->type) {
+        case wb_plugin::HostEventType::SendMesage: {
+            if (!event->sendMessageArgs) {
+                break;
+            }
+
+            PluginSendMessageHandler(event->sendMessageArgs);
+            break;
+        }
+
         case wb_plugin::HostEventType::Log: {
             if (!event->log) {
                 break;

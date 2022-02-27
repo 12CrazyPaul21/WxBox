@@ -14,6 +14,15 @@ bool wxbot::WxBot::GetAllContacts(std::vector<wxbox::crack::wx::WeChatContact>& 
     return wb_crack::CollectAllContact(args.get(), contacts);
 }
 
+bool wxbot::WxBot::GetContactWithNickName(const std::string& nickname, wb_wx::WeChatContact& contact)
+{
+    if (!args) {
+        return false;
+    }
+
+    return wb_crack::GetContactWithNickName(nickname, args.get(), contact);
+}
+
 bool wxbot::WxBot::GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact)
 {
     if (!args) {

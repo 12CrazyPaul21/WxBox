@@ -117,9 +117,24 @@ namespace wxbox {
 
         using PluginLogPtr = std::shared_ptr<PluginLog>;
 
+        typedef struct _PluginSendWeChatMessage
+        {
+            uint32_t                 messageType;
+            bool                     chatroom;
+            bool                     useWxNumber;
+            std::string              wxid;
+            std::string              wxnumber;
+            std::string              message;
+            std::string              imgPath;
+            std::string              filePath;
+            std::vector<std::string> notifyWxidLists;
+        } PluginSendWeChatMessage, *PPluginSendWeChatMessage;
+
+        using PluginSendWeChatMessagePtr = std::shared_ptr<PluginSendWeChatMessage>;
+
         enum class HostEventType
         {
-            SendTextMesage = 0,
+            SendMesage = 0,
             Log,
             ClearCommandResultScreen,
             Logout,
@@ -128,10 +143,9 @@ namespace wxbox {
 
         struct HostEventModel
         {
-            HostEventType type;
-            std::string   wxid;
-            std::string   textMessage;
-            PluginLogPtr  log;
+            HostEventType              type;
+            PluginSendWeChatMessagePtr sendMessageArgs;
+            PluginLogPtr               log;
         };
 
         using HostEventModelPtr = std::shared_ptr<HostEventModel>;

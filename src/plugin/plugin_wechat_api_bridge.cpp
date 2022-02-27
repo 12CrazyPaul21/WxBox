@@ -6,6 +6,7 @@
 
 static wb_plugin_wechat::FetchProfileBridge           fnFetchProfileBridge           = nullptr;
 static wb_plugin_wechat::GetAllContactsBridge         fnGetAllContactsBridge         = nullptr;
+static wb_plugin_wechat::GetContactWithNickNameBridge fnGetContactWithNickNameBridge = nullptr;
 static wb_plugin_wechat::GetContactWithWxNumberBridge fnGetContactWithWxNumberBridge = nullptr;
 static wb_plugin_wechat::GetContactWithWxidBridge     fnGetContactWithWxidBridge     = nullptr;
 static wb_plugin_wechat::WxNumberToWxidBridge         fnWxNumberToWxidBridge         = nullptr;
@@ -23,6 +24,11 @@ void wxbox::plugin::wechat::RegisterFetchProfileBridge(FetchProfileBridge bridge
 void wxbox::plugin::wechat::RegisterGetAllContactsBridge(GetAllContactsBridge bridge)
 {
     fnGetAllContactsBridge = bridge;
+}
+
+void wxbox::plugin::wechat::RegisterGetContactWithNickNameBridge(GetContactWithWxNumberBridge bridge)
+{
+    fnGetContactWithNickNameBridge = bridge;
 }
 
 void wxbox::plugin::wechat::RegisterGetContactWithWxNumberBridge(GetContactWithWxNumberBridge bridge)
@@ -73,6 +79,14 @@ bool wxbox::plugin::wechat::GetAllContacts(std::vector<wxbox::crack::wx::WeChatC
         return false;
     }
     return fnGetAllContactsBridge(contacts);
+}
+
+bool wxbox::plugin::wechat::GetContactWithNickName(const std::string& nickname, wb_wx::WeChatContact& contact)
+{
+    if (!fnGetContactWithNickNameBridge) {
+        return false;
+    }
+    return fnGetContactWithNickNameBridge(nickname, contact);
 }
 
 bool wxbox::plugin::wechat::GetContactWithWxNumber(const std::string& wxnumber, wb_wx::WeChatContact& contact)

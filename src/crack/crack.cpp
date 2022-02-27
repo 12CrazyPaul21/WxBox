@@ -947,68 +947,76 @@ bool wxbox::crack::CollectAllContact(const PWxBotEntryParameter args, std::vecto
     }
 }
 
-typedef struct _Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter
+enum class _Inner_SearchContactRole
 {
-    const std::string&                       wxnumber;
+    NickName,
+    WxNumber,
+};
+
+typedef struct _Inner_SearchContact_below_3_5_0_46_Parameter
+{
+    _Inner_SearchContactRole                 role;
+    const std::string&                       pattern;
     wb_wx::PWeChatContactItem_below_3_5_0_46 end;
     ucpulong_t                               weChatContactDataBeginOffset;
     wxbox::crack::wx::WeChatContact&         contact;
 
-    _Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter(const std::string& wxnumber, wb_wx::PWeChatContactItem_below_3_5_0_46 end, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
-      : wxnumber(wxnumber)
+    _Inner_SearchContact_below_3_5_0_46_Parameter(_Inner_SearchContactRole role, const std::string& pattern, wb_wx::PWeChatContactItem_below_3_5_0_46 end, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
+      : role(role)
+      , pattern(pattern)
       , end(end)
       , weChatContactDataBeginOffset(weChatContactDataBeginOffset)
       , contact(contact)
     {
     }
-} Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter;
+} Inner_SearchContact_below_3_5_0_46_Parameter;
 
-static bool Inner_GetContactWithWxNumber_below_3_5_0_46_Do(wb_wx::PWeChatContactItem_below_3_5_0_46 item, Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter& parameter)
+static bool Inner_SearchContact_below_3_5_0_46_Do(wb_wx::PWeChatContactItem_below_3_5_0_46 item, Inner_SearchContact_below_3_5_0_46_Parameter& parameter)
 {
     if (!item || item == parameter.end) {
         return false;
     }
 
-    uint8_t*              contactItemData      = ((uint8_t*)item) + parameter.weChatContactDataBeginOffset;
-    wb_wx::PWeChatWString wxnumberStringStruct = WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
+    uint8_t*              contactItemData = ((uint8_t*)item) + parameter.weChatContactDataBeginOffset;
+    wb_wx::PWeChatWString pStringStruct   = parameter.role == _Inner_SearchContactRole::NickName ? WECHAT_CONTACT_ITEM_NICKNAME(contactItemData) : WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
 
-    if (wxnumberStringStruct && wxnumberStringStruct->str && wxnumberStringStruct->length) {
-        if (!wb_string::ToString(wxnumberStringStruct->str).compare(parameter.wxnumber)) {
+    if (pStringStruct && pStringStruct->str && pStringStruct->length) {
+        if (!wb_string::ToString(pStringStruct->str).compare(parameter.pattern)) {
             Inner_CollectSingleContact(contactItemData, parameter.contact);
             return true;
         }
     }
 
-    if (Inner_GetContactWithWxNumber_below_3_5_0_46_Do(item->left, parameter)) {
+    if (Inner_SearchContact_below_3_5_0_46_Do(item->left, parameter)) {
         return true;
     }
 
-    if (Inner_GetContactWithWxNumber_below_3_5_0_46_Do(item->right, parameter)) {
+    if (Inner_SearchContact_below_3_5_0_46_Do(item->right, parameter)) {
         return true;
     }
 
     return false;
 }
 
-static bool Inner_GetContactWithWxNumber_below_3_5_0_46(const std::string& wxnumber, uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
+static bool Inner_SearchContact_below_3_5_0_46(_Inner_SearchContactRole role, const std::string& pattern, uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
 {
     wb_wx::PWeChatContactHeader_below_3_5_0_46 contactHeader = (wb_wx::PWeChatContactHeader_below_3_5_0_46)contactHeaderAddress;
 
-    Inner_GetContactWithWxNumber_below_3_5_0_46_Parameter parameter(wxnumber, (wb_wx::PWeChatContactItem_below_3_5_0_46)contactHeader, weChatContactDataBeginOffset, contact);
-    return Inner_GetContactWithWxNumber_below_3_5_0_46_Do(contactHeader->begin, parameter);
+    _Inner_SearchContact_below_3_5_0_46_Parameter parameter(role, pattern, (wb_wx::PWeChatContactItem_below_3_5_0_46)contactHeader, weChatContactDataBeginOffset, contact);
+    return Inner_SearchContact_below_3_5_0_46_Do(contactHeader->begin, parameter);
 }
 
-static bool Inner_GetContactWithWxNumber_above_3_5_0_46(const std::string& wxnumber, uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
+static bool Inner_SearchContact_above_3_5_0_46(_Inner_SearchContactRole role, const std::string& pattern, uint8_t* contactHeaderAddress, ucpulong_t weChatContactDataBeginOffset, wxbox::crack::wx::WeChatContact& contact)
 {
     wb_wx::PWeChatContactHeader_above_3_5_0_46 contactHeader = (wb_wx::PWeChatContactHeader_above_3_5_0_46)contactHeaderAddress;
     wb_wx::PWeChatContactItem_above_3_5_0_46   cursor        = contactHeader->begin;
 
     while (cursor) {
-        uint8_t*              contactItemData      = ((uint8_t*)cursor) + weChatContactDataBeginOffset;
-        wb_wx::PWeChatWString wxnumberStringStruct = WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
+        uint8_t*              contactItemData = ((uint8_t*)cursor) + weChatContactDataBeginOffset;
+        wb_wx::PWeChatWString pStringStruct   = role == _Inner_SearchContactRole::NickName ? WECHAT_CONTACT_ITEM_NICKNAME(contactItemData) : WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
 
-        if (wxnumberStringStruct && wxnumberStringStruct->str && wxnumberStringStruct->length) {
-            if (!wb_string::ToString(wxnumberStringStruct->str).compare(wxnumber)) {
+        if (pStringStruct && pStringStruct->str && pStringStruct->length) {
+            if (!wb_string::ToString(pStringStruct->str).compare(pattern)) {
                 return Inner_CollectSingleContact(contactItemData, contact);
             }
         }
@@ -1023,9 +1031,9 @@ static bool Inner_GetContactWithWxNumber_above_3_5_0_46(const std::string& wxnum
     return false;
 }
 
-bool wxbox::crack::GetContactWithWxNumber(const std::string& wxnumber, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact)
+bool Inner_SearchContact(_Inner_SearchContactRole role, const std::string& pattern, const wb_crack::PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact)
 {
-    if (wxnumber.empty() || !args) {
+    if (pattern.empty() || !args) {
         return false;
     }
 
@@ -1047,11 +1055,21 @@ bool wxbox::crack::GetContactWithWxNumber(const std::string& wxnumber, const PWx
     }
 
     if (versionNumber < v3_5_0_46) {
-        return Inner_GetContactWithWxNumber_below_3_5_0_46(wxnumber, contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contact);
+        return Inner_SearchContact_below_3_5_0_46(role, pattern, contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contact);
     }
     else {
-        return Inner_GetContactWithWxNumber_above_3_5_0_46(wxnumber, contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contact);
+        return Inner_SearchContact_above_3_5_0_46(role, pattern, contactHeaderAddress, args->wechat_datastructure_supplement.weChatContactDataBeginOffset, contact);
     }
+}
+
+bool wxbox::crack::GetContactWithNickName(const std::string& nickname, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact)
+{
+    return Inner_SearchContact(_Inner_SearchContactRole::NickName, nickname, args, contact);
+}
+
+bool wxbox::crack::GetContactWithWxNumber(const std::string& wxnumber, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact)
+{
+    return Inner_SearchContact(_Inner_SearchContactRole::WxNumber, wxnumber, args, contact);
 }
 
 static bool Inner_FindAndDeepCopyWeChatContactItemWithWXIDWrapper_below_3_5_0_46(void* pFindAndDeepCopyWeChatContactItemWithWXIDWrapper, uint8_t* globalContactContext, void* contactItem, wb_wx::PWeChatWString pWxidString)

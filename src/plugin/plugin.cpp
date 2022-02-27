@@ -5,7 +5,7 @@
 //
 
 static const char* HostEventNames[] = {
-    "SendTextMesage",
+    "SendMesage",
     "Log",
     "ClearCommandResultScreen",
     "Logout",
@@ -341,7 +341,8 @@ wxbox::plugin::HostEventModelPtr wxbox::plugin::BuildHostEventModel()
         return nullptr;
     }
 
-    ptr->log = nullptr;
+    ptr->sendMessageArgs = nullptr;
+    ptr->log             = nullptr;
 
     return ptr;
 }

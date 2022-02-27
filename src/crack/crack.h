@@ -136,6 +136,7 @@ namespace wxbox {
         bool     InitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem);
         bool     DeinitWeChatContactItem(const WxApis& wxApis, uint8_t* contactItem);
         bool     CollectAllContact(const PWxBotEntryParameter args, std::vector<wxbox::crack::wx::WeChatContact>& contacts);
+        bool     GetContactWithNickName(const std::string& nickname, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
         bool     GetContactWithWxNumber(const std::string& wxnumber, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
         bool     GetContactWithWxid(const std::string& wxid, const PWxBotEntryParameter args, wxbox::crack::wx::WeChatContact& contact);
 

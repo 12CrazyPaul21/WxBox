@@ -42,48 +42,6 @@ static int __host_event_set_type(lua_State* L)
     return 0;
 }
 
-static int __host_event_get_wxid(lua_State* L)
-{
-    wb_plugin::HostEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::HostEventModel, HOST_EVENT_MODEL_NAME>(L);
-    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
-
-    lua_pushstring(L, ptr->wxid.c_str());
-    return 1;
-}
-
-static int __host_event_set_wxid(lua_State* L)
-{
-    wb_plugin::HostEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::HostEventModel, HOST_EVENT_MODEL_NAME>(L);
-    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
-
-    const char* wxid = luaL_checkstring(L, 2);
-    luaL_argcheck(L, wxid != nullptr, 2, "parameter must be a string");
-
-    ptr->wxid = const_cast<char*>(wxid);
-    return 0;
-}
-
-static int __host_event_get_text_message(lua_State* L)
-{
-    wb_plugin::HostEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::HostEventModel, HOST_EVENT_MODEL_NAME>(L);
-    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
-
-    lua_pushstring(L, ptr->textMessage.c_str());
-    return 1;
-}
-
-static int __host_event_set_text_message(lua_State* L)
-{
-    wb_plugin::HostEventModel* ptr = wb_plugin::FetchUserDataPointer<wb_plugin::HostEventModel, HOST_EVENT_MODEL_NAME>(L);
-    luaL_argcheck(L, ptr != nullptr, 1, "null userdata");
-
-    const char* textMessage = luaL_checkstring(L, 2);
-    luaL_argcheck(L, textMessage != nullptr, 2, "parameter must be a string");
-
-    ptr->textMessage = const_cast<char*>(textMessage);
-    return 0;
-}
-
 //
 // export module
 //
@@ -96,10 +54,6 @@ const struct luaL_Reg wxbox::plugin::internal::HostEventModelMethods[] = {
 const struct luaL_Reg wxbox::plugin::internal::HostEventModelObjectMethods[] = {
     {"type", __host_event_get_type},
     {"set_type", __host_event_set_type},
-    {"wxid", __host_event_get_wxid},
-    {"set_wxid", __host_event_set_wxid},
-    {"text_message", __host_event_get_text_message},
-    {"set_text_message", __host_event_set_text_message},
     {NULL, NULL},
 };
 
