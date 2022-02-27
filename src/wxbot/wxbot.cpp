@@ -352,7 +352,9 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
         }
 
         case wxbox::ControlPacketType::CHANGE_CONFIG_REQUEST: {
-            args->avoidRevokeMessage = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->avoidrevokemessage();
+            args->avoidRevokeMessage        = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->avoidrevokemessage();
+            args->enableRawMessageHook      = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->enablerawmessagehook();
+            args->enableSendTextMessageHook = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->enablesendtextmessagehook();
             break;
         }
     }

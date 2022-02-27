@@ -75,6 +75,20 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
+         <widget class="QCheckBox" name="enableRawMessageHook">
+          <property name="text">
+           <string>enableRawMessageHook</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="enableSendTextMessageHook">
+          <property name="text">
+           <string>enableSendTextMessageHook</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="avoidRevokeMessage">
           <property name="text">
            <string>avoidRevokeMessage</string>

@@ -30,6 +30,8 @@ REGISTER_CONFIG_KEY(WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_STATUS_MONITOR_INTERVAL);
 REGISTER_CONFIG_KEY(WXBOX_WECHAT_AVOID_REVOKE_MESSAGE);
+REGISTER_CONFIG_KEY(WXBOX_WECHAT_ENABLE_RAW_MESSAGE_HOOK);
+REGISTER_CONFIG_KEY(WXBOX_WECHAT_ENABLE_SEND_TEXT_MESSAGE_HOOK);
 REGISTER_CONFIG_KEY(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
 REGISTER_CONFIG_KEY(WXBOX_LOADING_ICON_TYPE);
 REGISTER_CONFIG_KEY(WXBOX_LOADING_ICON_ANIMATION_USE_CACHE);
@@ -93,6 +95,8 @@ class AppConfig final : public wb_config::Config
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_MULTI_BLOXING_QUOTA);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_STATUS_MONITOR_INTERVAL);
         CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_AVOID_REVOKE_MESSAGE);
+        CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_ENABLE_RAW_MESSAGE_HOOK);
+        CHECK_DEFAULT_CONFIG(WXBOX_WECHAT_ENABLE_SEND_TEXT_MESSAGE_HOOK);
         CHECK_DEFAULT_CONFIG(WXBOX_CLOSE_IS_MINIMIZE_TO_TRAY);
         CHECK_DEFAULT_CONFIG(WXBOX_LOADING_ICON_TYPE);
         CHECK_DEFAULT_CONFIG(WXBOX_LOADING_ICON_ANIMATION_USE_CACHE);
@@ -363,6 +367,28 @@ class AppConfig final : public wb_config::Config
     void change_wechat_avoid_revoke_message(bool avoid)
     {
         this->operator[](WXBOX_WECHAT_AVOID_REVOKE_MESSAGE_KEY) = avoid;
+        submit();
+    }
+
+    bool wechat_enable_raw_message_hook() const
+    {
+        return this->operator[](WXBOX_WECHAT_ENABLE_RAW_MESSAGE_HOOK_KEY).safe_as<bool>();
+    }
+
+    void change_wechat_enable_raw_message_hook(bool enabled)
+    {
+        this->operator[](WXBOX_WECHAT_ENABLE_RAW_MESSAGE_HOOK_KEY) = enabled;
+        submit();
+    }
+
+    bool wechat_enable_send_text_message_hook() const
+    {
+        return this->operator[](WXBOX_WECHAT_ENABLE_SEND_TEXT_MESSAGE_HOOK_KEY).safe_as<bool>();
+    }
+
+    void change_wechat_enable_send_text_message_hook(bool enabled)
+    {
+        this->operator[](WXBOX_WECHAT_ENABLE_SEND_TEXT_MESSAGE_HOOK_KEY) = enabled;
         submit();
     }
 

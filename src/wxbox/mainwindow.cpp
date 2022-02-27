@@ -359,6 +359,16 @@ void MainWindow::RegisterWidgetEventHandler()
         TurnAvoidRevokeMessage(state == Qt::Checked);
     });
 
+    ui->enableRawMessageHook->setChecked(config.wechat_enable_raw_message_hook());
+    QObject::connect(ui->enableRawMessageHook, &QCheckBox::stateChanged, this, [this](int state) {
+        TurnEnableRawMessageHook(state == Qt::Checked);
+    });
+
+    ui->enableSendTextMessageHook->setChecked(config.wechat_enable_send_text_message_hook());
+    QObject::connect(ui->enableSendTextMessageHook, &QCheckBox::stateChanged, this, [this](int state) {
+        TurnEnableSendTextMessageHook(state == Qt::Checked);
+    });
+
     QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
         xstyle_manager.ChangeLanguage("en");
         xstyle_manager.ChangeTheme("GreenTheme");

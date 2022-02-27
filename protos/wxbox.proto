@@ -94,6 +94,8 @@ message LogRequest {
 
 message ChangeConfigRequest {
     bool avoidRevokeMessage = 1;
+    bool enableRawMessageHook = 2;
+    bool enableSendTextMessageHook = 3;
 }
 
 message WxBotControlPacket {

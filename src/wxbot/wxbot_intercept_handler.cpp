@@ -61,6 +61,10 @@ void wxbot::WxBot::WeChatRawMessageHandler(wb_wx::WeChatMessageType type, wb_wx:
         return;
     }
 
+    if (!args->enableRawMessageHook) {
+        return;
+    }
+
     DispatchPluginReceiveRawWeChatMessage(type, message, true);
 }
 
@@ -94,6 +98,10 @@ void wxbot::WxBot::WeChatReceivedMessagesHandler(wb_wx::PWeChatMessageCollection
 void wxbot::WxBot::WeChatSendTextMessageHandler(wxbox::crack::wx::PWeChatWString wxid, wxbox::crack::wx::PWeChatWString message)
 {
     if (!wxid || !message) {
+        return;
+    }
+
+    if (!args->enableSendTextMessageHook) {
         return;
     }
 

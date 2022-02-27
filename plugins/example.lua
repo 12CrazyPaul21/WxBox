@@ -26,25 +26,25 @@ function example.receive_raw_message(event)
     -- event:filter_message()
     -- event:substitute_wxid('filehelper')
     -- event:substitute_message('test')
-    -- wxbox.info('receive_raw_message : ' .. event:message())
+    wxbox.info('example.receive_raw_message : ' .. event:message())
 end
 
 function example.receive_message(event)
-    wxbox.info('receive_message : ' .. event:message())
+    -- wxbox.info('example.receive_message : ' .. event:message())
 end
 
 function example.receive_text_message(event)
     print("example.receive_text_message")
     print("    wxid : " .. event:wxid())
     print("    message : " .. event:message())
-    wxbox.info('example.receive_text_message : ' .. event:message())
+    -- wxbox.info('example.receive_text_message : ' .. event:message())
 end
 
 function example.send_text_message(event)
     print("example.send_text_message")
     print("    wxid : " .. event:wxid())
     print("    message : " .. event:message())
-    -- wxbox.info("example.send_text_message : " .. event:message())
+    wxbox.info("example.send_text_message : " .. event:message())
     -- event:substitute_wxid('filehelper')
     -- event:substitute_chatroom_talker_wxid('filehelper')
     -- event:substitute_message('test')

@@ -58,6 +58,8 @@ namespace wxbox {
             char                                          wechat_install_path[WXBOX_MAX_PATH];
             char                                          wechat_coremodule_abspath[WXBOX_MAX_PATH];
             bool                                          avoidRevokeMessage;
+            bool                                          enableRawMessageHook;
+            bool                                          enableSendTextMessageHook;
             WxApis                                        wechat_apis;
             wxbox::crack::feature::WxDataStructSupplement wechat_datastructure_supplement;
         } WxBotEntryParameter, *PWxBotEntryParameter;

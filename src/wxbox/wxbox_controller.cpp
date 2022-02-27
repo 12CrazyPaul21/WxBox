@@ -188,7 +188,9 @@ bool WxBoxController::StartWeChatInstance()
         strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxEnvInfo.version.c_str());
         strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxEnvInfo.installPath.c_str());
         strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxEnvInfo.coreModuleAbsPath.c_str());
-        wxbotEntryParameter.avoidRevokeMessage = config.wechat_avoid_revoke_message();
+        wxbotEntryParameter.avoidRevokeMessage        = config.wechat_avoid_revoke_message();
+        wxbotEntryParameter.enableRawMessageHook      = config.wechat_enable_raw_message_hook();
+        wxbotEntryParameter.enableSendTextMessageHook = config.wechat_enable_send_text_message_hook();
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
         wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
@@ -273,7 +275,9 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxProcessEnvInfo.wxEnvInfo.version.c_str());
         strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxProcessEnvInfo.wxEnvInfo.installPath.c_str());
         strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxProcessEnvInfo.wxEnvInfo.coreModuleAbsPath.c_str());
-        wxbotEntryParameter.avoidRevokeMessage = config.wechat_avoid_revoke_message();
+        wxbotEntryParameter.avoidRevokeMessage        = config.wechat_avoid_revoke_message();
+        wxbotEntryParameter.enableRawMessageHook      = config.wechat_enable_raw_message_hook();
+        wxbotEntryParameter.enableSendTextMessageHook = config.wechat_enable_send_text_message_hook();
         wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
         std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
         wxApiFeatures.ObtainDataStructureSupplement(wxProcessEnvInfo.wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
@@ -688,13 +692,15 @@ void WxBoxController::RequestExecutePluginScript(wb_process::PID clientPID, cons
     PushMessageAsync(std::move(msg));
 }
 
-void WxBoxController::RequestChangeAvoidRevokeMessageConfig(bool avoid)
+void WxBoxController::RequestChangeConfig()
 {
     wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
     msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::CHANGE_CONFIG_REQUEST);
 
     auto changeConfigRequest = msg.u.wxBoxControlPacket.mutable_changeconfigrequest();
-    changeConfigRequest->set_avoidrevokemessage(avoid);
+    changeConfigRequest->set_avoidrevokemessage(config.wechat_avoid_revoke_message());
+    changeConfigRequest->set_enablerawmessagehook(config.wechat_enable_raw_message_hook());
+    changeConfigRequest->set_enablesendtextmessagehook(config.wechat_enable_send_text_message_hook());
 
     for (const auto& client : clientInjectArgs) {
         msg.pid = client.first;

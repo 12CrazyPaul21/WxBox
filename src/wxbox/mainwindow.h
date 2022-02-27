@@ -146,7 +146,23 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     {
         if (config.wechat_avoid_revoke_message() != avoid) {
             config.change_wechat_avoid_revoke_message(avoid);
-            controller.RequestChangeAvoidRevokeMessageConfig(avoid);
+            controller.RequestChangeConfig();
+        }
+    }
+
+    void TurnEnableRawMessageHook(bool enabled)
+    {
+        if (config.wechat_enable_raw_message_hook() != enabled) {
+            config.change_wechat_enable_raw_message_hook(enabled);
+            controller.RequestChangeConfig();
+        }
+    }
+
+    void TurnEnableSendTextMessageHook(bool enabled)
+    {
+        if (config.wechat_enable_send_text_message_hook() != enabled) {
+            config.change_wechat_enable_send_text_message_hook(enabled);
+            controller.RequestChangeConfig();
         }
     }
 
