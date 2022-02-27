@@ -13,6 +13,21 @@ static int __wxbox_version(lua_State* L)
     return 1;
 }
 
+static int __wxbox_help(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type = wb_plugin::HostEventType::ReportHelp;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
 static int __wxbox_package_storage_path(lua_State* L)
 {
     const char* moduleName = luaL_checkstring(L, 1);
@@ -663,7 +678,7 @@ static int __wxbox_profile_send_file_with_wxnumber(lua_State* L)
     return 1;
 }
 
-// usage : >>wxbox.send_text_to_chatroom <roomWxid>, <text message>, <optional notify list...>
+// usage : >>wxbox.send_text_to_chatroom <roomWxid>, <text message>, [optional notify list...]
 static int __wxbox_profile_send_text_to_chatroom(lua_State* L)
 {
     const char* roomWxid = lua_tostring(L, 1);
@@ -769,7 +784,7 @@ static int __wxbox_profile_send_file_to_chatroom(lua_State* L)
     return 1;
 }
 
-// usage : >>wxbox.chatroom_notify <roomWxid>, <optional notify list...>
+// usage : >>wxbox.chatroom_notify <roomWxid>, [optional notify list...]
 static int __wxbox_profile_chatroom_notify(lua_State* L)
 {
     const char* roomWxid = lua_tostring(L, 1);
@@ -843,8 +858,10 @@ static int __wxbox_profile_chatroom_notify_all(lua_State* L)
 
 const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"version", __wxbox_version},
+    {"help", __wxbox_help},
     {"package_storage_path", __wxbox_package_storage_path},
     {"dispatch_host_event", __wxbox_dispatch_host_event},
+
     {"info", __wxbox_info},
     {"warning", __wxbox_warning},
     {"error", __wxbox_error},

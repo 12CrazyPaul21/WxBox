@@ -345,5 +345,13 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
             client->PushMessageAsync(std::move(msg));
             break;
         }
+
+        case wb_plugin::HostEventType::ReportHelp: {
+            std::string helpTxtFilePath = wb_file::JoinPath(args->plugins_root, "wxbox_module_apis.txt");
+            if (wb_file::IsPathExists(helpTxtFilePath)) {
+                SendFileToFileHelper(helpTxtFilePath);
+            }
+            break;
+        }
     }
 }

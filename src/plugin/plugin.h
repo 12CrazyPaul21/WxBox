@@ -149,6 +149,7 @@ namespace wxbox {
             ChangeConfig,
             UnInject,
             ExitWxBox,
+            ReportHelp,
             _TotalHostEventType
         };
 

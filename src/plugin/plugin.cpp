@@ -12,6 +12,7 @@ static const char* HostEventNames[] = {
     "ChangeConfig",
     "UnInject",
     "ExitWxBox",
+    "ReportHelp",
 };
 
 static const char* PluginEventNames[] = {
