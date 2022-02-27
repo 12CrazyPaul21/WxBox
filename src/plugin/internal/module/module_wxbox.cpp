@@ -89,6 +89,43 @@ static int __wxbox_clear(lua_State* L)
     return 0;
 }
 
+static int __wxbox_list_drives(lua_State* L)
+{
+    auto drives = wb_file::GetAllDrives();
+    if (drives.empty()) {
+        return 0;
+    }
+
+    std::stringstream ss;
+    for (auto drive : drives) {
+        ss << drive << std::endl;
+    }
+
+    lua_pushstring(L, ss.str().c_str());
+    return 1;
+}
+
+static int __wxbox_list_files(lua_State* L)
+{
+    const char* dirPath = luaL_checkstring(L, 1);
+    luaL_argcheck(L, dirPath != nullptr, 1, "dirpath is required");
+    luaL_argcheck(L, wb_file::IsDirectory(dirPath), 1, "invalid dirpath");
+
+    auto files = wb_file::ListAllFiles(dirPath);
+    if (files.empty()) {
+        lua_pushstring(L, "[ empty ]");
+        return 1;
+    }
+
+    std::stringstream ss;
+    for (auto file : files) {
+        ss << file << std::endl;
+    }
+
+    lua_pushstring(L, ss.str().c_str());
+    return 1;
+}
+
 /**
  * avoid_revoke
  * enable_raw_message_hook
@@ -787,6 +824,8 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"error", __wxbox_error},
     {"clear", __wxbox_clear},
 
+    {"list_drives", __wxbox_list_drives},
+    {"list_files", __wxbox_list_files},
     {"set_config", __wxbox_set_config},
     {"uninject_wxbot", __wxbox_uninject_wxbot},
     {"exit_wxbox", __wxbox_exit_wxbox},

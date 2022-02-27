@@ -114,6 +114,27 @@ static inline std::string GetProcessRootPath_Windows(wb_process::PID pid)
     return wxbox::util::file::ToDirectoryPath(szFullName);
 }
 
+static std::vector<std::string> ListAllFiles_Windows(const std::string& dirPath)
+{
+    std::vector<std::string> result;
+
+    if (!wb_file::IsDirectory(dirPath)) {
+        return result;
+    }
+
+    WIN32_FIND_DATAA findFileData = {0};
+    HANDLE           hFind        = ::FindFirstFileA(wb_file::JoinPath(dirPath, R"(*.*)").c_str(), &findFileData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        return result;
+    }
+
+    do {
+        result.emplace_back(std::string(findFileData.cFileName));
+    } while (::FindNextFileA(hFind, &findFileData));
+
+    return result;
+}
+
 static inline std::vector<std::string> ListFilesInDirectoryWithExt_Windows(const std::string& dirPath, const std::string& ext)
 {
     std::vector<std::string> result;
@@ -314,6 +335,12 @@ static inline std::string GetProcessRootPath_Mac(wb_process::PID pid)
 {
     throw std::exception("GetProcessRootPath_Mac stub");
     return "";
+}
+
+static std::vector<std::string> ListAllFiles_Mac(const std::string& dirPath)
+{
+    throw std::exception("ListAllFiles_Mac stub");
+    return std::vector<std::string>();
 }
 
 static inline std::vector<std::string> ListFilesInDirectoryWithExt_Mac(const std::string& dirPath, const std::string& ext)
@@ -568,6 +595,37 @@ bool wxbox::util::file::CheckVersionNumberValid(const std::string& version)
 {
     std::regex matchPattern(R"(^(?:([0-9]+)\.)?(?:([0-9]+)\.)?(?:([0-9]+)\.)?([0-9]+)$)");
     return std::regex_match(version.begin(), version.end(), matchPattern);
+}
+
+std::vector<std::string> wxbox::util::file::GetAllDrives()
+{
+    std::vector<std::string> result;
+
+#if WXBOX_IN_WINDOWS_OS
+
+    DWORD drives = ::GetLogicalDrives();
+    for (int i = 0; i < 26; i++) {
+        if ((drives & (0x1u << i))) {
+            char p[10] = {0};
+            sprintf_s(p, "%c:\\", 'A' + i);
+            result.emplace_back(p);
+        }
+    }
+
+#elif WXBOX_IN_MAC_OS
+    throw std::exception("GetAllDrives stub");
+#endif
+
+    return result;
+}
+
+std::vector<std::string> wxbox::util::file::ListAllFiles(const std::string& dirPath)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return ListAllFiles_Windows(dirPath);
+#elif WXBOX_IN_MAC_OS
+    return ListAllFiles_Mac(dirPath);
+#endif
 }
 
 std::vector<std::string> wxbox::util::file::ListFilesInDirectoryWithExt(const std::string& dirPath, const std::string& ext)

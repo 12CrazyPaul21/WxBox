@@ -123,6 +123,8 @@ namespace wxbox {
             std::string                         GetProcessRootPath();
             std::string                         GetProcessRootPath(wxbox::util::process::PID pid);
 
+            std::vector<std::string> GetAllDrives();
+            std::vector<std::string> ListAllFiles(const std::string& dirPath);
             std::vector<std::string> ListFilesInDirectoryWithExt(const std::string& dirPath, const std::string& ext);
             std::vector<std::string> ListFolderInDirectory(const std::string& dirPath);
 
