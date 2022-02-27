@@ -396,8 +396,6 @@ void MainWindow::RegisterWidgetEventHandler()
         //controller.ChangeWeChatStatusMonitorInterval(2000);
         /*controller.StopWeChatStatusMonitor();
         wxStatusModel.clear();*/
-        auto allDrives = wb_file::GetAllDrives();
-        auto files     = wb_file::ListAllFiles("c:\\");
     });
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
         //UpdateWeChatFeatures();

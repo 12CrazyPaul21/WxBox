@@ -89,6 +89,32 @@ static int __wxbox_clear(lua_State* L)
     return 0;
 }
 
+// >>wxbox.shell: <command>, [args...]
+static int __wxbox_shell(lua_State* L)
+{
+    const char* command = luaL_checkstring(L, 1);
+    luaL_argcheck(L, command != nullptr, 1, "command invalid");
+
+    std::vector<std::string> args;
+
+    // args list
+    for (int i = 2; i <= lua_gettop(L); i++) {
+        const char* arg = lua_tostring(L, i);
+        luaL_argcheck(L, arg != nullptr, i, "invalid args");
+        args.push_back(arg);
+    }
+
+    lua_pushboolean(L, wb_platform::Shell(command, args));
+    return 1;
+}
+
+static int __wxbox_lock_screen(lua_State* L)
+{
+    wb_platform::LockScreen();
+    lua_pushboolean(L, true);
+    return 1;
+}
+
 static int __wxbox_list_drives(lua_State* L)
 {
     auto drives = wb_file::GetAllDrives();
@@ -824,8 +850,11 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"error", __wxbox_error},
     {"clear", __wxbox_clear},
 
+    {"shell", __wxbox_shell},
+    {"lock_screen", __wxbox_lock_screen},
     {"list_drives", __wxbox_list_drives},
     {"list_files", __wxbox_list_files},
+
     {"set_config", __wxbox_set_config},
     {"uninject_wxbot", __wxbox_uninject_wxbot},
     {"exit_wxbox", __wxbox_exit_wxbox},

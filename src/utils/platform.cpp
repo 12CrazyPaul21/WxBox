@@ -22,6 +22,20 @@ static bool Is64System_Windows()
     return (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 || si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64);
 }
 
+static bool Shell_Windows(const std::string& command, const std::vector<std::string>& args)
+{
+    if (command.empty()) {
+        return false;
+    }
+
+    std::stringstream parameters;
+    for (auto arg : args) {
+        parameters << arg << " ";
+    }
+
+    return ::ShellExecuteA(NULL, "open", command.c_str(), parameters.str().c_str(), nullptr, SW_SHOWNORMAL) > (HINSTANCE)32;
+}
+
 static std::string GetSystemVersionDescription_Windows()
 {
     using FnRtlGetVersion = LONG(WINAPI*)(LPOSVERSIONINFOEXW);
@@ -58,6 +72,12 @@ static std::string GetSystemVersionDescription_Windows()
 static bool Is64System_Mac()
 {
     throw std::exception("Is64System_Mac stub");
+    return false;
+}
+
+static bool Shell_Mac(const std::string& command, const std::vector<std::string>& args)
+{
+    throw std::exception("LockScreen stub");
     return false;
 }
 
@@ -112,6 +132,24 @@ std::string wxbox::util::platform::GetSystemVersionDescription()
     return GetSystemVersionDescription_Windows();
 #elif WXBOX_IN_MAC_OS
     return GetSystemVersionDescription_Mac();
+#endif
+}
+
+void wxbox::util::platform::LockScreen()
+{
+#if WXBOX_IN_WINDOWS_OS
+    ::LockWorkStation();
+#elif WXBOX_IN_MAC_OS
+    throw std::exception("LockScreen stub");
+#endif
+}
+
+bool wxbox::util::platform::Shell(const std::string& command, const std::vector<std::string>& args)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return Shell_Windows(command, args);
+#elif WXBOX_IN_MAC_OS
+    return Shell_Mac(command, args);
 #endif
 }
 

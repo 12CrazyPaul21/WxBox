@@ -13,6 +13,9 @@ namespace wxbox {
             std::string GetCPUProductBrandDescription();
             std::string GetSystemVersionDescription();
 
+            void LockScreen();
+            bool Shell(const std::string& command, const std::vector<std::string>& args = std::vector<std::string>());
+
             //
             // only for windows
             //
