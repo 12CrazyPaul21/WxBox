@@ -62,6 +62,8 @@ namespace wxbox {
             wxbox::crack::feature::WxDataStructSupplement wechat_datastructure_supplement;
         } WxBotEntryParameter, *PWxBotEntryParameter;
 
+        using WxBotEntryParameterPtr = std::shared_ptr<WxBotEntryParameter>;
+
         PRAGMA(pack(pop))
 
         typedef struct _OpenWxWithMultiBoxingResult
@@ -123,6 +125,9 @@ namespace wxbox {
         //
         // wechat api
         //
+
+        void InitWeChatApiCrackEnvironment(WxBotEntryParameterPtr& args);
+        void DeInitWeChatApiCrackEnvironment();
 
         uint8_t* FetchWeChatGlobalProfileContext(const WxApis& wxApis);
 

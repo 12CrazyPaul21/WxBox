@@ -28,7 +28,7 @@ namespace wxbot {
     class WxBot
     {
       public:
-        WxBot(std::unique_ptr<wb_crack::WxBotEntryParameter>&& args)
+        WxBot(wb_crack::WxBotEntryParameterPtr&& args)
           : args(std::move(args))
           , inited(false)
           , running(false)
@@ -150,12 +150,12 @@ namespace wxbot {
         void ResponseExecutePluginResult(const std::string& result);
 
       private:
-        std::unique_ptr<wb_crack::WxBotEntryParameter> args;
-        std::vector<void*>                             hookPoints;
-        std::mutex                                     mutex;
-        std::atomic<bool>                              inited;
-        std::atomic<bool>                              running;
-        class WxBoxClient*                             client;
+        wb_crack::WxBotEntryParameterPtr args;
+        std::vector<void*>               hookPoints;
+        std::mutex                       mutex;
+        std::atomic<bool>                inited;
+        std::atomic<bool>                running;
+        class WxBoxClient*               client;
     };
 }
 

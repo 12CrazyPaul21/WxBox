@@ -68,6 +68,9 @@ bool wxbot::WxBot::Startup()
     wb_plugin_wechat::RegisterWxNumberToWxidBridge(std::bind(&WxBot::WxNumberToWxid, this, std::placeholders::_1));
     wb_plugin_wechat::RegisterWxidToWxNumberBridge(std::bind(&WxBot::WxidToWxNumber, this, std::placeholders::_1));
 
+    // init crack environment
+    wb_crack::InitWeChatApiCrackEnvironment(args);
+
     running = true;
     return true;
 }
@@ -95,6 +98,9 @@ void wxbot::WxBot::Stop()
 
     // stop wxbox client
     client->Stop();
+
+    // deinit crack environment
+    wb_crack::DeInitWeChatApiCrackEnvironment();
 
     running = false;
 }
@@ -383,7 +389,7 @@ void wxbot::WxBot::PluginVirtualMachineEventHandler(wb_plugin::PluginVirtualMach
 // wxbot routine
 //
 
-static void WxBotRoutine(std::unique_ptr<wb_crack::WxBotEntryParameter> args)
+static void WxBotRoutine(wb_crack::WxBotEntryParameterPtr args)
 {
     wxbot::WxBot bot(std::move(args));
 
@@ -428,7 +434,7 @@ WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
     }
 
     // duplicate wxbot entry parameter
-    std::unique_ptr<wb_crack::WxBotEntryParameter> duplicatedArgs = std::make_unique<wb_crack::WxBotEntryParameter>();
+    wb_crack::WxBotEntryParameterPtr duplicatedArgs = std::make_shared<wb_crack::WxBotEntryParameter>();
     if (!duplicatedArgs) {
         wb_crack::UnInjectWxBotBySelf();
         return;

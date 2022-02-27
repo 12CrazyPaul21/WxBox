@@ -89,6 +89,7 @@
         spdlog::info("WeChat Logout trigger event id : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.logoutTriggerEventId);                    \
         spdlog::info("WeChat contact header item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatContactHeaderItemOffset);        \
         spdlog::info("WeChat contact data begin offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatContactDataBeginOffset);          \
+        spdlog::info("WeChat message structure size : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatMessageStructureSize);               \
     }
 
 #endif  // #ifndef __WXBOX_APP_LOG_H

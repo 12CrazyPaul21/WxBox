@@ -5,9 +5,10 @@
 // Globals
 //
 
-static cpulong_t g_wechat_raw_message_type_point_offset = 0;
-
-static std::mutex g_mutex;
+static cpulong_t                        g_wechat_raw_message_type_point_offset   = 0;
+static cpulong_t                        g_wechat_message_structure_known_presize = 0;
+static std::mutex                       g_mutex;
+static wb_crack::WxBotEntryParameterPtr g_crack_env = nullptr;
 
 // hook point handler
 static wb_crack::FnWeChatExitHandler             g_wechat_exit_handler              = nullptr;
@@ -122,12 +123,46 @@ static void internal_wechat_received_messages_handler(wxbox::crack::wx::PWeChatM
         return;
     }
 
-    auto stubWeChatMessageSize = sizeof(wb_wx::WeChatMessage);
-    auto collectionSize        = (ucpulong_t)messageCollection->end - (ucpulong_t)messageCollection->begin;
-    auto collectionCount       = collectionSize / stubWeChatMessageSize;
-    auto turnWeChatMessageSize = collectionCount ? collectionSize / collectionCount : 0;
+    auto collectionSize = (ucpulong_t)messageCollection->end - (ucpulong_t)messageCollection->begin;
 
-    g_wechat_received_messages_handler(messageCollection, collectionCount, turnWeChatMessageSize);
+    //
+    // use known wechat message structure presize
+    //
+
+    if (g_wechat_message_structure_known_presize) {
+        auto collectionCount = collectionSize / g_wechat_message_structure_known_presize;
+        g_wechat_received_messages_handler(messageCollection, collectionCount, g_wechat_message_structure_known_presize);
+        return;
+    }
+
+    //
+    // unknown version wechat message structure size
+    //
+
+    // calc predefine WeChatMessageStructure Size
+    auto predefineWeChatMessageSize = (g_crack_env && g_crack_env->wechat_datastructure_supplement.weChatMessageStructureSize)
+                                          ? g_crack_env->wechat_datastructure_supplement.weChatMessageStructureSize
+                                          : sizeof(wb_wx::WeChatMessage);
+
+    if (predefineWeChatMessageSize > collectionSize) {
+        predefineWeChatMessageSize = collectionSize;
+    }
+
+    auto guessCollectionCount   = collectionSize / predefineWeChatMessageSize;
+    auto guessWeChatMessageSize = collectionSize / guessCollectionCount;
+
+    if (collectionSize % (guessCollectionCount * guessWeChatMessageSize) == 0) {
+        // guess maybe successful
+        if (guessCollectionCount == 1) {
+            g_wechat_message_structure_known_presize = guessWeChatMessageSize;
+        }
+    }
+    else {
+        // guess failed
+        guessCollectionCount = 1;
+    }
+
+    g_wechat_received_messages_handler(messageCollection, guessCollectionCount, guessWeChatMessageSize);
 }
 
 BEGIN_NAKED_STD_FUNCTION(internal_wechat_received_messages_handler_stub)
@@ -721,6 +756,35 @@ void wxbox::crack::UnRegisterWeChatSendTextMessageHandler()
 //
 // wechat api
 //
+
+void wxbox::crack::InitWeChatApiCrackEnvironment(WxBotEntryParameterPtr& args)
+{
+    if (!args) {
+        return;
+    }
+
+    g_crack_env = args;
+
+    //
+    // record known version wechat message structure size
+    //
+
+    // known version 3.4.5.27(0x278), 3.5.0.46(0x290)
+    //if (!strcmp(g_crack_env->wechat_version, "3.4.5.27")) {
+    //    g_wechat_message_structure_known_presize = 0x278;
+    //}
+    //else if (!strcmp(g_crack_env->wechat_version, "3.5.0.46")) {
+    //    g_wechat_message_structure_known_presize = 0x290;
+    //}
+    //else {
+    g_wechat_message_structure_known_presize = 0x0;
+    //}
+}
+
+void wxbox::crack::DeInitWeChatApiCrackEnvironment()
+{
+    g_crack_env = nullptr;
+}
 
 uint8_t* wxbox::crack::FetchWeChatGlobalProfileContext(const WxApis& wxApis)
 {

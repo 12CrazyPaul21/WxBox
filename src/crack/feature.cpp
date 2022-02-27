@@ -292,6 +292,16 @@ static inline bool UnwindWxDataStructSupplement(const YAML::Node& dataSupplement
 
     wxDataStructSupplement.weChatContactDataBeginOffset = dataSupplement["WeChatContactDataBeginOffset"].as<ucpulong_t>();
 
+    //
+    // WeChatMessageStructureSize
+    //
+
+    if (!dataSupplement["WeChatMessageStructureSize"].IsScalar()) {
+        return false;
+    }
+
+    wxDataStructSupplement.weChatMessageStructureSize = dataSupplement["WeChatMessageStructureSize"].as<ucpulong_t>();
+
     return true;
 }
 

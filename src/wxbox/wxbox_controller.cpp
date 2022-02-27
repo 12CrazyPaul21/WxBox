@@ -399,6 +399,7 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
     REPORT_WX_DATASTRUCT("Logout Event ID", logoutTriggerEventId);
     REPORT_WX_DATASTRUCT("Contact Header Item Offset", weChatContactHeaderItemOffset);
     REPORT_WX_DATASTRUCT("Contact Data Begin Offset", weChatContactDataBeginOffset);
+    REPORT_WX_DATASTRUCT("Message Structure Size", weChatMessageStructureSize);
 
     xstyle::report(view, title, reportText);
 }

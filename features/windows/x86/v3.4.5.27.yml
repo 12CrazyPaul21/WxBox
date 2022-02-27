@@ -193,3 +193,4 @@ datastructure:
     WeChatLogoutTriggerEventId: 0x31F
     WeChatContactHeaderItemOffset: 0xBC
     WeChatContactDataBeginOffset: 0x28
+    WeChatMessageStructureSize: 0x278
