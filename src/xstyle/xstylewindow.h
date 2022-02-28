@@ -101,6 +101,7 @@ class XStyleWindow : public QMainWindow
     {
         SetMinimizeButtonEnabled(true);
         setWindowModality(Qt::NonModal);
+        SyncParentAlwaysTopMost();
 
         if (!isHidden()) {
             showNormal();
@@ -119,6 +120,7 @@ class XStyleWindow : public QMainWindow
     {
         SetMinimizeButtonEnabled(false);
         setWindowModality(Qt::ApplicationModal);
+        SyncParentAlwaysTopMost();
 
         if (!isHidden()) {
             showNormal();
@@ -257,8 +259,36 @@ class XStyleWindow : public QMainWindow
         closeIsMinimizeToTray = toTray;
     }
 
+    Q_INVOKABLE void SyncParentAlwaysTopMost()
+    {
+        if (!xstyleParent) {
+            return;
+        }
+
+        TurnAlwaysTopMost(
+#if _WIN32
+            GetWindowLong((HWND)(xstyleParent->winId()), GWL_EXSTYLE) & WS_EX_TOPMOST
+#else
+            xstyleParent->windowFlags() & Qt::WindowStaysOnTopHint
+#endif
+        );
+    }
+
+    Q_INVOKABLE bool IsAlwaysTopMost()
+    {
+#if _WIN32
+        return GetWindowLong((HWND)winId(), GWL_EXSTYLE) & WS_EX_TOPMOST;
+#else
+        return windowFlags() & Qt::WindowStaysOnTopHint;
+#endif
+    }
+
     Q_INVOKABLE virtual void TurnAlwaysTopMost(bool enabled)
     {
+        if (IsAlwaysTopMost() == enabled) {
+            return;
+        }
+
 #if _WIN32
         SetWindowPos((HWND)winId(), enabled ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 #else
