@@ -25,6 +25,7 @@ namespace wxbox {
             std::string GetStringValueInRegister(HKEY hKey, const char* subKey, const char* valueName);
             const char* ExceptionDescription(const DWORD code);
             ucpulong_t  GetPEModuleImageSize(const std::string& path);
+            bool        RemoveAllMatchKernelObject(const std::string& programName, const std::wstring& kernelObjectNamePattern);
 #endif
         }
     }

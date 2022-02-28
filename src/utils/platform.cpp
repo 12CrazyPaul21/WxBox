@@ -159,6 +159,149 @@ bool wxbox::util::platform::Shell(const std::string& command, const std::vector<
 
 #if WXBOX_IN_WINDOWS_OS
 
+//
+// Typedef
+//
+
+typedef enum _SYSTEM_INFORMATION_CLASS
+{
+    SystemBasicInformation,
+    SystemProcessorInformation,
+    SystemPerformanceInformation,
+    SystemTimeOfDayInformation,
+    SystemNotImplemented1,
+    SystemProcessesAndThreadsInformation,
+    SystemCallCounts,
+    SystemConfigurationInformation,
+    SystemProcessorTimes,
+    SystemGlobalFlag,
+    SystemNotImplemented2,
+    SystemModuleInformation,
+    SystemLockInformation,
+    SystemNotImplemented3,
+    SystemNotImplemented4,
+    SystemNotImplemented5,
+    SystemHandleInformation,
+    SystemObjectInformation,
+    SystemPagefileInformation,
+    SystemInstructionEmulationCounts,
+    SystemInvalidInfoClass1,
+    SystemCacheInformation,
+    SystemPoolTagInformation,
+    SystemProcessorStatistics,
+    SystemDpcInformation,
+    SystemNotImplemented6,
+    SystemLoadImage,
+    SystemUnloadImage,
+    SystemTimeAdjustment,
+    SystemNotImplemented7,
+    SystemNotImplemented8,
+    SystemNotImplemented9,
+    SystemCrashDumpInformation,
+    SystemExceptionInformation,
+    SystemCrashDumpStateInformation,
+    SystemKernelDebuggerInformation,
+    SystemContextSwitchInformation,
+    SystemRegistryQuotaInformation,
+    SystemLoadAndCallImage,
+    SystemPrioritySeparation,
+    SystemNotImplemented10,
+    SystemNotImplemented11,
+    SystemInvalidInfoClass2,
+    SystemInvalidInfoClass3,
+    SystemTimeZoneInformation,
+    SystemLookasideInformation,
+    SystemSetTimeSlipEvent,
+    SystemCreateSession,
+    SystemDeleteSession,
+    SystemInvalidInfoClass4,
+    SystemRangeStartInformation,
+    SystemVerifierInformation,
+    SystemAddVerifier,
+    SystemSessionProcessesInformation
+} SYSTEM_INFORMATION_CLASS;
+
+typedef enum _OBJECT_INFORMATION_CLASS
+{
+    ObjectBasicInformation,
+    ObjectNameInformation,
+    ObjectTypeInformation,
+    ObjectTypesInformation,
+    ObjectHandleFlagInformation,
+    ObjectSessionInformation,
+    ObjectSessionObjectInformation,
+    MaxObjectInfoClass
+} OBJECT_INFORMATION_CLASS;
+
+typedef LONG      NTSTATUS;
+typedef NTSTATUS* PNTSTATUS;
+
+typedef struct _UNICODE_STRING
+{
+    USHORT Length;
+    USHORT MaximumLength;
+    _Field_size_bytes_part_(MaximumLength, Length) PWCH Buffer;
+} UNICODE_STRING, *PUNICODE_STRING;
+
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO
+{
+    USHORT UniqueProcessId;
+    USHORT CreatorBackTraceIndex;
+    UCHAR  ObjectTypeIndex;
+    UCHAR  HandleAttributes;
+    USHORT HandleValue;
+    PVOID  Object;
+    ULONG  GrantedAccess;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
+
+typedef struct _SYSTEM_HANDLE_INFORMATION
+{
+    ULONG                          NumberOfHandles;
+    SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
+
+typedef struct _OBJECT_TYPE_INFORMATION
+{
+    UNICODE_STRING  TypeName;
+    ULONG           TotalNumberOfObjects;
+    ULONG           TotalNumberOfHandles;
+    ULONG           TotalPagedPoolUsage;
+    ULONG           TotalNonPagedPoolUsage;
+    ULONG           TotalNamePoolUsage;
+    ULONG           TotalHandleTableUsage;
+    ULONG           HighWaterNumberOfObjects;
+    ULONG           HighWaterNumberOfHandles;
+    ULONG           HighWaterPagedPoolUsage;
+    ULONG           HighWaterNonPagedPoolUsage;
+    ULONG           HighWaterNamePoolUsage;
+    ULONG           HighWaterHandleTableUsage;
+    ULONG           InvalidAttributes;
+    GENERIC_MAPPING GenericMapping;
+    ULONG           ValidAccessMask;
+    BOOLEAN         SecurityRequired;
+    BOOLEAN         MaintainHandleCount;
+    UCHAR           TypeIndex;
+    CHAR            ReservedByte;
+    ULONG           PoolType;
+    ULONG           DefaultPagedPoolCharge;
+    ULONG           DefaultNonPagedPoolCharge;
+} OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
+
+typedef NTSTATUS(WINAPI* FnNtQuerySystemInformation)(SYSTEM_INFORMATION_CLASS SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength);
+typedef NTSTATUS(NTAPI* FnNtQueryObject)(HANDLE Handle, OBJECT_INFORMATION_CLASS ObjectInformationClass, PVOID ObjectInformation, ULONG ObjectInformationLength, PULONG ReturnLength);
+
+typedef struct _OBJECT_NAME_INFORMATION
+{
+    UNICODE_STRING Name;
+} OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
+
+#define STATUS_INFO_LENGTH_MISMATCH ((NTSTATUS)0xC0000004L)
+#define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
+
+//
+// wxbox::util::platform
+//
+
 bool wxbox::util::platform::EnableDebugPrivilege(bool bEnablePrivilege)
 {
     HANDLE hToken = NULL;
@@ -290,6 +433,162 @@ ucpulong_t wxbox::util::platform::GetPEModuleImageSize(const std::string& path)
     CloseHandle(hFile);
 
     return imageSize;
+}
+
+PSYSTEM_HANDLE_INFORMATION Inner_GetAllKernelObjectsInfo(FnNtQuerySystemInformation fnNtQuerySystemInformation)
+{
+    static const ULONG s_largeBufferSize   = 256 * 0x400 * 0x400;
+    static ULONG       s_initialBufferSize = 0x400;
+
+    if (!fnNtQuerySystemInformation) {
+        return nullptr;
+    }
+
+    ULONG                      bufferSize = s_initialBufferSize;
+    PSYSTEM_HANDLE_INFORMATION buffer     = reinterpret_cast<PSYSTEM_HANDLE_INFORMATION>(LocalAlloc(LPTR, bufferSize));
+    if (!buffer) {
+        return nullptr;
+    }
+
+    NTSTATUS status;
+    while ((status = fnNtQuerySystemInformation(SystemHandleInformation, reinterpret_cast<PVOID>(buffer), bufferSize, nullptr)) == STATUS_INFO_LENGTH_MISMATCH) {
+        LocalFree(buffer);
+        bufferSize *= 2;
+
+        if (bufferSize > s_largeBufferSize) {
+            return nullptr;
+        }
+
+        buffer = reinterpret_cast<PSYSTEM_HANDLE_INFORMATION>(LocalAlloc(LPTR, bufferSize));
+        if (!buffer) {
+            return nullptr;
+        }
+    }
+
+    if (!NT_SUCCESS(status)) {
+        LocalFree(buffer);
+        return nullptr;
+    }
+
+    if (bufferSize < s_largeBufferSize) {
+        s_initialBufferSize = bufferSize;
+    }
+
+    return buffer;
+}
+
+bool wxbox::util::platform::RemoveAllMatchKernelObject(const std::string& programName, const std::wstring& kernelObjectNamePattern)
+{
+    static FnNtQuerySystemInformation fnNtQuerySystemInformation = nullptr;
+    static FnNtQueryObject            fnNtQueryObject            = nullptr;
+
+    if (programName.empty() || kernelObjectNamePattern.empty()) {
+        return false;
+    }
+
+    //
+    // get NtQuerySystemInformation and NtQueryObject Windows Native API Address
+    //
+
+    if (!fnNtQuerySystemInformation || !fnNtQueryObject) {
+        HMODULE hNtdll = LoadLibraryA("Ntdll.dll");
+        if (!hNtdll) {
+            return false;
+        }
+
+        fnNtQuerySystemInformation = (FnNtQuerySystemInformation)GetProcAddress(hNtdll, "NtQuerySystemInformation");
+        fnNtQueryObject            = (FnNtQueryObject)GetProcAddress(hNtdll, "NtQueryObject");
+
+        if (!fnNtQuerySystemInformation || !fnNtQueryObject) {
+            return false;
+        }
+    }
+
+    //
+    // get all kernel objects info
+    //
+
+    PSYSTEM_HANDLE_INFORMATION allKernelObjects = Inner_GetAllKernelObjectsInfo(fnNtQuerySystemInformation);
+    if (!allKernelObjects) {
+        return false;
+    }
+
+    //
+    // search all match kernel object
+    //
+
+    HANDLE                                           hCurrentProcess = GetCurrentProcess();
+    std::unordered_map<wb_process::PID, std::string> pid2binName;
+
+    for (ULONG i = 0; i < allKernelObjects->NumberOfHandles; i++) {
+        PSYSTEM_HANDLE_TABLE_ENTRY_INFO object = &allKernelObjects->Handles[i];
+
+        // match program
+        auto binNameIt = pid2binName.find(object->UniqueProcessId);
+        if (binNameIt == pid2binName.end()) {
+            wb_process::ProcessInfo pi;
+            if (!wb_process::GetProcessInfoByPID(object->UniqueProcessId, pi)) {
+                continue;
+            }
+            pid2binName[object->UniqueProcessId] = pi.filename;
+
+            if (_stricmp(pi.filename.c_str(), programName.c_str())) {
+                continue;
+            }
+        }
+        else if (_stricmp(binNameIt->second.c_str(), programName.c_str())) {
+            continue;
+        }
+
+        //
+        // match kernel object name pattern
+        //
+
+        bool matched = false;
+
+        // open process handle
+        auto hProcess = wb_process::OpenProcessAutoHandle(object->UniqueProcessId);
+        if (!hProcess.hProcess) {
+            continue;
+        }
+
+        // duplicate kernel object
+        HANDLE hDuplicateHandle = NULL;
+        if (!DuplicateHandle(hProcess.hProcess, (HANDLE)object->HandleValue, hCurrentProcess, &hDuplicateHandle, DUPLICATE_SAME_ACCESS, FALSE, DUPLICATE_SAME_ACCESS)) {
+            continue;
+        }
+
+        // get kernel object name and match
+        ULONG uNeededSize = 0;
+        if (fnNtQueryObject(hDuplicateHandle, ObjectNameInformation, nullptr, 0, &uNeededSize) == STATUS_INFO_LENGTH_MISMATCH) {
+            POBJECT_NAME_INFORMATION pObjectName = reinterpret_cast<POBJECT_NAME_INFORMATION>(LocalAlloc(LPTR, uNeededSize));
+            if (!pObjectName) {
+                CloseHandle(hDuplicateHandle);
+                continue;
+            }
+
+            if (NT_SUCCESS(fnNtQueryObject(hDuplicateHandle, ObjectNameInformation, pObjectName, uNeededSize, &uNeededSize))) {
+                if (pObjectName->Name.Buffer && wcsstr(pObjectName->Name.Buffer, kernelObjectNamePattern.c_str())) {
+                    matched = true;
+                }
+            }
+
+            LocalFree(pObjectName);
+        }
+        CloseHandle(hDuplicateHandle);
+
+        if (!matched) {
+            continue;
+        }
+
+        // delete kernel object
+        if (DuplicateHandle(hProcess.hProcess, (HANDLE)object->HandleValue, hCurrentProcess, &hDuplicateHandle, DUPLICATE_CLOSE_SOURCE, FALSE, DUPLICATE_CLOSE_SOURCE)) {
+            CloseHandle(hDuplicateHandle);
+        }
+    }
+
+    LocalFree(allKernelObjects);
+    return true;
 }
 
 #endif

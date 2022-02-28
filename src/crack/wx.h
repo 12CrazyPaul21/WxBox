@@ -14,11 +14,13 @@ namespace wxbox {
 #define WX_WE_CHAT_CORE_MODULE "WeChatWin.dll"
 #define WX_WE_CHAT_MAIN_WINDOW_CLASS_NAME "WeChatMainWndForPC"
 #define WX_WE_CHAT_LOGIN_WINDOW_CLASS_NAME "WeChatLoginWndForPC"
+#define WX_WE_CHAT_SINGLETON_MUTEX_NAME L"_WeChat_App_Instance_Identity_Mutex_Name"
 #elif WXBOX_IN_MAC_OS
 #define WX_WE_CHAT_EXE ""
 #define WX_WE_CHAT_CORE_MODULE ""
 #define WX_WE_CHAT_MAIN_WINDOW_CLASS_NAME ""
 #define WX_WE_CHAT_LOGIN_WINDOW_CLASS_NAME ""
+#define WX_WE_CHAT_SINGLETON_MUTEX_NAME L"_WeChat_App_Instance_Identity_Mutex_Name"
 #endif
 
             //

@@ -401,6 +401,9 @@ static inline bool OpenWxWithMultiBoxing_Windows(const wb_wx::WeChatEnvironmentI
         return false;
     }
 
+    // remove all wechat process's singleton mutex kernel object
+    wb_platform::RemoveAllMatchKernelObject(WX_WE_CHAT_EXE, WX_WE_CHAT_SINGLETON_MUTEX_NAME);
+
     // create process and attach it
     wb_process::PID pid = wb_process::StartProcess(wxEnvInfo.executeAbsPath, true);
     if (!pid) {
