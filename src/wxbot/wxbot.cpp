@@ -352,9 +352,21 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
         }
 
         case wxbox::ControlPacketType::CHANGE_CONFIG_REQUEST: {
-            args->avoidRevokeMessage        = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->avoidrevokemessage();
-            args->enableRawMessageHook      = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->enablerawmessagehook();
-            args->enableSendTextMessageHook = message.u.wxBoxControlPacket.mutable_changeconfigrequest()->enablesendtextmessagehook();
+            auto changeConfigRequest = message.u.wxBoxControlPacket.mutable_changeconfigrequest();
+            if (!changeConfigRequest) {
+                break;
+            }
+
+            args->avoidRevokeMessage        = changeConfigRequest->avoidrevokemessage();
+            args->enableRawMessageHook      = changeConfigRequest->enablerawmessagehook();
+            args->enableSendTextMessageHook = changeConfigRequest->enablesendtextmessagehook();
+            args->wxbot_reconnect_interval  = changeConfigRequest->wxboxclientreconnectinterval();
+            args->plugin_long_task_timeout  = changeConfigRequest->pluginlongtasktimeout();
+
+            if (changeConfigRequest->serveruri().compare(args->wxbox_server_uri)) {
+                strcpy_s(args->wxbox_server_uri, sizeof(args->wxbox_server_uri), changeConfigRequest->serveruri().data());
+                client->ChangeServerURI(args->wxbox_server_uri);
+            }
             break;
         }
     }

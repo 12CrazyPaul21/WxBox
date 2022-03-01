@@ -39,7 +39,7 @@ void wxbot::WxBoxEndPoint::OnReadDone(bool ok)
 
 void wxbot::WxBoxClient::ResetChannel()
 {
-    channel = grpc::CreateChannel(serverURI, grpc::InsecureChannelCredentials());
+    channel = grpc::CreateChannel(GetServerURI(), grpc::InsecureChannelCredentials());
     stub    = WxBox::NewStub(channel);
 }
 

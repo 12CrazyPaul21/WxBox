@@ -388,8 +388,15 @@ namespace wxbot {
         // Property Methods
         //
 
+        void ChangeServerURI(const std::string& uri)
+        {
+            std::unique_lock<std::shared_mutex> lock(mutex);
+            serverURI = uri;
+        }
+
         std::string GetServerURI() const
         {
+            std::shared_lock<std::shared_mutex> lock(mutex);
             return serverURI;
         }
 
