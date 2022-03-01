@@ -251,7 +251,7 @@ static inline bool OpenWxWithMultiBoxing_CheckWeChatWinModule(HANDLE hProcess, c
     // to string
     std::string moduleAbsPath;
     if (loadDllDebugInfo.fUnicode) {
-        moduleAbsPath = wb_string::ToString((wchar_t*)dllAbsPathBuffer);
+        moduleAbsPath = wb_string::ToUtf8String((wchar_t*)dllAbsPathBuffer);
     }
     else {
         moduleAbsPath = (char*)dllAbsPathBuffer;
@@ -934,19 +934,19 @@ static inline bool Inner_CollectSingleContact(uint8_t* contactItemData, wxbox::c
     wb_wx::PWeChatWString nicknameStringStruct = WECHAT_CONTACT_ITEM_NICKNAME(contactItemData);
 
     if (wxidStringStruct && wxidStringStruct->str && wxidStringStruct->length) {
-        contact.wxid = wb_string::ToString(wxidStringStruct->str);
+        contact.wxid = wb_string::ToUtf8String(wxidStringStruct->str);
     }
 
     if (wxnumberStringStruct && wxnumberStringStruct->str && wxnumberStringStruct->length) {
-        contact.wxnumber = wb_string::ToString(wxnumberStringStruct->str);
+        contact.wxnumber = wb_string::ToUtf8String(wxnumberStringStruct->str);
     }
 
     if (remarkStringStruct && remarkStringStruct->str && remarkStringStruct->length) {
-        contact.remark = wb_string::ToString(remarkStringStruct->str);
+        contact.remark = wb_string::ToUtf8String(remarkStringStruct->str);
     }
 
     if (nicknameStringStruct && nicknameStringStruct->str && nicknameStringStruct->length) {
-        contact.nickname = wb_string::ToString(nicknameStringStruct->str);
+        contact.nickname = wb_string::ToUtf8String(nicknameStringStruct->str);
     }
 
     contact.chatroom = (!contact.wxid.empty() && contact.wxid.rfind("@chatroom") != std::string::npos);
@@ -1078,7 +1078,7 @@ static bool Inner_SearchContact_below_3_5_0_46_Do(wb_wx::PWeChatContactItem_belo
     wb_wx::PWeChatWString pStringStruct   = parameter.role == _Inner_SearchContactRole::NickName ? WECHAT_CONTACT_ITEM_NICKNAME(contactItemData) : WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
 
     if (pStringStruct && pStringStruct->str && pStringStruct->length) {
-        if (!wb_string::ToString(pStringStruct->str).compare(parameter.pattern)) {
+        if (!wb_string::ToUtf8String(pStringStruct->str).compare(parameter.pattern)) {
             Inner_CollectSingleContact(contactItemData, parameter.contact);
             return true;
         }
@@ -1113,7 +1113,7 @@ static bool Inner_SearchContact_above_3_5_0_46(_Inner_SearchContactRole role, co
         wb_wx::PWeChatWString pStringStruct   = role == _Inner_SearchContactRole::NickName ? WECHAT_CONTACT_ITEM_NICKNAME(contactItemData) : WECHAT_CONTACT_ITEM_WXNUMBER(contactItemData);
 
         if (pStringStruct && pStringStruct->str && pStringStruct->length) {
-            if (!wb_string::ToString(pStringStruct->str).compare(pattern)) {
+            if (!wb_string::ToUtf8String(pStringStruct->str).compare(pattern)) {
                 return Inner_CollectSingleContact(contactItemData, contact);
             }
         }
@@ -1259,7 +1259,7 @@ bool wxbox::crack::GetContactWithWxid(const std::string& wxid, wxbox::crack::wx:
     // build wxid string struct
     //
 
-    std::wstring         wWxidStr = wb_string::ToWString(wxid);
+    std::wstring         wWxidStr = wb_string::ToUtf8WString(wxid);
     wb_wx::WeChatWString wxidStr;
     wxidStr.str      = const_cast<wchar_t*>(wWxidStr.c_str());
     wxidStr.length   = wWxidStr.length();
@@ -1313,7 +1313,7 @@ static bool Inner_SendTextMessage(const wb_crack::PWxBotEntryParameter args, con
     // build wxid info
     //
 
-    std::wstring          wWxid = wb_string::ToWString(wxid);
+    std::wstring          wWxid = wb_string::ToUtf8WString(wxid);
     wb_wx::WeChatWString  wxidInfo;
     wb_wx::PWeChatWString pWxidInfo = &wxidInfo;
     wxidInfo.str                    = const_cast<wchar_t*>(wWxid.c_str());
@@ -1326,7 +1326,7 @@ static bool Inner_SendTextMessage(const wb_crack::PWxBotEntryParameter args, con
     // build message info
     //
 
-    std::wstring wMessage = wb_string::ToWString(message);
+    std::wstring wMessage = wb_string::ToUtf8WString(message);
     if (messageNotifyListSuffix) {
         wMessage += messageNotifyListSuffix;
     }
@@ -1394,7 +1394,7 @@ bool wxbox::crack::SendTextMessage(const std::string& wxid, const std::string& m
 
 static inline std::wstring Inner_GenerateNotifyMessage(const std::string& nickname)
 {
-    return L"@" + wb_string::ToWString(nickname) + L"\x2005";
+    return L"@" + wb_string::ToUtf8WString(nickname) + L"\x2005";
 }
 
 bool wxbox::crack::SendTextMessageWithNotifyList(const std::string& roomWxid, const std::vector<std::string>& notifyWxidLists, const std::string& message)
@@ -1410,7 +1410,7 @@ bool wxbox::crack::SendTextMessageWithNotifyList(const std::string& roomWxid, co
     std::vector<wb_wx::WeChatWString> vtNotifyWxidLists;
     for (auto wxid : notifyWxidLists) {
         wb_wx::WeChatWString wxidInfo;
-        std::wstring         wWxid = wb_string::ToWString(wxid);
+        std::wstring         wWxid = wb_string::ToUtf8WString(wxid);
         wxidInfo.str               = const_cast<wchar_t*>(wWxid.c_str());
         wxidInfo.length            = wWxid.length();
         wxidInfo.length2           = wxidInfo.length;
@@ -1482,7 +1482,7 @@ bool wxbox::crack::SendFile(const std::string& wxid, const std::string& filePath
     // build wxid info
     //
 
-    std::wstring          wWxid = wb_string::ToWString(wxid);
+    std::wstring          wWxid = wb_string::ToUtf8WString(wxid);
     wb_wx::WeChatWString  wxidInfo;
     wb_wx::PWeChatWString pWxidInfo = &wxidInfo;
     wxidInfo.str                    = const_cast<wchar_t*>(wWxid.c_str());
@@ -1495,7 +1495,7 @@ bool wxbox::crack::SendFile(const std::string& wxid, const std::string& filePath
     // build file path info
     //
 
-    std::wstring          wFilePath = wb_string::ToWString(filePath);
+    std::wstring          wFilePath = wb_string::ToUtf8WString(filePath);
     wb_wx::WeChatWString  filePathInfo;
     wb_wx::PWeChatWString pFilePathInfo = &filePathInfo;
     filePathInfo.str                    = const_cast<wchar_t*>(wFilePath.c_str());

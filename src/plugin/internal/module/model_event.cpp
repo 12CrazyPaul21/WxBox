@@ -121,7 +121,7 @@ static int __plugin_event_substitute_wxid(lua_State* L)
         pWxidInfo = TO_WECHAT_WSTRING(&pMessage->talker_wxid);
     }
 
-    wb_crack::SubstituteWeChatWString(pWxidInfo, wb_string::ToWString(newWxid));
+    wb_crack::SubstituteWeChatWString(pWxidInfo, wb_string::ToUtf8WString(newWxid));
 
     lua_pushboolean(L, true);
     return 1;
@@ -163,7 +163,7 @@ static int __plugin_event_substitute_message(lua_State* L)
     const char* newMessage = lua_tostring(L, 2);
     luaL_argcheck(L, newMessage != nullptr, 2, "invalid message");
 
-    wb_crack::SubstituteWeChatWString(pMessageInfo, wb_string::ToWString(newMessage));
+    wb_crack::SubstituteWeChatWString(pMessageInfo, wb_string::ToUtf8WString(newMessage));
 
     lua_pushboolean(L, true);
     return 1;
@@ -194,7 +194,7 @@ static int __plugin_event_substitute_chatroom_talker_wxid(lua_State* L)
         return 1;
     }
 
-    wb_crack::SubstituteWeChatWString(TO_WECHAT_WSTRING(&pMessage->chatroom_talker_wxid), wb_string::ToWString(newChatroomTalkerWxid));
+    wb_crack::SubstituteWeChatWString(TO_WECHAT_WSTRING(&pMessage->chatroom_talker_wxid), wb_string::ToUtf8WString(newChatroomTalkerWxid));
 
     lua_pushboolean(L, true);
     return 1;

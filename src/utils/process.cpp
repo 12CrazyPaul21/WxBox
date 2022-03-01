@@ -735,7 +735,7 @@ void wxbox::util::process::SetThreadName(THREAD_HANDLE hThread, const std::strin
         return;
     }
 
-    fnSetThreadDescription(hThread, wb_string::ToWString(threadName).c_str());
+    fnSetThreadDescription(hThread, wb_string::ToNativeWString(threadName).c_str());
 
 #elif WXBOX_IN_MAC_OS
     throw std::exception("SetThreadName stub");
@@ -770,7 +770,7 @@ std::string wxbox::util::process::GetThreadName(THREAD_HANDLE hThread)
     wchar_t*    threadDescription = nullptr;
 
     if (SUCCEEDED(fnGetThreadDescription(hThread, &threadDescription))) {
-        threadName = wb_string::ToString(threadDescription);
+        threadName = wb_string::ToUtf8String(threadDescription);
         ::LocalFree(threadDescription);
     }
 

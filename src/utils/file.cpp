@@ -273,7 +273,7 @@ static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, con
 
                     wb_file::FileChangeMonitorReport report;
                     report.dirpath  = dirPath;
-                    report.filename = wb_string::ToString(std::wstring(filename));
+                    report.filename = wb_string::ToUtf8String(std::wstring(filename));
                     report.fullpath = wb_file::JoinPath(report.dirpath, report.filename);
 
                     switch (pNotifyInfoCursor->Action) {

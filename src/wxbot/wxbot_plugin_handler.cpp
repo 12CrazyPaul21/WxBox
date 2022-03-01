@@ -49,13 +49,13 @@ void wxbot::WxBot::DispatchPluginReceiveRawWeChatMessage(wb_wx::WeChatMessageTyp
     command->event->messageType = (uint32_t)type;
 
     if (message->talker_wxid && message->talker_wxid_length) {
-        command->event->wxid = wb_string::ToString(message->talker_wxid);
+        command->event->wxid = wb_string::ToUtf8String(message->talker_wxid);
     }
     if (message->message && message->message_length) {
-        command->event->message = wb_string::ToString(message->message);
+        command->event->message = wb_string::ToUtf8String(message->message);
     }
     if (message->chatroom_talker_wxid && message->chatroom_talker_wxid_length) {
-        command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
+        command->event->chatroomTalkerWxid = wb_string::ToUtf8String(message->chatroom_talker_wxid);
     }
 
     wb_plugin::PushPluginVirtualMachineCommand(command);
@@ -81,13 +81,13 @@ void wxbot::WxBot::DispatchPluginReceiveWeChatMessage(wb_wx::PWeChatMessage mess
     command->event->messageType = message->message_type;
 
     if (message->talker_wxid && message->talker_wxid_length) {
-        command->event->wxid = wb_string::ToString(message->talker_wxid);
+        command->event->wxid = wb_string::ToUtf8String(message->talker_wxid);
     }
     if (message->message && message->message_length) {
-        command->event->message = wb_string::ToString(message->message);
+        command->event->message = wb_string::ToUtf8String(message->message);
     }
     if (message->chatroom_talker_wxid && message->chatroom_talker_wxid_length) {
-        command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
+        command->event->chatroomTalkerWxid = wb_string::ToUtf8String(message->chatroom_talker_wxid);
     }
 
     wb_plugin::PushPluginVirtualMachineCommand(command);
@@ -113,13 +113,13 @@ void wxbot::WxBot::DispatchPluginReceiveTextWeChatMessage(wb_wx::PWeChatMessage 
     command->event->messageType = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
 
     if (message->talker_wxid && message->talker_wxid_length) {
-        command->event->wxid = wb_string::ToString(message->talker_wxid);
+        command->event->wxid = wb_string::ToUtf8String(message->talker_wxid);
     }
     if (message->message && message->message_length) {
-        command->event->message = wb_string::ToString(message->message);
+        command->event->message = wb_string::ToUtf8String(message->message);
     }
     if (message->chatroom_talker_wxid && message->chatroom_talker_wxid_length) {
-        command->event->chatroomTalkerWxid = wb_string::ToString(message->chatroom_talker_wxid);
+        command->event->chatroomTalkerWxid = wb_string::ToUtf8String(message->chatroom_talker_wxid);
     }
 
     wb_plugin::PushPluginVirtualMachineCommand(command);
@@ -144,8 +144,8 @@ void wxbot::WxBot::DispatchPluginSendTextWeChatMessage(wxbox::crack::wx::PWeChat
     command->event->messageType = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
     command->event->pData1      = wxid;
     command->event->pData2      = message;
-    command->event->wxid        = wb_string::ToString(wxid->str);
-    command->event->message     = wb_string::ToString(message->str);
+    command->event->wxid        = wb_string::ToUtf8String(wxid->str);
+    command->event->message     = wb_string::ToUtf8String(message->str);
 
     wb_plugin::PushPluginVirtualMachineCommand(command);
     if (sync) {
