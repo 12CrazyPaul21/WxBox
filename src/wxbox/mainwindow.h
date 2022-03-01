@@ -172,6 +172,18 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         wb_coredump::ChangeDumpePrefix(newPrefix);
     }
 
+    void SetWindowLoadingIconType(WindowLoadingIconType type)
+    {
+        XSTYLE_WINDOW_CLASS::SetWindowLoadingIconType(type);
+        config.change_loading_icon_type((int)type);
+    }
+
+    void SetUseLoadingIconAnimationCache(bool useCache)
+    {
+        XSTYLE_WINDOW_CLASS::SetUseLoadingIconAnimationCache(useCache);
+        config.change_loading_icon_animation_use_cache(useCache);
+    }
+
     virtual void TurnCloseIsMinimizeToTray(bool toTray) Q_DECL_OVERRIDE
     {
         XSTYLE_WINDOW_CLASS::TurnCloseIsMinimizeToTray(toTray);

@@ -91,6 +91,13 @@ void WxBoxSettingDialog::InitWidgets()
     QObject::connect(this, SIGNAL(closed()), this, SLOT(Closed()));
 
     //
+    // Disabled Some Settings
+    //
+
+    ui->labelLoadingIconType->setVisible(false);
+    ui->comboBoxLoadingIconType->setVisible(false);
+
+    //
     // action button
     //
 
