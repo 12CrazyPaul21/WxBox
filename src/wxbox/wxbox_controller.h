@@ -48,11 +48,12 @@ class WxBoxController final : public QObject
     bool RequireValidWeChatEnvironmentInfo();
     void ReloadFeatures();
 
-    bool StartWeChatInstance();
-    bool InjectWxBotModule(wb_process::PID pid);
-    bool UnInjectWxBotModule(wb_process::PID pid);
-    void RaiseClientWindowToForeground(wb_process::PID pid);
-    void DisplayClientInjectArgs(wb_process::PID pid);
+    wb_crack::WxBotEntryParameter EncapWxBotEntryParameter(const wb_wx::WeChatEnvironmentInfo& _wxEnvInfo, wb_feature::WxApiFeatures& _wxApiFeatures, wb_feature::WxAPIHookPointVACollection& _vaCollection);
+    bool                          StartWeChatInstance();
+    bool                          InjectWxBotModule(wb_process::PID pid);
+    bool                          UnInjectWxBotModule(wb_process::PID pid);
+    void                          RaiseClientWindowToForeground(wb_process::PID pid);
+    void                          DisplayClientInjectArgs(wb_process::PID pid);
 
   private:
     //

@@ -135,6 +135,35 @@ void WxBoxController::ReloadFeatures()
     spdlog::info("Load WxBox api features");
 }
 
+wb_crack::WxBotEntryParameter WxBoxController::EncapWxBotEntryParameter(const wb_wx::WeChatEnvironmentInfo& _wxEnvInfo, wb_feature::WxApiFeatures& _wxApiFeatures, wb_feature::WxAPIHookPointVACollection& _vaCollection)
+{
+    wb_crack::WxBotEntryParameter wxbotEntryParameter;
+    std::memset(&wxbotEntryParameter, 0, sizeof(wxbotEntryParameter));
+
+    wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
+    strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wb_file::GetProcessRootPath().data());
+    strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), config.wxbot_root_path().data());
+    strcpy_s(wxbotEntryParameter.plugins_root, sizeof(wxbotEntryParameter.plugins_root), config.plugins_root().data());
+    strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
+
+    wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
+    wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
+
+    strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), _wxEnvInfo.version.c_str());
+    strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), _wxEnvInfo.installPath.c_str());
+    strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), _wxEnvInfo.coreModuleAbsPath.c_str());
+
+    wxbotEntryParameter.avoidRevokeMessage        = config.wechat_avoid_revoke_message();
+    wxbotEntryParameter.enableRawMessageHook      = config.wechat_enable_raw_message_hook();
+    wxbotEntryParameter.enableSendTextMessageHook = config.wechat_enable_send_text_message_hook();
+
+    wb_crack::GenerateWxApis(_vaCollection, wxbotEntryParameter.wechat_apis);
+    std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
+    _wxApiFeatures.ObtainDataStructureSupplement(_wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
+
+    return wxbotEntryParameter;
+}
+
 bool WxBoxController::StartWeChatInstance()
 {
     view->BeginMission();
@@ -188,24 +217,7 @@ bool WxBoxController::StartWeChatInstance()
         //
 
         // wxbot entry parameter
-        wb_crack::WxBotEntryParameter wxbotEntryParameter;
-        std::memset(&wxbotEntryParameter, 0, sizeof(wxbotEntryParameter));
-        wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
-        strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wb_file::GetProcessRootPath().data());
-        strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), config.wxbot_root_path().data());
-        strcpy_s(wxbotEntryParameter.plugins_root, sizeof(wxbotEntryParameter.plugins_root), config.plugins_root().data());
-        strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
-        wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
-        wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
-        strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxEnvInfo.version.c_str());
-        strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxEnvInfo.installPath.c_str());
-        strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxEnvInfo.coreModuleAbsPath.c_str());
-        wxbotEntryParameter.avoidRevokeMessage        = config.wechat_avoid_revoke_message();
-        wxbotEntryParameter.enableRawMessageHook      = config.wechat_enable_raw_message_hook();
-        wxbotEntryParameter.enableSendTextMessageHook = config.wechat_enable_send_text_message_hook();
-        wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
-        std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
-        wxApiFeatures.ObtainDataStructureSupplement(wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
+        wb_crack::WxBotEntryParameter wxbotEntryParameter = EncapWxBotEntryParameter(wxEnvInfo, wxApiFeatures, vaCollection);
 
         // log wx core module info
         spdlog::info("WeChat Core Module baseaddr : 0x{:08X}, size : 0x{:08X}", (ucpulong_t)openResult.pModuleBaseAddr, openResult.uModuleSize);
@@ -275,24 +287,7 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         //
 
         // wxbot entry parameter
-        wb_crack::WxBotEntryParameter wxbotEntryParameter;
-        std::memset(&wxbotEntryParameter, 0, sizeof(wxbotEntryParameter));
-        wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
-        strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wb_file::GetProcessRootPath().data());
-        strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), config.wxbot_root_path().data());
-        strcpy_s(wxbotEntryParameter.plugins_root, sizeof(wxbotEntryParameter.plugins_root), config.plugins_root().data());
-        strcpy_s(wxbotEntryParameter.wxbox_server_uri, sizeof(wxbotEntryParameter.wxbox_server_uri), config.wxbox_server_uri().data());
-        wxbotEntryParameter.wxbot_reconnect_interval = config.wxbox_client_reconnect_interval();
-        wxbotEntryParameter.plugin_long_task_timeout = config.plugin_long_task_timeout();
-        strcpy_s(wxbotEntryParameter.wechat_version, sizeof(wxbotEntryParameter.wechat_version), wxProcessEnvInfo.wxEnvInfo.version.c_str());
-        strcpy_s(wxbotEntryParameter.wechat_install_path, sizeof(wxbotEntryParameter.wechat_install_path), wxProcessEnvInfo.wxEnvInfo.installPath.c_str());
-        strcpy_s(wxbotEntryParameter.wechat_coremodule_abspath, sizeof(wxbotEntryParameter.wechat_coremodule_abspath), wxProcessEnvInfo.wxEnvInfo.coreModuleAbsPath.c_str());
-        wxbotEntryParameter.avoidRevokeMessage        = config.wechat_avoid_revoke_message();
-        wxbotEntryParameter.enableRawMessageHook      = config.wechat_enable_raw_message_hook();
-        wxbotEntryParameter.enableSendTextMessageHook = config.wechat_enable_send_text_message_hook();
-        wb_crack::GenerateWxApis(vaCollection, wxbotEntryParameter.wechat_apis);
-        std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
-        wxApiFeatures.ObtainDataStructureSupplement(wxProcessEnvInfo.wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
+        wb_crack::WxBotEntryParameter wxbotEntryParameter = EncapWxBotEntryParameter(wxProcessEnvInfo.wxEnvInfo, wxApiFeatures, vaCollection);
 
         // log wx core module info
         spdlog::info("Inject to WeChat Process(PID : {})", pid);
