@@ -25,6 +25,7 @@ bool wxbot::WxBot::Initialize()
 
     // build WxBoxClient
     client = new wxbot::WxBoxClient(args->wxbox_server_uri);
+    client->SetRetryInterval(args->wxbot_reconnect_interval);
     if (!client) {
         WXBOT_INIT_FAILED();
     }
@@ -363,6 +364,7 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
             args->wxbot_reconnect_interval  = changeConfigRequest->wxboxclientreconnectinterval();
             args->plugin_long_task_timeout  = changeConfigRequest->pluginlongtasktimeout();
 
+            client->SetRetryInterval(args->wxbot_reconnect_interval);
             if (changeConfigRequest->serveruri().compare(args->wxbox_server_uri)) {
                 strcpy_s(args->wxbox_server_uri, sizeof(args->wxbox_server_uri), changeConfigRequest->serveruri().data());
                 client->ChangeServerURI(args->wxbox_server_uri);
