@@ -24,6 +24,7 @@
     >>wxbox.error: <error message>
     >>wxbox.clear
 
+    [only for plugin]>>wxbox.sleep: <1 ~ 3000 ms>
     >>wxbox.shell: <command>, [optional args...]
     >>wxbox.lock_screen
     >>wxbox.list_drives

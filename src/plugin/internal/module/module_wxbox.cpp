@@ -104,6 +104,20 @@ static int __wxbox_clear(lua_State* L)
     return 0;
 }
 
+// >>wxbox.sleep: <millisecond>
+static int __wxbox_sleep(lua_State* L)
+{
+    if (lua_gettop(L) != 1) {
+        return 0;
+    }
+
+    lua_Integer ms = luaL_checkinteger(L, 1);
+    luaL_argcheck(L, ms > 0 && ms <= 3000, 1, "sleep time must be greater than zero and less than 3000 millisecond");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    return 0;
+}
+
 // >>wxbox.shell: <command>, [args...]
 static int __wxbox_shell(lua_State* L)
 {
@@ -867,6 +881,7 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"error", __wxbox_error},
     {"clear", __wxbox_clear},
 
+    {"sleep", __wxbox_sleep},
     {"shell", __wxbox_shell},
     {"lock_screen", __wxbox_lock_screen},
     {"list_drives", __wxbox_list_drives},

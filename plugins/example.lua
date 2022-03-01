@@ -85,6 +85,12 @@ function example.test()
 
     -- contacts = wxbox.get_all_contacts()
     -- return contacts[1].nickname
+
+    for i=1,100,1 do
+        wxbox.info(i)
+        wxbox.send_text_to_filehelper(i)
+        wxbox.sleep(1000)
+    end
 end
 
 function example.dispatch_message()
