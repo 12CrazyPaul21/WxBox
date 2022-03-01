@@ -262,7 +262,7 @@ void WxBoxSettingDialog::LoadSetting()
     SetCurrentSettingValue(ui->lineEditLogPath, QString(config.log_file_path().c_str()));
     SetCurrentSettingValue(ui->lineEditLogBasename, QString(config.log_name().c_str()));
     SetCurrentSettingValue(ui->sliderLogMaxRotatingFileCount, config.log_max_rotating_file_count());
-    SetCurrentSettingValue(ui->sliderLogMaxSingleFileSize, config.log_max_single_file_size() / 1024 / 1024);
+    SetCurrentSettingValue(ui->sliderLogMaxSingleFileSize, config.log_max_single_file_size() / 1048576);
     SetCurrentSettingValue(ui->sliderLogAutoFlushInterval, config.log_auto_flush_interval_sec());
 
     //

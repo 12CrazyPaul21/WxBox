@@ -150,6 +150,12 @@ void MainWindow::SettingChanged(const QString& name, const QVariant& newValue)
         MODIFY_METHOD(newValue.value<VALUE_TYPE>());                       \
     }
 
+#define NEXT_SETTING_CONVERT_MODIFY_CHECK(SETTING_NAME, VALUE_TYPE, CONVERT, MODIFY_METHOD) \
+    else if (!name.compare(SETTING_NAME))                                                   \
+    {                                                                                       \
+        MODIFY_METHOD(newValue.value<VALUE_TYPE>() CONVERT);                                \
+    }
+
 #define NEXT_ENUM_SETTING_MODIFY_CHECK(SETTING_NAME, VALUE_TYPE, ENUM_TYPE, MODIFY_METHOD) \
     else if (!name.compare(SETTING_NAME))                                                  \
     {                                                                                      \
@@ -173,7 +179,7 @@ void MainWindow::SettingChanged(const QString& name, const QVariant& newValue)
     NEXT_SETTING_MODIFY_CHECK("CoreDumpPrefix", QString, ChangeDumpPrefix)
     NEXT_STD_STRING_SETTING_MODIFY_CHECK("LogBasename", config.change_log_name)
     NEXT_SETTING_MODIFY_CHECK("LogMaxRotatingFileCount", int, config.change_log_max_rotating_file_count)
-    NEXT_SETTING_MODIFY_CHECK("LogMaxSingleFileSize", int, config.change_log_max_single_file_size)
+    NEXT_SETTING_CONVERT_MODIFY_CHECK("LogMaxSingleFileSize", int, *1048576, config.change_log_max_single_file_size)
     NEXT_SETTING_MODIFY_CHECK("LogAutoFlushInterval", int, config.change_log_auto_flush_interval_sec)
     NEXT_SETTING_MODIFY_CHECK("PluginLongTaskTimeout", int, ChangePluginLongTaskTimeout)
     NEXT_SETTING_MODIFY_CHECK("PluginLogMaxLine", int, config.change_plugin_log_max_line)
@@ -448,8 +454,9 @@ void MainWindow::RegisterWidgetEventHandler()
     QObject::connect(ui->btnStartWeChat, &QPushButton::clicked, &this->controller, &WxBoxController::StartWeChatInstance);
 
     QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
-        xstyle_manager.ChangeLanguage("en");
-        xstyle_manager.ChangeTheme("GreenTheme");
+        int* p = nullptr;
+        *p     = 2;
+
         /*xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
         xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
         xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
@@ -458,8 +465,6 @@ void MainWindow::RegisterWidgetEventHandler()
         xstyle_manager.ChangeTheme("");*/
     });
     QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
-        xstyle_manager.ChangeLanguage("zh_cn");
-        xstyle_manager.ChangeTheme("");
         /* xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
         xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
         char* e = nullptr;
