@@ -1464,7 +1464,7 @@ bool wxbox::crack::SendTextMessageWithNotifyList(const std::string& roomWxid, co
 
 bool wxbox::crack::SendFile(const std::string& wxid, const std::string& filePath)
 {
-    if (!g_crack_env || !g_crack_env->wechat_apis.WXSendFileMessage || !g_crack_env->wechat_apis.FetchGlobalSendMessageContext || wxid.empty() || filePath.empty() || !wb_file::IsPathExists(filePath)) {
+    if (!g_crack_env || !g_crack_env->wechat_apis.WXSendFileMessage || !g_crack_env->wechat_apis.FetchGlobalSendMessageContext || wxid.empty() || filePath.empty() || !wb_file::IsPathExists(wb_string::Utf8ToNativeString(filePath))) {
         return false;
     }
 
