@@ -25,7 +25,7 @@ end
 function example.receive_raw_message(event)
     -- event:filter_message()
     -- event:substitute_wxid('filehelper')
-    -- event:substitute_message('test')
+    -- event:substitute_message('你好')
     wxbox.info('example.receive_raw_message : ' .. event:message())
 end
 

@@ -137,6 +137,27 @@ static int __wxbox_shell(lua_State* L)
     return 1;
 }
 
+// >>wxbox.msgbox: <message>, [optional title]
+static int __wxbox_msgbox(lua_State* L)
+{
+    const char* message = luaL_checkstring(L, 1);
+    luaL_argcheck(L, message != nullptr, 1, "message invalid");
+
+    std::string title;
+    if (lua_gettop(L) > 1) {
+        title = luaL_checkstring(L, 2);
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    std::stringstream ss;
+    ss << R"(vbscript:CreateObject("WScript.Shell").Popup(")" << message << R"(",0,")" << title << R"(",64)(window.close))";
+    wb_platform::Shell("mshta", {wb_string::Utf8ToNativeString(ss.str())});
+#else
+
+#endif
+    return 0;
+}
+
 static int __wxbox_lock_screen(lua_State* L)
 {
     wb_platform::LockScreen();
@@ -883,6 +904,7 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
 
     {"sleep", __wxbox_sleep},
     {"shell", __wxbox_shell},
+    {"msgbox", __wxbox_msgbox},
     {"lock_screen", __wxbox_lock_screen},
     {"list_drives", __wxbox_list_drives},
     {"list_files", __wxbox_list_files},
