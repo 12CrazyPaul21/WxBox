@@ -856,6 +856,16 @@ std::string wxbox::plugin::GetPluginVirtualMachineStorageRoot()
     return wb_file::JoinPath(g_vm_signleton->pluginPath, "storage");
 }
 
+void wxbox::plugin::ChangeLongTaskTimeout(std::time_t timeout)
+{
+    if (!::g_vm_signleton) {
+        return;
+    }
+
+    std::unique_lock<std::shared_mutex> lock(::g_vm_signleton->rwmutex);
+    g_vm_signleton->longTaskTimeout = timeout;
+}
+
 bool wxbox::plugin::PushPluginVirtualMachineCommandSync(PluginVirtualMachineCommandPtr command)
 {
     if (!::g_vm_signleton) {

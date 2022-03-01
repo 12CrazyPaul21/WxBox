@@ -365,6 +365,8 @@ void wxbot::WxBot::WxBoxRequestOrResponseHandler(wxbot::WxBotMessage& message)
             args->plugin_long_task_timeout  = changeConfigRequest->pluginlongtasktimeout();
 
             client->SetRetryInterval(args->wxbot_reconnect_interval);
+            wb_plugin::ChangeLongTaskTimeout(args->plugin_long_task_timeout);
+
             if (changeConfigRequest->serveruri().compare(args->wxbox_server_uri)) {
                 strcpy_s(args->wxbox_server_uri, sizeof(args->wxbox_server_uri), changeConfigRequest->serveruri().data());
                 client->ChangeServerURI(args->wxbox_server_uri);

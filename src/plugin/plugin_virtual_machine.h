@@ -152,6 +152,7 @@ namespace wxbox {
 
         void        ExecutePluginVirtualMachineGC();
         std::string GetPluginVirtualMachineStorageRoot();
+        void        ChangeLongTaskTimeout(std::time_t timeout);
 
         template<PluginVirtualMachineCommandType type>
         auto BuildPluginVirtualMachineCommand() -> typename PluginVirtualMachineCommandTypeTrait<type>::ContainerPtrType
