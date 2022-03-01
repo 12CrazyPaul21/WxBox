@@ -211,7 +211,7 @@ static int __wxbox_list_files(lua_State* L)
 
     std::stringstream ss;
     for (auto file : files) {
-        ss << file << std::endl;
+        ss << wb_string::NativeToUtf8String(file) << std::endl;
     }
 
     lua_pushstring(L, ss.str().c_str());
