@@ -201,9 +201,11 @@ static int __wxbox_list_files(lua_State* L)
 {
     const char* dirPath = luaL_checkstring(L, 1);
     luaL_argcheck(L, dirPath != nullptr, 1, "dirpath is required");
-    luaL_argcheck(L, wb_file::IsDirectory(dirPath), 1, "invalid dirpath");
 
-    auto files = wb_file::ListAllFiles(dirPath);
+    std::string nativeDirPath = wb_string::Utf8ToNativeString(dirPath);
+    luaL_argcheck(L, wb_file::IsDirectory(nativeDirPath), 1, "invalid dirpath");
+
+    auto files = wb_file::ListAllFiles(nativeDirPath);
     if (files.empty()) {
         lua_pushstring(L, "[ empty ]");
         return 1;
@@ -211,6 +213,9 @@ static int __wxbox_list_files(lua_State* L)
 
     std::stringstream ss;
     for (auto file : files) {
+        if (wb_file::IsDirectory(wb_file::JoinPath(nativeDirPath, file))) {
+            ss << "./";
+        }
         ss << wb_string::NativeToUtf8String(file) << std::endl;
     }
 
