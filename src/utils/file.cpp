@@ -725,6 +725,23 @@ std::time_t wxbox::util::file::GetFileModifyTimestamp(const std::string& path)
     return std::chrono::duration_cast<std::chrono::seconds>(std::experimental::filesystem::last_write_time(path).time_since_epoch()).count();
 }
 
+uintmax_t wxbox::util::file::GetFileSize(const std::string& path)
+{
+    if (!IsPathExists(path)) {
+        return 0;
+    }
+
+    uintmax_t filesize = 0;
+
+    try {
+        filesize = std::experimental::filesystem::file_size(std::experimental::filesystem::path(path));
+    }
+    catch (std::exception& /*e*/) {
+    }
+
+    return filesize;
+}
+
 int wxbox::util::file::ExposeFileStreamFD(std::filebuf* fb)
 {
     if (!fb) {

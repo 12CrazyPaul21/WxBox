@@ -134,6 +134,7 @@ namespace wxbox {
 
             std::string GetFileVersion(const std::string& path);
             std::time_t GetFileModifyTimestamp(const std::string& path);
+            uintmax_t   GetFileSize(const std::string& path);
 
             YAML::Node UnwindYamlFile(const std::string& path);
             bool       UnwindVersionNumber(const std::string& version, VersionNumber& versionNumber);

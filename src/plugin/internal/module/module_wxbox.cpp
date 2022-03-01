@@ -441,8 +441,81 @@ static int __wxbox_profile_get_all_contacts(lua_State* L)
     return 1;
 }
 
+static int __inner_check_file_valid(lua_State* L, const std::string& filePath)
+{
+    auto nativeFilePath = wb_string::Utf8ToNativeString(filePath);
+
+    // check whether file exists
+    if (!wb_file::IsPathExists(nativeFilePath)) {
+        lua_pushstring(L, "file is not exists");
+        return 1;
+    }
+
+    //
+    // check file size, max 1G Bytes
+    //
+
+    auto filesize = wb_file::GetFileSize(nativeFilePath);
+
+    if (!filesize) {
+        lua_pushstring(L, "file is empty");
+        return 1;
+    }
+    else if (filesize > 1073741824) {
+        lua_pushstring(L, "file size no more than 1GB");
+        return 1;
+    }
+
+    return 0;
+}
+
+static int __inner_send_file(lua_State* L, const std::string& target, bool isChatroom, bool isWxNumber, const std::string& filePath, bool isPicture)
+{
+    // check file valid, if invalid return error message
+    if (__inner_check_file_valid(L, filePath)) {
+        return 1;
+    }
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    event->type            = wb_plugin::HostEventType::SendMesage;
+    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
+    if (!event->sendMessageArgs) {
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    event->sendMessageArgs->chatroom = isChatroom;
+
+    if (isPicture) {
+        event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::PICTURE;
+        event->sendMessageArgs->imgPath     = filePath;
+    }
+    else {
+        event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::FILE;
+        event->sendMessageArgs->filePath    = filePath;
+    }
+
+    event->sendMessageArgs->useWxNumber = isWxNumber;
+
+    if (isWxNumber) {
+        event->sendMessageArgs->wxnumber = target;
+    }
+    else {
+        event->sendMessageArgs->wxid = target;
+    }
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    lua_pushboolean(L, true);
+    return 1;
+}
+
 // usage : >>wxbox.send_text_to_filehelper <text message>
-static int __wxbox_profile_send_text_to_filehelper(lua_State* L)
+static int __wxbox_send_text_to_filehelper(lua_State* L)
 {
     const char* message = lua_tostring(L, 1);
     luaL_argcheck(L, message != nullptr, 1, "invalid message");
@@ -472,67 +545,25 @@ static int __wxbox_profile_send_text_to_filehelper(lua_State* L)
 }
 
 // usage : >>wxbox.send_picture_to_filehelper <image path>
-static int __wxbox_profile_send_picture_to_filehelper(lua_State* L)
+static int __wxbox_send_picture_to_filehelper(lua_State* L)
 {
     const char* imgPath = lua_tostring(L, 1);
     luaL_argcheck(L, imgPath != nullptr, 1, "invalid image path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::PICTURE;
-    event->sendMessageArgs->chatroom    = false;
-    event->sendMessageArgs->useWxNumber = false;
-    event->sendMessageArgs->wxid        = "filehelper";
-    event->sendMessageArgs->imgPath     = imgPath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, "filehelper", false, false, imgPath, true);
 }
 
 // usage : >>wxbox.send_file_to_filehelper <file path>
-static int __wxbox_profile_send_file_to_filehelper(lua_State* L)
+static int __wxbox_send_file_to_filehelper(lua_State* L)
 {
     const char* filePath = lua_tostring(L, 1);
     luaL_argcheck(L, filePath != nullptr, 1, "invalid file path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::FILE;
-    event->sendMessageArgs->chatroom    = false;
-    event->sendMessageArgs->useWxNumber = false;
-    event->sendMessageArgs->wxid        = "filehelper";
-    event->sendMessageArgs->filePath    = filePath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, "filehelper", false, false, filePath, false);
 }
 
 // usage : >>wxbox.send_text <wxid>, <text message>
-static int __wxbox_profile_send_text(lua_State* L)
+static int __wxbox_send_text(lua_State* L)
 {
     const char* wxid = lua_tostring(L, 1);
     luaL_argcheck(L, wxid != nullptr, 1, "invalid wxid");
@@ -565,7 +596,7 @@ static int __wxbox_profile_send_text(lua_State* L)
 }
 
 // usage : >>wxbox.send_picture <wxid>, <image path>
-static int __wxbox_profile_send_picture(lua_State* L)
+static int __wxbox_send_picture(lua_State* L)
 {
     const char* wxid = lua_tostring(L, 1);
     luaL_argcheck(L, wxid != nullptr, 1, "invalid wxid");
@@ -573,32 +604,11 @@ static int __wxbox_profile_send_picture(lua_State* L)
     const char* imgPath = lua_tostring(L, 2);
     luaL_argcheck(L, imgPath != nullptr, 2, "invalid image path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::PICTURE;
-    event->sendMessageArgs->chatroom    = false;
-    event->sendMessageArgs->useWxNumber = false;
-    event->sendMessageArgs->wxid        = wxid;
-    event->sendMessageArgs->imgPath     = imgPath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, wxid, false, false, imgPath, true);
 }
 
 // usage : >>wxbox.send_file <wxid>, <file path>
-static int __wxbox_profile_send_file(lua_State* L)
+static int __wxbox_send_file(lua_State* L)
 {
     const char* wxid = lua_tostring(L, 1);
     luaL_argcheck(L, wxid != nullptr, 1, "invalid wxid");
@@ -606,32 +616,11 @@ static int __wxbox_profile_send_file(lua_State* L)
     const char* filePath = lua_tostring(L, 2);
     luaL_argcheck(L, filePath != nullptr, 2, "invalid file path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::FILE;
-    event->sendMessageArgs->chatroom    = false;
-    event->sendMessageArgs->useWxNumber = false;
-    event->sendMessageArgs->wxid        = wxid;
-    event->sendMessageArgs->filePath    = filePath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, wxid, false, false, filePath, false);
 }
 
 // usage : >>wxbox.send_text_with_wxnumber <wxnumber>, <text message>
-static int __wxbox_profile_send_text_with_wxnumber(lua_State* L)
+static int __wxbox_send_text_with_wxnumber(lua_State* L)
 {
     const char* wxnumber = lua_tostring(L, 1);
     luaL_argcheck(L, wxnumber != nullptr, 1, "invalid wxnumber");
@@ -664,7 +653,7 @@ static int __wxbox_profile_send_text_with_wxnumber(lua_State* L)
 }
 
 // usage : >>wxbox.send_picture_with_wxnumber <wxnumber>, <image path>
-static int __wxbox_profile_send_picture_with_wxnumber(lua_State* L)
+static int __wxbox_send_picture_with_wxnumber(lua_State* L)
 {
     const char* wxnumber = lua_tostring(L, 1);
     luaL_argcheck(L, wxnumber != nullptr, 1, "invalid wxnumber");
@@ -672,32 +661,11 @@ static int __wxbox_profile_send_picture_with_wxnumber(lua_State* L)
     const char* imgPath = lua_tostring(L, 2);
     luaL_argcheck(L, imgPath != nullptr, 2, "invalid image path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::PICTURE;
-    event->sendMessageArgs->chatroom    = false;
-    event->sendMessageArgs->useWxNumber = true;
-    event->sendMessageArgs->wxnumber    = wxnumber;
-    event->sendMessageArgs->imgPath     = imgPath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, wxnumber, false, true, imgPath, true);
 }
 
 // usage : >>wxbox.send_file_with_wxnumber <wxnumber>, <file path>
-static int __wxbox_profile_send_file_with_wxnumber(lua_State* L)
+static int __wxbox_send_file_with_wxnumber(lua_State* L)
 {
     const char* wxnumber = lua_tostring(L, 1);
     luaL_argcheck(L, wxnumber != nullptr, 1, "invalid wxnumber");
@@ -705,32 +673,11 @@ static int __wxbox_profile_send_file_with_wxnumber(lua_State* L)
     const char* filePath = lua_tostring(L, 2);
     luaL_argcheck(L, filePath != nullptr, 2, "invalid file path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::FILE;
-    event->sendMessageArgs->chatroom    = false;
-    event->sendMessageArgs->useWxNumber = true;
-    event->sendMessageArgs->wxnumber    = wxnumber;
-    event->sendMessageArgs->filePath    = filePath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, wxnumber, false, true, filePath, false);
 }
 
 // usage : >>wxbox.send_text_to_chatroom <roomWxid>, <text message>, [optional notify list...]
-static int __wxbox_profile_send_text_to_chatroom(lua_State* L)
+static int __wxbox_send_text_to_chatroom(lua_State* L)
 {
     const char* roomWxid = lua_tostring(L, 1);
     luaL_argcheck(L, roomWxid != nullptr, 1, "invalid roomWxid");
@@ -770,7 +717,7 @@ static int __wxbox_profile_send_text_to_chatroom(lua_State* L)
 }
 
 // usage : >>wxbox.send_picture_to_chatroom <roomWxid>, <image path>
-static int __wxbox_profile_send_picture_to_chatroom(lua_State* L)
+static int __wxbox_send_picture_to_chatroom(lua_State* L)
 {
     const char* roomWxid = lua_tostring(L, 1);
     luaL_argcheck(L, roomWxid != nullptr, 1, "invalid roomWxid");
@@ -778,32 +725,11 @@ static int __wxbox_profile_send_picture_to_chatroom(lua_State* L)
     const char* imgPath = lua_tostring(L, 2);
     luaL_argcheck(L, imgPath != nullptr, 2, "invalid image path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::PICTURE;
-    event->sendMessageArgs->chatroom    = true;
-    event->sendMessageArgs->useWxNumber = false;
-    event->sendMessageArgs->wxid        = roomWxid;
-    event->sendMessageArgs->imgPath     = imgPath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, roomWxid, true, false, imgPath, true);
 }
 
 // usage : >>wxbox.send_file_to_chatroom <roomWxid>, <file path>
-static int __wxbox_profile_send_file_to_chatroom(lua_State* L)
+static int __wxbox_send_file_to_chatroom(lua_State* L)
 {
     const char* roomWxid = lua_tostring(L, 1);
     luaL_argcheck(L, roomWxid != nullptr, 1, "invalid roomWxid");
@@ -811,32 +737,11 @@ static int __wxbox_profile_send_file_to_chatroom(lua_State* L)
     const char* filePath = lua_tostring(L, 2);
     luaL_argcheck(L, filePath != nullptr, 2, "invalid file path");
 
-    auto event = wb_plugin::BuildHostEventModel();
-    if (!event) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->type            = wb_plugin::HostEventType::SendMesage;
-    event->sendMessageArgs = std::make_shared<wb_plugin::PluginSendWeChatMessage>();
-    if (!event->sendMessageArgs) {
-        lua_pushboolean(L, false);
-        return 1;
-    }
-
-    event->sendMessageArgs->messageType = (uint32_t)wb_wx::WeChatMessageType::FILE;
-    event->sendMessageArgs->chatroom    = true;
-    event->sendMessageArgs->useWxNumber = false;
-    event->sendMessageArgs->wxid        = roomWxid;
-    event->sendMessageArgs->filePath    = filePath;
-
-    wb_plugin::DispatchPluginToHostEvent(std::move(event));
-    lua_pushboolean(L, true);
-    return 1;
+    return __inner_send_file(L, roomWxid, true, false, filePath, false);
 }
 
 // usage : >>wxbox.chatroom_notify <roomWxid>, [optional notify list...]
-static int __wxbox_profile_chatroom_notify(lua_State* L)
+static int __wxbox_chatroom_notify(lua_State* L)
 {
     const char* roomWxid = lua_tostring(L, 1);
     luaL_argcheck(L, roomWxid != nullptr, 1, "invalid roomWxid");
@@ -873,7 +778,7 @@ static int __wxbox_profile_chatroom_notify(lua_State* L)
 }
 
 // usage : >>wxbox.chatroom_notify_all <roomWxid>
-static int __wxbox_profile_chatroom_notify_all(lua_State* L)
+static int __wxbox_chatroom_notify_all(lua_State* L)
 {
     const char* roomWxid = lua_tostring(L, 1);
     luaL_argcheck(L, roomWxid != nullptr, 1, "invalid roomWxid");
@@ -944,25 +849,25 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"get_contact_with_wxnumber", __wxbox_profile_get_contact_with_wxnumber},
     {"get_all_contacts", __wxbox_profile_get_all_contacts},
 
-    {"send_text_to_filehelper", __wxbox_profile_send_text_to_filehelper},
-    {"send_picture_to_filehelper", __wxbox_profile_send_picture_to_filehelper},
-    {"send_file_to_filehelper", __wxbox_profile_send_file_to_filehelper},
-    {"download", __wxbox_profile_send_file_to_filehelper},
+    {"send_text_to_filehelper", __wxbox_send_text_to_filehelper},
+    {"send_picture_to_filehelper", __wxbox_send_picture_to_filehelper},
+    {"send_file_to_filehelper", __wxbox_send_file_to_filehelper},
+    {"download", __wxbox_send_file_to_filehelper},
 
-    {"send_text", __wxbox_profile_send_text},
-    {"send_picture", __wxbox_profile_send_picture},
-    {"send_file", __wxbox_profile_send_file},
+    {"send_text", __wxbox_send_text},
+    {"send_picture", __wxbox_send_picture},
+    {"send_file", __wxbox_send_file},
 
-    {"send_text_with_wxnumber", __wxbox_profile_send_text_with_wxnumber},
-    {"send_picture_with_wxnumber", __wxbox_profile_send_picture_with_wxnumber},
-    {"send_file_with_wxnumber", __wxbox_profile_send_file_with_wxnumber},
+    {"send_text_with_wxnumber", __wxbox_send_text_with_wxnumber},
+    {"send_picture_with_wxnumber", __wxbox_send_picture_with_wxnumber},
+    {"send_file_with_wxnumber", __wxbox_send_file_with_wxnumber},
 
-    {"send_text_to_chatroom", __wxbox_profile_send_text_to_chatroom},
-    {"send_picture_to_chatroom", __wxbox_profile_send_picture_to_chatroom},
-    {"send_file_to_chatroom", __wxbox_profile_send_file_to_chatroom},
+    {"send_text_to_chatroom", __wxbox_send_text_to_chatroom},
+    {"send_picture_to_chatroom", __wxbox_send_picture_to_chatroom},
+    {"send_file_to_chatroom", __wxbox_send_file_to_chatroom},
 
-    {"chatroom_notify", __wxbox_profile_chatroom_notify},
-    {"chatroom_notify_all", __wxbox_profile_chatroom_notify_all},
+    {"chatroom_notify", __wxbox_chatroom_notify},
+    {"chatroom_notify_all", __wxbox_chatroom_notify_all},
 
     {NULL, NULL},
 };
