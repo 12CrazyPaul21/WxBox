@@ -158,6 +158,22 @@ static int __wxbox_msgbox(lua_State* L)
     return 0;
 }
 
+// >>wxbox.speak: <message>
+static int __wxbox_speak(lua_State* L)
+{
+    const char* message = luaL_checkstring(L, 1);
+    luaL_argcheck(L, message != nullptr, 1, "message invalid");
+
+#if WXBOX_IN_WINDOWS_OS
+    std::stringstream ss;
+    ss << R"(vbscript:CreateObject("SAPI.SpVoice").Speak(")" << wb_string::Utf8ToNativeString(message) << R"(")(window.close))";
+    wb_platform::Shell("mshta", {ss.str()});
+#else
+
+#endif
+    return 0;
+}
+
 static int __wxbox_lock_screen(lua_State* L)
 {
     wb_platform::LockScreen();
@@ -905,6 +921,7 @@ const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"sleep", __wxbox_sleep},
     {"shell", __wxbox_shell},
     {"msgbox", __wxbox_msgbox},
+    {"speak", __wxbox_speak},
     {"lock_screen", __wxbox_lock_screen},
     {"list_drives", __wxbox_list_drives},
     {"list_files", __wxbox_list_files},
