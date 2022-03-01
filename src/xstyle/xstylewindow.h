@@ -442,6 +442,7 @@ class XStyleWindow : public QMainWindow
 
     virtual void CompleteShow();
     virtual bool BeforeClose();
+    virtual void MinimizedToTray();
     virtual void AfterThemeChanged(const QString& themeName);
     virtual void WindowActiveChanged(bool isActive);
     virtual bool DraggableAreaHitTest(int x, int y);

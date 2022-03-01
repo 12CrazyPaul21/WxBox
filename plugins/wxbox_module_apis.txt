@@ -16,8 +16,8 @@
 
     >>wxbox.version
     >>wxbox.help
-    >>package_storage_path: <module name>
-    [only for plugin]>>dispatch_host_event: <host event object>
+    >>wxbox.package_storage_path: <module name>
+    [only for plugin]>>wxbox.dispatch_host_event: <host event object>
 
     >>wxbox.info: <information message>
     >>wxbox.warning: warning message>

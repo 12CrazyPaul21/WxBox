@@ -99,6 +99,8 @@
 #endif
 
 #define WXBOX_UNREF(P) (P)
+#define WXBOX_CLAMP(VALUE, MIN_VALUE, MAX_VALUE) (VALUE < MIN_VALUE ? MIN_VALUE : VALUE > MAX_VALUE ? MAX_VALUE \
+                                                                                                    : VALUE)
 
 //
 // Typedef

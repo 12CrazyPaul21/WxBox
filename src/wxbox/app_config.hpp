@@ -193,6 +193,12 @@ class AppConfig final : public wb_config::Config
         return this->operator[](WXBOX_COREDUMP_PREFIX_KEY).safe_as<std::string>();
     }
 
+    void change_coredump_prefix(const std::string& newPrefix)
+    {
+        this->operator[](WXBOX_COREDUMP_PREFIX_KEY) = newPrefix;
+        submit();
+    }
+
     std::string crashdumper() const
     {
         auto crashdumper = this->operator[](WXBOX_CRASHDUMPER_KEY).safe_as<std::string>();
@@ -235,9 +241,21 @@ class AppConfig final : public wb_config::Config
         return logName.empty() ? "WxBox" : logName;
     }
 
+    void change_log_name(const std::string& logName)
+    {
+        this->operator[](WXBOX_LOG_BASENAME_KEY) = logName;
+        submit();
+    }
+
     int log_max_rotating_file_count() const
     {
         return this->operator[](WXBOX_LOG_MAX_ROTATING_FILE_COUNT_KEY).safe_as<int>();
+    }
+
+    void change_log_max_rotating_file_count(int count)
+    {
+        this->operator[](WXBOX_LOG_MAX_ROTATING_FILE_COUNT_KEY) = count;
+        submit();
     }
 
     int log_max_single_file_size() const
@@ -245,9 +263,23 @@ class AppConfig final : public wb_config::Config
         return this->operator[](WXBOX_LOG_MAX_SINGLE_FILE_SIZE_KEY).safe_as<int>();
     }
 
+    void change_log_max_single_file_size(int size)
+    {
+        this->operator[](WXBOX_LOG_MAX_SINGLE_FILE_SIZE_KEY) = size;
+        submit();
+    }
+
     int log_auto_flush_interval_sec() const
     {
         return this->operator[](WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC_KEY).safe_as<int>();
+    }
+
+    void change_log_auto_flush_interval_sec(int sec)
+    {
+        spdlog::flush_every(std::chrono::seconds(sec));
+
+        this->operator[](WXBOX_LOG_AUTO_FLUSH_INTERVAL_SEC_KEY) = sec;
+        submit();
     }
 
     spdlog::level::level_enum log_level() const

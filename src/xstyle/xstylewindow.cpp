@@ -432,6 +432,10 @@ bool XStyleWindow::BeforeClose()
     return true;
 }
 
+void XStyleWindow::MinimizedToTray()
+{
+}
+
 void XStyleWindow::ThemeChanged(QString themeName, QString styleSheet)
 {
     SetStyleSheetSync(styleSheet);
@@ -511,6 +515,7 @@ void XStyleWindow::closeEvent(QCloseEvent* event)
         fadeOut(true);
         hide();
         event->ignore();
+        MinimizedToTray();
         return;
     }
 

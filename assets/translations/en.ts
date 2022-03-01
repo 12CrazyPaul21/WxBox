@@ -221,6 +221,14 @@
         <source>Client not connected</source>
         <translation>Client not connected</translation>
     </message>
+    <message>
+        <source>Restart WxBox To Apply Setting Changed?</source>
+        <translation>Restart WxBox To Apply Setting Changed?</translation>
+    </message>
+    <message>
+        <source>WxBox is Minimized To Tray</source>
+        <translation>WxBox is Minimized To Tray</translation>
+    </message>
 </context>
 <context>
     <name>WxBoxController</name>
@@ -356,6 +364,192 @@
     <message>
         <source>WXID</source>
         <translation>WXID</translation>
+    </message>
+</context>
+<context>
+    <name>WxBoxSettingDialog</name>
+    <message>
+        <source>确认</source>
+        <translation>Confirm</translation>
+    </message>
+    <message>
+        <source>取消</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <source>应用</source>
+        <translation>Apply</translation>
+    </message>
+    <message>
+        <source>常规</source>
+        <translation>Regular</translation>
+    </message>
+    <message>
+        <source>窗口</source>
+        <translation>Window</translation>
+    </message>
+    <message>
+        <source>语言与样式</source>
+        <translation>Language And Theme</translation>
+    </message>
+    <message>
+        <source>日志</source>
+        <translation>Log</translation>
+    </message>
+    <message>
+        <source>特征库</source>
+        <translation>Feature Repository</translation>
+    </message>
+    <message>
+        <source>特性开关</source>
+        <translation>Feature Options</translation>
+    </message>
+    <message>
+        <source>WeChat基础信息</source>
+        <translation>WeChat Base Information</translation>
+    </message>
+    <message>
+        <source>WeChat状态监控</source>
+        <translation>WeChat Status Monitor</translation>
+    </message>
+    <message>
+        <source>WxBox Client 重连尝试间隔（ms）</source>
+        <translation>WxBox Client Reconnect Interval(ms)</translation>
+    </message>
+    <message>
+        <source>关闭窗口为最小化到托盘</source>
+        <translation>Close is Minimize To Tray</translation>
+    </message>
+    <message>
+        <source>WxBox窗口总是在最顶层</source>
+        <translation>WxBox Window Always Top-Most</translation>
+    </message>
+    <message>
+        <source>为WxBox窗口Loading图标动画启用缓存</source>
+        <translation>WxBox Loading Icon Animation Use Cache</translation>
+    </message>
+    <message>
+        <source>WxBox窗口Loading图标动画类型</source>
+        <translation>WxBox Loading Icon Animation Type</translation>
+    </message>
+    <message>
+        <source>i18n根路径</source>
+        <translation>i18n Root Path</translation>
+    </message>
+    <message>
+        <source>语言</source>
+        <translation>Language</translation>
+    </message>
+    <message>
+        <source>主题根路径</source>
+        <translation>Theme Root Path</translation>
+    </message>
+    <message>
+        <source>窗口样式</source>
+        <translation>Window Theme</translation>
+    </message>
+    <message>
+        <source>转储文件根路径</source>
+        <translation>CoreDump Root Path</translation>
+    </message>
+    <message>
+        <source>转储文件前缀</source>
+        <translation>CoreDump File Prefix</translation>
+    </message>
+    <message>
+        <source>日志路径</source>
+        <translation>Log File Path</translation>
+    </message>
+    <message>
+        <source>最大Rotating文件数目</source>
+        <translation>Max Log Rotating File Count</translation>
+    </message>
+    <message>
+        <source>最大单个文件大小（MB）</source>
+        <translation>Max Single Log File Size(MB)</translation>
+    </message>
+    <message>
+        <source>自动flush时间间隔（s）</source>
+        <translation>Auto Flush Log Interval(s)</translation>
+    </message>
+    <message>
+        <source>扩展根路径</source>
+        <translation>Plugins Root Path</translation>
+    </message>
+    <message>
+        <source>WxBot端Plugin执行命令超时时长（ms）</source>
+        <translation>Plugin LongTask Timeout(ms)</translation>
+    </message>
+    <message>
+        <source>Command执行结果日志最大行数</source>
+        <translation>Max Command Execute Result Log Line</translation>
+    </message>
+    <message>
+        <source>Command历史记录最大条数</source>
+        <translation>Max Command History Line</translation>
+    </message>
+    <message>
+        <source>Command历史持久化记录条数</source>
+        <translation>Max Command History Persistence Line</translation>
+    </message>
+    <message>
+        <source>特征文件根路径</source>
+        <translation>Feature Root Path</translation>
+    </message>
+    <message>
+        <source>特征库根URL</source>
+        <translation>Feature Repository URL</translation>
+    </message>
+    <message>
+        <source>特征库版本时间戳</source>
+        <translation>Feature Version Timestamp</translation>
+    </message>
+    <message>
+        <source>屏蔽“WeChat消息撤回”</source>
+        <translation>Avoid WeChat Revoke Message</translation>
+    </message>
+    <message>
+        <source>Hook原始WeChat消息，对应receive_raw_message Plugin事件（阻塞处理）</source>
+        <translation>Enable WeChat Raw Message Hook(block)</translation>
+    </message>
+    <message>
+        <source>Hook发送文本消息，对应send_text_message Plugin事件（阻塞处理）</source>
+        <translation>Enable WeChat Send Text Message Hook(block)</translation>
+    </message>
+    <message>
+        <source>WeChat安装路径</source>
+        <translation>WeChat Installation Path</translation>
+    </message>
+    <message>
+        <source>WeChat核心模块路径</source>
+        <translation>WeChat CoreModule Path</translation>
+    </message>
+    <message>
+        <source>WeChat进程状态刷新间隔（ms）</source>
+        <translation>Client Status Update Interval(ms)</translation>
+    </message>
+</context>
+<context>
+    <name>WxBoxSettingDialog_xstylewindow</name>
+    <message>
+        <source>Setting</source>
+        <translation>WxBox Setting</translation>
+    </message>
+    <message>
+        <source>Choice WeChat Installation Path</source>
+        <translation>Choice WeChat Installation Path</translation>
+    </message>
+    <message>
+        <source>Choice WeChat Core Module Path</source>
+        <translation>Choice WeChat Core Module Path</translation>
+    </message>
+    <message>
+        <source>Need Restart WxBox To Apply All Change</source>
+        <translation>Need Restart WxBox To Apply All Change</translation>
+    </message>
+    <message>
+        <source>Change WxBox Server Port Must Restart WxBox. Otherwise, The Newly WxBox Client Cannot Be Connected</source>
+        <translation>Change WxBox Server Port Must Restart WxBox. Otherwise, The Newly WxBox Client Cannot Be Connected</translation>
     </message>
 </context>
 <context>

@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget* parent)
   , config(AppConfig::singleton())
   , aboutDialog(this)
   , downloadDialog(this)
+  , settingDialog(this)
   , contactListDialog(this)
   , appMenu("AppMenu", this)
   , appTray(this)
@@ -19,7 +20,6 @@ MainWindow::MainWindow(QWidget* parent)
   , controller(this)
 {
     // setup xstyle ui
-    qApp->setStyle(QStyleFactory::create("Fusion"));
     SetupXStyleUi(ui);
     SetWindowTitle(Translate(WXBOX_MAIN_WINDOW_TITLE));
 
@@ -72,6 +72,29 @@ bool MainWindow::CheckSystemVersionSupported()
     return false;
 }
 
+void MainWindow::ModifySetting(int tabIndex)
+{
+    if (settingDialog.ModifySetting(tabIndex) && WXBOX_INFORMATION_YES_NO(Translate("Restart WxBox To Apply Setting Changed?"))) {
+        //
+        // trigger restart WxBox
+        //
+
+        quit();
+
+        while (readyForCloseCounter) {
+            QApplication::processEvents();
+            QThread::msleep(10);
+        }
+
+        qApp->exit(WXBOX_RESTART_STATUS_CODE);
+    }
+}
+
+void MainWindow::RequestWeChatInstallationPathSetting()
+{
+    settingDialog.ModifySetting(3);
+}
+
 void MainWindow::UpdateWeChatFeatures()
 {
     downloadDialog.BeginMission();
@@ -114,6 +137,57 @@ void MainWindow::UpdateWeChatFeatures()
     controller.ReloadFeatures();
 }
 
+void MainWindow::SettingChanged(const QString& name, const QVariant& newValue)
+{
+#define BEGIN_SETTING_MODIFY_CHECK(SETTING_NAME, MODIFY_METHOD, VALUE) \
+    if (!name.compare(SETTING_NAME)) {                                 \
+        MODIFY_METHOD(VALUE);                                          \
+    }
+
+#define NEXT_SETTING_MODIFY_CHECK(SETTING_NAME, VALUE_TYPE, MODIFY_METHOD) \
+    else if (!name.compare(SETTING_NAME))                                  \
+    {                                                                      \
+        MODIFY_METHOD(newValue.value<VALUE_TYPE>());                       \
+    }
+
+#define NEXT_ENUM_SETTING_MODIFY_CHECK(SETTING_NAME, VALUE_TYPE, ENUM_TYPE, MODIFY_METHOD) \
+    else if (!name.compare(SETTING_NAME))                                                  \
+    {                                                                                      \
+        MODIFY_METHOD((ENUM_TYPE)newValue.value<VALUE_TYPE>());                            \
+    }
+
+#define NEXT_STD_STRING_SETTING_MODIFY_CHECK(SETTING_NAME, MODIFY_METHOD) \
+    else if (!name.compare(SETTING_NAME))                                 \
+    {                                                                     \
+        MODIFY_METHOD(newValue.value<QString>().toStdString());           \
+    }
+
+    BEGIN_SETTING_MODIFY_CHECK("WxBoxServerPort", ChangeWxBoxServerURI, QString("localhost:%1").arg(newValue.value<QString>()).toStdString())
+    NEXT_SETTING_MODIFY_CHECK("WxBoxClientReconnectInterval", int, ChangeWxBoxClientReconnectInterval)
+    NEXT_SETTING_MODIFY_CHECK("CloseIsMinimizeToTray", bool, TurnCloseIsMinimizeToTray)
+    NEXT_SETTING_MODIFY_CHECK("AlwaysTopMost", bool, TurnAlwaysTopMost)
+    NEXT_SETTING_MODIFY_CHECK("LoadingIconAnimationUseCache", bool, SetUseLoadingIconAnimationCache)
+    NEXT_ENUM_SETTING_MODIFY_CHECK("LoadingIconType", int, WindowLoadingIconType, SetWindowLoadingIconType)
+    NEXT_SETTING_MODIFY_CHECK("Language", QString, xstyle_manager.ChangeLanguage)
+    NEXT_SETTING_MODIFY_CHECK("Theme", QString, xstyle_manager.ChangeTheme)
+    NEXT_SETTING_MODIFY_CHECK("CoreDumpPrefix", QString, ChangeDumpPrefix)
+    NEXT_STD_STRING_SETTING_MODIFY_CHECK("LogBasename", config.change_log_name)
+    NEXT_SETTING_MODIFY_CHECK("LogMaxRotatingFileCount", int, config.change_log_max_rotating_file_count)
+    NEXT_SETTING_MODIFY_CHECK("LogMaxSingleFileSize", int, config.change_log_max_single_file_size)
+    NEXT_SETTING_MODIFY_CHECK("LogAutoFlushInterval", int, config.change_log_auto_flush_interval_sec)
+    NEXT_SETTING_MODIFY_CHECK("PluginLongTaskTimeout", int, ChangePluginLongTaskTimeout)
+    NEXT_SETTING_MODIFY_CHECK("PluginLogMaxLine", int, config.change_plugin_log_max_line)
+    NEXT_SETTING_MODIFY_CHECK("PluginCommandMaxHistoryLine", int, ChangePluginCommandMaxHistoryLine)
+    NEXT_SETTING_MODIFY_CHECK("PluginCommandMaxHistoryPersistenceLine", int, config.change_plugin_command_max_history_persistence_line)
+    NEXT_STD_STRING_SETTING_MODIFY_CHECK("FeatureRepoRootURL", config.change_features_repo_root_url)
+    NEXT_SETTING_MODIFY_CHECK("AvoidRevokeMessage", bool, TurnAvoidRevokeMessage)
+    NEXT_SETTING_MODIFY_CHECK("EnableRawMessageHook", bool, TurnEnableRawMessageHook)
+    NEXT_SETTING_MODIFY_CHECK("EnableSendTextMessageHook", bool, TurnEnableSendTextMessageHook)
+    NEXT_STD_STRING_SETTING_MODIFY_CHECK("WeChatInstallationPath", controller.ChangeWeChatInstallationPath)
+    NEXT_STD_STRING_SETTING_MODIFY_CHECK("WeChatCoreModulePath", controller.ChangeWeChatCoreModulePath)
+    NEXT_SETTING_MODIFY_CHECK("ClientStatusUpdateInterval", int, controller.ChangeWeChatStatusMonitorInterval)
+}
+
 void MainWindow::AppendExecuteCommandResult(const QString& result)
 {
     if (result.isEmpty()) {
@@ -138,6 +212,14 @@ void MainWindow::ClearCommandResultScreen()
     ui->viewCommandExecuteLogger->clear();
 }
 
+void MainWindow::ChangePluginCommandMaxHistoryLine(int maxLine)
+{
+    if (config.plugin_command_max_history_line() != maxLine) {
+        config.change_plugin_command_max_history_line(maxLine);
+        ui->lineCommand->SetMaxHistoryLine(maxLine);
+    }
+}
+
 void MainWindow::OnBeginMission()
 {
     XSTYLE_WINDOW_CLASS::OnBeginMission();
@@ -153,7 +235,7 @@ void MainWindow::OnCloseMission()
 void MainWindow::InitAppMenu()
 {
     // application menu
-    appMenu.pushAction("Setting");
+    appMenu.pushAction("Setting", &settingDialog, std::bind(&MainWindow::ModifySetting, this, 0));
     appMenu.pushSeparator();
     appMenu.pushAction("Visit Repository", this, std::bind(&QDesktopServices::openUrl, QUrl(WXBOX_REPOSITORY_URL)));
     appMenu.pushAction("About WxBox", &aboutDialog, std::bind(&AboutWxBoxDialog::showApplicationModal, &aboutDialog));
@@ -218,10 +300,22 @@ void MainWindow::InitWidget()
     ui->lineCommand->SetMaxHistoryLine(config.plugin_command_max_history_line());
     ui->lineCommand->LoadHistory(config.load_plugin_command_history());
     ui->lineCommand->setEnabled(false);
+
+    //
+    // setting dialog
+    //
+
+    settingDialog.InitWidgets();
 }
 
 void MainWindow::RegisterWidgetEventHandler()
 {
+    //
+    // setting dialog
+    //
+
+    settingDialog.RegisterSettingChangedHandler(std::bind(&MainWindow::SettingChanged, this, std::placeholders::_1, std::placeholders::_2));
+
     //
     // wechat status table view
     //
@@ -345,34 +439,13 @@ void MainWindow::RegisterWidgetEventHandler()
         ui->lineCommand->clear();
     });
 
+    //
+    // only for test
+    //
+
     QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
     QObject::connect(ui->btnUpdateFeatureRepository, &QPushButton::clicked, this, &MainWindow::UpdateWeChatFeatures);
     QObject::connect(ui->btnStartWeChat, &QPushButton::clicked, &this->controller, &WxBoxController::StartWeChatInstance);
-
-    ui->closeIsMinimizeTray->setChecked(config.close_is_minimize_to_tray());
-    QObject::connect(ui->closeIsMinimizeTray, &QCheckBox::stateChanged, this, [this](int state) {
-        TurnCloseIsMinimizeToTray(state == Qt::Checked);
-    });
-
-    ui->topMost->setChecked(config.always_top_most());
-    QObject::connect(ui->topMost, &QCheckBox::stateChanged, this, [this](int state) {
-        TurnAlwaysTopMost(state == Qt::Checked);
-    });
-
-    ui->avoidRevokeMessage->setChecked(config.wechat_avoid_revoke_message());
-    QObject::connect(ui->avoidRevokeMessage, &QCheckBox::stateChanged, this, [this](int state) {
-        TurnAvoidRevokeMessage(state == Qt::Checked);
-    });
-
-    ui->enableRawMessageHook->setChecked(config.wechat_enable_raw_message_hook());
-    QObject::connect(ui->enableRawMessageHook, &QCheckBox::stateChanged, this, [this](int state) {
-        TurnEnableRawMessageHook(state == Qt::Checked);
-    });
-
-    ui->enableSendTextMessageHook->setChecked(config.wechat_enable_send_text_message_hook());
-    QObject::connect(ui->enableSendTextMessageHook, &QCheckBox::stateChanged, this, [this](int state) {
-        TurnEnableSendTextMessageHook(state == Qt::Checked);
-    });
 
     QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
         xstyle_manager.ChangeLanguage("en");
@@ -401,17 +474,22 @@ void MainWindow::RegisterWidgetEventHandler()
         //controller.ChangeWeChatStatusMonitorInterval(2000);
         /*controller.StopWeChatStatusMonitor();
         wxStatusModel.clear();*/
+
+        ModifySetting();
     });
     QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
         //UpdateWeChatFeatures();
         //xstyle_manager.ChangeLanguage("en");
 
-        WXBOT_LOG_INFO("hello {}", "information");
+        xstyle::information(this, "information", "change to chinese and GreenTheme");
+        xstyle::information(nullptr, "information", "change to chinese and GreenTheme");
+
+        /*  WXBOT_LOG_INFO("hello {}", "information");
         WXBOT_LOG_WARNING("hello {}", "warning");
         WXBOT_LOG_ERROR("hello {}", "error");
         WXBOX_LOG_INFO_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", "information");
         WXBOX_LOG_WARNING_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", "warning");
-        WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", " error");
+        WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", " error");*/
     });
 }
 

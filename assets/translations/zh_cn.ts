@@ -221,6 +221,14 @@
         <source>Client not connected</source>
         <translation>客户端的WxBot未与WxBox连接</translation>
     </message>
+    <message>
+        <source>Restart WxBox To Apply Setting Changed?</source>
+        <translation>是否重启WxBox让设置生效？</translation>
+    </message>
+    <message>
+        <source>WxBox is Minimized To Tray</source>
+        <translation>WxBox已最小化到托盘</translation>
+    </message>
 </context>
 <context>
     <name>WxBoxController</name>
@@ -356,6 +364,192 @@
     <message>
         <source>WXID</source>
         <translation>WXID</translation>
+    </message>
+</context>
+<context>
+    <name>WxBoxSettingDialog</name>
+    <message>
+        <source>确认</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <source>取消</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>应用</source>
+        <translation>应用</translation>
+    </message>
+    <message>
+        <source>常规</source>
+        <translation>常规</translation>
+    </message>
+    <message>
+        <source>窗口</source>
+        <translation>窗口</translation>
+    </message>
+    <message>
+        <source>语言与样式</source>
+        <translation>语言与样式</translation>
+    </message>
+    <message>
+        <source>日志</source>
+        <translation>日志</translation>
+    </message>
+    <message>
+        <source>特征库</source>
+        <translation>特征库</translation>
+    </message>
+    <message>
+        <source>特性开关</source>
+        <translation>特性开关</translation>
+    </message>
+    <message>
+        <source>WeChat基础信息</source>
+        <translation>WeChat基础信息</translation>
+    </message>
+    <message>
+        <source>WeChat状态监控</source>
+        <translation>WeChat状态监控</translation>
+    </message>
+    <message>
+        <source>WxBox Client 重连尝试间隔（ms）</source>
+        <translation>WxBox Client 重连尝试间隔（ms）</translation>
+    </message>
+    <message>
+        <source>关闭窗口为最小化到托盘</source>
+        <translation>关闭窗口为最小化到托盘</translation>
+    </message>
+    <message>
+        <source>WxBox窗口总是在最顶层</source>
+        <translation>WxBox窗口总是在最顶层</translation>
+    </message>
+    <message>
+        <source>为WxBox窗口Loading图标动画启用缓存</source>
+        <translation>为WxBox窗口Loading图标动画启用缓存</translation>
+    </message>
+    <message>
+        <source>WxBox窗口Loading图标动画类型</source>
+        <translation>WxBox窗口Loading图标动画类型</translation>
+    </message>
+    <message>
+        <source>i18n根路径</source>
+        <translation>i18n根路径</translation>
+    </message>
+    <message>
+        <source>语言</source>
+        <translation>语言</translation>
+    </message>
+    <message>
+        <source>主题根路径</source>
+        <translation>主题根路径</translation>
+    </message>
+    <message>
+        <source>窗口样式</source>
+        <translation>窗口样式</translation>
+    </message>
+    <message>
+        <source>转储文件根路径</source>
+        <translation>转储文件根路径</translation>
+    </message>
+    <message>
+        <source>转储文件前缀</source>
+        <translation>转储文件前缀</translation>
+    </message>
+    <message>
+        <source>日志路径</source>
+        <translation>日志路径</translation>
+    </message>
+    <message>
+        <source>最大Rotating文件数目</source>
+        <translation>最大Rotating文件数目</translation>
+    </message>
+    <message>
+        <source>最大单个文件大小（MB）</source>
+        <translation>最大单个文件大小（MB）</translation>
+    </message>
+    <message>
+        <source>自动flush时间间隔（s）</source>
+        <translation>自动flush时间间隔（s）</translation>
+    </message>
+    <message>
+        <source>扩展根路径</source>
+        <translation>扩展根路径</translation>
+    </message>
+    <message>
+        <source>WxBot端Plugin执行命令超时时长（ms）</source>
+        <translation>WxBot端Plugin执行命令超时时长（ms）</translation>
+    </message>
+    <message>
+        <source>Command执行结果日志最大行数</source>
+        <translation>Command执行结果日志最大行数</translation>
+    </message>
+    <message>
+        <source>Command历史记录最大条数</source>
+        <translation>Command历史记录最大条数</translation>
+    </message>
+    <message>
+        <source>Command历史持久化记录条数</source>
+        <translation>Command历史持久化记录条数</translation>
+    </message>
+    <message>
+        <source>特征文件根路径</source>
+        <translation>特征文件根路径</translation>
+    </message>
+    <message>
+        <source>特征库根URL</source>
+        <translation>特征库根URL</translation>
+    </message>
+    <message>
+        <source>特征库版本时间戳</source>
+        <translation>特征库版本时间戳</translation>
+    </message>
+    <message>
+        <source>屏蔽“WeChat消息撤回”</source>
+        <translation>屏蔽“WeChat消息撤回”</translation>
+    </message>
+    <message>
+        <source>Hook原始WeChat消息，对应receive_raw_message Plugin事件（阻塞处理）</source>
+        <translation>Hook原始WeChat消息，对应receive_raw_message Plugin事件（阻塞处理）</translation>
+    </message>
+    <message>
+        <source>Hook发送文本消息，对应send_text_message Plugin事件（阻塞处理）</source>
+        <translation>Hook发送文本消息，对应send_text_message Plugin事件（阻塞处理）</translation>
+    </message>
+    <message>
+        <source>WeChat安装路径</source>
+        <translation>WeChat安装路径</translation>
+    </message>
+    <message>
+        <source>WeChat核心模块路径</source>
+        <translation>WeChat核心模块路径</translation>
+    </message>
+    <message>
+        <source>WeChat进程状态刷新间隔（ms）</source>
+        <translation>WeChat进程状态刷新间隔（ms）</translation>
+    </message>
+</context>
+<context>
+    <name>WxBoxSettingDialog_xstylewindow</name>
+    <message>
+        <source>Setting</source>
+        <translation>WxBox 设置</translation>
+    </message>
+    <message>
+        <source>Choice WeChat Installation Path</source>
+        <translation>选择WeChat安装路径</translation>
+    </message>
+    <message>
+        <source>Choice WeChat Core Module Path</source>
+        <translation>选择WeChat核心模块所在路径</translation>
+    </message>
+    <message>
+        <source>Need Restart WxBox To Apply All Change</source>
+        <translation>部分设置需要重新启动WxBox才能生效</translation>
+    </message>
+    <message>
+        <source>Change WxBox Server Port Must Restart WxBox. Otherwise, The Newly WxBox Client Cannot Be Connected</source>
+        <translation>修改了WxBox Server的端口号后需要重启WxBox，否则无法连接新WxBox Client</translation>
     </message>
 </context>
 <context>

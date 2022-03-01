@@ -4,10 +4,6 @@
 
 #define _wctr(MESSAGE) Translate(MESSAGE)
 
-static wb_process::PID last_client_pid = 0;
-static uint64_t        total_clients   = 0;
-static uint64_t        current_clients = 0;
-
 WxBoxController::WxBoxController(MainWindow* view)
   : QObject(reinterpret_cast<QObject*>(view))
   , config(AppConfig::singleton())
@@ -92,8 +88,23 @@ void WxBoxController::ChangeWeChatStatusMonitorInterval(int interval)
     StartWeChatStatusMonitor();
 }
 
+void WxBoxController::ChangeWeChatInstallationPath(const std::string& path)
+{
+    config.change_wechat_installation_dir(path);
+    LoadWeChatEnvironmentInfo();
+}
+
+void WxBoxController::ChangeWeChatCoreModulePath(const std::string& path)
+{
+    config.change_wechat_module_dir(path);
+    LoadWeChatEnvironmentInfo();
+}
+
 void WxBoxController::LoadWeChatEnvironmentInfo()
 {
+    wxEnvInfo.installPath.clear();
+    wxEnvInfo.moduleFolderAbsPath.clear();
+
     if (wb_wx::ResolveWxEnvInfo(config.wechat_installation_dir(), config.wechat_module_dir(), wxEnvInfo)) {
         return;
     }
@@ -111,9 +122,11 @@ bool WxBoxController::RequireValidWeChatEnvironmentInfo()
     }
 
     // Supplement the dialog box to specify a valid installation path
-    // ...
+    xstyle::warning(view, "", WBC_TRANSMESSAGE(WBCErrorCode::INVALID_WECHAT_ENV_INFO));
+    view->RequestWeChatInstallationPathSetting();
 
-    return false;
+    // recheck
+    return wb_wx::IsWxInstallationPathValid(wxEnvInfo.installPath, wxEnvInfo.moduleFolderAbsPath);
 }
 
 void WxBoxController::ReloadFeatures()
@@ -128,7 +141,6 @@ bool WxBoxController::StartWeChatInstance()
 
     // verify wechat environment info
     if (!RequireValidWeChatEnvironmentInfo()) {
-        xstyle::warning(view, "", WBC_TRANSMESSAGE(WBCErrorCode::INVALID_WECHAT_ENV_INFO));
         view->CloseMission();
         return false;
     }
@@ -551,21 +563,10 @@ void WxBoxController::WxBoxServerEvent(wxbox::WxBoxMessage message)
             RequestInjectArgs(message.pid);
             RequestProfile(message.pid);
             UpdateClientStatus(message.pid);
-
-            // only for test
-            last_client_pid = message.pid;
-            total_clients++;
-            current_clients++;
-            view->SetWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
             break;
 
         case wxbox::WxBoxMessageType::WxBoxClientDone:
             UpdateClientStatus(message.pid);
-
-            // only for test
-            last_client_pid = 0;
-            current_clients--;
-            view->SetWindowTitle(QString("total client count : <%1>, active client count : <%2>").arg(total_clients).arg(current_clients));
             break;
 
         case wxbox::WxBoxMessageType::WxBotRequestOrResponse: {
@@ -706,6 +707,9 @@ void WxBoxController::RequestChangeConfig()
     changeConfigRequest->set_avoidrevokemessage(config.wechat_avoid_revoke_message());
     changeConfigRequest->set_enablerawmessagehook(config.wechat_enable_raw_message_hook());
     changeConfigRequest->set_enablesendtextmessagehook(config.wechat_enable_send_text_message_hook());
+    changeConfigRequest->set_wxboxclientreconnectinterval(config.wxbox_client_reconnect_interval());
+    changeConfigRequest->set_pluginlongtasktimeout(config.plugin_long_task_timeout());
+    changeConfigRequest->set_serveruri(config.wxbox_server_uri());
 
     for (const auto& client : clientInjectArgs) {
         msg.pid = client.first;

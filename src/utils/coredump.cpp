@@ -381,6 +381,12 @@ bool wxbox::util::coredump::RegisterUnhandledExceptionAutoDumper(const std::stri
     return g_alreadyRegistered;
 }
 
+void wxbox::util::coredump::ChangeDumpePrefix(const std::string& prefix)
+{
+    std::lock_guard<std::mutex> lock(g_mutexHandleUnhandleException);
+    g_dumpPrefix = prefix;
+}
+
 void wxbox::util::coredump::ChangeDumperLanguage(const std::string& language)
 {
     std::lock_guard<std::mutex> lock(g_mutexHandleUnhandleException);

@@ -39,13 +39,16 @@
 #include <about.h>
 #include <download_dialog.h>
 #include <contact_list_dialog.h>
+#include <setting_dialog.h>
 #include <wxbox_client_status_model.h>
+
+#define WXBOX_RESTART_STATUS_CODE 0x4325145
 
 #define SHOW_SPLASH_SCREEN()                                                   \
     QSplashScreen* splash = new QSplashScreen(QPixmap(":/splash_screen.png")); \
-    splash->setStyleSheet(R"(font: normal bold 14px "Microsoft YaHei";)");     \
+    splash->setStyleSheet(R"(font: normal bold 16px "Microsoft YaHei";)");     \
     splash->show();
-#define SPLASH_MESSAGE(MESSAGE) splash->showMessage(xstyle_manager.Translate("SplashScreen", MESSAGE), Qt::AlignCenter | Qt::AlignBottom, Qt::lightGray);
+#define SPLASH_MESSAGE(MESSAGE) splash->showMessage(xstyle_manager.Translate("SplashScreen", MESSAGE), Qt::AlignHCenter | Qt::AlignBottom, Qt::lightGray);
 #define SPLASH_FINISH(PWIDGET)   \
     {                            \
         splash->finish(&window); \
@@ -53,12 +56,32 @@
         splash = nullptr;        \
     }
 
+#define WXBOX_INFORMATION_YES_NO(MESSAGE) (xstyle::information(this, "", MESSAGE, XStyleMessageBoxButtonType::YesNo) == XStyleMessageBoxButton::Yes)
+
 #ifdef WXBOX_XSTYLE_QUICK
 #define XSTYLE_WINDOW_CLASS XStyleQuickWindow
 #define WXBOX_QUICK_UI_URL "qrc:/wxbox/wxbox_quick_ui.qml"
 #else
 #define XSTYLE_WINDOW_CLASS XStyleWindow
 #endif
+
+#define DEFINE_CONTROLLER_CONFIG_MODIFIER(METHOD_NAME, TYPE_NAME, GETTER, SETTER) \
+    inline void METHOD_NAME(const TYPE_NAME& v)                                   \
+    {                                                                             \
+        if (GETTER() != v) {                                                      \
+            SETTER(v);                                                            \
+            controller.RequestChangeConfig();                                     \
+        }                                                                         \
+    }
+
+#define DEFINE_CONTROLLER_STRING_CONFIG_MODIFIER(METHOD_NAME, TYPE_NAME, GETTER, SETTER) \
+    inline void METHOD_NAME(const TYPE_NAME& v)                                          \
+    {                                                                                    \
+        if (GETTER().compare(v)) {                                                       \
+            SETTER(v);                                                                   \
+            controller.RequestChangeConfig();                                            \
+        }                                                                                \
+    }
 
 namespace Ui {
     class MainWindowBody;
@@ -87,9 +110,13 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     ~MainWindow();
 
     bool CheckSystemVersionSupported();
+    void ModifySetting(int tabIndex = 0);
+    void RequestWeChatInstallationPathSetting();
     void UpdateWeChatFeatures();
+    void SettingChanged(const QString& name, const QVariant& newValue);
     void AppendExecuteCommandResult(const QString& result);
     void ClearCommandResultScreen();
+    void ChangePluginCommandMaxHistoryLine(int maxLine);
 
     bool InitWxBox(QSplashScreen* splash);
     bool DeinitWxBox();
@@ -103,6 +130,11 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     virtual bool BeforeClose() Q_DECL_OVERRIDE
     {
         return DeinitWxBox();
+    }
+
+    virtual void MinimizedToTray() Q_DECL_OVERRIDE
+    {
+        this->appTray.showMessage("", Translate("WxBox is Minimized To Tray"), QSystemTrayIcon::NoIcon, 3000);
     }
 
     virtual void RetranslateUi() Q_DECL_OVERRIDE
@@ -133,11 +165,21 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         wxStatusModel.applyTheme(statusIcons, loginStatusIcons);
     }
 
+    inline void ChangeDumpPrefix(const QString& prefix)
+    {
+        auto newPrefix = prefix.toStdString();
+        config.change_coredump_prefix(newPrefix);
+        wb_coredump::ChangeDumpePrefix(newPrefix);
+    }
+
     virtual void TurnCloseIsMinimizeToTray(bool toTray) Q_DECL_OVERRIDE
     {
         XSTYLE_WINDOW_CLASS::TurnCloseIsMinimizeToTray(toTray);
         if (config.close_is_minimize_to_tray() != toTray) {
             config.change_close_is_minimize_to_tray(toTray);
+            if (!toTray && isHidden()) {
+                show();
+            }
         }
         qApp->setQuitOnLastWindowClosed(!toTray);
     }
@@ -150,29 +192,12 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         }
     }
 
-    void TurnAvoidRevokeMessage(bool avoid)
-    {
-        if (config.wechat_avoid_revoke_message() != avoid) {
-            config.change_wechat_avoid_revoke_message(avoid);
-            controller.RequestChangeConfig();
-        }
-    }
-
-    void TurnEnableRawMessageHook(bool enabled)
-    {
-        if (config.wechat_enable_raw_message_hook() != enabled) {
-            config.change_wechat_enable_raw_message_hook(enabled);
-            controller.RequestChangeConfig();
-        }
-    }
-
-    void TurnEnableSendTextMessageHook(bool enabled)
-    {
-        if (config.wechat_enable_send_text_message_hook() != enabled) {
-            config.change_wechat_enable_send_text_message_hook(enabled);
-            controller.RequestChangeConfig();
-        }
-    }
+    DEFINE_CONTROLLER_CONFIG_MODIFIER(TurnAvoidRevokeMessage, bool, config.wechat_avoid_revoke_message, config.change_wechat_avoid_revoke_message)
+    DEFINE_CONTROLLER_CONFIG_MODIFIER(TurnEnableRawMessageHook, bool, config.wechat_enable_raw_message_hook, config.change_wechat_enable_raw_message_hook)
+    DEFINE_CONTROLLER_CONFIG_MODIFIER(TurnEnableSendTextMessageHook, bool, config.wechat_enable_send_text_message_hook, config.change_wechat_enable_send_text_message_hook)
+    DEFINE_CONTROLLER_CONFIG_MODIFIER(ChangeWxBoxClientReconnectInterval, int, config.wxbox_client_reconnect_interval, config.change_wxbox_client_reconnect_interval)
+    DEFINE_CONTROLLER_CONFIG_MODIFIER(ChangePluginLongTaskTimeout, int, config.plugin_long_task_timeout, config.change_plugin_long_task_timeout)
+    DEFINE_CONTROLLER_STRING_CONFIG_MODIFIER(ChangeWxBoxServerURI, std::string, config.wxbox_server_uri, config.change_wxbox_server_uri)
 
     virtual void timerEvent(QTimerEvent* event) Q_DECL_OVERRIDE
     {
@@ -190,6 +215,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     Ui::MainWindowBody*    ui;
     AboutWxBoxDialog       aboutDialog;
     DownloadDialog         downloadDialog;
+    WxBoxSettingDialog     settingDialog;
     ContactListDialog      contactListDialog;
     XStyleMenu             appMenu;
     QSystemTrayIcon        appTray;

@@ -4,5 +4,7 @@
   </qresource>
   <qresource prefix="/">
     <file>./splash_screen.png</file>
+    <file>./image/visit.png</file>
+    <file>./image/select_folder.png</file>
   </qresource>
 </RCC>

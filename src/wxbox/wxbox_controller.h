@@ -42,6 +42,8 @@ class WxBoxController final : public QObject
     void StopWeChatStatusMonitor();
     void ChangeWeChatStatusMonitorInterval(int interval);
 
+    void ChangeWeChatInstallationPath(const std::string& path);
+    void ChangeWeChatCoreModulePath(const std::string& path);
     void LoadWeChatEnvironmentInfo();
     bool RequireValidWeChatEnvironmentInfo();
     void ReloadFeatures();

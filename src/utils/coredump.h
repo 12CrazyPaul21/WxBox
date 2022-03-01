@@ -16,6 +16,7 @@ namespace wxbox {
             //
 
             bool RegisterUnhandledExceptionAutoDumper(const std::string& dumpPrefix, const std::string& dumpSinkPath, const std::string& dumperPath, const std::string& i18nPath, const std::string& themePath, bool disabledWhenDebug = true);
+            void ChangeDumpePrefix(const std::string& prefix);
             void ChangeDumperLanguage(const std::string& language);
             void ChangeTheme(const std::string& themeName);
             void RegisterExceptionExitCallback(ExceptionExitCallback callback);

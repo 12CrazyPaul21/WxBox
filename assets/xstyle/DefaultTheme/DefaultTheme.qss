@@ -118,3 +118,7 @@ QMenu::right-arrow:selected {
 #viewWeChatStatus::item:selected:!active {
     selection-background-color: rgb(51, 133, 255);
 }
+
+#WxBoxSettingDialog_body_container * {
+    font-family: "Microsoft YaHei";
+}

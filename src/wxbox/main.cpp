@@ -1,19 +1,30 @@
 #include <mainwindow.h>
 
-static void ExitHandler()
+static int g_wxbox_exit_code = 0;
+
+static inline void CleanEnvironment()
 {
     google::protobuf::ShutdownProtobufLibrary();
     spdlog::drop_all();
     AppConfig::singleton().submit();
 }
 
-static void ExceptionExitHandler()
+static void ExitHandler()
 {
-    spdlog::error("wxbox is crash");
-    ExitHandler();
+    if (g_wxbox_exit_code == WXBOX_RESTART_STATUS_CODE) {
+        return;
+    }
+
+    CleanEnvironment();
 }
 
-int main(int argc, char* argv[])
+static void ExceptionExitHandler()
+{
+    spdlog::error("WxBox is Crash...");
+    CleanEnvironment();
+}
+
+int WxBoxMain(int argc, char* argv[])
 {
     wb_process::AppSingleton singleton("WxBox_App", true);
 
@@ -62,6 +73,7 @@ int main(int argc, char* argv[])
     //
 
     SPLASH_MESSAGE("Instantiation Main Window");
+    qApp->setStyle(QStyleFactory::create("Fusion"));
     MainWindow window;
 
     SPLASH_MESSAGE("Check System Version Supported");
@@ -82,4 +94,25 @@ int main(int argc, char* argv[])
 
     SPLASH_FINISH(&window);
     return app.exec();
+}
+
+int main(int argc, char* argv[])
+{
+    g_wxbox_exit_code = WxBoxMain(argc, argv);
+
+    if (g_wxbox_exit_code == WXBOX_RESTART_STATUS_CODE) {
+        CleanEnvironment();
+
+        //
+        // restart wxbox
+        //
+
+        QStringList args;
+        for (int i = 1; i < argc; i++) {
+            args << argv[i];
+        }
+        QProcess::startDetached(argv[0], args);
+    }
+
+    return g_wxbox_exit_code;
 }

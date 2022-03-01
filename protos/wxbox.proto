@@ -97,6 +97,9 @@ message ChangeConfigRequest {
     bool avoidRevokeMessage = 1;
     bool enableRawMessageHook = 2;
     bool enableSendTextMessageHook = 3;
+    uint32 wxboxClientReconnectInterval = 4;
+    uint32 pluginLongTaskTimeout = 5;
+    string serverURI = 6;
 }
 
 message WxBotControlPacket {
