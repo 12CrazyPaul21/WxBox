@@ -94,8 +94,8 @@ TEST(wxbox_utils, string)
     std::string  str1 = "from string";
     std::wstring str2 = L"from wstring";
 
-    EXPECT_EQ(0, wb_string::ToWString(str1).compare(L"from string"));
-    EXPECT_EQ(0, wb_string::ToString(str2).compare("from wstring"));
+    EXPECT_EQ(0, wb_string::ToUtf8WString(str1).compare(L"from string"));
+    EXPECT_EQ(0, wb_string::ToUtf8String(str2).compare("from wstring"));
 }
 
 TEST(wxbox_utils, process)

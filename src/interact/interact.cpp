@@ -65,14 +65,39 @@ int main(int argc, char* argv[])
                     break;
                 }
 
-                if (pPluginToHost->hostEvent->type == wb_plugin::HostEventType::SendTextMesage) {
-                    std::cout << "host event type : <SendTextMesage>" << std::endl;
-                    std::cout << "    send to : " << pPluginToHost->hostEvent->wxid << std::endl;
-                    std::cout << "    text message : " << pPluginToHost->hostEvent->textMessage << std::endl;
+                if (pPluginToHost->hostEvent->type == wb_plugin::HostEventType::SendMesage) {
+                    auto sendMessageArgs = pPluginToHost->hostEvent->sendMessageArgs;
+                    if (!sendMessageArgs) {
+                        break;
+                    }
 
-                    auto command         = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::SendWxChatTextMessage>();
-                    command->wxid        = pPluginToHost->hostEvent->wxid;
-                    command->textMessage = pPluginToHost->hostEvent->textMessage;
+                    std::cout << "host event type : <SendMesage>" << std::endl;
+                    std::cout << "    message type : " << sendMessageArgs->messageType << std::endl;
+                    std::cout << "    is chatroom : " << sendMessageArgs->chatroom << std::endl;
+                    std::cout << "    use wxnumber : " << sendMessageArgs->useWxNumber << std::endl;
+                    std::cout << "    wxid : " << sendMessageArgs->wxid << std::endl;
+                    std::cout << "    wxnumber : " << sendMessageArgs->wxnumber << std::endl;
+                    std::cout << "    message : " << sendMessageArgs->message << std::endl;
+                    std::cout << "    image file path : " << sendMessageArgs->imgPath << std::endl;
+                    std::cout << "    file path : " << sendMessageArgs->filePath << std::endl;
+                    std::cout << "    notify list : " << std::endl;
+                    for (auto notify : sendMessageArgs->notifyWxidLists) {
+                        std::cout << "        " << notify << std::endl;
+                    }
+
+                    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+                    command->event = wb_plugin::BuildPluginEventModel();
+                    if (!command->event) {
+                        return;
+                    }
+
+                    command->event->type               = wb_plugin::PluginEventType::ReceiveTextMessage;
+                    command->event->pData1             = nullptr;
+                    command->event->messageType        = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
+                    command->event->wxid               = "fake_wxid";
+                    command->event->message            = "message";
+                    command->event->chatroomTalkerWxid = "im";
+
                     wb_plugin::PushPluginVirtualMachineCommand(command);
                     command->signal.get_future().wait();
                 }

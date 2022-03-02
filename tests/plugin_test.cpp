@@ -385,10 +385,41 @@ TEST(wxbox_plugin, text_message_handler)
                 EXPECT_NE(nullptr, pPluginToHost);
                 EXPECT_NE(nullptr, pPluginToHost->hostEvent);
 
-                if (pPluginToHost->hostEvent->type == wb_plugin::HostEventType::SendTextMesage) {
-                    std::cout << "host event type : <SendTextMesage>" << std::endl;
-                    std::cout << "    send to : " << pPluginToHost->hostEvent->wxid << std::endl;
-                    std::cout << "    text message : " << pPluginToHost->hostEvent->textMessage << std::endl;
+                if (pPluginToHost->hostEvent->type == wb_plugin::HostEventType::SendMesage) {
+                    auto sendMessageArgs = pPluginToHost->hostEvent->sendMessageArgs;
+                    if (!sendMessageArgs) {
+                        break;
+                    }
+
+                    std::cout << "host event type : <SendMesage>" << std::endl;
+                    std::cout << "    message type : " << sendMessageArgs->messageType << std::endl;
+                    std::cout << "    is chatroom : " << sendMessageArgs->chatroom << std::endl;
+                    std::cout << "    use wxnumber : " << sendMessageArgs->useWxNumber << std::endl;
+                    std::cout << "    wxid : " << sendMessageArgs->wxid << std::endl;
+                    std::cout << "    wxnumber : " << sendMessageArgs->wxnumber << std::endl;
+                    std::cout << "    message : " << sendMessageArgs->message << std::endl;
+                    std::cout << "    image file path : " << sendMessageArgs->imgPath << std::endl;
+                    std::cout << "    file path : " << sendMessageArgs->filePath << std::endl;
+                    std::cout << "    notify list : " << std::endl;
+                    for (auto notify : sendMessageArgs->notifyWxidLists) {
+                        std::cout << "        " << notify << std::endl;
+                    }
+
+                    auto command   = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+                    command->event = wb_plugin::BuildPluginEventModel();
+                    if (!command->event) {
+                        return;
+                    }
+
+                    command->event->type               = wb_plugin::PluginEventType::ReceiveTextMessage;
+                    command->event->pData1             = nullptr;
+                    command->event->messageType        = (uint32_t)wb_wx::WeChatMessageType::PLAINTEXT;
+                    command->event->wxid               = "fake_wxid";
+                    command->event->message            = "message";
+                    command->event->chatroomTalkerWxid = "im";
+
+                    wb_plugin::PushPluginVirtualMachineCommand(command);
+                    command->signal.get_future().wait();
                 }
             }
         }
@@ -401,27 +432,35 @@ TEST(wxbox_plugin, text_message_handler)
     // test case
     //
 
-    auto recvcommand         = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::ReceiveWxChatTextMessage>();
-    recvcommand->wxid        = "filehelper";
-    recvcommand->textMessage = ">>wxbox.version";
+    auto recvcommand            = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    recvcommand->event          = wb_plugin::BuildPluginEventModel();
+    recvcommand->event->type    = wb_plugin::PluginEventType::ReceiveTextMessage;
+    recvcommand->event->wxid    = "filehelper";
+    recvcommand->event->message = ">>wxbox.version";
     wb_plugin::PushPluginVirtualMachineCommand(recvcommand);
     recvcommand->signal.get_future().wait();
 
-    recvcommand              = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::ReceiveWxChatTextMessage>();
-    recvcommand->wxid        = "hape";
-    recvcommand->textMessage = ">>wxbox.version";
+    recvcommand                 = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    recvcommand->event          = wb_plugin::BuildPluginEventModel();
+    recvcommand->event->type    = wb_plugin::PluginEventType::ReceiveTextMessage;
+    recvcommand->event->wxid    = "hape";
+    recvcommand->event->message = ">>wxbox.version";
     wb_plugin::PushPluginVirtualMachineCommand(recvcommand);
     recvcommand->signal.get_future().wait();
 
-    auto sendcommand         = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::SendWxChatTextMessage>();
-    sendcommand->wxid        = "filehelper";
-    sendcommand->textMessage = ">>wxbox.version";
+    auto sendcommand            = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    sendcommand->event          = wb_plugin::BuildPluginEventModel();
+    sendcommand->event->type    = wb_plugin::PluginEventType::SendTextMessage;
+    sendcommand->event->wxid    = "filehelper";
+    sendcommand->event->message = ">>wxbox.version";
     wb_plugin::PushPluginVirtualMachineCommand(sendcommand);
     sendcommand->signal.get_future().wait();
 
-    sendcommand              = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::SendWxChatTextMessage>();
-    sendcommand->wxid        = "hape";
-    sendcommand->textMessage = "hello wxbox plugin";
+    sendcommand                 = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>();
+    sendcommand->event          = wb_plugin::BuildPluginEventModel();
+    sendcommand->event->type    = wb_plugin::PluginEventType::SendTextMessage;
+    sendcommand->event->wxid    = "hape";
+    sendcommand->event->message = "hello wxbox plugin";
     wb_plugin::PushPluginVirtualMachineCommand(sendcommand);
     sendcommand->signal.get_future().wait();
 
