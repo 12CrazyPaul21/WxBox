@@ -124,6 +124,10 @@ QMenu::right-arrow:selected {
     font: normal bold 12px "Microsoft YaHei";
 }
 
+#viewWeChatStatus QHeaderView::section {
+    background-color: rgba(200, 200, 200, 240);
+}
+
 #viewWeChatStatus::item:selected:active {
     selection-background-color: rgb(51, 133, 255);
 }
