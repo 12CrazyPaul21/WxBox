@@ -24,53 +24,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QPushButton" name="btn_about">
-        <property name="text">
-         <string>关于</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnUpdateFeatureRepository">
-        <property name="text">
-         <string>更新特征库</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnStartWeChat">
-        <property name="text">
-         <string>以多开方式启动微信</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btn_test1">
-        <property name="text">
-         <string>test1</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btn_test2">
-        <property name="text">
-         <string>test2</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btn_test3">
-        <property name="text">
-         <string>test3</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btn_test4">
-        <property name="text">
-         <string>test4</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayoutToolBar"/>
       </item>
       <item>
        <widget class="QTableView" name="viewWeChatStatus"/>
@@ -131,6 +85,112 @@
     </widget>
    </item>
   </layout>
+  <action name="actionStartWeChatInstance">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/start_wechat.png</normaloff>
+     <normalon>:/image/start_wechat.png</normalon>:/image/start_wechat.png</iconset>
+   </property>
+   <property name="text">
+    <string>StartWeChatInstance</string>
+   </property>
+   <property name="toolTip">
+    <string>Start New WeChat Instance</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionEnableAvoidRevokeMessage">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/avoid_revoke.png</normaloff>
+     <normalon>:/image/revoke.png</normalon>:/image/avoid_revoke.png</iconset>
+   </property>
+   <property name="text">
+    <string>EnableAvoidRevokeMessage</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable Avoid Revoke Message</string>
+   </property>
+  </action>
+  <action name="actionEnableRawMessageHook">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/hook.png</normaloff>
+     <normalon>:/image/hook.png</normalon>:/image/hook.png</iconset>
+   </property>
+   <property name="text">
+    <string>EnableRawMessageHook</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable Raw Message Hook</string>
+   </property>
+  </action>
+  <action name="actionEnableSendTextMessageHook">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/rev_hook.png</normaloff>
+     <normalon>:/image/rev_hook.png</normalon>:/image/rev_hook.png</iconset>
+   </property>
+   <property name="text">
+    <string>EnableSendTextMessageHook</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable Send Text Messag Hook</string>
+   </property>
+  </action>
+  <action name="actionUpdateFeatureRepository">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/update_feature.png</normaloff>
+     <normalon>:/image/update_feature.png</normalon>:/image/update_feature.png</iconset>
+   </property>
+   <property name="text">
+    <string>UpdateFeatureRepository</string>
+   </property>
+   <property name="toolTip">
+    <string>Update Feature Repository</string>
+   </property>
+  </action>
+  <action name="actionSetting">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/setting.png</normaloff>
+     <normalon>:/image/setting.png</normalon>:/image/setting.png</iconset>
+   </property>
+   <property name="text">
+    <string>Setting</string>
+   </property>
+   <property name="toolTip">
+    <string>Setting</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+,</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/about.png</normaloff>
+     <normalon>:/image/about.png</normalon>:/image/about.png</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="toolTip">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -139,6 +199,8 @@
    <header>xstyle/xstylecommandline.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../assets/wxbox.qrc"/>
+ </resources>
  <connections/>
 </ui>

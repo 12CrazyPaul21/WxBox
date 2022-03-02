@@ -18,6 +18,7 @@
 #include <QSystemTrayIcon>
 #include <QSplashScreen>
 #include <QTextEdit>
+#include <QToolBar>
 
 #undef signals
 #include <utils/common.h>
@@ -74,6 +75,19 @@
         }                                                                         \
     }
 
+#define DEFINE_CONTROLLER_CONFIG_ASSOCIATE_ACTION_MODIFIER(METHOD_NAME, TYPE_NAME, GETTER, SETTER, MASK, WARNING) \
+    inline void METHOD_NAME(const TYPE_NAME& v)                                                                   \
+    {                                                                                                             \
+        if (GETTER() != v) {                                                                                      \
+            if (v && strlen(WARNING)) {                                                                           \
+                xstyle::warning(this, "", Translate(WARNING));                                                    \
+            }                                                                                                     \
+            SETTER(v);                                                                                            \
+            SetActionEnabled(MASK, v);                                                                            \
+            controller.RequestChangeConfig();                                                                     \
+        }                                                                                                         \
+    }
+
 #define DEFINE_CONTROLLER_STRING_CONFIG_MODIFIER(METHOD_NAME, TYPE_NAME, GETTER, SETTER) \
     inline void METHOD_NAME(const TYPE_NAME& v)                                          \
     {                                                                                    \
@@ -117,6 +131,8 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
     void AppendExecuteCommandResult(const QString& result);
     void ClearCommandResultScreen();
     void ChangePluginCommandMaxHistoryLine(int maxLine);
+    void SetActionEnabled(int mask, bool enabled);
+    void RetranslateToolBar(int mask = 7);
 
     bool InitWxBox(QSplashScreen* splash);
     bool DeinitWxBox();
@@ -150,6 +166,9 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
 
         wxStatusModel.model().setHorizontalHeaderLabels(TranslateStringList(WxBoxClientStatusHeader));
         wxStatusModel.resize(false);
+
+        // toolbar's actions
+        RetranslateToolBar();
     }
 
     virtual void AfterThemeChanged(const QString& themeName) Q_DECL_OVERRIDE
@@ -204,9 +223,9 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
         }
     }
 
-    DEFINE_CONTROLLER_CONFIG_MODIFIER(TurnAvoidRevokeMessage, bool, config.wechat_avoid_revoke_message, config.change_wechat_avoid_revoke_message)
-    DEFINE_CONTROLLER_CONFIG_MODIFIER(TurnEnableRawMessageHook, bool, config.wechat_enable_raw_message_hook, config.change_wechat_enable_raw_message_hook)
-    DEFINE_CONTROLLER_CONFIG_MODIFIER(TurnEnableSendTextMessageHook, bool, config.wechat_enable_send_text_message_hook, config.change_wechat_enable_send_text_message_hook)
+    DEFINE_CONTROLLER_CONFIG_ASSOCIATE_ACTION_MODIFIER(TurnAvoidRevokeMessage, bool, config.wechat_avoid_revoke_message, config.change_wechat_avoid_revoke_message, 0x1, "")
+    DEFINE_CONTROLLER_CONFIG_ASSOCIATE_ACTION_MODIFIER(TurnEnableRawMessageHook, bool, config.wechat_enable_raw_message_hook, config.change_wechat_enable_raw_message_hook, 0x2, "If Enable Raw Message Hook, Maybe Cause WeChat Stucked")
+    DEFINE_CONTROLLER_CONFIG_ASSOCIATE_ACTION_MODIFIER(TurnEnableSendTextMessageHook, bool, config.wechat_enable_send_text_message_hook, config.change_wechat_enable_send_text_message_hook, 0x4, "")
     DEFINE_CONTROLLER_CONFIG_MODIFIER(ChangeWxBoxClientReconnectInterval, int, config.wxbox_client_reconnect_interval, config.change_wxbox_client_reconnect_interval)
     DEFINE_CONTROLLER_CONFIG_MODIFIER(ChangePluginLongTaskTimeout, int, config.plugin_long_task_timeout, config.change_plugin_long_task_timeout)
     DEFINE_CONTROLLER_STRING_CONFIG_MODIFIER(ChangeWxBoxServerURI, std::string, config.wxbox_server_uri, config.change_wxbox_server_uri)
@@ -225,6 +244,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
 
   private:
     Ui::MainWindowBody*    ui;
+    QToolBar*              toolbar;
     AboutWxBoxDialog       aboutDialog;
     DownloadDialog         downloadDialog;
     WxBoxSettingDialog     settingDialog;

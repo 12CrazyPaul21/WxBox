@@ -138,3 +138,16 @@ QMenu::right-arrow:selected {
 #AboutWxBoxDialog_body_container {
     background: rgba(255, 255, 255, 230);
 }
+
+#WxBoxToolbar::separator {
+    background: rgba(255, 255, 255, 40);
+    width: 1px;
+}
+
+#WxBoxToolbar QToolButton:hover {
+    background: rgba(100, 100, 100, 100);
+}
+
+#WxBoxToolbar QToolButton:checked {
+    background: rgba(10, 240, 10, 200);
+}

@@ -229,6 +229,53 @@
         <source>WxBox is Minimized To Tray</source>
         <translation>WxBox is Minimized To Tray</translation>
     </message>
+    <message>
+        <source>If Enable Raw Message Hook, Maybe Cause WeChat Stucked</source>
+        <translation>If Enable Raw Message Hook, Maybe Cause WeChat Stucked</translation>
+    </message>
+</context>
+<context>
+    <name>MainWindowBody</name>
+    <message>
+        <source>Start New WeChat Instance</source>
+        <translation>Start New WeChat Instance</translation>
+    </message>
+    <message>
+        <source>Enable Avoid Revoke Message</source>
+        <translation>Enable Avoid Revoke Message</translation>
+    </message>
+    <message>
+        <source>Disable Avoid Revoke Message</source>
+        <translation>Disable Avoid Revoke Message</translation>
+    </message>
+    <message>
+        <source>Enable Raw Message Hook</source>
+        <translation>Enable Raw Message Hook</translation>
+    </message>
+    <message>
+        <source>Disable Raw Message Hook</source>
+        <translation>Disable Raw Message Hook</translation>
+    </message>
+    <message>
+        <source>Enable Send Text Message Hook</source>
+        <translation>Enable Send Text Message Hook</translation>
+    </message>
+    <message>
+        <source>Disable Send Text Message Hook</source>
+        <translation>Disable Send Text Message Hook</translation>
+    </message>
+    <message>
+        <source>Update Feature Repository</source>
+        <translation>Update Feature Repository</translation>
+    </message>
+    <message>
+        <source>Setting</source>
+        <translation>Setting</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>About</translation>
+    </message>
 </context>
 <context>
     <name>WxBoxController</name>

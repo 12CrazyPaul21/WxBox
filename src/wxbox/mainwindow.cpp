@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget* parent)
   : XSTYLE_WINDOW_CLASS(WXBOX_MAIN_WINDOW_NAME, parent, false)
   , ui(new Ui::MainWindowBody)
   , config(AppConfig::singleton())
+  , toolbar(nullptr)
   , aboutDialog(this)
   , downloadDialog(this)
   , settingDialog(this)
@@ -226,16 +227,78 @@ void MainWindow::ChangePluginCommandMaxHistoryLine(int maxLine)
     }
 }
 
+void MainWindow::SetActionEnabled(int mask, bool enabled)
+{
+    if (mask & 0x1) {
+        ui->actionEnableAvoidRevokeMessage->setChecked(enabled);
+    }
+
+    if (mask & 0x2) {
+        ui->actionEnableRawMessageHook->setChecked(enabled);
+    }
+
+    if (mask & 0x4) {
+        ui->actionEnableSendTextMessageHook->setChecked(enabled);
+    }
+
+    RetranslateToolBar(mask);
+}
+
+void MainWindow::RetranslateToolBar(int mask)
+{
+    if (mask & 0x1) {
+        ui->actionEnableAvoidRevokeMessage->setToolTip(
+            xstyle_manager.Translate("MainWindowBody",
+                                     ui->actionEnableAvoidRevokeMessage->isChecked()
+                                         ? "Disable Avoid Revoke Message"
+                                         : "Enable Avoid Revoke Message"));
+    }
+
+    if (mask & 0x2) {
+        ui->actionEnableRawMessageHook->setToolTip(
+            xstyle_manager.Translate("MainWindowBody",
+                                     ui->actionEnableRawMessageHook->isChecked()
+                                         ? "Disable Raw Message Hook"
+                                         : "Enable Raw Message Hook"));
+    }
+
+    if (mask & 0x4) {
+        ui->actionEnableSendTextMessageHook->setToolTip(
+            xstyle_manager.Translate("MainWindowBody",
+                                     ui->actionEnableSendTextMessageHook->isChecked()
+                                         ? "Disable Send Text Message Hook"
+                                         : "Enable Send Text Message Hook"));
+    }
+}
+
 void MainWindow::OnBeginMission()
 {
     XSTYLE_WINDOW_CLASS::OnBeginMission();
-    ui->btnStartWeChat->setEnabled(false);
+
+    ui->actionStartWeChatInstance->setEnabled(false);
+    ui->actionEnableAvoidRevokeMessage->setEnabled(false);
+    ui->actionEnableRawMessageHook->setEnabled(false);
+    ui->actionEnableSendTextMessageHook->setEnabled(false);
+    ui->actionUpdateFeatureRepository->setEnabled(false);
+    ui->actionSetting->setEnabled(false);
+
+    appMenu.disable("Setting");
+    appMenu.disable("Exit WxBox");
 }
 
 void MainWindow::OnCloseMission()
 {
     XSTYLE_WINDOW_CLASS::OnCloseMission();
-    ui->btnStartWeChat->setEnabled(true);
+
+    ui->actionStartWeChatInstance->setEnabled(true);
+    ui->actionEnableAvoidRevokeMessage->setEnabled(true);
+    ui->actionEnableRawMessageHook->setEnabled(true);
+    ui->actionEnableSendTextMessageHook->setEnabled(true);
+    ui->actionUpdateFeatureRepository->setEnabled(true);
+    ui->actionSetting->setEnabled(true);
+
+    appMenu.enable("Setting");
+    appMenu.enable("Exit WxBox");
 }
 
 void MainWindow::InitAppMenu()
@@ -318,6 +381,32 @@ void MainWindow::InitWidget()
     //
 
     settingDialog.InitWidgets();
+
+    //
+    // toolbar
+    //
+
+    toolbar = new QToolBar(this);
+    ui->horizontalLayoutToolBar->addWidget(toolbar);
+
+    toolbar->setObjectName("WxBoxToolbar");
+    toolbar->setIconSize(QSize(30, 30));
+
+    toolbar->addAction(ui->actionStartWeChatInstance);
+    toolbar->addSeparator();
+    toolbar->addAction(ui->actionEnableAvoidRevokeMessage);
+    toolbar->addAction(ui->actionEnableRawMessageHook);
+    toolbar->addAction(ui->actionEnableSendTextMessageHook);
+    toolbar->addSeparator();
+    toolbar->addAction(ui->actionUpdateFeatureRepository);
+    toolbar->addAction(ui->actionSetting);
+    toolbar->addAction(ui->actionAbout);
+
+    ui->actionEnableAvoidRevokeMessage->setChecked(config.wechat_avoid_revoke_message());
+    ui->actionEnableRawMessageHook->setChecked(config.wechat_enable_raw_message_hook());
+    ui->actionEnableSendTextMessageHook->setChecked(config.wechat_enable_send_text_message_hook());
+
+    RetranslateToolBar();
 }
 
 void MainWindow::RegisterWidgetEventHandler()
@@ -452,56 +541,24 @@ void MainWindow::RegisterWidgetEventHandler()
     });
 
     //
-    // only for test
+    // toolbar
     //
 
-    QObject::connect(ui->btn_about, &QPushButton::clicked, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
-    QObject::connect(ui->btnUpdateFeatureRepository, &QPushButton::clicked, this, &MainWindow::UpdateWeChatFeatures);
-    QObject::connect(ui->btnStartWeChat, &QPushButton::clicked, &this->controller, &WxBoxController::StartWeChatInstance);
+    QObject::connect(ui->actionStartWeChatInstance, &QAction::triggered, &this->controller, &WxBoxController::StartWeChatInstance);
 
-    QObject::connect(ui->btn_test1, &QPushButton::clicked, this, [this]() {
-        int* p = nullptr;
-        *p     = 2;
-
-        /*xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);
-        xstyle::warning(nullptr, "wraning", "change to english and DefaultTheme", XStyleMessageBoxButtonType::Ok);*/
-        /*    xstyle_manager.ChangeLanguage("zh_cn");
-        xstyle_manager.ChangeTheme("");*/
+    QObject::connect(ui->actionEnableAvoidRevokeMessage, &QAction::toggled, this, [this](bool checked) {
+        TurnAvoidRevokeMessage(checked);
     });
-    QObject::connect(ui->btn_test2, &QPushButton::clicked, this, [this]() {
-        /* xstyle::message(this, "message", "it's a message", XStyleMessageBoxButtonType::NoButton);
-        xstyle::error(nullptr, "error", "ready to crash", XStyleMessageBoxButtonType::Ok);
-        char* e = nullptr;
-        *e      = 0;*/
+    QObject::connect(ui->actionEnableRawMessageHook, &QAction::toggled, this, [this](bool checked) {
+        TurnEnableRawMessageHook(checked);
     });
-    QObject::connect(ui->btn_test3, &QPushButton::clicked, this, [this]() {
-        /*    xstyle::information(this, "information", "change to chinese and GreenTheme");
-        xstyle_manager.ChangeLanguage("zh_cn");
-        xstyle_manager.ChangeTheme("GreenTheme");*/
-        /*       xstyle_manager.ChangeTheme("");
-        xstyle_manager.ChangeLanguage("zh_cn");*/
-        //controller.ChangeWeChatStatusMonitorInterval(2000);
-        /*controller.StopWeChatStatusMonitor();
-        wxStatusModel.clear();*/
-
-        ModifySetting();
+    QObject::connect(ui->actionEnableSendTextMessageHook, &QAction::toggled, this, [this](bool checked) {
+        TurnEnableSendTextMessageHook(checked);
     });
-    QObject::connect(ui->btn_test4, &QPushButton::clicked, this, [this]() {
-        //UpdateWeChatFeatures();
-        //xstyle_manager.ChangeLanguage("en");
 
-        xstyle::information(this, "information", "change to chinese and GreenTheme");
-        xstyle::information(nullptr, "information", "change to chinese and GreenTheme");
-
-        /*  WXBOT_LOG_INFO("hello {}", "information");
-        WXBOT_LOG_WARNING("hello {}", "warning");
-        WXBOT_LOG_ERROR("hello {}", "error");
-        WXBOX_LOG_INFO_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", "information");
-        WXBOX_LOG_WARNING_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", "warning");
-        WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(this, "hi", "is a message {}", " error");*/
-    });
+    QObject::connect(ui->actionUpdateFeatureRepository, &QAction::triggered, this, &MainWindow::UpdateWeChatFeatures);
+    QObject::connect(ui->actionSetting, &QAction::triggered, this, &MainWindow::ModifySetting);
+    QObject::connect(ui->actionAbout, &QAction::triggered, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);
 }
 
 bool MainWindow::InitWxBox(QSplashScreen* splash)

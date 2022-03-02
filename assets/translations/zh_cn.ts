@@ -229,6 +229,53 @@
         <source>WxBox is Minimized To Tray</source>
         <translation>WxBox已最小化到托盘</translation>
     </message>
+    <message>
+        <source>If Enable Raw Message Hook, Maybe Cause WeChat Stucked</source>
+        <translation>启用该特性后，如果WeChat短时间收到大量消息，可能导致WeChat界面短暂卡顿</translation>
+    </message>
+</context>
+<context>
+    <name>MainWindowBody</name>
+    <message>
+        <source>Start New WeChat Instance</source>
+        <translation>启动微信新实例</translation>
+    </message>
+    <message>
+        <source>Enable Avoid Revoke Message</source>
+        <translation>启用“防止WeChat撤回消息”</translation>
+    </message>
+    <message>
+        <source>Disable Avoid Revoke Message</source>
+        <translation>禁用“防止WeChat撤回消息”</translation>
+    </message>
+    <message>
+        <source>Enable Raw Message Hook</source>
+        <translation>启用“WeChat Raw消息Hook”</translation>
+    </message>
+    <message>
+        <source>Disable Raw Message Hook</source>
+        <translation>禁用“WeChat Raw消息Hook”</translation>
+    </message>
+    <message>
+        <source>Enable Send Text Message Hook</source>
+        <translation>启用“WeChat发送文本消息Hook”</translation>
+    </message>
+    <message>
+        <source>Disable Send Text Message Hook</source>
+        <translation>禁用“WeChat发送文本消息Hook”</translation>
+    </message>
+    <message>
+        <source>Update Feature Repository</source>
+        <translation>更新特征库</translation>
+    </message>
+    <message>
+        <source>Setting</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>关于</translation>
+    </message>
 </context>
 <context>
     <name>WxBoxController</name>
@@ -250,7 +297,7 @@
     </message>
     <message>
         <source>WeChat api hook point invalid</source>
-        <translation>定位WeChat Hook点部分失败</translation>
+        <translation>定位WeChat Hook点部分失败，请尝试更新特征库</translation>
     </message>
     <message>
         <source>Inject WxBot module invalid</source>
