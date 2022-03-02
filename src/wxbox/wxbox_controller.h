@@ -49,12 +49,23 @@ class WxBoxController final : public QObject
     void ReloadFeatures();
 
     enum class XStyleMessageBoxButton ShowStartAndInjectMessageDialog(bool start);
-    wb_crack::WxBotEntryParameter     EncapWxBotEntryParameter(const wb_wx::WeChatEnvironmentInfo& _wxEnvInfo, wb_feature::WxApiFeatures& _wxApiFeatures, wb_feature::WxAPIHookPointVACollection& _vaCollection);
+    bool                              EncapWxBotEntryParameter(const wb_wx::WeChatEnvironmentInfo&     _wxEnvInfo,
+                                                               wb_feature::WxApiFeatures&              _wxApiFeatures,
+                                                               wb_feature::WxAPIHookPointVACollection& _vaCollection,
+                                                               wb_process::PID                         clientPID,
+                                                               wb_crack::WxBotEntryParameter&          wxbotEntryParameter);
     bool                              StartWeChatInstance();
     bool                              InjectWxBotModule(wb_process::PID pid);
     bool                              UnInjectWxBotModule(wb_process::PID pid);
     void                              RaiseClientWindowToForeground(wb_process::PID pid);
     void                              DisplayClientInjectArgs(wb_process::PID pid);
+
+  private:
+    //
+    // Inner Methods
+    //
+
+    enum class WBCErrorCode _Inner_ExecuteInjectWxBotModule(enum class WBCErrorCode prevErrorCode, wb_crack::WxBotEntryParameter& wxbotEntryParameter);
 
   private:
     //

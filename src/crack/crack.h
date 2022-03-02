@@ -48,6 +48,7 @@ namespace wxbox {
         typedef struct _WxBotEntryParameter
         {
             ucpulong_t                                    wxbox_pid;
+            ucpulong_t                                    wxbot_pid;
             char                                          wxbox_root[WXBOX_MAX_PATH];
             char                                          wxbot_root[WXBOX_MAX_PATH];
             char                                          plugins_root[WXBOX_MAX_PATH];

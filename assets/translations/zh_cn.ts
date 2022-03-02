@@ -332,12 +332,20 @@
         <translation>是否确定注入WxBot模块?</translation>
     </message>
     <message>
+        <source>Do you want to force injection?</source>
+        <translation>是否强制注入WxBot模块?</translation>
+    </message>
+    <message>
         <source>Inject WxBot module can't guarantee the stable operation of the WeChat</source>
         <translation>注入WxBot无法保证WeChat稳定运行</translation>
     </message>
     <message>
         <source>UnSupported this feature</source>
         <translation>该特性定位失败，不支持该功能</translation>
+    </message>
+    <message>
+        <source>Some interfaces are interdependent, so not marking [UnSupported] does not mean that the corresponding functions can be used</source>
+        <translation>有些接口相互依赖，没标注[不支持]不代表对应的功能就能使用</translation>
     </message>
 </context>
 <context>

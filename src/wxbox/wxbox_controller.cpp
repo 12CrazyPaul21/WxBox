@@ -143,12 +143,16 @@ XStyleMessageBoxButton WxBoxController::ShowStartAndInjectMessageDialog(bool sta
     return xstyle::information(view, "", message, XStyleMessageBoxButtonType::YesNo);
 }
 
-wb_crack::WxBotEntryParameter WxBoxController::EncapWxBotEntryParameter(const wb_wx::WeChatEnvironmentInfo& _wxEnvInfo, wb_feature::WxApiFeatures& _wxApiFeatures, wb_feature::WxAPIHookPointVACollection& _vaCollection)
+bool WxBoxController::EncapWxBotEntryParameter(const wb_wx::WeChatEnvironmentInfo&     _wxEnvInfo,
+                                               wb_feature::WxApiFeatures&              _wxApiFeatures,
+                                               wb_feature::WxAPIHookPointVACollection& _vaCollection,
+                                               wb_process::PID                         clientPID,
+                                               wb_crack::WxBotEntryParameter&          wxbotEntryParameter)
 {
-    wb_crack::WxBotEntryParameter wxbotEntryParameter;
     std::memset(&wxbotEntryParameter, 0, sizeof(wxbotEntryParameter));
 
     wxbotEntryParameter.wxbox_pid = wb_process::GetCurrentProcessId();
+    wxbotEntryParameter.wxbot_pid = clientPID;
     strcpy_s(wxbotEntryParameter.wxbox_root, sizeof(wxbotEntryParameter.wxbox_root), wb_file::GetProcessRootPath().data());
     strcpy_s(wxbotEntryParameter.wxbot_root, sizeof(wxbotEntryParameter.wxbot_root), config.wxbot_root_path().data());
     strcpy_s(wxbotEntryParameter.plugins_root, sizeof(wxbotEntryParameter.plugins_root), config.plugins_root().data());
@@ -169,7 +173,7 @@ wb_crack::WxBotEntryParameter WxBoxController::EncapWxBotEntryParameter(const wb
     std::memset(&wxbotEntryParameter.wechat_datastructure_supplement, 0, sizeof(wxbotEntryParameter.wechat_datastructure_supplement));
     _wxApiFeatures.ObtainDataStructureSupplement(_wxEnvInfo.version, wxbotEntryParameter.wechat_datastructure_supplement);
 
-    return wxbotEntryParameter;
+    return true;
 }
 
 bool WxBoxController::StartWeChatInstance()
@@ -182,16 +186,21 @@ bool WxBoxController::StartWeChatInstance()
         return false;
     }
 
-    WBCErrorCode errorCode     = WBCErrorCode::WBC_NO_ERROR;
-    auto         quesStatus    = ShowStartAndInjectMessageDialog(true);
-    bool         isInjectWxBot = (quesStatus == XStyleMessageBoxButton::Yes);
+    WBCErrorCode                  errorCode     = WBCErrorCode::WBC_NO_ERROR;
+    auto                          quesStatus    = ShowStartAndInjectMessageDialog(true);
+    bool                          isInjectWxBot = (quesStatus == XStyleMessageBoxButton::Yes);
+    wb_crack::WxBotEntryParameter wxbotEntryParameter;
 
     if (quesStatus == XStyleMessageBoxButton::Close) {
         view->CloseMission();
         return false;
     }
 
-    wxbox::internal::TaskInThreadPool::StartTask([this, isInjectWxBot, &errorCode]() {
+    //
+    // start wechat instance and encapsulate wxbot entry parameter then verify hook points
+    //
+
+    wxbox::internal::TaskInThreadPool::StartTask([this, isInjectWxBot, &errorCode, &wxbotEntryParameter]() {
         // open and wechat with multi boxing
         wb_crack::OpenWxWithMultiBoxingResult openResult = {0};
         if (!wxbox::crack::OpenWxWithMultiBoxing(wxEnvInfo, wxApiFeatures, &openResult, isInjectWxBot)) {
@@ -220,12 +229,8 @@ bool WxBoxController::StartWeChatInstance()
         // deattach
         wb_crack::DeAttachWxProcess(openResult.pid);
 
-        //
-        // inject wxbot
-        //
-
-        // wxbot entry parameter
-        wb_crack::WxBotEntryParameter wxbotEntryParameter = EncapWxBotEntryParameter(wxEnvInfo, wxApiFeatures, vaCollection);
+        // encapsulate wxbot entry parameter
+        EncapWxBotEntryParameter(wxEnvInfo, wxApiFeatures, vaCollection, openResult.pid, wxbotEntryParameter);
 
         // log wx core module info
         spdlog::info("WeChat Core Module baseaddr : 0x{:08X}, size : 0x{:08X}", (ucpulong_t)openResult.pModuleBaseAddr, openResult.uModuleSize);
@@ -241,19 +246,14 @@ bool WxBoxController::StartWeChatInstance()
             errorCode = WBCErrorCode::WECHAT_API_HOOK_POINT_INVALID;
             return;
         }
-
-        // inject
-        if (!wb_crack::InjectWxBot(openResult.pid, wxbotEntryParameter)) {
-            errorCode = WBCErrorCode::INJECT_WXBOT_MODULE_FAILED;
-            return;
-        }
     })
         .wait();
 
-    if (WBC_FAILED(errorCode)) {
-        WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(view, "", WBC_MESSAGE(errorCode));
-    }
+    //
+    // execute inject
+    //
 
+    errorCode = _Inner_ExecuteInjectWxBotModule(errorCode, wxbotEntryParameter);
     view->CloseMission();
     return errorCode == WBCErrorCode::WBC_NO_ERROR;
 }
@@ -267,13 +267,19 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
 
     view->BeginMission();
 
-    WBCErrorCode errorCode = WBCErrorCode::WBC_NO_ERROR;
+    WBCErrorCode                  errorCode = WBCErrorCode::WBC_NO_ERROR;
+    wb_crack::WxBotEntryParameter wxbotEntryParameter;
+
     if (ShowStartAndInjectMessageDialog(false) != XStyleMessageBoxButton::Yes) {
         view->CloseMission();
         return false;
     }
 
-    wxbox::internal::TaskInThreadPool::StartTask([this, pid, &errorCode]() {
+    //
+    // encapsulate wxbot entry parameter and verify hook points
+    //
+
+    wxbox::internal::TaskInThreadPool::StartTask([this, pid, &errorCode, &wxbotEntryParameter]() {
         // get wechat process environment info
         wb_wx::WeChatProcessEnvironmentInfo wxProcessEnvInfo;
         if (!wb_wx::ResolveWxEnvInfo(pid, wxProcessEnvInfo)) {
@@ -294,12 +300,8 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         wxApiFeatures.Collect(locateTarget, wxProcessEnvInfo.wxEnvInfo.version, vaCollection);
         aphandle.close();
 
-        //
-        // inject wxbot
-        //
-
-        // wxbot entry parameter
-        wb_crack::WxBotEntryParameter wxbotEntryParameter = EncapWxBotEntryParameter(wxProcessEnvInfo.wxEnvInfo, wxApiFeatures, vaCollection);
+        // encapsulate wxbot entry parameter
+        EncapWxBotEntryParameter(wxProcessEnvInfo.wxEnvInfo, wxApiFeatures, vaCollection, pid, wxbotEntryParameter);
 
         // log wx core module info
         spdlog::info("Inject to WeChat Process(PID : {})", pid);
@@ -316,11 +318,46 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         // verify hook point
         if (!wb_crack::VerifyWxApis(wxbotEntryParameter.wechat_apis)) {
             errorCode = WBCErrorCode::WECHAT_API_HOOK_POINT_INVALID;
-            return;
         }
+    })
+        .wait();
 
-        // inject
-        if (!wb_crack::InjectWxBot(pid, wxbotEntryParameter)) {
+    //
+    // execute inject
+    //
+
+    errorCode = _Inner_ExecuteInjectWxBotModule(errorCode, wxbotEntryParameter);
+    view->CloseMission();
+    return errorCode == WBCErrorCode::WBC_NO_ERROR;
+}
+
+WBCErrorCode WxBoxController::_Inner_ExecuteInjectWxBotModule(WBCErrorCode prevErrorCode, wb_crack::WxBotEntryParameter& wxbotEntryParameter)
+{
+    WBCErrorCode errorCode = prevErrorCode;
+
+    //
+    // check prev status
+    //
+
+    if (prevErrorCode == WBCErrorCode::WECHAT_API_HOOK_POINT_INVALID) {
+        if (xstyle::error(view, _wctr("Do you want to force injection?"), _wctr(WBC_MESSAGE(prevErrorCode)), XStyleMessageBoxButtonType::YesNo) != XStyleMessageBoxButton::Yes) {
+            spdlog::error(WBC_MESSAGE(prevErrorCode));
+            return prevErrorCode;
+        }
+        errorCode = WBCErrorCode::WBC_NO_ERROR;
+    }
+
+    if (WBC_FAILED(errorCode)) {
+        WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(view, "", WBC_MESSAGE(errorCode));
+        return errorCode;
+    }
+
+    //
+    // execute inject
+    //
+
+    wxbox::internal::TaskInThreadPool::StartTask([this, &errorCode, &wxbotEntryParameter]() {
+        if (!wb_crack::InjectWxBot(wxbotEntryParameter.wxbot_pid, wxbotEntryParameter)) {
             errorCode = WBCErrorCode::INJECT_WXBOT_MODULE_FAILED;
             return;
         }
@@ -331,8 +368,7 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
         WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(view, "", WBC_MESSAGE(errorCode));
     }
 
-    view->CloseMission();
-    return errorCode == WBCErrorCode::WBC_NO_ERROR;
+    return errorCode;
 }
 
 bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
@@ -370,6 +406,7 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
     QString     title = QString("WeChat %1").arg(xstyle_manager.Translate("xstyle_meta", "Feature"));
     QString     reportText;
     QTextStream reportTextStream(&reportText);
+    bool        fullFeatures = true;
 
     reportTextStream << "WeChat Process ID : " << pid << "(0x" << Qt::hex << Qt::uppercasedigits << pid << ")" << XSTYLE_REPORT_ENDL;
     reportTextStream << "WeChat Version : " << injectArgs.wechat_version << XSTYLE_REPORT_ENDL;
@@ -382,6 +419,7 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
 
 #define REPORT_WXAPI(API)                                                                                                                                               \
     {                                                                                                                                                                   \
+        fullFeatures = injectArgs.wechat_apis.API ? fullFeatures : false;                                                                                               \
         reportTextStream << #API##" : "                                                                                                                                 \
                          << injectArgs.wechat_apis.API                                                                                                                  \
                          << (injectArgs.wechat_apis.API ? "" : QString(" [<font color=\"red\">%1</font>]").arg(xstyle_manager.Translate("xstyle_meta", "UnSupported"))) \
@@ -390,6 +428,7 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
 
 #define REPORT_WX_DATASTRUCT(DESC, MEMBER)                                                                                                                                                     \
     {                                                                                                                                                                                          \
+        fullFeatures = injectArgs.wechat_datastructure_supplement.MEMBER ? fullFeatures : false;                                                                                               \
         reportTextStream << "&nbsp;&nbsp;&nbsp;&nbsp;"##DESC##" : "                                                                                                                            \
                          << injectArgs.wechat_datastructure_supplement.MEMBER                                                                                                                  \
                          << (injectArgs.wechat_datastructure_supplement.MEMBER ? "" : QString(" [<font color=\"red\">%1</font>]").arg(xstyle_manager.Translate("xstyle_meta", "UnSupported"))) \
@@ -423,6 +462,13 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
     REPORT_WX_DATASTRUCT("Contact Header Item Offset", weChatContactHeaderItemOffset);
     REPORT_WX_DATASTRUCT("Contact Data Begin Offset", weChatContactDataBeginOffset);
     REPORT_WX_DATASTRUCT("Message Structure Size", weChatMessageStructureSize);
+
+    if (!fullFeatures) {
+        reportTextStream << "<center>"
+                         << _wctr("Some interfaces are interdependent, so not marking [UnSupported] does not mean that the corresponding functions can be used")
+                         << "</center>"
+                         << XSTYLE_REPORT_ENDL;
+    }
 
     xstyle::report(view, title, reportText);
 }

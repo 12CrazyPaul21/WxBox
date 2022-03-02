@@ -328,6 +328,10 @@
         <translation>Do you want to inject WxBot at the same time?</translation>
     </message>
     <message>
+        <source>Do you want to force injection?</source>
+        <translation>Do you want to force injection?</translation>
+    </message>
+    <message>
         <source>Do you want to inject WxBot Module?</source>
         <translation>Do you want to inject WxBot Module?</translation>
     </message>
@@ -338,6 +342,10 @@
     <message>
         <source>UnSupported this feature</source>
         <translation>UnSupported this feature</translation>
+    </message>
+    <message>
+        <source>Some interfaces are interdependent, so not marking [UnSupported] does not mean that the corresponding functions can be used</source>
+        <translation>Some interfaces are interdependent, so not marking [UnSupported] does not mean that the corresponding functions can be used</translation>
     </message>
 </context>
 <context>
