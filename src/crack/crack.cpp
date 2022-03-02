@@ -386,7 +386,7 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
         }
     }
 
-    if (!keepAttach) {
+    if (!keepAttach || !result) {
         ::DebugActiveProcessStop(pid);
     }
 
