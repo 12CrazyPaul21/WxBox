@@ -265,6 +265,10 @@
         <translation>Disable Send Text Message Hook</translation>
     </message>
     <message>
+        <source>Open Plugin Path</source>
+        <translation>Open Plugin Path</translation>
+    </message>
+    <message>
         <source>Update Feature Repository</source>
         <translation>Update Feature Repository</translation>
     </message>

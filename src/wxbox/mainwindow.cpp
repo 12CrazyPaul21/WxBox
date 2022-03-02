@@ -398,6 +398,7 @@ void MainWindow::InitWidget()
     toolbar->addAction(ui->actionEnableRawMessageHook);
     toolbar->addAction(ui->actionEnableSendTextMessageHook);
     toolbar->addSeparator();
+    toolbar->addAction(ui->actionOpenPluginPath);
     toolbar->addAction(ui->actionUpdateFeatureRepository);
     toolbar->addAction(ui->actionSetting);
     toolbar->addAction(ui->actionAbout);
@@ -556,6 +557,9 @@ void MainWindow::RegisterWidgetEventHandler()
         TurnEnableSendTextMessageHook(checked);
     });
 
+    QObject::connect(ui->actionOpenPluginPath, &QAction::triggered, this, [this]() {
+        wb_file::OpenFolderInExplorer(wb_string::Utf8ToNativeString(config.plugins_root()));
+    });
     QObject::connect(ui->actionUpdateFeatureRepository, &QAction::triggered, this, &MainWindow::UpdateWeChatFeatures);
     QObject::connect(ui->actionSetting, &QAction::triggered, this, &MainWindow::ModifySetting);
     QObject::connect(ui->actionAbout, &QAction::triggered, &aboutDialog, &AboutWxBoxDialog::showApplicationModal);

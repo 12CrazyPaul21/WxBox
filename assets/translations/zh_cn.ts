@@ -265,6 +265,10 @@
         <translation>禁用“WeChat发送文本消息Hook”</translation>
     </message>
     <message>
+        <source>Open Plugin Path</source>
+        <translation>打开扩展根目录</translation>
+    </message>
+    <message>
         <source>Update Feature Repository</source>
         <translation>更新特征库</translation>
     </message>

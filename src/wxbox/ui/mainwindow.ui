@@ -229,6 +229,18 @@
     <string>About</string>
    </property>
   </action>
+  <action name="actionOpenPluginPath">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/open_plugin_path.png</normaloff>:/image/open_plugin_path.png</iconset>
+   </property>
+   <property name="text">
+    <string>OpenPluginPath</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Plugin Path</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
