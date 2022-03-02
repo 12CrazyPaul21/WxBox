@@ -77,8 +77,12 @@
     color: rgba(200, 200, 200, 200);
 }
 
+#CrashDumper_xstylewindow * {
+    font-family: "Microsoft YaHei";
+}
+
 #CrashDumper_xstylewindow {
-    qproperty-footer_height: 30;
+    qproperty-footer_height: 35;
 }
 
 #CrashDumper_link_label {
