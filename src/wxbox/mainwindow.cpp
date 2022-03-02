@@ -246,7 +246,13 @@ void MainWindow::InitAppMenu()
     appMenu.pushAction("Visit Repository", this, std::bind(&QDesktopServices::openUrl, QUrl(WXBOX_REPOSITORY_URL)));
     appMenu.pushAction("About WxBox", &aboutDialog, std::bind(&AboutWxBoxDialog::showApplicationModal, &aboutDialog));
     appMenu.pushSeparator();
-    appMenu.pushAction("Exit WxBox", this, std::bind(&MainWindow::quit, this));
+    appMenu.pushAction("Exit WxBox", this, [this]() {
+        auto modalWidget = QApplication::activeModalWidget();
+        if (modalWidget && modalWidget != this) {
+            return;
+        }
+        this->quit();
+    });
 
     // client item context menu
     clientItemContextMenu.pushAction("Inject");
