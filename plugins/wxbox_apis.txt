@@ -16,8 +16,13 @@
 
     >>wxbox.version
     >>wxbox.help
+    >>wxbox.generate_temp_file_name
+    >>wxbox.global_temp_folder_path
     >>wxbox.package_storage_path: <module name>
     [only for plugin]>>wxbox.dispatch_host_event: <host event object>
+
+    >>wxbox.snap
+    >>wxbox.snap_main_monitor
 
     >>wxbox.info: <information message>
     >>wxbox.warning: warning message>
@@ -26,6 +31,8 @@
 
     [only for plugin]>>wxbox.sleep: <1 ~ 3000 ms>
     >>wxbox.shell: <command>, [optional args...]
+    >>wxbox.msgbox: <message>, [optional title]
+    >>wxbox.speak: <message>
     >>wxbox.lock_screen
     >>wxbox.list_drives
     >>wxbox.list_files: <dirpath>
@@ -69,3 +76,52 @@
 
     >>wxbox.chatroom_notify: <roomWxid>, [optional notify list...]
     >>wxbox.chatroom_notify_all: <roomWxid>
+
+@plugin life cycle event and wechat event:
+    load
+    prereload
+    unload
+    
+    receive_raw_message
+    receive_message
+    receive_text_message
+    send_text_message
+    login_wechat_event
+    logout_wechat_event
+    exit_wechat_event
+
+@plugin event object getters [only for plugin]:
+
+    event:type()
+    event:message_type()
+    event:wxid()
+    event:message()
+    event:chatroom_talker_wxid()
+    event:pdata1
+    event:pdata2
+
+@plugin event object methods [only for plugin]:
+
+    event:filter_message()
+    event:substitute_wxid(new_wxid)
+    event:substitute_message(new_message)
+    event:substitute_chatroom_talker_wxid(new_chatroom_talker_wxid)
+
+@plugin host event type:
+    SendMessage
+    Log
+    ClearCommandResultScreen
+    Logout
+    ChangeConfig
+    UnInject
+    ExitWxBox
+    ReportHelp
+
+@plugin host event static methods [only for plugin]:
+
+    wxbox_host_event.create()
+
+@plugin host event object getter and setters [only for plugin]:
+
+    host_event:type()
+    host_event:set_type(type)
