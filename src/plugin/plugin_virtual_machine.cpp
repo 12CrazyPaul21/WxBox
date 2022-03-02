@@ -853,7 +853,9 @@ std::string wxbox::plugin::GetPluginVirtualMachineStorageRoot()
         return "";
     }
 
-    return wb_file::JoinPath(g_vm_signleton->pluginPath, "storage");
+    auto path = wb_file::JoinPath(g_vm_signleton->pluginPath, "storage");
+    wb_file::RecursivelyCreateFolder(wb_string::Utf8ToNativeString(path));
+    return path;
 }
 
 std::string wxbox::plugin::GetPluginVirtualMachineGlobalTempRoot()
@@ -862,7 +864,9 @@ std::string wxbox::plugin::GetPluginVirtualMachineGlobalTempRoot()
         return "";
     }
 
-    return wb_file::JoinPath(GetPluginVirtualMachineStorageRoot(), "global_temp");
+    auto path = wb_file::JoinPath(GetPluginVirtualMachineStorageRoot(), "global_temp");
+    wb_file::RecursivelyCreateFolder(wb_string::Utf8ToNativeString(path));
+    return path;
 }
 
 void wxbox::plugin::ChangeLongTaskTimeout(std::time_t timeout)

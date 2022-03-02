@@ -79,6 +79,8 @@ bool wb_file::_VersionNumber::operator<=(const _VersionNumber& right)
 
 #if WXBOX_IN_WINDOWS_OS
 
+#include <ShlObj_core.h>
+
 static inline std::string GetProcessRootPath_Windows()
 {
     char fullPath[MAX_PATH]    = {0};
@@ -784,5 +786,19 @@ void wxbox::util::file::OpenFileInExplorer(const std::string& path)
     ::CoUninitialize();
 #else
     throw std::exception("OpenFileInExplorer stub");
+#endif
+}
+
+bool wxbox::util::file::RecursivelyCreateFolder(const std::string& folder)
+{
+    if (wb_file::IsPathExists(folder)) {
+        return true;
+    }
+
+#if WXBOX_IN_WINDOWS_OS
+    return SHCreateDirectoryExA(NULL, folder.c_str(), nullptr) == ERROR_SUCCESS;
+#else
+    throw std::exception("RecursivelyCreateFolder stub");
+    return false;
 #endif
 }
