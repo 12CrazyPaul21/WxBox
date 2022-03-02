@@ -273,8 +273,16 @@
         <translation>未连接WeChat进程的WxBot模块</translation>
     </message>
     <message>
-        <source>Do you want to inject wxbot at the same time?</source>
+        <source>Do you want to inject WxBot at the same time?</source>
         <translation>是否同时注入WxBot模块？</translation>
+    </message>
+    <message>
+        <source>Do you want to inject WxBot Module?</source>
+        <translation>是否确定注入WxBot模块?</translation>
+    </message>
+    <message>
+        <source>Inject WxBot module can't guarantee the stable operation of the WeChat</source>
+        <translation>注入WxBot无法保证WeChat稳定运行</translation>
     </message>
     <message>
         <source>UnSupported this feature</source>

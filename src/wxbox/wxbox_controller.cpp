@@ -135,6 +135,14 @@ void WxBoxController::ReloadFeatures()
     spdlog::info("Load WxBox api features");
 }
 
+XStyleMessageBoxButton WxBoxController::ShowStartAndInjectMessageDialog(bool start)
+{
+    QString question = _wctr(start ? "Do you want to inject WxBot at the same time?" : "Do you want to inject WxBot Module?");
+    QString warning  = _wctr("Inject WxBot module can't guarantee the stable operation of the WeChat");
+    QString message  = QString("<center>%1</center>(<font color=\"orange\">%2</font>)").arg(question).arg(warning);
+    return xstyle::information(view, "", message, XStyleMessageBoxButtonType::YesNo);
+}
+
 wb_crack::WxBotEntryParameter WxBoxController::EncapWxBotEntryParameter(const wb_wx::WeChatEnvironmentInfo& _wxEnvInfo, wb_feature::WxApiFeatures& _wxApiFeatures, wb_feature::WxAPIHookPointVACollection& _vaCollection)
 {
     wb_crack::WxBotEntryParameter wxbotEntryParameter;
@@ -175,7 +183,7 @@ bool WxBoxController::StartWeChatInstance()
     }
 
     WBCErrorCode errorCode     = WBCErrorCode::WBC_NO_ERROR;
-    auto         quesStatus    = xstyle::information(view, "", _wctr("Do you want to inject wxbot at the same time?"), XStyleMessageBoxButtonType::YesNo);
+    auto         quesStatus    = ShowStartAndInjectMessageDialog(true);
     bool         isInjectWxBot = (quesStatus == XStyleMessageBoxButton::Yes);
 
     if (quesStatus == XStyleMessageBoxButton::Close) {
@@ -260,6 +268,10 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
     view->BeginMission();
 
     WBCErrorCode errorCode = WBCErrorCode::WBC_NO_ERROR;
+    if (ShowStartAndInjectMessageDialog(false) != XStyleMessageBoxButton::Yes) {
+        view->CloseMission();
+        return false;
+    }
 
     wxbox::internal::TaskInThreadPool::StartTask([this, pid, &errorCode]() {
         // get wechat process environment info

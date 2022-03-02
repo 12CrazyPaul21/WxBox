@@ -94,8 +94,8 @@ void WxBoxSettingDialog::InitWidgets()
     // Disabled Some Settings
     //
 
-    ui->labelLoadingIconType->setVisible(false);
-    ui->comboBoxLoadingIconType->setVisible(false);
+    // ui->labelLoadingIconType->setVisible(false);
+    // ui->comboBoxLoadingIconType->setVisible(false);
 
     //
     // action button

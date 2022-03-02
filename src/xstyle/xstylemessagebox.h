@@ -9,16 +9,16 @@
 #define MESSAGE_WXBOX_NAME "XStyleMessageBox"
 #define XSTYLE_REPORT_ENDL "<br/>"
 
-typedef enum class XStyleMessageBoxType
+enum class XStyleMessageBoxType
 {
     Report = 0,
     Message,
     Information,
     Warning,
     Error
-} XStyleMessageBoxType;
+};
 
-typedef enum class XStyleMessageBoxButton
+enum class XStyleMessageBoxButton
 {
     Close = 0,
     NoButton,
@@ -30,9 +30,9 @@ typedef enum class XStyleMessageBoxButton
     Retry,
     Skip,
     _Count
-} XStyleMessageBoxButton;
+};
 
-typedef enum class XStyleMessageBoxButtonType
+enum class XStyleMessageBoxButtonType
 {
     NoButton = 0,
     Ok,
@@ -40,7 +40,7 @@ typedef enum class XStyleMessageBoxButtonType
     ConfirmCancel,
     YesNo,
     RetrySkip
-} XStyleMessageBoxButtonType;
+};
 
 //
 // XStyleMessageBox

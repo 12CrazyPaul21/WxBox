@@ -273,8 +273,16 @@
         <translation>WeChat process's WxBot module not connected</translation>
     </message>
     <message>
-        <source>Do you want to inject wxbot at the same time?</source>
-        <translation>Do you want to inject wxbot at the same time?</translation>
+        <source>Do you want to inject WxBot at the same time?</source>
+        <translation>Do you want to inject WxBot at the same time?</translation>
+    </message>
+    <message>
+        <source>Do you want to inject WxBot Module?</source>
+        <translation>Do you want to inject WxBot Module?</translation>
+    </message>
+    <message>
+        <source>Inject WxBot module can't guarantee the stable operation of the WeChat</source>
+        <translation>Inject WxBot module can't guarantee the stable operation of the WeChat</translation>
     </message>
     <message>
         <source>UnSupported this feature</source>
