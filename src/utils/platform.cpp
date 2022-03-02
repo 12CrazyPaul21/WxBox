@@ -2,6 +2,16 @@
 
 #if WXBOX_IN_WINDOWS_OS
 
+#ifndef min
+#define min WXBOX_MIN
+#endif
+
+#ifndef max
+#define max WXBOX_MAX
+#endif
+
+#include <atlimage.h>
+
 static bool Is64System_Windows()
 {
     using FnGetNativeSystemInfo = void(WINAPI*)(LPSYSTEM_INFO lpSystemInfo);
@@ -67,6 +77,133 @@ static std::string GetSystemVersionDescription_Windows()
     return ss.str();
 }
 
+static BOOL CALLBACK CollectMonitorRegionEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+    WXBOX_UNREF(hdcMonitor);
+    WXBOX_UNREF(lprcMonitor);
+
+    auto multiMonitorRegionInfo = reinterpret_cast<wb_platform::PMultiMonitorRegionInfo>(dwData);
+    if (!multiMonitorRegionInfo) {
+        return FALSE;
+    }
+
+    // get monitor device name
+    MONITORINFOEX monitorInfoEx;
+    monitorInfoEx.cbSize = sizeof(monitorInfoEx);
+    if (!GetMonitorInfoA(hMonitor, &monitorInfoEx)) {
+        return TRUE;
+    }
+
+    // get monitor's physical size and position
+    DEVMODEA devMode;
+    ZeroMemory(&devMode, sizeof(devMode));
+    devMode.dmSize = sizeof(devMode);
+    if (!EnumDisplaySettingsA(monitorInfoEx.szDevice, ENUM_CURRENT_SETTINGS, &devMode)) {
+        return TRUE;
+    }
+
+    wb_platform::MonitorPhysicalRegion monitorRegion(devMode.dmPosition.x, devMode.dmPosition.y, devMode.dmPelsWidth, devMode.dmPelsHeight);
+
+    if (multiMonitorRegionInfo->monitorRegions.empty()) {
+        multiMonitorRegionInfo->min_x = multiMonitorRegionInfo->max_x = monitorRegion.x;
+        multiMonitorRegionInfo->min_y = multiMonitorRegionInfo->max_y = monitorRegion.y;
+        multiMonitorRegionInfo->min_width = multiMonitorRegionInfo->max_width = monitorRegion.width;
+        multiMonitorRegionInfo->min_height = multiMonitorRegionInfo->max_height = monitorRegion.height;
+    }
+    else {
+        multiMonitorRegionInfo->min_x      = WXBOX_MIN(multiMonitorRegionInfo->min_x, monitorRegion.x);
+        multiMonitorRegionInfo->max_x      = WXBOX_MAX(multiMonitorRegionInfo->max_x, monitorRegion.x);
+        multiMonitorRegionInfo->min_y      = WXBOX_MIN(multiMonitorRegionInfo->min_y, monitorRegion.y);
+        multiMonitorRegionInfo->max_y      = WXBOX_MAX(multiMonitorRegionInfo->max_y, monitorRegion.y);
+        multiMonitorRegionInfo->min_width  = WXBOX_MIN(multiMonitorRegionInfo->min_width, monitorRegion.width);
+        multiMonitorRegionInfo->max_width  = WXBOX_MAX(multiMonitorRegionInfo->max_width, monitorRegion.width);
+        multiMonitorRegionInfo->min_height = WXBOX_MIN(multiMonitorRegionInfo->min_height, monitorRegion.height);
+        multiMonitorRegionInfo->max_height = WXBOX_MAX(multiMonitorRegionInfo->max_height, monitorRegion.height);
+    }
+
+    multiMonitorRegionInfo->monitorRegions.emplace_back(std::move(monitorRegion));
+    return TRUE;
+}
+
+static bool GetDesktopFullPhysicalRegion(wb_platform::FullMonitorPhysicalRegion& region)
+{
+    wb_platform::MultiMonitorRegionInfo multiMonitorRegionInfo;
+    EnumDisplayMonitors(NULL, NULL, CollectMonitorRegionEnumProc, reinterpret_cast<LPARAM>(&multiMonitorRegionInfo));
+    if (!multiMonitorRegionInfo.valid()) {
+        return false;
+    }
+
+    region = multiMonitorRegionInfo.region();
+    return true;
+}
+
+static bool CaptureMonitorSnap_Windows(const std::string& savePngImageFilePath)
+{
+    wb_platform::FullMonitorPhysicalRegion region;
+    if (!GetDesktopFullPhysicalRegion(region)) {
+        return false;
+    }
+
+    //
+    // config bitmap info
+    //
+
+    BITMAPINFOHEADER bmih;
+    ZeroMemory(&bmih, sizeof(bmih));
+
+    bmih.biSize          = sizeof(BITMAPINFOHEADER);
+    bmih.biWidth         = region.width;
+    bmih.biHeight        = region.height;
+    bmih.biPlanes        = 1;
+    bmih.biBitCount      = 24;
+    bmih.biCompression   = BI_RGB;
+    bmih.biSizeImage     = bmih.biWidth * bmih.biHeight * 3;
+    bmih.biXPelsPerMeter = 0;
+    bmih.biYPelsPerMeter = 0;
+    bmih.biClrUsed       = 0;
+    bmih.biClrImportant  = 0;
+
+    //
+    // create compatible desktop device-context and bitmap
+    //
+
+    HWND hWndDesktop = GetDesktopWindow();
+    HDC  hDesktopDC  = GetDC(hWndDesktop);
+
+    HDC hOffScreenDC = CreateCompatibleDC(hDesktopDC);
+    if (!hOffScreenDC) {
+        ReleaseDC(hWndDesktop, hDesktopDC);
+        return false;
+    }
+
+    HBITMAP hOffScreenBmp = CreateDIBitmap(hDesktopDC, &bmih, 0, 0, nullptr, 0);
+    if (!hOffScreenBmp) {
+        DeleteDC(hOffScreenDC);
+        ReleaseDC(hWndDesktop, hDesktopDC);
+        return false;
+    }
+
+    //
+    // capture desktop snap to offscreen bitmap
+    //
+
+    SelectObject(hOffScreenDC, hOffScreenBmp);
+    BitBlt(hOffScreenDC, 0, 0, region.width, region.height, hDesktopDC, region.x, region.y, SRCCOPY);
+
+    //
+    // copy to image
+    //
+
+    CImage image;
+    image.Attach(hOffScreenBmp);
+    bool retval = SUCCEEDED(image.Save(savePngImageFilePath.c_str(), Gdiplus::ImageFormatPNG));
+
+    DeleteObject(hOffScreenBmp);
+    DeleteDC(hOffScreenDC);
+    ReleaseDC(hWndDesktop, hDesktopDC);
+    return retval;
+}
+
 #elif WXBOX_IN_MAC_OS
 
 static bool Is64System_Mac()
@@ -85,6 +222,12 @@ static std::string GetSystemVersionDescription_Mac()
 {
     throw std::exception("GetSystemVersionDescription_Mac stub");
     return "";
+}
+
+static bool CaptureMonitorSnap_Mac(const std::string& savePngImageFilePath)
+{
+    throw std::exception("CaptureMonitorSnap_Mac stub");
+    return false;
 }
 
 #endif
@@ -141,6 +284,15 @@ void wxbox::util::platform::LockScreen()
     ::LockWorkStation();
 #elif WXBOX_IN_MAC_OS
     throw std::exception("LockScreen stub");
+#endif
+}
+
+bool wxbox::util::platform::CaptureMonitorSnap(const std::string& savePngImageFilePath)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return CaptureMonitorSnap_Windows(savePngImageFilePath);
+#elif WXBOX_IN_MAC_OS
+    return CaptureMonitorSnap_Mac(savePngImageFilePath);
 #endif
 }
 
