@@ -502,12 +502,7 @@ void WxBoxController::UpdateClientStatus(wb_process::PID pid) noexcept
     if (client->status != WxBoxClientItemStatus::Normal) {
         client->logined = false;
     }
-    if (client->status == WxBoxClientItemStatus::Independent) {
-        auto it = clientInjectArgs.find(pid);
-        if (it != clientInjectArgs.end()) {
-            clientInjectArgs.erase(it);
-        }
-    }
+
     client->update();
 }
 
@@ -618,9 +613,14 @@ void WxBoxController::WxBoxServerEvent(wxbox::WxBoxMessage message)
             UpdateClientStatus(message.pid);
             break;
 
-        case wxbox::WxBoxMessageType::WxBoxClientDone:
+        case wxbox::WxBoxMessageType::WxBoxClientDone: {
+            auto it = clientInjectArgs.find(message.pid);
+            if (it != clientInjectArgs.end()) {
+                clientInjectArgs.erase(it);
+            }
             UpdateClientStatus(message.pid);
             break;
+        }
 
         case wxbox::WxBoxMessageType::WxBotRequestOrResponse: {
             WxBotRequestOrResponseHandler(message);
