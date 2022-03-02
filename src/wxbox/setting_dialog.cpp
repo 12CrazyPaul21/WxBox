@@ -297,6 +297,10 @@ void WxBoxSettingDialog::LoadSetting()
 
 int WxBoxSettingDialog::ModifySetting(int tabIndex)
 {
+    if (waitingLoop) {
+        return 0;
+    }
+
     ui->tabWidget->setCurrentIndex(tabIndex);
     LoadSetting();
 

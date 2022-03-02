@@ -315,6 +315,9 @@
                    </item>
                    <item row="3" column="0">
                     <widget class="QLabel" name="labelLoadingIconType">
+                     <property name="enabled">
+                      <bool>true</bool>
+                     </property>
                      <property name="text">
                       <string>WxBox窗口Loading图标动画类型</string>
                      </property>
@@ -829,8 +832,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>502</width>
-                 <height>253</height>
+                 <width>532</width>
+                 <height>266</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -1130,8 +1133,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>502</width>
-                 <height>253</height>
+                 <width>532</width>
+                 <height>266</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -1299,8 +1302,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>502</width>
-                 <height>253</height>
+                 <width>532</width>
+                 <height>266</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_10">

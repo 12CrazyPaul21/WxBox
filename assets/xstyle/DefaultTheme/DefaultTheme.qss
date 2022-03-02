@@ -9,7 +9,7 @@
     qproperty-reserve_shadow_width: 6;
     qproperty-shadow_color: black;
     qproperty-border_radius: 4;
-    qproperty-window_fade_out_duration: 300;
+    qproperty-window_fade_out_duration: 200;
     qproperty-window_icon_url: ":/XStyleTheme/DefaultTheme/image/app.png";
 }
 

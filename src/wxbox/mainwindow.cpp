@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #define WXBOX_MAIN_WINDOW_NAME "MainWindow"
-#define WXBOX_MAIN_WINDOW_TITLE "WxBox"
+#define WXBOX_MAIN_WINDOW_TITLE "WxBox - " WXBOX_VERSION
 #define WXBOX_ICON_URL ":/icon/app.ico"
 
 MainWindow::MainWindow(QWidget* parent)
