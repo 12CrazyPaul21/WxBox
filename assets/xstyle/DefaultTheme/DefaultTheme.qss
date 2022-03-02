@@ -1,7 +1,7 @@
 // #XStyleWindowTheme#
 
 .xstylewindow {
-    qproperty-title_height: 50;
+    qproperty-title_height: 40;
     qproperty-footer_height: 20;
     qproperty-title_button_width: 40;
     qproperty-title_button_height: 40;
@@ -73,6 +73,10 @@
     qproperty-window_loading_icon_url: ":/XStyleTheme/DefaultTheme/image/loading.png";
 }
 
+#MainWindowBodyFrame {
+    
+}
+
 #CrashDumper_body_container QLabel {
     color: rgba(200, 200, 200, 200);
 }
@@ -99,6 +103,11 @@ QMenu::right-arrow:selected {
 
 #DownloadDialog_labelStatus {
     font: normal bold 14px "Microsoft YaHei";
+    color: white;
+}
+
+#groupBoxCommand {
+    font: normal bold 13px "Microsoft YaHei";
     color: white;
 }
 

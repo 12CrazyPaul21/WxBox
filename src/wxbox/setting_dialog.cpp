@@ -340,7 +340,7 @@ void WxBoxSettingDialog::Apply(bool confirm)
     if (neededRestartToApplyAll) {
         QString msg = Translate("Need Restart WxBox To Apply All Change");
         if (neededRestartToApplyAll & 2) {
-            msg = QString("<center>%1</center>(<font color=\"red\">%2</font>)").arg(msg).arg(Translate("Change WxBox Server Port Must Restart WxBox. Otherwise, The Newly WxBox Client Cannot Be Connected"));
+            msg = QString("<center>%1</center>( <font color=\"red\">%2</font> )").arg(msg).arg(Translate("Change WxBox Server Port Must Restart WxBox. Otherwise, The Newly WxBox Client Cannot Be Connected"));
         }
 
         xstyle::warning(this, "", msg);

@@ -139,7 +139,7 @@ XStyleMessageBoxButton WxBoxController::ShowStartAndInjectMessageDialog(bool sta
 {
     QString question = _wctr(start ? "Do you want to inject WxBot at the same time?" : "Do you want to inject WxBot Module?");
     QString warning  = _wctr("Inject WxBot module can't guarantee the stable operation of the WeChat");
-    QString message  = QString("<center>%1</center>(<font color=\"orange\">%2</font>)").arg(question).arg(warning);
+    QString message  = QString("<center>%1</center>( <font color=\"orange\">%2</font> )").arg(question).arg(warning);
     return xstyle::information(view, "", message, XStyleMessageBoxButtonType::YesNo);
 }
 
