@@ -15,6 +15,8 @@ class AboutWxBoxDialog final : public XStyleWindow
     explicit AboutWxBoxDialog(QWidget* parent = nullptr, bool deleteWhenClose = false);
     ~AboutWxBoxDialog();
 
+    void UpdateAboutContent();
+
   protected:
     void RetranslateUi();
 

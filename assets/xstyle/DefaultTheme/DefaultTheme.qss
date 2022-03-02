@@ -13,6 +13,10 @@
     qproperty-window_icon_url: ":/XStyleTheme/DefaultTheme/image/app.png";
 }
 
+.xstylewindow * {
+    font-family: "Microsoft YaHei";
+}
+
 .xstylewindow_container {
     background: rgb(0, 0, 77);
 }
@@ -77,10 +81,6 @@
     color: rgba(200, 200, 200, 200);
 }
 
-#CrashDumper_xstylewindow * {
-    font-family: "Microsoft YaHei";
-}
-
 #CrashDumper_xstylewindow {
     qproperty-footer_height: 35;
 }
@@ -125,4 +125,16 @@ QMenu::right-arrow:selected {
 
 #WxBoxSettingDialog_body_container * {
     font-family: "Microsoft YaHei";
+}
+
+#labelAboutContent {
+    font-size: 12px;
+}
+
+#AboutWxBoxDialog_xstylewindow {
+    qproperty-footer_height: 18;
+}
+
+#AboutWxBoxDialog_body_container {
+    background: rgba(255, 255, 255, 230);
 }

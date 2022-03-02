@@ -641,10 +641,29 @@
     </message>
 </context>
 <context>
-    <name>AboutWxboxDialog_xstylewindow</name>
+    <name>AboutWxBoxDialog_xstylewindow</name>
     <message>
         <source>About WxBox</source>
         <translation>关于WxBox</translation>
+    </message>
+    <message>
+        <source>Project Repository URL</source>
+        <translation>WxBox项目仓库URL</translation>
+    </message>
+    <message>
+        <source>Thirdparty Project Repository URL</source>
+        <translation>第三方依赖仓库URL</translation>
+    </message>
+    <message>
+        <source>Thirdparty Resource URL</source>
+        <translation>第三方引用资源URL</translation>
+    </message>
+</context>
+<context>
+    <name>AboutWxBoxDialog</name>
+    <message>
+        <source>OK</source>
+        <translation>确定</translation>
     </message>
 </context>
 </TS>
