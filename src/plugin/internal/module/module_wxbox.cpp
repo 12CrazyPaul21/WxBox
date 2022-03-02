@@ -1,4 +1,5 @@
 #include <plugin/plugin.h>
+#include <random>
 
 //
 // wxbox module methods
@@ -26,6 +27,31 @@ static int __wxbox_help(lua_State* L)
 
     wb_plugin::DispatchPluginToHostEvent(std::move(event));
     return 0;
+}
+
+static inline std::string __inner_generate_temp_file_name(const std::string& prefix)
+{
+    static std::default_random_engine              re;
+    static std::uniform_int_distribution<uint16_t> ud(0, 1000);
+
+    std::stringstream ss;
+    ss << prefix << "_" << wb_process::TimeStampToDate<std::chrono::milliseconds>(wb_process::GetCurrentTimestamp(), false) << ud(re);
+    return ss.str();
+}
+
+static int __wxbox_generate_temp_file_name(lua_State* L)
+{
+    const char* prefix = luaL_checkstring(L, 1);
+    luaL_argcheck(L, prefix != nullptr, 1, "prefix is required");
+
+    lua_pushstring(L, __inner_generate_temp_file_name(prefix).c_str());
+    return 1;
+}
+
+static int __wxbox_global_temp_folder_path(lua_State* L)
+{
+    lua_pushstring(L, wb_plugin::GetPluginVirtualMachineGlobalTempRoot().c_str());
+    return 1;
 }
 
 static int __wxbox_package_storage_path(lua_State* L)
@@ -727,6 +753,8 @@ static int __wxbox_chatroom_notify_all(lua_State* L)
 const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"version", __wxbox_version},
     {"help", __wxbox_help},
+    {"generate_temp_file_name", __wxbox_generate_temp_file_name},
+    {"global_temp_folder_path", __wxbox_global_temp_folder_path},
     {"package_storage_path", __wxbox_package_storage_path},
     {"dispatch_host_event", __wxbox_dispatch_host_event},
 

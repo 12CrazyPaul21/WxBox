@@ -152,6 +152,7 @@ namespace wxbox {
 
         void        ExecutePluginVirtualMachineGC();
         std::string GetPluginVirtualMachineStorageRoot();
+        std::string GetPluginVirtualMachineGlobalTempRoot();
         void        ChangeLongTaskTimeout(std::time_t timeout);
 
         template<PluginVirtualMachineCommandType type>

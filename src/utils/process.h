@@ -207,11 +207,15 @@ namespace wxbox {
                 char      buffer[100] = {0};
                 struct tm timeInfo    = {0};
 
+                auto err =
 #if WXBOX_IN_WINDOWS_OS
-                localtime_s(&timeInfo, &tt);
+                    localtime_s(&timeInfo, &tt);
 #else
-                localtime_r(&timeInfo, &tt);
+                    localtime_r(&timeInfo, &tt);
 #endif
+                if (err) {
+                    return "";
+                }
 
                 if (standard) {
                     strftime(buffer, sizeof(buffer), "%Y-%m-%d %X", &timeInfo);
@@ -219,6 +223,7 @@ namespace wxbox {
                 else {
                     strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", &timeInfo);
                 }
+
                 return buffer;
             }
         }
