@@ -137,13 +137,8 @@ static bool GetDesktopFullPhysicalRegion(wb_platform::FullMonitorPhysicalRegion&
     return true;
 }
 
-static bool CaptureMonitorSnap_Windows(const std::string& savePngImageFilePath)
+static bool DoCaptureMonitorSnap(const std::string& savePngImageFilePath, wb_platform::FullMonitorPhysicalRegion& region)
 {
-    wb_platform::FullMonitorPhysicalRegion region;
-    if (!GetDesktopFullPhysicalRegion(region)) {
-        return false;
-    }
-
     //
     // config bitmap info
     //
@@ -204,6 +199,27 @@ static bool CaptureMonitorSnap_Windows(const std::string& savePngImageFilePath)
     return retval;
 }
 
+static inline bool CaptureMainMonitorSnap_Windows(const std::string& savePngImageFilePath)
+{
+    RECT rect;
+    if (!GetWindowRect(GetDesktopWindow(), &rect)) {
+        return false;
+    }
+
+    wb_platform::FullMonitorPhysicalRegion region(rect.left, rect.top, (rect.right - rect.left), (rect.bottom - rect.top));
+    return DoCaptureMonitorSnap(savePngImageFilePath, region);
+}
+
+static inline bool CaptureMonitorSnap_Windows(const std::string& savePngImageFilePath)
+{
+    wb_platform::FullMonitorPhysicalRegion region;
+    if (!GetDesktopFullPhysicalRegion(region)) {
+        return false;
+    }
+
+    return DoCaptureMonitorSnap(savePngImageFilePath, region);
+}
+
 #elif WXBOX_IN_MAC_OS
 
 static bool Is64System_Mac()
@@ -222,6 +238,12 @@ static std::string GetSystemVersionDescription_Mac()
 {
     throw std::exception("GetSystemVersionDescription_Mac stub");
     return "";
+}
+
+static bool CaptureMainMonitorSnap_Mac(const std::string& savePngImageFilePath)
+{
+    throw std::exception("CaptureMainMonitorSnap_Mac stub");
+    return false;
 }
 
 static bool CaptureMonitorSnap_Mac(const std::string& savePngImageFilePath)
@@ -284,6 +306,15 @@ void wxbox::util::platform::LockScreen()
     ::LockWorkStation();
 #elif WXBOX_IN_MAC_OS
     throw std::exception("LockScreen stub");
+#endif
+}
+
+bool wxbox::util::platform::CaptureMainMonitorSnap(const std::string& savePngImageFilePath)
+{
+#if WXBOX_IN_WINDOWS_OS
+    return CaptureMainMonitorSnap_Windows(savePngImageFilePath);
+#elif WXBOX_IN_MAC_OS
+    return CaptureMainMonitorSnap_Mac(savePngImageFilePath);
 #endif
 }
 

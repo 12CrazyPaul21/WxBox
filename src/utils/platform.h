@@ -90,6 +90,7 @@ namespace wxbox {
             std::string GetSystemVersionDescription();
 
             void LockScreen();
+            bool CaptureMainMonitorSnap(const std::string& savePngImageFilePath);
             bool CaptureMonitorSnap(const std::string& savePngImageFilePath);
             bool Shell(const std::string& command, const std::vector<std::string>& args = std::vector<std::string>());
 
