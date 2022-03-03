@@ -251,15 +251,15 @@ void WxBoxSettingDialog::LoadSetting()
     // CoreDump groupbox
     //
 
-    SetCurrentSettingValue(ui->lineEditCoreDumpPath, QString(config.coredump_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditCoreDumpPath, QString(wb_string::NativeToUtf8String(config.coredump_path()).c_str()));
     SetCurrentSettingValue(ui->lineEditCoreDumpPrefix, QString(config.coredump_prefix().c_str()));
-    SetCurrentSettingValue(ui->lineEditCoreDumper, QString(config.crashdumper().c_str()));
+    SetCurrentSettingValue(ui->lineEditCoreDumper, QString(wb_string::NativeToUtf8String(config.crashdumper()).c_str()));
 
     //
     // Log groupbox
     //
 
-    SetCurrentSettingValue(ui->lineEditLogPath, QString(config.log_file_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditLogPath, QString(wb_string::NativeToUtf8String(config.log_file_path()).c_str()));
     SetCurrentSettingValue(ui->lineEditLogBasename, QString(config.log_name().c_str()));
     SetCurrentSettingValue(ui->sliderLogMaxRotatingFileCount, config.log_max_rotating_file_count());
     SetCurrentSettingValue(ui->sliderLogMaxSingleFileSize, config.log_max_single_file_size() / 1048576);

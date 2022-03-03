@@ -371,7 +371,7 @@ bool wxbox::util::coredump::RegisterUnhandledExceptionAutoDumper(const std::stri
 #endif
 
     if (g_alreadyRegistered) {
-        g_dumpPrefix   = dumpPrefix;
+        g_dumpPrefix   = wb_string::Utf8ToNativeString(dumpPrefix);
         g_dumpSinkPath = dumpSinkPath;
         g_dumperPath   = dumperPath;
         g_i18nPath     = i18nPath;
@@ -384,7 +384,7 @@ bool wxbox::util::coredump::RegisterUnhandledExceptionAutoDumper(const std::stri
 void wxbox::util::coredump::ChangeDumpePrefix(const std::string& prefix)
 {
     std::lock_guard<std::mutex> lock(g_mutexHandleUnhandleException);
-    g_dumpPrefix = prefix;
+    g_dumpPrefix = wb_string::Utf8ToNativeString(prefix);
 }
 
 void wxbox::util::coredump::ChangeDumperLanguage(const std::string& language)

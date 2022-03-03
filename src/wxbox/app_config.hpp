@@ -185,7 +185,7 @@ class AppConfig final : public wb_config::Config
             return "";
         }
 
-        return wxbox::util::file::JoinPath(wxbox::util::file::GetProcessRootPath(), coredumpPath);
+        return wxbox::util::file::JoinPath(wxbox::util::file::GetProcessRootPath(), wb_string::Utf8ToNativeString(coredumpPath));
     }
 
     std::string coredump_prefix() const
@@ -206,12 +206,13 @@ class AppConfig final : public wb_config::Config
             return "";
         }
 
-        auto rootPath        = wxbox::util::file::GetProcessRootPath();
-        auto crashdumperPath = wxbox::util::file::JoinPath(rootPath, crashdumper) + DUMPER_EXT_NAME;
+        auto rootPath          = wxbox::util::file::GetProcessRootPath();
+        auto nativeCrashDumper = wb_string::Utf8ToNativeString(crashdumper);
+        auto crashdumperPath   = wxbox::util::file::JoinPath(rootPath, nativeCrashDumper) + DUMPER_EXT_NAME;
 
 #if _DEBUG
         if (!wb_file::IsPathExists(crashdumperPath)) {
-            crashdumperPath = wb_file::JoinPath(wb_file::JoinPath(rootPath, "/../crashdumper"), crashdumper) + DUMPER_EXT_NAME;
+            crashdumperPath = wb_file::JoinPath(wb_file::JoinPath(rootPath, "/../crashdumper"), nativeCrashDumper) + DUMPER_EXT_NAME;
         }
 #endif
 
