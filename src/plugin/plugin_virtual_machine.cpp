@@ -854,7 +854,7 @@ std::string wxbox::plugin::GetPluginVirtualMachineStorageRoot()
     }
 
     auto path = wb_file::JoinPath(g_vm_signleton->pluginPath, "storage");
-    wb_file::RecursivelyCreateFolder(wb_string::Utf8ToNativeString(path));
+    wb_file::RecursivelyCreateFolder(path);
     return path;
 }
 
@@ -865,7 +865,7 @@ std::string wxbox::plugin::GetPluginVirtualMachineGlobalTempRoot()
     }
 
     auto path = wb_file::JoinPath(GetPluginVirtualMachineStorageRoot(), "global_temp");
-    wb_file::RecursivelyCreateFolder(wb_string::Utf8ToNativeString(path));
+    wb_file::RecursivelyCreateFolder(path);
     return path;
 }
 

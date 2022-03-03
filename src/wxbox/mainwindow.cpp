@@ -558,7 +558,7 @@ void MainWindow::RegisterWidgetEventHandler()
     });
 
     QObject::connect(ui->actionOpenPluginPath, &QAction::triggered, this, [this]() {
-        wb_file::OpenFolderInExplorer(wb_string::Utf8ToNativeString(config.plugins_root()));
+        wb_file::OpenFolderInExplorer(config.plugins_root());
     });
     QObject::connect(ui->actionUpdateFeatureRepository, &QAction::triggered, this, &MainWindow::UpdateWeChatFeatures);
     QObject::connect(ui->actionSetting, &QAction::triggered, this, &MainWindow::ModifySetting);

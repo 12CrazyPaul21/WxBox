@@ -551,12 +551,13 @@ class AppConfig final : public wb_config::Config
             return "";
         }
 
-        auto rootPath        = wxbox::util::file::GetProcessRootPath();
-        auto pluginsRootPath = wxbox::util::file::JoinPath(rootPath, pluginsRelpath);
+        auto rootPath             = wxbox::util::file::GetProcessRootPath();
+        auto nativePluginsRelPath = wb_string::Utf8ToNativeString(pluginsRelpath);
+        auto pluginsRootPath      = wxbox::util::file::JoinPath(rootPath, nativePluginsRelPath);
 
 #if _DEBUG
         if (!wb_file::IsPathExists(pluginsRootPath)) {
-            pluginsRootPath = wb_file::JoinPath(rootPath, "/../../../../" + pluginsRelpath);
+            pluginsRootPath = wb_file::JoinPath(rootPath, "/../../../../" + nativePluginsRelPath);
         }
 #endif
 

@@ -269,7 +269,7 @@ void WxBoxSettingDialog::LoadSetting()
     // Plugin tab
     //
 
-    SetCurrentSettingValue(ui->lineEditPluginsPath, QString(config.plugins_root().c_str()));
+    SetCurrentSettingValue(ui->lineEditPluginsPath, QString(wb_string::NativeToUtf8String(config.plugins_root()).c_str()));
     SetCurrentSettingValue(ui->sliderPluginLongTaskTimeout, config.plugin_long_task_timeout());
     SetCurrentSettingValue(ui->sliderPluginLogMaxLine, config.plugin_log_max_line());
     SetCurrentSettingValue(ui->sliderPluginCommandMaxHistoryLine, config.plugin_command_max_history_line());
