@@ -423,7 +423,7 @@ bool wxbox::util::coredump::GenerateMiniDump(const GenerateMiniDumpParameter& pa
     }
     if (!sinkPathExists) {
         // recursively create sink path
-        if (!std::experimental::filesystem::create_directories(parameter.dumpSinkPath)) {
+        if (!wb_file::RecursivelyCreateFolder(parameter.dumpSinkPath)) {
             return false;
         }
     }

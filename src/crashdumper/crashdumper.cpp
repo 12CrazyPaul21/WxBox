@@ -407,7 +407,7 @@ static int main_Windows(int argc, char* argv[])
         }
     }
 
-    if (!dumpReport) {
+    if (!dumpReport || !miniDumpSuccess) {
         ::CloseHandle(hProcess);
         return 0;
     }
