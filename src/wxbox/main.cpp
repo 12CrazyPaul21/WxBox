@@ -109,9 +109,9 @@ int main(int argc, char* argv[])
 
         QStringList args;
         for (int i = 1; i < argc; i++) {
-            args << argv[i];
+            args << wb_string::NativeToUtf8String(argv[i]).c_str();
         }
-        QProcess::startDetached(argv[0], args);
+        QProcess::startDetached(wb_string::NativeToUtf8String(argv[0]).c_str(), args);
     }
 
     return g_wxbox_exit_code;
