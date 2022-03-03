@@ -44,7 +44,7 @@ int WxBoxMain(int argc, char* argv[])
     SHOW_SPLASH_SCREEN();
 
     // change language
-    xstyle_manager.RegisterI18nFolder(QString(config.i18n_path().c_str()));
+    xstyle_manager.RegisterI18nFolder(QString(wb_string::NativeToUtf8String(config.i18n_path()).c_str()));
     xstyle_manager.ChangeLanguage(QString(config.language().c_str()));
 
     // init logger
