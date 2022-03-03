@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
         auto command     = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::Eval>();
         command->command = ">>";
-        command->command += statement;
+        command->command += wb_string::NativeToUtf8String(statement);
         wb_plugin::PushPluginVirtualMachineCommand(command);
         command->signal.get_future().wait();
     }
