@@ -366,7 +366,7 @@ class AppConfig final : public wb_config::Config
 
     std::string wechat_installation_dir() const
     {
-        return this->operator[](WXBOX_WECHAT_INSTALLATION_DIR_KEY).safe_as<std::string>();
+        return wb_string::Utf8ToNativeString(this->operator[](WXBOX_WECHAT_INSTALLATION_DIR_KEY).safe_as<std::string>());
     }
 
     void change_wechat_installation_dir(const std::string& path)
@@ -377,7 +377,7 @@ class AppConfig final : public wb_config::Config
 
     std::string wechat_module_dir() const
     {
-        return this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY).safe_as<std::string>();
+        return wb_string::Utf8ToNativeString(this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY).safe_as<std::string>());
     }
 
     void change_wechat_module_dir(const std::string& path)

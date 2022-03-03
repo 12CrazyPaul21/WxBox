@@ -290,8 +290,8 @@ void WxBoxSettingDialog::LoadSetting()
     // WeChat tab
     //
 
-    SetCurrentSettingValue(ui->lineEditWeChatInstallationPath, QString(config.wechat_installation_dir().c_str()));
-    SetCurrentSettingValue(ui->lineEditWeChatCoreModulePath, QString(config.wechat_module_dir().c_str()));
+    SetCurrentSettingValue(ui->lineEditWeChatInstallationPath, QString(wb_string::NativeToUtf8String(config.wechat_installation_dir()).c_str()));
+    SetCurrentSettingValue(ui->lineEditWeChatCoreModulePath, QString(wb_string::NativeToUtf8String(config.wechat_module_dir()).c_str()));
     SetCurrentSettingValue(ui->sliderClientStatusUpdateInterval, config.wechat_status_monitor_interval());
 }
 
