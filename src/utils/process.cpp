@@ -770,7 +770,7 @@ std::string wxbox::util::process::GetThreadName(THREAD_HANDLE hThread)
     wchar_t*    threadDescription = nullptr;
 
     if (SUCCEEDED(fnGetThreadDescription(hThread, &threadDescription))) {
-        threadName = wb_string::ToUtf8String(threadDescription);
+        threadName = wb_string::ToNativeString(threadDescription);
         ::LocalFree(threadDescription);
     }
 
