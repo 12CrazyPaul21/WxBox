@@ -129,7 +129,7 @@ class AppConfig final : public wb_config::Config
         }
 
         auto rootPath = wxbox::util::file::GetProcessRootPath();
-        auto i18nPath = wxbox::util::file::JoinPath(rootPath, i18nSubPath);
+        auto i18nPath = wxbox::util::file::JoinPath(rootPath, wb_string::Utf8ToNativeString(i18nSubPath));
 
 #if _DEBUG
         if (!wb_file::IsPathExists(i18nPath)) {
@@ -152,7 +152,7 @@ class AppConfig final : public wb_config::Config
         }
 
         auto rootPath  = wxbox::util::file::GetProcessRootPath();
-        auto themePath = wxbox::util::file::JoinPath(rootPath, themeSubPath);
+        auto themePath = wxbox::util::file::JoinPath(rootPath, wb_string::Utf8ToNativeString(themeSubPath));
 
 #if _DEBUG
         if (!wb_file::IsPathExists(themePath)) {
@@ -185,7 +185,7 @@ class AppConfig final : public wb_config::Config
             return "";
         }
 
-        return wxbox::util::file::JoinPath(wxbox::util::file::GetProcessRootPath(), coredumpPath);
+        return wxbox::util::file::JoinPath(wxbox::util::file::GetProcessRootPath(), wb_string::Utf8ToNativeString(coredumpPath));
     }
 
     std::string coredump_prefix() const
@@ -206,12 +206,13 @@ class AppConfig final : public wb_config::Config
             return "";
         }
 
-        auto rootPath        = wxbox::util::file::GetProcessRootPath();
-        auto crashdumperPath = wxbox::util::file::JoinPath(rootPath, crashdumper) + DUMPER_EXT_NAME;
+        auto rootPath          = wxbox::util::file::GetProcessRootPath();
+        auto nativeCrashDumper = wb_string::Utf8ToNativeString(crashdumper);
+        auto crashdumperPath   = wxbox::util::file::JoinPath(rootPath, nativeCrashDumper) + DUMPER_EXT_NAME;
 
 #if _DEBUG
         if (!wb_file::IsPathExists(crashdumperPath)) {
-            crashdumperPath = wb_file::JoinPath(wb_file::JoinPath(rootPath, "/../crashdumper"), crashdumper) + DUMPER_EXT_NAME;
+            crashdumperPath = wb_file::JoinPath(wb_file::JoinPath(rootPath, "/../crashdumper"), nativeCrashDumper) + DUMPER_EXT_NAME;
         }
 #endif
 
@@ -225,8 +226,8 @@ class AppConfig final : public wb_config::Config
     std::string log_file_path() const
     {
         auto rootPath = wxbox::util::file::GetProcessRootPath();
-        auto subPath  = log_sub_path();
-        auto logName  = log_name();
+        auto subPath  = wb_string::Utf8ToNativeString(log_sub_path());
+        auto logName  = wb_string::Utf8ToNativeString(log_name());
         return wb_file::JoinPath(wb_file::JoinPath(rootPath, subPath), logName) + ".log";
     }
 
@@ -308,7 +309,7 @@ class AppConfig final : public wb_config::Config
         }
 
         auto rootPath     = wxbox::util::file::GetProcessRootPath();
-        auto featuresPath = wxbox::util::file::JoinPath(rootPath, featuresRealPath);
+        auto featuresPath = wxbox::util::file::JoinPath(rootPath, wb_string::Utf8ToNativeString(featuresRealPath));
 
 #if _DEBUG
         if (!wb_file::IsPathExists(featuresPath)) {
@@ -347,6 +348,9 @@ class AppConfig final : public wb_config::Config
 
     std::string feature_update_timestamp() const
     {
+        if (!wb_file::IsPathExists(features_path())) {
+            return "";
+        }
         return this->operator[](WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP_KEY).safe_as<std::string>();
     }
 
@@ -362,7 +366,7 @@ class AppConfig final : public wb_config::Config
 
     std::string wechat_installation_dir() const
     {
-        return this->operator[](WXBOX_WECHAT_INSTALLATION_DIR_KEY).safe_as<std::string>();
+        return wb_string::Utf8ToNativeString(this->operator[](WXBOX_WECHAT_INSTALLATION_DIR_KEY).safe_as<std::string>());
     }
 
     void change_wechat_installation_dir(const std::string& path)
@@ -373,7 +377,7 @@ class AppConfig final : public wb_config::Config
 
     std::string wechat_module_dir() const
     {
-        return this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY).safe_as<std::string>();
+        return wb_string::Utf8ToNativeString(this->operator[](WXBOX_WECHAT_MODULE_DIR_KEY).safe_as<std::string>());
     }
 
     void change_wechat_module_dir(const std::string& path)
@@ -516,7 +520,18 @@ class AppConfig final : public wb_config::Config
 #ifndef _DEBUG
         return wxbox::util::file::GetProcessRootPath();
 #else
-        auto rootPath      = wxbox::util::file::GetProcessRootPath();
+        auto rootPath = wxbox::util::file::GetProcessRootPath();
+
+        if (wb_file::IsPathExists(wb_file::JoinPath(rootPath,
+#if WXBOX_IN_WINDOWS_OS
+                                                    "WxBot.dll"
+#else
+                                                    "WxBot.so"
+#endif
+                                                    ))) {
+            return rootPath;
+        }
+
         auto wxbotRootPath = wb_file::JoinPath(rootPath, "/../wxbot/");
         if (!wb_file::IsPathExists(wxbotRootPath)) {
             wxbotRootPath = wb_file::JoinPath(rootPath, "/../src/wxbot/");
@@ -536,12 +551,13 @@ class AppConfig final : public wb_config::Config
             return "";
         }
 
-        auto rootPath        = wxbox::util::file::GetProcessRootPath();
-        auto pluginsRootPath = wxbox::util::file::JoinPath(rootPath, pluginsRelpath);
+        auto rootPath             = wxbox::util::file::GetProcessRootPath();
+        auto nativePluginsRelPath = wb_string::Utf8ToNativeString(pluginsRelpath);
+        auto pluginsRootPath      = wxbox::util::file::JoinPath(rootPath, nativePluginsRelPath);
 
 #if _DEBUG
         if (!wb_file::IsPathExists(pluginsRootPath)) {
-            pluginsRootPath = wb_file::JoinPath(rootPath, "/../../../../" + pluginsRelpath);
+            pluginsRootPath = wb_file::JoinPath(rootPath, "/../../../../" + nativePluginsRelPath);
         }
 #endif
 

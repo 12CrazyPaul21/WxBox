@@ -348,8 +348,8 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
 
         case wb_plugin::HostEventType::ReportHelp: {
             std::string helpTxtFilePath = wb_file::JoinPath(args->plugins_root, "wxbox_apis.txt");
-            if (wb_file::IsPathExists(wb_string::Utf8ToNativeString(helpTxtFilePath))) {
-                SendFileToFileHelper(helpTxtFilePath);
+            if (wb_file::IsPathExists(helpTxtFilePath)) {
+                SendFileToFileHelper(wb_string::NativeToUtf8String(helpTxtFilePath));
             }
             break;
         }
