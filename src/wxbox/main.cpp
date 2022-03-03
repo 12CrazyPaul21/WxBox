@@ -64,7 +64,7 @@ int WxBoxMain(int argc, char* argv[])
 
     // init xstyle
     SPLASH_MESSAGE("Init XStyle Theme");
-    xstyle_manager.RegisterThemeFolder(QString(config.theme_path().c_str()));
+    xstyle_manager.RegisterThemeFolder(QString(wb_string::NativeToUtf8String(config.theme_path()).c_str()));
     xstyle_manager.RegisterDefaultTheme(XSTYLE_DEFAULT_THEME_URL);
     xstyle_manager.ChangeTheme(QString(config.current_theme_name().c_str()));
 

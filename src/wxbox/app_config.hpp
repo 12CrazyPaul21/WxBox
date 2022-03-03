@@ -152,7 +152,7 @@ class AppConfig final : public wb_config::Config
         }
 
         auto rootPath  = wxbox::util::file::GetProcessRootPath();
-        auto themePath = wxbox::util::file::JoinPath(rootPath, themeSubPath);
+        auto themePath = wxbox::util::file::JoinPath(rootPath, wb_string::Utf8ToNativeString(themeSubPath));
 
 #if _DEBUG
         if (!wb_file::IsPathExists(themePath)) {

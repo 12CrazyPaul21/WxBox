@@ -244,7 +244,7 @@ void WxBoxSettingDialog::LoadSetting()
 
     SetCurrentSettingValue(ui->lineEditi18nPath, QString(wb_string::NativeToUtf8String(config.i18n_path()).c_str()));
     SetCurrentSettingValue(ui->comboBoxLanguage, languageIndex);
-    SetCurrentSettingValue(ui->lineEditThemePath, QString(config.theme_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditThemePath, QString(wb_string::NativeToUtf8String(config.theme_path()).c_str()));
     SetCurrentSettingValue(ui->comboBoxTheme, QString(config.current_theme_name().c_str()));
 
     //
