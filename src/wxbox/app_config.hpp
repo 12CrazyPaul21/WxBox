@@ -309,7 +309,7 @@ class AppConfig final : public wb_config::Config
         }
 
         auto rootPath     = wxbox::util::file::GetProcessRootPath();
-        auto featuresPath = wxbox::util::file::JoinPath(rootPath, featuresRealPath);
+        auto featuresPath = wxbox::util::file::JoinPath(rootPath, wb_string::Utf8ToNativeString(featuresRealPath));
 
 #if _DEBUG
         if (!wb_file::IsPathExists(featuresPath)) {
@@ -348,6 +348,9 @@ class AppConfig final : public wb_config::Config
 
     std::string feature_update_timestamp() const
     {
+        if (!wb_file::IsPathExists(features_path())) {
+            return "";
+        }
         return this->operator[](WXBOX_WECHAT_FEATURE_UPDATE_TIMESTAMP_KEY).safe_as<std::string>();
     }
 
@@ -517,7 +520,18 @@ class AppConfig final : public wb_config::Config
 #ifndef _DEBUG
         return wxbox::util::file::GetProcessRootPath();
 #else
-        auto rootPath      = wxbox::util::file::GetProcessRootPath();
+        auto rootPath = wxbox::util::file::GetProcessRootPath();
+
+        if (wb_file::IsPathExists(wb_file::JoinPath(rootPath,
+#if WXBOX_IN_WINDOWS_OS
+                                                    "WxBot.dll"
+#else
+                                                    "WxBot.so"
+#endif
+                                                    ))) {
+            return rootPath;
+        }
+
         auto wxbotRootPath = wb_file::JoinPath(rootPath, "/../wxbot/");
         if (!wb_file::IsPathExists(wxbotRootPath)) {
             wxbotRootPath = wb_file::JoinPath(rootPath, "/../src/wxbot/");

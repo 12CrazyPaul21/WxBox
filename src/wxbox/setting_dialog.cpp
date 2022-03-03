@@ -279,7 +279,7 @@ void WxBoxSettingDialog::LoadSetting()
     // Feature tab
     //
 
-    SetCurrentSettingValue(ui->lineEditFeaturePath, QString(config.features_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditFeaturePath, QString(wb_string::NativeToUtf8String(config.features_path()).c_str()));
     SetCurrentSettingValue(ui->lineEditFeatureRepoRootURL, QString(config.features_repo_root_url().c_str()));
     SetCurrentSettingValue(ui->lineEditFeatureVersionTimestamp, QString(config.feature_update_timestamp().c_str()));
     SetCurrentSettingValue(ui->checkBoxAvoidRevokeMessage, config.wechat_avoid_revoke_message());
