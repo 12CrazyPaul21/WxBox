@@ -14,6 +14,10 @@ int main(int argc, char* argv[])
     }
     cout << "plugins path : " << pluginPath << std::endl;
 
+#ifdef WXBOX_IN_WINDOWS_OS
+    ::SetConsoleOutputCP(65001);
+#endif
+
     wb_plugin::PluginVirtualMachineStartupInfo startupInfo;
     startupInfo.pluginPath      = pluginPath;
     startupInfo.longTaskTimeout = WXBOX_PLUGIN_LONG_TASK_DEFAULT_TIMEOUT_MS;
