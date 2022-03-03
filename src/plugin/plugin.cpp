@@ -168,7 +168,7 @@ int wxbox::plugin::__declare_plugin(lua_State* L)
     lua_setfield(L, -2, "plugin_name");
 
     // record plugin storage path
-    lua_pushstring(L, wb_file::JoinPath(wb_plugin::GetPluginVirtualMachineStorageRoot(), pluginName).c_str());
+    lua_pushstring(L, wb_file::JoinPath(wb_string::NativeToUtf8String(wb_plugin::GetPluginVirtualMachineStorageRoot()), pluginName).c_str());
     lua_setfield(L, -2, "storage_path");
 
     // register event handler stubs

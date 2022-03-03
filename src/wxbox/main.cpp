@@ -44,7 +44,7 @@ int WxBoxMain(int argc, char* argv[])
     SHOW_SPLASH_SCREEN();
 
     // change language
-    xstyle_manager.RegisterI18nFolder(QString(config.i18n_path().c_str()));
+    xstyle_manager.RegisterI18nFolder(QString(wb_string::NativeToUtf8String(config.i18n_path()).c_str()));
     xstyle_manager.ChangeLanguage(QString(config.language().c_str()));
 
     // init logger
@@ -64,7 +64,7 @@ int WxBoxMain(int argc, char* argv[])
 
     // init xstyle
     SPLASH_MESSAGE("Init XStyle Theme");
-    xstyle_manager.RegisterThemeFolder(QString(config.theme_path().c_str()));
+    xstyle_manager.RegisterThemeFolder(QString(wb_string::NativeToUtf8String(config.theme_path()).c_str()));
     xstyle_manager.RegisterDefaultTheme(XSTYLE_DEFAULT_THEME_URL);
     xstyle_manager.ChangeTheme(QString(config.current_theme_name().c_str()));
 
@@ -109,9 +109,9 @@ int main(int argc, char* argv[])
 
         QStringList args;
         for (int i = 1; i < argc; i++) {
-            args << argv[i];
+            args << wb_string::NativeToUtf8String(argv[i]).c_str();
         }
-        QProcess::startDetached(argv[0], args);
+        QProcess::startDetached(wb_string::NativeToUtf8String(argv[0]).c_str(), args);
     }
 
     return g_wxbox_exit_code;

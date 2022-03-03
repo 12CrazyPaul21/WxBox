@@ -242,24 +242,24 @@ void WxBoxSettingDialog::LoadSetting()
         ui->comboBoxTheme->addItem(theme);
     }
 
-    SetCurrentSettingValue(ui->lineEditi18nPath, QString(config.i18n_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditi18nPath, QString(wb_string::NativeToUtf8String(config.i18n_path()).c_str()));
     SetCurrentSettingValue(ui->comboBoxLanguage, languageIndex);
-    SetCurrentSettingValue(ui->lineEditThemePath, QString(config.theme_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditThemePath, QString(wb_string::NativeToUtf8String(config.theme_path()).c_str()));
     SetCurrentSettingValue(ui->comboBoxTheme, QString(config.current_theme_name().c_str()));
 
     //
     // CoreDump groupbox
     //
 
-    SetCurrentSettingValue(ui->lineEditCoreDumpPath, QString(config.coredump_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditCoreDumpPath, QString(wb_string::NativeToUtf8String(config.coredump_path()).c_str()));
     SetCurrentSettingValue(ui->lineEditCoreDumpPrefix, QString(config.coredump_prefix().c_str()));
-    SetCurrentSettingValue(ui->lineEditCoreDumper, QString(config.crashdumper().c_str()));
+    SetCurrentSettingValue(ui->lineEditCoreDumper, QString(wb_string::NativeToUtf8String(config.crashdumper()).c_str()));
 
     //
     // Log groupbox
     //
 
-    SetCurrentSettingValue(ui->lineEditLogPath, QString(config.log_file_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditLogPath, QString(wb_string::NativeToUtf8String(config.log_file_path()).c_str()));
     SetCurrentSettingValue(ui->lineEditLogBasename, QString(config.log_name().c_str()));
     SetCurrentSettingValue(ui->sliderLogMaxRotatingFileCount, config.log_max_rotating_file_count());
     SetCurrentSettingValue(ui->sliderLogMaxSingleFileSize, config.log_max_single_file_size() / 1048576);
@@ -269,7 +269,7 @@ void WxBoxSettingDialog::LoadSetting()
     // Plugin tab
     //
 
-    SetCurrentSettingValue(ui->lineEditPluginsPath, QString(config.plugins_root().c_str()));
+    SetCurrentSettingValue(ui->lineEditPluginsPath, QString(wb_string::NativeToUtf8String(config.plugins_root()).c_str()));
     SetCurrentSettingValue(ui->sliderPluginLongTaskTimeout, config.plugin_long_task_timeout());
     SetCurrentSettingValue(ui->sliderPluginLogMaxLine, config.plugin_log_max_line());
     SetCurrentSettingValue(ui->sliderPluginCommandMaxHistoryLine, config.plugin_command_max_history_line());
@@ -279,7 +279,7 @@ void WxBoxSettingDialog::LoadSetting()
     // Feature tab
     //
 
-    SetCurrentSettingValue(ui->lineEditFeaturePath, QString(config.features_path().c_str()));
+    SetCurrentSettingValue(ui->lineEditFeaturePath, QString(wb_string::NativeToUtf8String(config.features_path()).c_str()));
     SetCurrentSettingValue(ui->lineEditFeatureRepoRootURL, QString(config.features_repo_root_url().c_str()));
     SetCurrentSettingValue(ui->lineEditFeatureVersionTimestamp, QString(config.feature_update_timestamp().c_str()));
     SetCurrentSettingValue(ui->checkBoxAvoidRevokeMessage, config.wechat_avoid_revoke_message());
@@ -290,8 +290,8 @@ void WxBoxSettingDialog::LoadSetting()
     // WeChat tab
     //
 
-    SetCurrentSettingValue(ui->lineEditWeChatInstallationPath, QString(config.wechat_installation_dir().c_str()));
-    SetCurrentSettingValue(ui->lineEditWeChatCoreModulePath, QString(config.wechat_module_dir().c_str()));
+    SetCurrentSettingValue(ui->lineEditWeChatInstallationPath, QString(wb_string::NativeToUtf8String(config.wechat_installation_dir()).c_str()));
+    SetCurrentSettingValue(ui->lineEditWeChatCoreModulePath, QString(wb_string::NativeToUtf8String(config.wechat_module_dir()).c_str()));
     SetCurrentSettingValue(ui->sliderClientStatusUpdateInterval, config.wechat_status_monitor_interval());
 }
 

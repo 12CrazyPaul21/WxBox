@@ -110,8 +110,8 @@ void WxBoxController::LoadWeChatEnvironmentInfo()
     }
 
     if (wb_wx::ResolveWxEnvInfo(wxEnvInfo)) {
-        config.change_wechat_installation_dir(wxEnvInfo.installPath);
-        config.change_wechat_module_dir(wxEnvInfo.moduleFolderAbsPath);
+        config.change_wechat_installation_dir(wb_string::NativeToUtf8String(wxEnvInfo.installPath));
+        config.change_wechat_module_dir(wb_string::NativeToUtf8String(wxEnvInfo.moduleFolderAbsPath));
     }
 }
 

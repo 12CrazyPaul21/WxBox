@@ -159,7 +159,7 @@ static int __wxbox_generate_temp_file_name(lua_State* L)
 
 static int __wxbox_global_temp_folder_path(lua_State* L)
 {
-    lua_pushstring(L, wb_plugin::GetPluginVirtualMachineGlobalTempRoot().c_str());
+    lua_pushstring(L, wb_string::NativeToUtf8String(wb_plugin::GetPluginVirtualMachineGlobalTempRoot()).c_str());
     return 1;
 }
 
@@ -168,7 +168,7 @@ static int __wxbox_package_storage_path(lua_State* L)
     const char* moduleName = luaL_checkstring(L, 1);
     luaL_argcheck(L, moduleName != nullptr, 1, "module name is required");
 
-    lua_pushstring(L, wb_file::JoinPath(wb_plugin::GetPluginVirtualMachineStorageRoot(), moduleName).c_str());
+    lua_pushstring(L, wb_file::JoinPath(wb_string::NativeToUtf8String(wb_plugin::GetPluginVirtualMachineStorageRoot()), moduleName).c_str());
     return 1;
 }
 
@@ -217,7 +217,7 @@ static int __wxbox_snap(lua_State* L)
         return 1;
     }
 
-    return __inner_send_file(L, "filehelper", false, false, snapFileName, true);
+    return __inner_send_file(L, "filehelper", false, false, wb_string::NativeToUtf8String(snapFileName), true);
 }
 
 static int __wxbox_snap_main_monitor(lua_State* L)
@@ -228,7 +228,7 @@ static int __wxbox_snap_main_monitor(lua_State* L)
         return 1;
     }
 
-    return __inner_send_file(L, "filehelper", false, false, snapFileName, true);
+    return __inner_send_file(L, "filehelper", false, false, wb_string::NativeToUtf8String(snapFileName), true);
 }
 
 static int __wxbox_info(lua_State* L)

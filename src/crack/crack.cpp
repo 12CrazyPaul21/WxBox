@@ -251,7 +251,7 @@ static inline bool OpenWxWithMultiBoxing_CheckWeChatWinModule(HANDLE hProcess, c
     // to string
     std::string moduleAbsPath;
     if (loadDllDebugInfo.fUnicode) {
-        moduleAbsPath = wb_string::ToUtf8String((wchar_t*)dllAbsPathBuffer);
+        moduleAbsPath = wb_string::ToNativeString((wchar_t*)dllAbsPathBuffer);
     }
     else {
         moduleAbsPath = (char*)dllAbsPathBuffer;
