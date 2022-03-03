@@ -129,7 +129,7 @@ class AppConfig final : public wb_config::Config
         }
 
         auto rootPath = wxbox::util::file::GetProcessRootPath();
-        auto i18nPath = wxbox::util::file::JoinPath(rootPath, i18nSubPath);
+        auto i18nPath = wxbox::util::file::JoinPath(rootPath, wb_string::Utf8ToNativeString(i18nSubPath));
 
 #if _DEBUG
         if (!wb_file::IsPathExists(i18nPath)) {
@@ -225,8 +225,8 @@ class AppConfig final : public wb_config::Config
     std::string log_file_path() const
     {
         auto rootPath = wxbox::util::file::GetProcessRootPath();
-        auto subPath  = log_sub_path();
-        auto logName  = log_name();
+        auto subPath  = wb_string::Utf8ToNativeString(log_sub_path());
+        auto logName  = wb_string::Utf8ToNativeString(log_name());
         return wb_file::JoinPath(wb_file::JoinPath(rootPath, subPath), logName) + ".log";
     }
 
