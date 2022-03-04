@@ -1,6 +1,9 @@
 #include <wxbot.hpp>
 
-#define UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME 10000
+#define UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME 5000
+#define WXBOT_HOOK_CHECK_OVERTIME 5000
+
+static std::atomic_int g_singleton = 0;
 
 //
 // WxBot
@@ -130,7 +133,7 @@ bool wxbot::WxBot::HookWeChat()
     wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
 
     // execute hook
-    ExecuteHookWeChat(true);
+    ExecuteHookWeChat(true, WXBOT_HOOK_CHECK_OVERTIME, true);
 
     // register intercept handlers
     RegisterInterceptHanlders();
@@ -152,7 +155,7 @@ void wxbot::WxBot::UnHookWeChat()
     wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
 
     // execute unhook
-    ExecuteHookWeChat(false);
+    ExecuteHookWeChat(false, WXBOT_HOOK_CHECK_OVERTIME, true);
 
     // unregister intercept handlers
     UnRegisterInterceptHanlders();
@@ -270,7 +273,7 @@ void wxbot::WxBot::UnRegisterInterceptHanlders()
 }
 
 // must avoid system calling and memory alloc&free calling
-void wxbot::WxBot::ExecuteHookWeChat(bool hook)
+void wxbot::WxBot::ExecuteHookWeChat(bool hook, std::time_t msOvertime, bool forced)
 {
     wb_process::CallFrameHitTestItemVector testPoints;
     for (auto hookPoint : hookPoints) {
@@ -278,6 +281,8 @@ void wxbot::WxBot::ExecuteHookWeChat(bool hook)
             testPoints.push_back(wb_process::CallFrameHitTestItem{hookPoint, wb_crack::HOOK_OPCODE_LENGTH});
         }
     }
+
+    auto timestamp = wb_process::GetCurrentTimestamp(true);
 
     for (;;) {
         auto hittedPoints = wb_process::HitTestAllOtherThreadCallFrame(testPoints);
@@ -293,13 +298,22 @@ void wxbot::WxBot::ExecuteHookWeChat(bool hook)
             }
         }
 
-        if (testPoints.empty()) {
+        if (testPoints.empty() || wb_process::GetCurrentTimestamp(true) - timestamp > msOvertime) {
             break;
         }
 
         wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+    }
+
+    if (!forced) {
+        return;
+    }
+
+    for (auto it = testPoints.begin(); it != testPoints.end();) {
+        void* hookPoint = it->addr;
+        hook ? wb_hook::ExecuteInProcessIntercept(hookPoint) : wb_hook::RevokeInProcessHook(hookPoint);
     }
 }
 
@@ -432,12 +446,20 @@ _Finish:
 
     // unload wxbot module
     wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
+    --g_singleton;
 }
 
 WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
 {
+    int alreadyInited = 0;
+    g_singleton.compare_exchange_strong(alreadyInited, 1);
+    if (alreadyInited) {
+        return;
+    }
+
     if (!args) {
         wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
+        --g_singleton;
         return;
     }
 
@@ -445,6 +467,7 @@ WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
     wb_crack::WxBotEntryParameterPtr duplicatedArgs = std::make_shared<wb_crack::WxBotEntryParameter>();
     if (!duplicatedArgs) {
         wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
+        --g_singleton;
         return;
     }
     std::memcpy(duplicatedArgs.get(), args, sizeof(wb_crack::WxBotEntryParameter));
