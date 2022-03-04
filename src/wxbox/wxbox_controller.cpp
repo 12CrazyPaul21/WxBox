@@ -121,6 +121,11 @@ bool WxBoxController::RequireValidWeChatEnvironmentInfo()
         return true;
     }
 
+    LoadWeChatEnvironmentInfo();
+    if (wb_wx::IsWxInstallationPathValid(wxEnvInfo.installPath, wxEnvInfo.moduleFolderAbsPath)) {
+        return true;
+    }
+
     // Supplement the dialog box to specify a valid installation path
     xstyle::warning(view, "", WBC_TRANSMESSAGE(WBCErrorCode::INVALID_WECHAT_ENV_INFO));
     view->RequestWeChatInstallationPathSetting();
