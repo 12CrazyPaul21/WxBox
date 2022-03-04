@@ -349,6 +349,7 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
 
     HMODULE hKernel32 = LoadLibraryA("kernel32.dll");
     if (!hKernel32) {
+        CloseHandle(hProcess);
         return false;
     }
 
@@ -356,6 +357,7 @@ static inline bool OpenWxWithMultiBoxing_DebugLoop(const wb_wx::WeChatEnvironmen
     if (!pfnWaitForDebugEvent) {
         pfnWaitForDebugEvent = reinterpret_cast<FnWaitForDebugEvent>(GetProcAddress(hKernel32, "WaitForDebugEvent"));
         if (!pfnWaitForDebugEvent) {
+            CloseHandle(hProcess);
             return false;
         }
     }
@@ -432,7 +434,7 @@ static void Logout_Windows(const ucpulong_t eventId, const void* pWeChatEventPro
 		call pWeChatEventProc
     }
 
-    delete pcontext;
+    delete[] pcontext;
 }
 
 #elif WXBOX_IN_MAC_OS

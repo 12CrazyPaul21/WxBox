@@ -392,9 +392,7 @@ void WxBoxSettingDialog::SettingChanged(QWidget* settingItem, const QVariant& ne
     // check whether value is changed
     if (settingItem->property(SETTING_VALUE_KEY).compare(newValue)) {
         // add to changed list
-        if (changedList.find(settingItem) == changedList.end()) {
-            changedList.insert(settingItem);
-        }
+        changedList.insert(settingItem);
     }
     else {
         changedList.erase(settingItem);

@@ -28,7 +28,7 @@ namespace wxbot {
     class WxBot
     {
       public:
-        WxBot(wb_crack::WxBotEntryParameterPtr&& args)
+        explicit WxBot(wb_crack::WxBotEntryParameterPtr&& args)
           : args(std::move(args))
           , inited(false)
           , running(false)

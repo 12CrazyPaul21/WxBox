@@ -12,7 +12,7 @@ namespace wxbox {
         class Future final
         {
           public:
-            Future(std::future<void> f)
+            explicit Future(std::future<void> f)
               : objFuture(std::move(f))
             {
             }
