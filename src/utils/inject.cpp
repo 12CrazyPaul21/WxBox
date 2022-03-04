@@ -97,6 +97,7 @@ static bool InjectModuleToProcess_Windows(wxbox::util::process::PID pid, const s
     HANDLE                             hRemoteThread    = NULL;
     wb_memory::RemotePageInfo          dataPageInfo;
     wb_memory::RemoteWrittenMemoryInfo modulePathMemoryInfo;
+    wb_process::ModuleInfo             moduleInfo;
 
     // open process with all access permission
     HANDLE hProcess = wb_process::OpenProcessHandle(pid);
@@ -110,32 +111,35 @@ static bool InjectModuleToProcess_Windows(wxbox::util::process::PID pid, const s
         goto _DONE;
     }
 
-    // write module path to process
-    modulePathMemoryInfo = wb_memory::WriteStringToProcess(hProcess, dataPageInfo, modulePath);
-    if (!modulePathMemoryInfo.addr) {
-        goto _DONE;
-    }
+    // avoid load library twice
+    if (!wb_process::GetModuleInfo(pid, modulePath, moduleInfo)) {
+        // write module path to process
+        modulePathMemoryInfo = wb_memory::WriteStringToProcess(hProcess, dataPageInfo, modulePath);
+        if (!modulePathMemoryInfo.addr) {
+            goto _DONE;
+        }
 
-    // get kernel32 module handler
-    hKernel32 = ::GetModuleHandleA("kernel32");
-    if (!hKernel32) {
-        goto _DONE;
-    }
+        // get kernel32 module handler
+        hKernel32 = ::GetModuleHandleA("kernel32");
+        if (!hKernel32) {
+            goto _DONE;
+        }
 
-    // get LoadLibraryA address
-    funcLoadLibraryA = ::GetProcAddress(hKernel32, "LoadLibraryA");
-    if (!funcLoadLibraryA) {
-        goto _DONE;
-    }
+        // get LoadLibraryA address
+        funcLoadLibraryA = ::GetProcAddress(hKernel32, "LoadLibraryA");
+        if (!funcLoadLibraryA) {
+            goto _DONE;
+        }
 
-    // inject dll module
-    hRemoteThread = ::CreateRemoteThread(hProcess, nullptr, 0, (LPTHREAD_START_ROUTINE)funcLoadLibraryA, modulePathMemoryInfo.addr, 0, nullptr);
-    if (!hRemoteThread) {
-        goto _DONE;
-    }
+        // inject dll module
+        hRemoteThread = ::CreateRemoteThread(hProcess, nullptr, 0, (LPTHREAD_START_ROUTINE)funcLoadLibraryA, modulePathMemoryInfo.addr, 0, nullptr);
+        if (!hRemoteThread) {
+            goto _DONE;
+        }
 
-    // wait for module loaded
-    ::WaitForSingleObject(hRemoteThread, INFINITE);
+        // wait for module loaded
+        ::WaitForSingleObject(hRemoteThread, INFINITE);
+    }
 
     // inject success
     retval = true;
