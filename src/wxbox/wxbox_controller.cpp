@@ -419,8 +419,8 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
 
     reportTextStream << "WeChat Process ID : " << pid << "(0x" << Qt::hex << Qt::uppercasedigits << pid << ")" << XSTYLE_REPORT_ENDL;
     reportTextStream << "WeChat Version : " << injectArgs.wechat_version << XSTYLE_REPORT_ENDL;
-    reportTextStream << "WeChat Install Path : " << injectArgs.wechat_install_path << XSTYLE_REPORT_ENDL;
-    reportTextStream << "WeChat CoreModule : " << injectArgs.wechat_coremodule_abspath << XSTYLE_REPORT_ENDL
+    reportTextStream << "WeChat Install Path : " << QString::fromLocal8Bit(injectArgs.wechat_install_path) << XSTYLE_REPORT_ENDL;
+    reportTextStream << "WeChat CoreModule : " << QString::fromLocal8Bit(injectArgs.wechat_coremodule_abspath) << XSTYLE_REPORT_ENDL
                      << XSTYLE_REPORT_ENDL;
 
     reportTextStream.setIntegerBase(16);
