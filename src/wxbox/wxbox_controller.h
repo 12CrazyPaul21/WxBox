@@ -14,6 +14,7 @@
 #include <app_log.hpp>
 #include <app_config.hpp>
 #include <wxbox_server.hpp>
+#include <internal/threadpool.hpp>
 #include <wxbox_client_status_model.h>
 
 using wxbox::WxBoxServerStatus;

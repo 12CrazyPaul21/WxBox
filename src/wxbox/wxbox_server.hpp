@@ -41,7 +41,6 @@
 #undef signals
 #include <utils/common.h>
 #define signals Q_SIGNALS
-#include <internal/threadpool.hpp>
 
 using grpc::Server;
 using grpc::ServerBidiReactor;
@@ -207,6 +206,7 @@ namespace wxbox {
           : server(server)
           , hold(false)
           , finished(false)
+          , sendCounter(0)
         {
             StartRead(&fromClientPacket);
         }
@@ -220,6 +220,7 @@ namespace wxbox {
                 std::unique_lock<std::mutex> lock(mutex);
                 if (queue.size()) {
                     queue.pop_front();
+                    --sendCounter;
                 }
             }
 
@@ -261,8 +262,8 @@ namespace wxbox {
 
             std::unique_lock<std::mutex> lock(mutex);
             queue.push_back(packet);
-            if (queue.size() == 1) {
-                StartWrite(&queue[0]);
+            if (!sendCounter && queue.size() == 1) {
+                ExecuteWrite(&queue[0]);
             }
 
             return true;
@@ -286,14 +287,21 @@ namespace wxbox {
             }
 
             std::unique_lock<std::mutex> lock(mutex);
-            if (queue.size()) {
-                StartWrite(&queue[0]);
+            if (!sendCounter && queue.size()) {
+                ExecuteWrite(&queue[0]);
             }
+        }
+
+        void ExecuteWrite(wxbox::WxBoxControlPacket* packet)
+        {
+            ++sendCounter;
+            StartWrite(packet);
         }
 
       private:
         std::atomic<bool>                     finished;
         std::atomic<bool>                     hold;
+        std::atomic<int>                      sendCounter;
         wxbox::WxBotControlPacket             fromClientPacket;
         std::deque<wxbox::WxBoxControlPacket> queue;
         std::mutex                            mutex;
@@ -422,9 +430,7 @@ namespace wxbox {
 
         Q_SLOT void PushMessageAsync(WxBoxMessage message)
         {
-            wxbox::internal::TaskInThreadPool::StartTask([this, message]() {
-                PushMessage(std::move(message));
-            });
+            wb_process::async_task([this](WxBoxMessage message) { PushMessage(std::move(message)); }, std::move(message));
         }
 
         void PutMessageToWxBox(const WxBoxMessage& message)
@@ -497,7 +503,7 @@ namespace wxbox {
         void shutdown()
         {
             if (serverImpl) {
-                wxbox::internal::TaskInThreadPool::StartTask([=]() {
+                wb_process::async_task([=]() {
                     serverImpl->Shutdown();
                 });
             }

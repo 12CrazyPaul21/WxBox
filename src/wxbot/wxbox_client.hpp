@@ -214,6 +214,7 @@ namespace wxbot {
         explicit WxBoxEndPoint(WxBox::Stub* stub, WxBoxClient* client)
           : client(client)
           , finished(false)
+          , sendCounter(0)
         {
             if (!stub) {
                 return;
@@ -235,6 +236,7 @@ namespace wxbot {
                 std::unique_lock<std::mutex> lock(mutex);
                 if (queue.size()) {
                     queue.pop_front();
+                    --sendCounter;
                 }
             }
 
@@ -280,10 +282,12 @@ namespace wxbot {
             }
 
             std::unique_lock<std::mutex> lock(mutex);
+
             queue.push_back(packet);
-            if (queue.size() == 1) {
-                queue[0].set_pid(wb_process::GetCurrentProcessId());
-                StartWrite(&queue[0]);
+            queue[queue.size() - 1].set_pid(wb_process::GetCurrentProcessId());
+
+            if (!sendCounter && queue.size() == 1) {
+                ExecuteWrite(&queue[0]);
             }
 
             return true;
@@ -309,14 +313,21 @@ namespace wxbot {
             }
 
             std::unique_lock<std::mutex> lock(mutex);
-            if (queue.size()) {
-                StartWrite(&queue[0]);
+            if (!sendCounter && queue.size()) {
+                ExecuteWrite(&queue[0]);
             }
+        }
+
+        void ExecuteWrite(wxbox::WxBotControlPacket* packet)
+        {
+            ++sendCounter;
+            StartWrite(packet);
         }
 
       private:
         std::atomic<bool>              finished;
         std::atomic<bool>              communicable;
+        std::atomic<int>               sendCounter;
         ClientContext                  context;
         WxBoxControlPacket             fromServerPacket;
         std::deque<WxBotControlPacket> queue;
