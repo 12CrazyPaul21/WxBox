@@ -1,5 +1,63 @@
 # WxBox
 
+## 主要功能
+
+- WeChat进程实例多开；
+- 消息防撤回；
+- 监控账户生命周期【登录、注销、退出PC客户端】；
+- 检查PC微信是否处于登录状态；
+- Plugin触发PC端退出登录；
+- 获取登录账户的Profile；
+- 获取包括群聊在内的所有联系人信息【只获取昵称、备注、wxnumber和wxid】；
+- 昵称、wxnumber和wxid之间的相互转换；
+- 接管WeChat原始消息和处理过的消息；
+- 接管WeChat发送文本消息；
+- Plugin主动执行发送文本消息、文件、图片，对于群聊可以指定@列表。可以指定发送的目标和内容；
+- 过滤接收到的消息【原始消息拦截事件中】；
+- 替换接收到的消息【原始消息拦截事件中】，可以替换发送者、消息内容，对于群聊可以替换talker；
+- 通过WxBox或者手机端WeChat的“文件传输助手”向PC WeChat客户端发出执行Plugin命令的指令；
+- 自定义纯文本和二进制类型的Plugin。
+
+### Plugin预定义wxbox模块提供的部分API接口
+
+ 	WxBox的核心功能在Plugin上，上面的所有功能都可以在自定义的Plugin中调用，而Plugin可以通过WxBox和filehelper来调用。
+
+​	WxBot里面预定义了一个wxbox模块，它提供了一些API接口，这些API包含了上面还有之外的功能，完整的wxbox模块API可以看plugins目录下的wxbox_apis.txt文件，下面列出部分：
+
+- \>>wxbox.version查看wxbox的版本
+- \>>wxbox.help查看wxbox命令帮助，它会给文件传输助手发送一个wxbox_apis.txt文件
+- \>>wxbox.snap向filehelper发送一个桌面系统所有显示器拼接的“载图”
+- \>>wxbox.snap_main_monitor向filehelper发送一个桌面主Monitor的“载图”
+- \>>wxbox.info、>>wxbox.warning、>>wxbox.error向WxBox发送不同Level的日志
+- \>>wxbox.shell在PC系统上执行有权限执行的所有类型的shell命令【*】，可以通过它执行关机、打开程序、图片等指令
+- \>>wxbox.msgbox给PC弹出一个对话框，用来提示消息的
+- \>>wxbox.speak让PC播放一段指定文本的语音
+- \>>wxbox.lock_screen让PC锁屏
+- \>>wxbox.list_drivers列出PC系统上所有的硬盘驱动器盘符
+- \>>wxbox.list_files列出PC系统上指定文件夹目录下的所有文件和文件夹
+- \>>wxbox.download把PC上指定的文件通过filehelper传输到手机上，大小限制跟WeChat发送文件大小的限制一样，听说最大是1GB，但是没测试过
+- \>>wxbox.uninject_wxbot卸载PC上当前用户的WxBot模块
+- \>>wxbox.exit_wxbox关闭PC上的WxBox
+- \>>wxbox.logout让PC上的WeChat退出登录
+- \>>wxbox.nickname_to_wxid昵称转为wxid
+- \>>wxbox.wxid_to_wxnumber从wxid转为wxnumber
+- \>>wxbox.chatroom_wxid获取群聊的roomWxid
+- \>>wxbox.get_all_contacts获取所有联系人信息，这不是给filehelper或者WxBox调用的，这个在Plugin中调用
+- \>>wxbox.send_text_to_filehelper向filehelper发送文本消息
+- \>>wxbox.send_picture_to_filehelper向filehelper发送图片
+- \>>wxbox.send_file_to_filehelper向filehelper发送文件
+- \>>wxbox.send_text向指定wxid联系人发送文本消息
+- \>>wxbox.send_picture向指定wxid联系人发送图片
+- \>>wxbox.send_file向指定wxid联系人发送文件
+- \>>wxbox.send_text_with_wxnumber向指定wxnumber联系人发送文本消息
+- \>>wxbox.send_picture_with_wxnumber向指定wxnumber联系人发送图片
+- \>>wxbox.send_file_with_wxnumber向指定wxnumber联系人发送文件
+- \>>wxbox.send_text_to_chatroom向指定群聊发送文本消息，消息后面可选带@列表
+- \>>wxbox.send_picture_to_chatroom向群聊发送图片
+- \>>wxbox.send_file_to_chatroom向群聊发送文件
+- \>>wxbox.chatroom_notiry在群聊上@一部分人
+- \>>wxbox.chatroom_notiry_all在群聊上@所有人
+
 ## 第三方依赖
 
 ​	注意：以下部分库存在编译好的版本或者我们自己编译过的Windows版本放在这个仓库上：https://gitee.com/phantom27/wxbox-public-storage
