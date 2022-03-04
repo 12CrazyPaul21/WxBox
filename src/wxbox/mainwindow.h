@@ -150,7 +150,10 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
 
     virtual void MinimizedToTray() Q_DECL_OVERRIDE
     {
-        this->appTray.showMessage("", Translate("WxBox is Minimized To Tray"), QSystemTrayIcon::NoIcon, 3000);
+        if (!config["wxbox/already_show_minimized_to_tray_tips"_conf].safe_as<bool>()) {
+            this->appTray.showMessage("", Translate("WxBox is Minimized To Tray"), QSystemTrayIcon::NoIcon, 3000);
+            config["wxbox/already_show_minimized_to_tray_tips"_conf] = true;
+        }
     }
 
     virtual void RetranslateUi() Q_DECL_OVERRIDE
@@ -211,6 +214,7 @@ class MainWindow final : public XSTYLE_WINDOW_CLASS
             if (!toTray && isHidden()) {
                 show();
             }
+            config["wxbox/already_show_minimized_to_tray_tips"_conf] = false;
         }
         qApp->setQuitOnLastWindowClosed(!toTray);
     }
