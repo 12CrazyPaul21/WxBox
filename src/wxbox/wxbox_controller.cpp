@@ -249,6 +249,15 @@ bool WxBoxController::StartWeChatInstance()
     })
         .wait();
 
+    if (!isInjectWxBot) {
+        if (WBC_FAILED(errorCode)) {
+            WXBOX_LOG_ERROR_AND_SHOW_MSG_BOX(view, "", WBC_MESSAGE(errorCode));
+        }
+
+        view->CloseMission();
+        return errorCode == WBCErrorCode::WBC_NO_ERROR;
+    }
+
     //
     // execute inject
     //
