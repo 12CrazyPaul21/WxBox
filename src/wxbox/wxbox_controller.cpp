@@ -274,7 +274,7 @@ bool WxBoxController::StartWeChatInstance()
 
 bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
 {
-    if (wb_crack::IsWxBotInjected(pid)) {
+    if (wb_crack::IsWxBotInjected(pid) && IsClientAlive(pid)) {
         xstyle::information(view, "", WBC_TRANSMESSAGE(WBCErrorCode::WECHAT_PROCESS_IS_ALREADY_INJECT));
         return false;
     }

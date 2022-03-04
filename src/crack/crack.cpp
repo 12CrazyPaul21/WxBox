@@ -610,7 +610,7 @@ bool wxbox::crack::UnInjectWxBot(wxbox::util::process::PID pid)
     return wb_inject::UnInjectModuleFromProcess(pid, wb_crack::WXBOT_MODULE_NAME);
 }
 
-bool wxbox::crack::UnInjectWxBotBySelf()
+bool wxbox::crack::UnInjectWxBotBySelf(std::time_t msOvertime, bool forced)
 {
     wb_process::ModuleInfo moduleInfo;
     if (!wb_process::GetModuleInfo(wb_process::GetCurrentProcessId(), wb_crack::WXBOT_MODULE_NAME, moduleInfo)) {
@@ -620,7 +620,15 @@ bool wxbox::crack::UnInjectWxBotBySelf()
     wb_memory::init_internal_allocator();
     wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
 
-    while (wb_process::HitTestAllOtherThreadCallFrame(moduleInfo.pModuleBaseAddr, moduleInfo.uModuleSize)) {
+    bool isClean   = false;
+    auto timestamp = wb_process::GetCurrentTimestamp(true);
+
+    for (;;) {
+        isClean = !wb_process::HitTestAllOtherThreadCallFrame(moduleInfo.pModuleBaseAddr, moduleInfo.uModuleSize);
+        if (isClean || wb_process::GetCurrentTimestamp(true) - timestamp > msOvertime) {
+            break;
+        }
+
         wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
@@ -628,6 +636,10 @@ bool wxbox::crack::UnInjectWxBotBySelf()
 
     wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
     wb_memory::deinit_internal_allocator();
+
+    if (!isClean && !forced) {
+        return false;
+    }
 
     return wb_inject::UnloadModuleBySelf(wb_crack::WXBOT_MODULE_NAME, wb_process::GetCurrentThreadId());
 }

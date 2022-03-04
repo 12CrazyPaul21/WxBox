@@ -458,7 +458,16 @@ void MainWindow::RegisterWidgetEventHandler()
                 controller.UnInjectWxBotModule(pid);
             });
             clientItemContextMenu.show("UnInject");
-            clientItemContextMenu.hide("Inject");
+
+            if (item->status == WxBoxClientItemStatus::Normal) {
+                clientItemContextMenu.hide("Inject");
+            }
+            else {
+                clientItemContextMenu.show("Inject");
+                clientItemContextMenu.connectAction("Inject", this, [this, pid]() {
+                    controller.InjectWxBotModule(pid);
+                });
+            }
 
             if (item->status == WxBoxClientItemStatus::Normal && controller.clientInjectArgs.find(pid) != controller.clientInjectArgs.end()) {
                 clientItemContextMenu.connectAction("Show Feature Info", this, [this, pid]() {

@@ -1,5 +1,7 @@
 #include <wxbot.hpp>
 
+#define UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME 10000
+
 //
 // WxBot
 //
@@ -429,20 +431,20 @@ static void WxBotRoutine(wb_crack::WxBotEntryParameterPtr args)
 _Finish:
 
     // unload wxbot module
-    wb_crack::UnInjectWxBotBySelf();
+    wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
 }
 
 WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
 {
     if (!args) {
-        wb_crack::UnInjectWxBotBySelf();
+        wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
         return;
     }
 
     // duplicate wxbot entry parameter
     wb_crack::WxBotEntryParameterPtr duplicatedArgs = std::make_shared<wb_crack::WxBotEntryParameter>();
     if (!duplicatedArgs) {
-        wb_crack::UnInjectWxBotBySelf();
+        wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
         return;
     }
     std::memcpy(duplicatedArgs.get(), args, sizeof(wb_crack::WxBotEntryParameter));
