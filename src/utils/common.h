@@ -92,10 +92,14 @@
         }                     \
     }
 #define WXBOX_MAX_PATH MAX_PATH
+#define WXBOX_TRY __try
+#define WXBOX_EXCEPT __except (EXCEPTION_EXECUTE_HANDLER)
 #else
 #define CloseHandleSafe(h) \
     {}
 #define WXBOX_MAX_PATH 256
+#define WXBOX_TRY try
+#define WXBOX_EXCEPT catch (...)
 #endif
 
 #define WXBOX_UNREF(P) (P)

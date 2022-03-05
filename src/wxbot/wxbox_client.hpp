@@ -221,7 +221,7 @@ namespace wxbot {
             }
 
             stub->async()->Communication(&context, this);
-            context.set_wait_for_ready(false);
+            context.set_wait_for_ready(true);
             AddHold();
             StartRead(&fromServerPacket);
             StartCall();
@@ -262,13 +262,10 @@ namespace wxbot {
                 return;
             }
 
-            {
-                std::unique_lock<std::mutex> lock(mutex);
-                queue.clear();
-            }
+            std::unique_lock<std::mutex> lock(mutex);
+            queue.clear();
 
-            RemoveHold();
-            context.TryCancel();
+            Cancel();
         }
 
         bool SendPacket(const wxbox::WxBotControlPacket& packet)
@@ -322,6 +319,18 @@ namespace wxbot {
         {
             ++sendCounter;
             StartWrite(packet);
+        }
+
+        void Cancel()
+        {
+            WXBOX_TRY
+            {
+                context.TryCancel();
+                RemoveHold();
+            }
+            WXBOX_EXCEPT
+            {
+            }
         }
 
       private:
