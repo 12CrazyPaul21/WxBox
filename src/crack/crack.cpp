@@ -913,9 +913,15 @@ bool wxbox::crack::InitWeChatContactItem(uint8_t* contactItem)
         return false;
     }
 
-    __asm {
-		mov ecx, contactItem
-		call pInitWeChatContactItem
+    WXBOX_TRY
+    {
+        __asm {
+			mov ecx, contactItem
+			call pInitWeChatContactItem
+        }
+    }
+    WXBOX_EXCEPT
+    {
     }
 
     return true;
@@ -932,9 +938,15 @@ bool wxbox::crack::DeinitWeChatContactItem(uint8_t* contactItem)
         return false;
     }
 
-    __asm {
-		mov ecx, contactItem
-		call pDeinitWeChatContactItem
+    WXBOX_TRY
+    {
+        __asm {
+			mov ecx, contactItem
+			call pDeinitWeChatContactItem
+        }
+    }
+    WXBOX_EXCEPT
+    {
     }
 
     return true;
@@ -1203,12 +1215,18 @@ static bool Inner_FindAndDeepCopyWeChatContactItemWithWXIDWrapper_below_3_5_0_46
 {
     bool result = false;
 
-    __asm {
-		push contactItem
-		push pWxidString
-		mov ecx, globalContactContext
-		call pFindAndDeepCopyWeChatContactItemWithWXIDWrapper
-		mov result, al
+    WXBOX_TRY
+    {
+        __asm {
+			push contactItem
+			push pWxidString
+			mov ecx, globalContactContext
+			call pFindAndDeepCopyWeChatContactItemWithWXIDWrapper
+			mov result, al
+        }
+    }
+    WXBOX_EXCEPT
+    {
     }
 
     return result;
@@ -1220,16 +1238,22 @@ static bool Inner_FindAndDeepCopyWeChatContactItemWithWXIDWrapper_above_3_5_0_46
     wchar_t* p      = pWxidString->str;
     uint32_t len    = pWxidString->length;
 
-    __asm {
-		push contactItem
-		push 0
-		push 0
-		push len
-		push len
-		push p
-		mov ecx, globalContactContext
-		call pFindAndDeepCopyWeChatContactItemWithWXIDWrapper
-		mov result, al
+    WXBOX_TRY
+    {
+        __asm {
+			push contactItem
+			push 0
+			push 0
+			push len
+			push len
+			push p
+			mov ecx, globalContactContext
+			call pFindAndDeepCopyWeChatContactItemWithWXIDWrapper
+			mov result, al
+        }
+    }
+    WXBOX_EXCEPT
+    {
     }
 
     return result;
@@ -1510,6 +1534,33 @@ bool wxbox::crack::SendTextMessageWithNotifyList(const std::string& roomWxid, co
     return Inner_SendTextMessage(g_crack_env.get(), roomWxid, message, &notifyList, msgSuffix.empty() ? nullptr : msgSuffix.c_str());
 }
 
+static bool Inner_SendFile_Safe(void* pWxidInfo, void* pFilePathInfo, void* pFetchGlobalSendMessageContext, void* pFakeWeChatMessageStructure, void* pWXSendFileMessage)
+{
+    void* result = nullptr;
+
+    WXBOX_TRY
+    {
+        __asm {
+			push 0
+			push 0
+			push pFilePathInfo
+			push pWxidInfo
+
+			call pFetchGlobalSendMessageContext
+			mov ecx, eax
+
+			push pFakeWeChatMessageStructure
+			call pWXSendFileMessage
+			mov result, eax
+        }
+    }
+    WXBOX_EXCEPT
+    {
+    }
+
+    return result != nullptr;
+}
+
 bool wxbox::crack::SendFile(const std::string& wxid, const std::string& filePath)
 {
     if (!g_crack_env || !g_crack_env->wechat_apis.WXSendFileMessage || !g_crack_env->wechat_apis.FetchGlobalSendMessageContext || wxid.empty() || filePath.empty() || !wb_file::IsPathExists(wb_string::Utf8ToNativeString(filePath))) {
@@ -1587,6 +1638,8 @@ bool wxbox::crack::SendFile(const std::string& wxid, const std::string& filePath
     }
 
     return result != nullptr;
+
+    return Inner_SendFile_Safe(pWxidInfo, pFilePathInfo, pFetchGlobalSendMessageContext, pFakeWeChatMessageStructure, pWXSendFileMessage);
 }
 
 bool wxbox::crack::SubstituteWeChatWString(wxbox::crack::wx::PWeChatWString original, const std::wstring& substitute)
