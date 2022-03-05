@@ -1331,6 +1331,30 @@ bool wxbox::crack::GetContactWithWxid(const std::string& wxid, wxbox::crack::wx:
     return success;
 }
 
+static bool Inner_SendTextMessage_Safe(void* pWxidInfo, void* pMessageInfo, void* pNotifyList, void* pFakeWeChatMessageStructure, void* pWXSendTextMessage)
+{
+    void* result = nullptr;
+
+    WXBOX_TRY
+    {
+        __asm {
+			push 1
+			push pNotifyList
+			push pMessageInfo
+			mov edx, pWxidInfo
+			mov ecx, pFakeWeChatMessageStructure
+			call pWXSendTextMessage
+			add esp, 0xC
+			mov result, eax
+        }
+    }
+    WXBOX_EXCEPT
+    {
+    }
+
+    return result != nullptr;
+}
+
 static bool Inner_SendTextMessage(const wb_crack::PWxBotEntryParameter args, const std::string& wxid, const std::string& message, const wb_wx::PChatRoomNotifyList pNotifyList, const wchar_t* messageNotifyListSuffix = nullptr)
 {
     if (!args || !args->wechat_apis.WXSendTextMessage || wxid.empty() || (message.empty() && !messageNotifyListSuffix) || !pNotifyList) {
@@ -1393,21 +1417,7 @@ static bool Inner_SendTextMessage(const wb_crack::PWxBotEntryParameter args, con
     // execute
     //
 
-    void* result             = nullptr;
-    void* pWXSendTextMessage = reinterpret_cast<void*>(args->wechat_apis.WXSendTextMessage);
-
-    __asm {
-		push 1
-		push pNotifyList
-		push pMessageInfo
-		mov edx, pWxidInfo
-		mov ecx, pFakeWeChatMessageStructure
-		call pWXSendTextMessage
-		add esp, 0xC
-		mov result, eax
-    }
-
-    return result != nullptr;
+    return Inner_SendTextMessage_Safe(pWxidInfo, pMessageInfo, pNotifyList, pFakeWeChatMessageStructure, reinterpret_cast<void*>(args->wechat_apis.WXSendTextMessage));
 }
 
 bool wxbox::crack::SendTextMessage(const std::string& wxid, const std::string& message)
