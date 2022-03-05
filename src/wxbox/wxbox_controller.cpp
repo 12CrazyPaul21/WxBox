@@ -205,7 +205,7 @@ bool WxBoxController::StartWeChatInstance()
     // start wechat instance and encapsulate wxbot entry parameter then verify hook points
     //
 
-    wxbox::internal::TaskInThreadPool::StartTask([this, isInjectWxBot, &errorCode, &wxbotEntryParameter]() {
+    wxbox::internal::AsyncTask::start([this, isInjectWxBot, &errorCode, &wxbotEntryParameter]() {
         // open and wechat with multi boxing
         wb_crack::OpenWxWithMultiBoxingResult openResult = {0};
         if (!wxbox::crack::OpenWxWithMultiBoxing(wxEnvInfo, wxApiFeatures, &openResult, isInjectWxBot)) {
@@ -293,7 +293,7 @@ bool WxBoxController::InjectWxBotModule(wb_process::PID pid)
     // encapsulate wxbot entry parameter and verify hook points
     //
 
-    wxbox::internal::TaskInThreadPool::StartTask([this, pid, &errorCode, &wxbotEntryParameter]() {
+    wxbox::internal::AsyncTask::start([this, pid, &errorCode, &wxbotEntryParameter]() {
         // get wechat process environment info
         wb_wx::WeChatProcessEnvironmentInfo wxProcessEnvInfo;
         if (!wb_wx::ResolveWxEnvInfo(pid, wxProcessEnvInfo)) {
@@ -370,7 +370,7 @@ WBCErrorCode WxBoxController::_Inner_ExecuteInjectWxBotModule(WBCErrorCode prevE
     // execute inject
     //
 
-    wxbox::internal::TaskInThreadPool::StartTask([this, &errorCode, &wxbotEntryParameter]() {
+    wxbox::internal::AsyncTask::start([this, &errorCode, &wxbotEntryParameter]() {
         if (!wb_crack::InjectWxBot(wxbotEntryParameter.wxbot_pid, wxbotEntryParameter)) {
             errorCode = WBCErrorCode::INJECT_WXBOT_MODULE_FAILED;
             return;

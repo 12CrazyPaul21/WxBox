@@ -47,7 +47,8 @@ wxbox_src = files([
     join_paths(wxbox_root, 'wxbox_server.cpp'),
     join_paths(wxbox_root, 'app_log.hpp'),
     join_paths(wxbox_root, 'app_config.hpp'),
-    join_paths(wxbox_internal, 'threadpool.hpp')
+    join_paths(wxbox_internal, 'threadpool.hpp'),
+    join_paths(wxbox_internal, 'task.hpp'),
 ])
 
 # resources

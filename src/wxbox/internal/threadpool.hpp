@@ -9,14 +9,13 @@
 namespace wxbox {
     namespace internal {
 
-        class Future final
+        class [[deprecated]] Future final
         {
           public:
-            explicit Future(std::future<void> f)
+            explicit Future(std::shared_future<void> f)
               : objFuture(std::move(f))
             {
             }
-
             void wait()
             {
                 while (objFuture.wait_for(std::chrono::milliseconds(10)) == std::future_status::timeout) {
@@ -25,10 +24,10 @@ namespace wxbox {
             }
 
           private:
-            std::future<void> objFuture;
+            std::shared_future<void> objFuture;
         };
 
-        class TaskInThreadPool final : public QRunnable
+        class [[deprecated]] TaskInThreadPool final : public QRunnable
         {
           public:
             typedef std::function<void(void)> TaskFunc;
@@ -59,7 +58,7 @@ namespace wxbox {
 
             Future get_future()
             {
-                return Future(sigFinished.get_future());
+                return Future(sigFinished.get_future().share());
             }
 
             static inline TaskInThreadPool* NewTask(TaskFunc func, FinishFunc finishFunc = nullptr)
