@@ -397,8 +397,7 @@ bool wxbox::util::memory::FreeRemoteProcessPage(wxbox::util::process::PROCESS_HA
         return false;
     }
 
-    void*      addr = pageInfo.addr;
-    ucpulong_t size = pageInfo.size;
+    void* addr = pageInfo.addr;
 
     pageInfo.addr   = nullptr;
     pageInfo.size   = 0;
@@ -407,7 +406,7 @@ bool wxbox::util::memory::FreeRemoteProcessPage(wxbox::util::process::PROCESS_HA
     pageInfo.free   = 0;
 
 #if WXBOX_IN_WINDOWS_OS
-    return VirtualFreeEx(hProcess, addr, size, MEM_DECOMMIT);
+    return VirtualFreeEx(hProcess, addr, 0, MEM_RELEASE);
 #else
     throw std::exception("FreeRemoteProcessPage stub");
     return false;
