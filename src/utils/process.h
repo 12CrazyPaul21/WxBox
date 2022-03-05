@@ -190,7 +190,11 @@ namespace wxbox {
             template<typename _FunctionType, typename... _ArgTypes>
             inline void async_task(_FunctionType&& func, _ArgTypes&&... args)
             {
-                std::thread(std::forward<_FunctionType>(func), std::forward<_ArgTypes>(args)...).detach();
+                try {
+                    std::thread(std::forward<_FunctionType>(func), std::forward<_ArgTypes>(args)...).detach();
+                }
+                catch (const std::exception& /*e*/) {
+                }
             }
 
             //
