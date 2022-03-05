@@ -395,6 +395,17 @@ static bool ReloadPlugin(wxbox::plugin::PPluginVirtualMachine vm, const std::str
     return LoadPlugin(vm, pluginFileName);
 }
 
+static void LuaStateGC(wxbox::plugin::PPluginVirtualMachine vm)
+{
+    WXBOX_TRY
+    {
+        lua_gc(vm->state, LUA_GCCOLLECT);
+    }
+    WXBOX_EXCEPT
+    {
+    }
+}
+
 static void RefreshPlugins(wxbox::plugin::PPluginVirtualMachine vm)
 {
     if (!CheckPluginVirtualMachineValid(vm)) {
@@ -406,18 +417,12 @@ static void RefreshPlugins(wxbox::plugin::PPluginVirtualMachine vm)
     }
 
     // execute garbage collection
-    WXBOX_TRY
-    {
-        lua_gc(vm->state, LUA_GCCOLLECT);
-    }
-    WXBOX_EXCEPT
-    {
-    }
+    LuaStateGC(vm);
 
     // fetch all plugin's filename
     auto pluginLists = wb_file::ListFilesInDirectoryWithExt(vm->pluginPath, WXBOX_PLUGIN_FILE_EXT);
 
-    // added�� removed and modified plugin list
+    // added, removed and modified plugin list
     std::vector<std::string>  addedPluginList;
     decltype(addedPluginList) removedPluginList;
     decltype(addedPluginList) modifiedPluginList;
