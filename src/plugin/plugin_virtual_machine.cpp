@@ -398,9 +398,12 @@ static bool ReloadPlugin(wxbox::plugin::PPluginVirtualMachine vm, const std::str
 
 static void LuaStateGC(wxbox::plugin::PPluginVirtualMachine vm)
 {
+    WXBOX_UNREF(vm);
+
     WXBOX_TRY
     {
-        lua_gc(vm->state, LUA_GCCOLLECT);
+        // do nothing
+        // lua_gc(vm->state, LUA_GCCOLLECT);
     }
     WXBOX_EXCEPT
     {
@@ -870,8 +873,6 @@ void wxbox::plugin::ExecutePluginVirtualMachineGC()
 
 std::string wxbox::plugin::GetPluginVirtualMachineStorageRoot()
 {
-    std::shared_lock<std::shared_mutex> lock(g_vm_signleton_mutex);
-
     if (!::g_vm_signleton) {
         return "";
     }
@@ -883,8 +884,6 @@ std::string wxbox::plugin::GetPluginVirtualMachineStorageRoot()
 
 std::string wxbox::plugin::GetPluginVirtualMachineGlobalTempRoot()
 {
-    std::shared_lock<std::shared_mutex> lock(g_vm_signleton_mutex);
-
     if (!::g_vm_signleton) {
         return "";
     }
@@ -896,8 +895,6 @@ std::string wxbox::plugin::GetPluginVirtualMachineGlobalTempRoot()
 
 void wxbox::plugin::ChangeLongTaskTimeout(std::time_t timeout)
 {
-    std::unique_lock<std::shared_mutex> lock_singleton(g_vm_signleton_mutex);
-
     if (!::g_vm_signleton) {
         return;
     }
@@ -908,8 +905,6 @@ void wxbox::plugin::ChangeLongTaskTimeout(std::time_t timeout)
 
 bool wxbox::plugin::PushPluginVirtualMachineCommandSync(PluginVirtualMachineCommandPtr command)
 {
-    std::unique_lock<std::shared_mutex> lock_singleton(g_vm_signleton_mutex);
-
     if (!::g_vm_signleton) {
         return false;
     }
@@ -931,8 +926,6 @@ bool wxbox::plugin::PushPluginVirtualMachineCommand(PluginVirtualMachineCommandP
 
 void wxbox::plugin::DispatchPluginToHostEvent(wxbox::plugin::HostEventModelPtr hostEvent)
 {
-    std::lock_guard<std::shared_mutex> lock(g_vm_signleton_mutex);
-
     if (!::g_vm_signleton || !::g_vm_signleton->callback || !hostEvent) {
         return;
     }
