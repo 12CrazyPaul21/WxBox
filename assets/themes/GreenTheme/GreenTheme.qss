@@ -1,0 +1,30 @@
+// #XStyleWindowTheme#
+
+.xstylewindow {
+    qproperty-window_icon_url: ":/XStyleTheme/GreenTheme/image/logo.png";
+    qproperty-shadow_color: rgba(150, 250, 180, 200);
+    qproperty-title_height: 35;
+}
+
+#wxbox_min_button {
+    qproperty-icon_url: ":/XStyleTheme/GreenTheme/image/minimize.png";
+    qproperty-down_color: rgba(0, 102, 255, 220);
+}
+
+#wxbox_min_button:hover {
+    border: 0px solid transparent;
+}
+
+#wxbox_max_button {
+    qproperty-icon_url: ":/XStyleTheme/GreenTheme/image/maximize.png";
+}
+
+#wxbox_close_button {
+    qproperty-icon_url: ":/XStyleTheme/GreenTheme/image/close.png";
+    qproperty-hover_color: rgba(230, 0, 0, 220);
+    qproperty-down_color: rgba(230, 0, 0, 255);
+}
+
+#wxbox_close_button:hover {
+    border: 0px solid transparent;
+}

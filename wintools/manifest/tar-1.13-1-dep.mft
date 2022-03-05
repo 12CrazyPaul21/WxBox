@@ -1,0 +1,4 @@
+bin/libiconv-2.dll
+bin/libintl-2.dll
+manifest/tar-1.13-1-dep.mft
+manifest/tar-1.13-1-dep.ver

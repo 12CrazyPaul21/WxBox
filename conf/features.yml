@@ -1,4 +1,0 @@
-version: '0.1.0'
-platform:
-  windows: !include windows_features.yml
-  mac: !include mac_features.yml

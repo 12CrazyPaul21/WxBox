@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <builddir>build\wxbox-cppcheck-build-dir</builddir>
+    <platform>Unspecified</platform>
+    <analyze-all-vs-configs>false</analyze-all-vs-configs>
+    <check-headers>true</check-headers>
+    <check-unused-templates>true</check-unused-templates>
+    <max-ctu-depth>2</max-ctu-depth>
+    <max-template-recursion>100</max-template-recursion>
+    <paths>
+        <dir name="src"/>
+        <dir name="plugins"/>
+        <dir name="tests"/>
+    </paths>
+    <libraries>
+        <library>googletest</library>
+        <library>lua</library>
+        <library>qt</library>
+        <library>windows</library>
+        <library>zlib</library>
+    </libraries>
+</project>

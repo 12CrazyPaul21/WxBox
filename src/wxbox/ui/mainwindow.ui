@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowBody</class>
+ <widget class="QWidget" name="MainWindowBody">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>645</width>
+    <height>503</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="MainWindowBodyFrame">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>6</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutToolBar"/>
+      </item>
+      <item>
+       <widget class="QTableView" name="viewWeChatStatus"/>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBoxCommand">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="title">
+         <string>Command</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayoutCommand">
+         <property name="spacing">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QTextEdit" name="viewCommandExecuteLogger">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutCommand">
+           <property name="spacing">
+            <number>2</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="labelCommandPrefix">
+             <property name="text">
+              <string>&gt;&gt;</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="XStyleCommandLine" name="lineCommand"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionStartWeChatInstance">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/start_wechat.png</normaloff>
+     <normalon>:/image/start_wechat.png</normalon>:/image/start_wechat.png</iconset>
+   </property>
+   <property name="text">
+    <string>StartWeChatInstance</string>
+   </property>
+   <property name="toolTip">
+    <string>Start New WeChat Instance</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionEnableAvoidRevokeMessage">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/avoid_revoke.png</normaloff>
+     <normalon>:/image/revoke.png</normalon>:/image/avoid_revoke.png</iconset>
+   </property>
+   <property name="text">
+    <string>EnableAvoidRevokeMessage</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable Avoid Revoke Message</string>
+   </property>
+  </action>
+  <action name="actionEnableRawMessageHook">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/hook.png</normaloff>
+     <normalon>:/image/hook.png</normalon>:/image/hook.png</iconset>
+   </property>
+   <property name="text">
+    <string>EnableRawMessageHook</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable Raw Message Hook</string>
+   </property>
+  </action>
+  <action name="actionEnableSendTextMessageHook">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/rev_hook.png</normaloff>
+     <normalon>:/image/rev_hook.png</normalon>:/image/rev_hook.png</iconset>
+   </property>
+   <property name="text">
+    <string>EnableSendTextMessageHook</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable Send Text Messag Hook</string>
+   </property>
+  </action>
+  <action name="actionUpdateFeatureRepository">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/update_feature.png</normaloff>
+     <normalon>:/image/update_feature.png</normalon>:/image/update_feature.png</iconset>
+   </property>
+   <property name="text">
+    <string>UpdateFeatureRepository</string>
+   </property>
+   <property name="toolTip">
+    <string>Update Feature Repository</string>
+   </property>
+  </action>
+  <action name="actionSetting">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/setting.png</normaloff>
+     <normalon>:/image/setting.png</normalon>:/image/setting.png</iconset>
+   </property>
+   <property name="text">
+    <string>Setting</string>
+   </property>
+   <property name="toolTip">
+    <string>Setting</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+,</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/about.png</normaloff>
+     <normalon>:/image/about.png</normalon>:/image/about.png</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="toolTip">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionOpenPluginPath">
+   <property name="icon">
+    <iconset resource="../../../assets/wxbox.qrc">
+     <normaloff>:/image/open_plugin_path.png</normaloff>:/image/open_plugin_path.png</iconset>
+   </property>
+   <property name="text">
+    <string>OpenPluginPath</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Plugin Path</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XStyleCommandLine</class>
+   <extends>QLineEdit</extends>
+   <header>xstyle/xstylecommandline.hpp</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../assets/wxbox.qrc"/>
+ </resources>
+ <connections/>
+</ui>

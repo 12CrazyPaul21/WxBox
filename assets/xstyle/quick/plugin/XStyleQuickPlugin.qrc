@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/plugin">
+    <file>./Theme/qmldir</file>
+    <file>./Theme/Theme.qml</file>
+    <file>./XStyleQuickWindow/qmldir</file>
+    <file>./XStyleQuickWindow/XStyleQuickWindow.qml</file>
+    <file>./XStyleThemeDock.js</file>
+  </qresource>
+</RCC>

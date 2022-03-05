@@ -1,0 +1,129 @@
+@syntax：
+    statement ::= prefixexp methodcall
+    prefixexp ::= ">>"
+    methodcall ::= method | method ":" arglist
+    method ::= methodname | modulename "." methodname
+    arglist ::= expr {"," expr}
+    expr ::= false | true | Numeral | LiteralString
+
+@example:
+    >>wxbox.help
+    >>wxbox.version
+    >>wxbox.send_text: 'filehelper', 'hello world'
+    >>wxbox.set_config: 'avoid_revoke', true
+
+@wxbox apis:
+
+    >>wxbox.version
+    >>wxbox.help
+    >>wxbox.get_phone_test_case
+    >>wxbox.generate_temp_file_name
+    >>wxbox.global_temp_folder_path
+    >>wxbox.package_storage_path: <module name>
+    [only for plugin]>>wxbox.dispatch_host_event: <host event object>
+
+    >>wxbox.snap
+    >>wxbox.snap_main_monitor
+
+    >>wxbox.info: <information message>
+    >>wxbox.warning: warning message>
+    >>wxbox.error: <error message>
+    >>wxbox.clear
+
+    [only for plugin]>>wxbox.sleep: <1 ~ 3000 ms>
+    >>wxbox.shell: <command>, [optional args...]
+    >>wxbox.msgbox: <message>, [optional title]
+    >>wxbox.speak: <message>
+    >>wxbox.lock_screen
+    >>wxbox.list_drives
+    >>wxbox.list_files: <dirpath>
+
+    >>wxbox.set_config: <config name>, <enabled>
+    >>wxbox.uninject_wxbot
+    >>wxbox.exit_wxbox
+
+@wxbox wechat apis:
+
+    >>wxbox.is_logined
+    >>wxbox.logout
+    >>wxbox.profile_wxid
+    >>wxbox.profile_wxnumber
+    >>wxbox.profile_nickname
+
+    >>wxbox.nickname_to_wxid: <nickname>
+    >>wxbox.wxid_to_wxnumber: <wxid>
+    >>wxbox.wxnumber_to_wxid: <wxnumber>
+    >>wxbox.chatroom_wxid: <chatroom name>
+    [only for plugin]>>wxbox.get_contact_with_wxid: <wxid>
+    [only for plugin]>>wxbox.get_contact_with_wxnumber: <wxnumber>
+    [only for plugin]>>wxbox.get_all_contacts
+
+    >>wxbox.send_text_to_filehelper: <text message>
+    >>wxbox.send_picture_to_filehelper: <image file path>
+    >>wxbox.send_file_to_filehelper: <file path>
+    >>wxbox.download: <file path>
+
+    >>wxbox.send_text: <wxid>, <text message>
+    >>wxbox.send_picture: <wxid>, <image file path>
+    >>wxbox.send_file: <wxid>, <file path>
+
+    >>wxbox.send_text_with_wxnumber: <wxnumber>, <text message>
+    >>wxbox.send_picture_with_wxnumber: <wxnumber>, <image file path>
+    >>wxbox.send_file_with_wxnumber: <wxnumber>, <file path>
+
+    >>wxbox.send_text_to_chatroom: <roomWxid>, <text message>, [optional notify list...]
+    >>wxbox.send_picture_to_chatroom: <roomWxid>, <image file path>
+    >>wxbox.send_file_to_chatroom: <roomWxid>, <file path>
+
+    >>wxbox.chatroom_notify: <roomWxid>, [optional notify list...]
+    >>wxbox.chatroom_notify_all: <roomWxid>
+
+@plugin life cycle event and wechat event:
+    load
+    prereload
+    unload
+    
+    receive_raw_message
+    receive_message
+    receive_text_message
+    send_text_message
+    login_wechat_event
+    logout_wechat_event
+    exit_wechat_event
+
+@plugin event object getters [only for plugin]:
+
+    event:type()
+    event:message_type()
+    event:wxid()
+    event:message()
+    event:chatroom_talker_wxid()
+    event:pdata1
+    event:pdata2
+
+@plugin event object methods [only for plugin]:
+
+    event:filter_message()
+    event:substitute_wxid(new_wxid)
+    event:substitute_message(new_message)
+    event:substitute_chatroom_talker_wxid(new_chatroom_talker_wxid)
+
+@plugin host event type:
+    SendMessage
+    Log
+    ClearCommandResultScreen
+    Logout
+    ChangeConfig
+    UnInject
+    ExitWxBox
+    ReportHelp
+    GetPhoneTestCase
+
+@plugin host event static methods [only for plugin]:
+
+    wxbox_host_event.create()
+
+@plugin host event object getter and setters [only for plugin]:
+
+    host_event:type()
+    host_event:set_type(type)

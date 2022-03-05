@@ -3,7 +3,16 @@
     <file>app.ico</file>
   </qresource>
   <qresource prefix="/">
-    <file>translations/en.qm</file>
-    <file>translations/zh_cn.qm</file>
+    <file>./splash_screen.png</file>
+    <file>./image/visit.png</file>
+    <file>./image/select_folder.png</file>
+    <file>./image/start_wechat.png</file>
+    <file>./image/avoid_revoke.png</file>
+    <file>./image/hook.png</file>
+    <file>./image/rev_hook.png</file>
+    <file>./image/open_plugin_path.png</file>
+    <file>./image/update_feature.png</file>
+    <file>./image/setting.png</file>
+    <file>./image/about.png</file>
   </qresource>
 </RCC>

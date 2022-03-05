@@ -1,8 +1,8 @@
-#include <chrono>
-#include <spdlog/spdlog.h>
 #include <test_common.h>
-#include <thread>
-#include <utils/common.h>
+
+//
+// wxbox_utils
+//
 
 TEST(wxbox_utils, file)
 {
@@ -94,8 +94,8 @@ TEST(wxbox_utils, string)
     std::string  str1 = "from string";
     std::wstring str2 = L"from wstring";
 
-    EXPECT_EQ(0, wb_string::ToWString(str1).compare(L"from string"));
-    EXPECT_EQ(0, wb_string::ToString(str2).compare("from wstring"));
+    EXPECT_EQ(0, wb_string::ToUtf8WString(str1).compare(L"from string"));
+    EXPECT_EQ(0, wb_string::ToUtf8String(str2).compare("from wstring"));
 }
 
 TEST(wxbox_utils, process)
@@ -114,211 +114,269 @@ TEST(wxbox_utils, process)
     // }
 }
 
-TEST(wxbox_utils, feature)
+TEST(wxbox_utils, inject)
 {
     auto processPath = wxbox::util::file::GetProcessRootPath();
-    EXPECT_NE("", processPath);
+    EXPECT_NE(true, processPath.empty());
 
-    auto featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
-    EXPECT_NE("", processPath);
-    spdlog::info("feature conf path : {}", featConfPath);
+    char            callFuncName[] = "SayHiInject";
+    wb_process::PID pid            = GetCurrentProcessId();
+    EXPECT_NE(wb_process::PID(0), pid);
 
-    wb_feature::WxApiHookInfo wxApiHookInfo;
-    auto                      unwindSuccess = wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
-    EXPECT_EQ(true, unwindSuccess);
-    spdlog::info("feature conf unwind success : {}", unwindSuccess);
-    if (unwindSuccess) {
-        spdlog::info("WxApiHookInfo platform : {}", wxApiHookInfo.platform);
-        spdlog::info("WxApiHookInfo featureFileAbsPath : {}", wxApiHookInfo.featureFileAbsPath);
+    std::string moduleFolderPath = wxbox::util::file::JoinPath(processPath, "/ModForInjectTest/");
+    wb_inject::AddModuleSearchPath(wb_process::GetCurrentProcessHandle(), moduleFolderPath);
 
-        for (auto absoluteHookInfoPair : wxApiHookInfo.mapWxAbsoluteHookInfo) {
-            std::string                    wxVersion        = absoluteHookInfoPair.first;
-            wb_feature::WxAbsoluteHookInfo absoluteHookInfo = absoluteHookInfoPair.second;
+#if WXBOX_IN_WINDOWS_OS
+    char moduleName[] = "ModForInjectTest.dll";
+#else
+    char moduleName[] = "ModForInjectTest.so";
+#endif
 
-            spdlog::info("WxApiHookInfo absoluteHookInfo wechat version : {}", wxVersion);
-            for (auto api : wb_feature::WX_HOOK_API) {
-                spdlog::info("    {} RVA : 0x{:08X}", api, absoluteHookInfo.GetApiRva(api));
-            }
-        }
+    char                              message[] = "Inject";
+    wb_inject::MethodCallingParameter parameter = wb_inject::MethodCallingParameter::BuildBufferValue(message, sizeof(message));
 
-        for (auto wxHookPointFeaturesPair : wxApiHookInfo.mapWxHookPointFeatures) {
-            std::string                      wxVersion         = wxHookPointFeaturesPair.first;
-            wb_feature::WxHookPointFeatures  hookPointFeatures = wxHookPointFeaturesPair.second;
-            wb_feature::HookPointFeatureInfo hookFeatureInfo;
+    EXPECT_EQ(true, wb_inject::InjectModuleToProcess(pid, moduleName, callFuncName, &parameter));
+    EXPECT_EQ(true, wb_inject::UnInjectModuleFromProcess(pid, moduleName));
+}
 
-            spdlog::info("WxApiHookInfo hookPointFeatures wechat version : {}", wxVersion);
-            for (auto api : wb_feature::WX_HOOK_API) {
-                spdlog::info("    {} hook feature :", api);
-                if (!hookPointFeatures.GetApiHookFeature(api, hookFeatureInfo)) {
-                    continue;
-                }
+TEST(wxbox_utils, DISABLED_use_frida_to_inject)
+{
+    // #include <frida-core.h>
 
-                spdlog::info("        ScanType : {}", hookFeatureInfo.scanType);
-                if (!hookFeatureInfo.scanType.compare("ref")) {
-                    if (hookFeatureInfo.refFeatureStream.size()) {
-                        spdlog::info("        RefFeatureStream :");
-                        PrintUInt8Vector(hookFeatureInfo.refFeatureStream);
-                    }
+    // frida_init();
+    // FridaInjector* injector = frida_injector_new();
 
-                    if (hookFeatureInfo.refBackExtralInstruction.size()) {
-                        spdlog::info("        RefBackExtralInstruction :");
-                        PrintUInt8Vector(hookFeatureInfo.refBackExtralInstruction);
-                    }
+    // GError* error = nullptr;
+    // auto    e     = frida_injector_inject_library_file_sync(injector, 628036, "forhook.dll", "SayHi", "", nullptr, &error);
 
-                    if (hookFeatureInfo.refFrontExtralInstruction.size()) {
-                        spdlog::info("        RefFrontExtralInstruction :");
-                        PrintUInt8Vector(hookFeatureInfo.refFrontExtralInstruction);
-                    }
-                }
-                else if (!hookFeatureInfo.scanType.compare("multiPushRef")) {
-                    if (hookFeatureInfo.pushInstruction.size()) {
-                        spdlog::info("        PushInstruction :");
-                        PrintUInt8Vector(hookFeatureInfo.pushInstruction);
-                    }
+    // frida_injector_close_sync(injector, nullptr, nullptr);
+    // frida_unref(injector);
+    // frida_deinit();
+}
 
-                    if (hookFeatureInfo.refFeatureStreams.size()) {
-                        spdlog::info("        RefFeatureStreams :");
-                        for (auto refFeatureStream : hookFeatureInfo.refFeatureStreams) {
-                            PrintUInt8Vector(refFeatureStream);
-                        }
-                    }
-                }
-                else if (!hookFeatureInfo.scanType.compare("instruction")) {
-                    if (hookFeatureInfo.instructionFeatureStream.size()) {
-                        spdlog::info("        InstructionFeatureStream :");
-                        PrintUInt8Vector(hookFeatureInfo.instructionFeatureStream);
-                    }
-                }
-
-                spdlog::info("        LocateAction : {}", hookFeatureInfo.locateAction);
-                if (hookFeatureInfo.locateActionFeatureStream.size()) {
-                    spdlog::info("        LocateActionFeatureStream :");
-                    PrintUInt8Vector(hookFeatureInfo.locateActionFeatureStream);
-                }
-                spdlog::info("        HookPointOffset : {}", hookFeatureInfo.hookPointOffset);
-                if (!hookFeatureInfo.locateAction.compare("backThenFront")) {
-                    if (hookFeatureInfo.thenLocateActionFeatureStream.size()) {
-                        spdlog::info("        ThenLocateActionFeatureStream :");
-                        PrintUInt8Vector(hookFeatureInfo.thenLocateActionFeatureStream);
-                    }
-                }
-                else if (!hookFeatureInfo.locateAction.compare("backMultiTimes")) {
-                    spdlog::info("        LocateActionExecuteTimes : {}", hookFeatureInfo.locateActionExecuteTimes);
-                }
-            }
-        }
-
-        wb_feature::WxHookPointFeatures wxHookPointFeatures1, wxHookPointFeatures2;
-        EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.4.4", wxHookPointFeatures1));
-        EXPECT_EQ(true, wxApiHookInfo.GetWxHookPointFeaturesWithSimilarVersion("3.5.27", wxHookPointFeatures2));
+TEST(wxbox_utils, list_file)
+{
+    auto utilsSrcPath = wb_file::JoinPath(wb_file::GetProcessRootPath(), "../../../src/utils");
+    auto cppFileList  = wb_file::ListFilesInDirectoryWithExt(utilsSrcPath, "cpp");
+    EXPECT_NE(size_t(0), cppFileList.size());
+    spdlog::info("{} all cpp files : ", utilsSrcPath.c_str());
+    for (auto cpp : cppFileList) {
+        spdlog::info("    {}", cpp.c_str());
     }
 }
 
-TEST(wxbox_utils, wx)
+TEST(wxbox_utils, DISABLED_folder_monitor)
 {
-    auto wxInstallationPath = wxbox::util::wx::GetWxInstallationPath();
-    EXPECT_NE("", wxInstallationPath);
-    spdlog::info("wx installation path : {}", wxInstallationPath);
+    auto path = wb_file::GetProcessRootPath();
+    EXPECT_EQ(true, wb_file::OpenFolderFilesChangeMonitor(path, [](wb_file::FileChangeMonitorReport report) {
+                  std::stringstream ss;
+                  ss << "dirpath : " << report.dirpath;
 
-    auto wxInstallationPathIsValid = wxbox::util::wx::IsWxInstallationPathValid(wxInstallationPath);
-    EXPECT_EQ(true, wxInstallationPathIsValid);
-    spdlog::info("wx installation path is valid : {}", wxInstallationPathIsValid);
+                  switch (report.type) {
+                      case wb_file::FileChangeType::Added:
+                          ss << "  [add] : " << report.filename << std::endl;
+                          break;
+                      case wb_file::FileChangeType::Removed:
+                          ss << "  [remove] : " << report.filename << std::endl;
+                          break;
+                      case wb_file::FileChangeType::Modified:
+                          ss << "  [modify] : " << report.filename << std::endl;
+                          break;
+                      case wb_file::FileChangeType::Renamed:
+                          ss << "  [rename] : " << report.oldname << " -> " << report.filename << std::endl;
+                          break;
+                  }
 
-    auto wxVersion = wxbox::util::wx::GetWxVersion(wxInstallationPath);
-    EXPECT_NE("", wxVersion);
-    spdlog::info("wx version : {}", wxVersion);
+                  std::cout << ss.str();
+              }));
 
-    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
-    auto                         resolveSuccess = wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo);
-    EXPECT_EQ(true, resolveSuccess);
-    spdlog::info("wechat environment success : {}", resolveSuccess);
+    WaitForPressAnyKey("<<<<< Monitor Folder, Press Any Key to Stop Monitor... >>>>>");
+    wb_file::CloseFolderFilesChangeMonitor(path);
+}
 
-    auto wxProcessLists = wxbox::util::wx::GetWeChatProcessList();
-    spdlog::info("wechat prcoess count : {}", wxProcessLists.size());
-    for (auto pi : wxProcessLists) {
-        spdlog::info("wechat prcoess(pid:{}) ", pi.pid);
-        spdlog::info("    execute file abspath : {}", pi.abspath);
-        spdlog::info("    execute filename : {}", pi.filename);
-        spdlog::info("    execute dirpath : {}", pi.dirpath);
+TEST(wxbox_utils, config)
+{
+    static constexpr char TEST_CONFIG_NAME[] = "test_config.yml";
+    wb_config::Config     config(TEST_CONFIG_NAME);
+
+    // load config
+    EXPECT_EQ(true, config.load(TEST_CONFIG_NAME));
+
+    config["/wxbox/foo"_conf] = 1;
+    config["/wxbox/bar"_conf] = "2";
+    config["/wx/list"_conf]   = std::vector<std::string>({"hello", "world"});
+    config.submit();
+    config.close();
+
+    config.load();
+    EXPECT_EQ(1, config[R"(/wxbox/foo)"_conf].safe_as<int>());
+    EXPECT_EQ(0, config[R"(/wxbox/bar)"_conf].safe_as<std::string>().compare("2"));
+    EXPECT_EQ(0, config["/wx/list"_conf][0].safe_as<std::string>().compare("hello"));
+    EXPECT_EQ(0, config["/wx/list"_conf][1].safe_as<std::string>().compare("world"));
+
+    for (auto item : config["/wx/list"_conf]) {
+        spdlog::info("{}", item.safe_as<std::string>());
     }
 }
 
-TEST(wxbox_utils, crack)
+TEST(wxbox_utils, app_config)
 {
-    auto wxInstallationPath = wxbox::util::wx::GetWxInstallationPath();
-    if (wxInstallationPath.empty()) {
-        return;
-    }
+    static constexpr char TEST_CONFIG_NAME[] = "test_config.yml";
+    AppConfig&            config             = AppConfig::singleton();
 
-    wb_wx::WeChatEnvironmentInfo wxEnvInfo;
-    if (!wxbox::util::wx::ResolveWxEnvInfo(wxInstallationPath, &wxEnvInfo)) {
-        return;
-    }
+    // load config
+    EXPECT_EQ(true, config.load(TEST_CONFIG_NAME));
 
-    // unwind feature
-    wb_feature::WxApiHookInfo wxApiHookInfo;
-    auto                      processPath  = wxbox::util::file::GetProcessRootPath();
-    auto                      featConfPath = wxbox::util::file::JoinPath(processPath, "../../../conf/features.yml");
-    wxbox::util::feature::UnwindFeatureConf(featConfPath, wxApiHookInfo);
+    // print default config
+    spdlog::info("default config : ");
+    spdlog::info("    /wxbox/plugins_relpath : {}", config[WXBOX_PLUGINS_RELPATH_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/language : {}", config[WXBOX_LANGUAGE_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/plugins_relpath : {}", config[WXBOX_COREDUMP_PATH_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/wechat_installation_dir : {}", config[WXBOX_WECHAT_INSTALLATION_DIR_KEY].safe_as<std::string>());
+    spdlog::info("    /wxbox/wechat_multi_bloxing_quota : {}", config[WXBOX_WECHAT_MULTI_BLOXING_QUOTA_KEY].safe_as<std::string>());
 
-    // open wechat with multi boxing
-    wb_crack::OpenWxWithMultiBoxingResult openResult           = {0};
-    auto                                  wxMultiBoxingSuccess = wxbox::util::crack::OpenWxWithMultiBoxing(wxEnvInfo, wxApiHookInfo, &openResult);
-    EXPECT_EQ(true, wxMultiBoxingSuccess);
-    spdlog::info("wx multi boxing : {}", wxMultiBoxingSuccess);
-    if (wxMultiBoxingSuccess) {
-        spdlog::info("wechat new process pid : {}", openResult.pid);
-    }
+    config["/wxbox/foo"_conf] = 1;
+    config["/wxbox/bar"_conf] = "2";
+    config["/wx/list"_conf]   = std::vector<std::string>({"hello", "world"});
+    config.submit();
+    config.close();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    config.load();
+    EXPECT_EQ(1, config[R"(/wxbox/foo)"_conf].safe_as<int>());
+    EXPECT_EQ(0, config[R"(/wxbox/bar)"_conf].safe_as<std::string>().compare("2"));
+}
 
-    // get module info
-    wb_process::ModuleInfo mi;
-    auto                   getModuleInfoSuccess = wxbox::util::process::GetModuleInfo(openResult.pid, WX_WE_CHAT_CORE_MODULE, mi);
-    EXPECT_EQ(true, getModuleInfoSuccess);
-    EXPECT_EQ((ucpulong_t)openResult.pModuleBaseAddr, (ucpulong_t)mi.pModuleBaseAddr);
-    EXPECT_EQ((ucpulong_t)openResult.uModuleSize, (ucpulong_t)mi.uModuleSize);
-    spdlog::info("get module info : {}", getModuleInfoSuccess);
+TEST(wxbox_utils, timestamp_to_date)
+{
+    auto ts_ms = wb_process::GetCurrentTimestamp();
+    auto ts_s  = wb_process::GetCurrentTimestamp(false);
+    spdlog::info("date : {}", wb_process::TimeStampToDate<std::chrono::milliseconds>(ts_ms));
+    spdlog::info("date : {}", wb_process::TimeStampToDate<std::chrono::seconds>(ts_s));
+}
 
-    //
-    // locate all api va
-    //
+TEST(wxbox_utils, platform)
+{
+    spdlog::info("is 64 system : {}", wb_platform::Is64System());
+    spdlog::info("is 64 process : {}", wb_process::Is64Process(wb_process::GetCurrentProcessHandle()));
+    spdlog::info("system product description : {}", wb_platform::GetSystemVersionDescription());
+    spdlog::info("cpu product description : {}", wb_platform::GetCPUProductBrandDescription());
+}
 
-    wb_process::PROCESS_HANDLE hProcess = NULL;
+TEST(wxbox_utils, module_infos)
+{
+    auto moduleInfos = wb_process::CollectModuleInfos(wb_process::GetCurrentProcessId());
+    EXPECT_NE(size_t(0), moduleInfos.size());
+}
 
-#if WXBOX_IN_WINDOWS_OS
-    hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, openResult.pid);
-#elif WXBOX_IN_MAC_OS
+std::string before_hook()
+{
+    spdlog::info("before hook");
+    return "before hook";
+}
 
-#endif
+std::string after_hook()
+{
+    spdlog::info("after hook");
+    return "after hook";
+}
 
-    if (hProcess) {
-        //
-        // known wechat version
-        //
+TEST(wxbox_utils, hook)
+{
+    EXPECT_EQ(0, before_hook().compare("before hook"));
+    wb_hook::InProcessDummyHook(before_hook, after_hook);
+    EXPECT_EQ(0, before_hook().compare("after hook"));
+    wb_hook::RevokeInProcessHook(before_hook);
+    EXPECT_EQ(0, before_hook().compare("before hook"));
 
-        wb_feature::LocateTargetInfo locateTargetInfo = {hProcess, openResult.pModuleBaseAddr, openResult.uModuleSize};
-        for (auto api : wb_feature::WX_HOOK_API) {
-            ucpulong_t addr = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
-            EXPECT_NE(ucpulong_t(0), addr);
-            spdlog::info("{} VA : 0x{:08X}", api, addr);
+	wb_hook::InProcessHook(before_hook, after_hook);
+    EXPECT_EQ(0, before_hook().compare("after hook"));
+    wb_hook::RevokeInProcessHook(before_hook);
+    EXPECT_EQ(0, before_hook().compare("before hook"));
+}
+
+TEST(wxbox_utils, log)
+{
+    AppConfig& config = AppConfig::singleton();
+    config.load(AppConfig::APP_CONFIG_NAME);
+
+    AppConfig::RegisterLogger();
+
+    auto log_path                    = config.log_file_path();
+    auto log_name                    = config.log_name();
+    auto log_max_rotating_file_count = config.log_max_rotating_file_count();
+    auto log_max_single_file_size    = config.log_max_single_file_size();
+    auto log_auto_flush_interval_sec = config.log_auto_flush_interval_sec();
+    auto log_level                   = config.log_level();
+    auto log_pattern                 = config.log_pattern();
+
+    spdlog::info(log_path);
+    spdlog::info(log_name);
+    spdlog::info(log_max_rotating_file_count);
+    spdlog::info(log_max_single_file_size);
+    spdlog::info(log_auto_flush_interval_sec);
+    spdlog::info(log_level);
+    spdlog::info(log_pattern);
+
+    spdlog::debug("is a debug log");
+    SPDLOG_DEBUG("is a DEBUG LOG");
+    SPDLOG_TRACE("is a TRACE LOG");
+
+    auto t1 = std::thread([]() {
+        for (int i = 0; i < 100; i++) {
+            spdlog::info(i);
         }
+    });
 
-        //
-        // unknwon wechat version
-        //
-
-        wxEnvInfo.version = "3.2.2";
-        for (auto api : wb_feature::WX_HOOK_API) {
-            ucpulong_t addr = wb_feature::LocateWxAPIHookPointVA(wxEnvInfo, wxApiHookInfo, locateTargetInfo, api);
-            EXPECT_NE(ucpulong_t(0), addr);
-            spdlog::info("unknwon version(v3.2.2) {} VA : 0x{:08X}", api, addr);
+    auto t2 = std::thread([]() {
+        for (int i = 0; i < 100; i++) {
+            spdlog::info(i);
         }
+    });
+
+    t1.join();
+    t2.join();
+}
+
+typedef struct _TestItem
+{
+    int         a;
+    int         b;
+    std::string c;
+
+    _TestItem(int _a, int _b, const std::string& _c)
+      : a(_a)
+      , b(_b)
+      , c(_c)
+    {
+    }
+} TestItem;
+
+void print_internal_allocator_ref(std::vector<TestItem, wb_memory::internal_allocator<TestItem>>& vt, const std::set<ucpulong_t, std::less<ucpulong_t>, wb_memory::internal_allocator<ucpulong_t>>& s)
+{
+    for (auto item : vt) {
+        spdlog::info("TestItem a : {}, b : {}, c : {}", item.a, item.b, item.c);
     }
 
-#if WXBOX_IN_WINDOWS_OS
-    CloseHandle(hProcess);
-#elif WXBOX_IN_MAC_OS
+    for (auto v : s) {
+        spdlog::info("ucpulong_t value : {}", v);
+    }
+}
 
-#endif
+TEST(wxbox_utils, internal_allocator)
+{
+	wb_memory::init_internal_allocator();
+
+    std::vector<TestItem, wb_memory::internal_allocator<TestItem>> vt;
+    std::set<ucpulong_t, std::less<ucpulong_t>, wb_memory::internal_allocator<ucpulong_t>> s;
+
+	vt.push_back(TestItem(1, 2, "3"));
+    vt.emplace_back(TestItem(4, 5, "6"));
+
+	s.insert(1);
+    s.insert(2);
+    s.insert(3);
+
+	print_internal_allocator_ref(vt, s);
+
+	wb_memory::deinit_internal_allocator();
 }

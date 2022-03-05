@@ -1,0 +1,28 @@
+<RCC>
+  <qresource prefix="/XStyleTheme/DefaultTheme/">
+    <file>./image/app.png</file>
+    <file>./image/loading.png</file>
+    <file>./image/minimize.png</file>
+    <file>./image/maximize.png</file>
+    <file>./image/close.png</file>
+    <file>./image/information.png</file>
+    <file>./image/warning.png</file>
+    <file>./image/error.png</file>
+    <file>./image/menu-right-arrow.png</file>
+    <file>./image/menu-right-arrow-hover.png</file>
+    <file>./image/independent_status.png</file>
+    <file>./image/injected_status.png</file>
+    <file>./image/normal_status.png</file>
+    <file>./image/normal_status_but_not_full_feature.png</file>
+    <file>./image/disabled_login_status.png</file>
+    <file>./image/logined_status.png</file>
+    <file>./image/not_logined_status.png</file>
+  </qresource>
+  <qresource prefix="/XStyleTheme/DefaultTheme">
+    <file>./DefaultTheme.qss</file>
+  </qresource>
+
+  <qresource prefix="/XStyleQuickThemes/DefaultTheme">
+    <file>./DefaultTheme.qml</file>
+  </qresource>
+</RCC>

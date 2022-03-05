@@ -1,0 +1,41 @@
+#include <winver.h>
+#include <config.h>
+
+//
+// version info
+//
+
+#ifndef DEBUG
+#define VER_DEBUG 0x0L
+#else
+#define VER_DEBUG VS_FF_DEBUG
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION WXBOX_MAJOR_VERSION, WXBOX_MINOR_VERSION, WXBOX_REVISION_NUMBER, 1
+ PRODUCTVERSION WXBOX_MAJOR_VERSION, WXBOX_MINOR_VERSION, WXBOX_REVISION_NUMBER, 1
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+ FILEFLAGS VER_DEBUG
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "CompanyName", "phantom"
+            VALUE "FileDescription", "WxBot Plugin Command Syntax Interact Train Program"
+            VALUE "FileVersion", WXBOX_VERSION
+            VALUE "InternalName", "interact.exe"
+            VALUE "LegalCopyright", "Copyright (C) 2022"
+            VALUE "OriginalFilename", "interact.exe"
+            VALUE "ProductName", "WxBox"
+            VALUE "ProductVersion", WXBOX_VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END

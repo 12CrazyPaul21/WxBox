@@ -1,0 +1,50 @@
+>>wxbox.version
+>>wxbox.help
+>>wxbox.get_phone_test_case
+>>wxbox.generate_temp_file_name: '前缀'
+>>wxbox.global_temp_folder_path
+>>wxbox.package_storage_path: 'example'
+>>wxbox.snap
+>>wxbox.snap_main_monitor
+>>wxbox.info: '这是一个information'
+>>wxbox.warning: '这是一个warning'
+>>wxbox.error: '这是一个"error"日志"'
+>>wxbox.clear
+>>wxbox.sleep: 100
+>>wxbox.shell: 'calc'
+>>wxbox.shell: 'shutdown', '/s /t 120'
+>>wxbox.shell: 'shutdown', '/a'
+>>wxbox.msgbox: 'hello这是一个对话框'
+>>wxbox.speak: 'hello这是一段语音'
+>>wxbox.lock_screen
+>>wxbox.list_drives
+>>wxbox.list_files: 'C:\Users'
+>>wxbox.download: 'c:\windows\notepad.exe'
+>>wxbox.set_config: 'avoid_revoke', true
+>>wxbox.set_config: 'enable_raw_message_hook', true
+>>wxbox.set_config: 'enable_send_text_message_hook', true
+>>wxbox.uninject_wxbot
+>>wxbox.exit_wxbox
+>>wxbox.is_logined
+>>wxbox.profile_wxid
+>>wxbox.profile_wxnumber
+>>wxbox.profile_nickname
+>>wxbox.logout
+>>wxbox.nickname_to_wxid: '文件传输助手'
+>>wxbox.wxid_to_wxnumber: 'gh_3dfda90e39d6'
+>>wxbox.wxnumber_to_wxid: 'wxzhifu'
+>>wxbox.chatroom_wxid: '<根据实际情况修改>'
+>>wxbox.send_text_to_filehelper: '你好文件传输助手'
+>>wxbox.send_picture_to_filehelper: "<根据实际情况修改图片文件路径>"
+>>wxbox.send_file_to_filehelper: 'c:\windows\notepad.exe'
+>>wxbox.send_text: '<根据实际情况填写wxid>', '你好联系人wxid'
+>>wxbox.send_picture: '<根据实际情况填写wxid>', "<根据实际情况修改图片文件路径>"
+>>wxbox.send_file: '<根据实际情况填写wxid>', 'c:\windows\notepad.exe'
+>>wxbox.send_text_with_wxnumber: '<根据实际情况填写wxnumber>', '你好联系人wxid'
+>>wxbox.send_picture_with_wxnumber: '<根据实际情况填写wxnumber>', "<根据实际情况修改图片文件路径>"
+>>wxbox.send_file_with_wxnumber: '<根据实际情况填写wxnumber>', 'c:\windows\notepad.exe'
+>>wxbox.send_text_to_chatroom: '<根据实际情况填写群聊的wxid>', '你好群聊，这个参数后面接可选的@列表，每个都是一个联系人的wxid', '[根据实际情况填写要@的人的wxd，每个独立一个字符串]...'
+>>wxbox.send_picture_to_chatroom: '<根据实际情况填写群聊的wxid>', "<根据实际情况修改图片文件路径>"
+>>wxbox.send_file_to_chatroom: '<根据实际情况填写群聊的wxid>', 'c:\windows\notepad.exe'
+>>wxbox.chatroom_notify: '<根据实际情况填写群聊的wxid>', '[根据实际情况填写要@的人的wxd，每个独立一个字符串]...'
+>>wxbox.chatroom_notify_all: '<根据实际情况填写群聊的wxid>'

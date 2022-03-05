@@ -1,14 +1,39 @@
+#define WXBOX_REPOSITORY_URL "https://gitee.com/phantom27/wxbox"
+#define WXBOT_LOG_NAME "WxBot"
+
 #define WXBOX_UNSUPPORT_OS 0
 #define WXBOX_WINDOWS_OS 1
 #define WXBOX_MAC_OS 2
 
-#define WXBOX_VERSION "@version@"
-#define WXBOX_MODULE_VERSION "@wxbox_module_version@"
-#define WXBOT_MODULE_VERSION "@wxbot_module_version@"
+#define WXBOX_CPU_LITTLE_ENDIAN 0
+#define WXBOX_CPU_BIG_ENDIAN 1
+
+#define WXBOX_CPU_UNSUPPORT 0
+#define WXBOX_CPU_X86 1
+#define WXBOX_CPU_X86_64 2
+
+#define WXBOX_MAJOR_VERSION @wxbox_major_version@
+#define WXBOX_MINOR_VERSION @wxbox_minor_version@
+#define WXBOX_REVISION_NUMBER @wxbox_revision_number@
+
+#define WXBOT_MAJOR_VERSION @wxbot_major_version@
+#define WXBOT_MINOR_VERSION @wxbot_minor_version@
+#define WXBOT_REVISION_NUMBER @wxbot_revision_number@
+
+#define WXBOX_VERSION "@wxbox_major_version@.@wxbox_minor_version@.@wxbox_revision_number@"
+#define WXBOT_VERSION "@wxbot_major_version@.@wxbot_minor_version@.@wxbot_revision_number@"
 #define WXBOX_PLATFORM @os@
+#define WXBOX_CPU_ENDIAN @endian@
+#define WXBOX_CPU_FAMILY @cpu_family@
 
 #define WXBOX_IN_WINDOWS_OS (WXBOX_PLATFORM == WXBOX_WINDOWS_OS)
 #define WXBOX_IN_MAC_OS (WXBOX_PLATFORM == WXBOX_MAC_OS)
+
+#define WXBOX_CPU_IS_LITTLE_ENDIAN (WXBOX_CPU_ENDIAN == WXBOX_CPU_LITTLE_ENDIAN)
+#define WXBOX_CPU_IS_BIG_ENDIAN (WXBOX_CPU_ENDIAN == WXBOX_CPU_BIG_ENDIAN)
+
+#define WXBOX_CPU_IS_X86 (WXBOX_CPU_FAMILY == WXBOX_CPU_X86)
+#define WXBOX_CPU_IS_X86_64 (WXBOX_CPU_FAMILY == WXBOX_CPU_X86_64)
 
 #if WXBOX_IN_WINDOWS_OS
 #define WXBOX_PLATFORM_NAME "windows"
@@ -17,3 +42,4 @@
 #else
 #define WXBOX_PLATFORM_NAME ""
 #endif
+

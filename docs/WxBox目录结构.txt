@@ -1,0 +1,49 @@
+|   config.yml                      : 配置文件
+|   crashdumper.exe                 ：WxBox崩溃转储程序
+|   interact.exe                    ：用于演示WxBox Plugin命令执行语法的交互式命令行工具
+|   wxbot.dll                       ：核心的WxBot模块，它会被注入进WeChat进程中，以实现接管WeChat API，并启动Plugin“虚拟机”，另外它会通过gRPC与WxBox通信
+|   wxbox.exe                       : WxBox主程序，用于管理所有的WeChat实例、注入、卸载WxBot模块等
+|
++---features                        ：WeChat对应版本的特征库，如果没有对应版本的feature，会使用最接近的版本的特征去尝试定位
+|   +---mac
+|   \---windows
+|       \---x86
+|               v3.4.5.27.yml
+|               v3.5.0.46.yml
+|
++---i18n                            : 界面语言包
+|       en.qm
+|       zh_cn.qm
+|
++---themes                          : 界面主题包
+|       GreenTheme.rcc
+|
++---log                             : WxBox、WxBot日志，当单个文件超过一定大小后，会自动rotating
+|       WxBox.log
+|
++---plugins                         : WxBox Plugin根目录【根目录存放所有纯文本的自定义lua扩展，整个目录可以自由添加、删除、不影响WxBot使用】
+|   |   example.lua.disabled        : 纯文本格式的plugin例子，要测试的话可以把.disabled去掉
+|   |   wxbox_apis.txt              : WxBox Plugin API说明文档
+|   |
+|   +---common                      : common存放所有纯文本格式的第三方lua库，可以自由添加
+|   |   |   JSON.lua
+|   |   |
+|   |   \---libs                    : common/libs存放所有二进制的第三方lua库，一样可以自由添加
+|   +---libs                        : 二进制Plugin
+|   |   |   template.dll.disabled   : 编译好的template例子
+|   |   |
+|   |   \---template                : 编写二进制WxBox Plugin的模板
+|   |       |   meson.build
+|   |       |   README.md
+|   |       |   template.cpp
+|   |       |   template.hpp
+|   |       |
+|   |       \---subprojects
+|   |               lua.wrap
+|   |
+|   \---storage                     : 所有Plugin存储数据的根目录，最好每个Plugin单独一个文件夹
+|       \---global_temp             : 给Plugin全局使用的临时目录
+
+
+
+

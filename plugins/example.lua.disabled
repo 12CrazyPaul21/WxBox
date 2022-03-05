@@ -1,0 +1,88 @@
+-- declare a plugin, must be a global variable
+example = declare_plugin('example')
+
+-- common lib
+local JSON = require('JSON')
+
+-- dynamic module
+local template = require('template')
+
+function example.load()
+    wxbox.info("example.load")
+    wxbox.info('wxbox version : ' .. wxbox.version())
+    wxbox.info('example module storage path : ' .. wxbox.package_storage_path(example.plugin_name))
+    return true
+end
+
+function example.prereload()
+    wxbox.info("example.prereload")
+end
+
+function example.unload()
+    wxbox.info("example.unload")
+end
+
+function example.receive_raw_message(event)
+    -- event:filter_message()
+    -- event:substitute_wxid('filehelper')
+    -- event:substitute_message('你好')
+    wxbox.info('example.receive_raw_message : ' .. event:message())
+end
+
+function example.receive_message(event)
+    wxbox.info('example.receive_message : ' .. event:message())
+end
+
+function example.receive_text_message(event)
+    wxbox.info('example.receive_text_message : ' .. event:message())
+end
+
+function example.send_text_message(event)
+    -- event:substitute_wxid('filehelper')
+    -- event:substitute_message('test')
+    -- event:substitute_chatroom_talker_wxid('filehelper')
+    wxbox.info("example.send_text_message : " .. event:message())
+end
+
+function example.login_wechat_event(event)
+    wxbox.info('login')
+end
+
+function example.logout_wechat_event(event)
+    wxbox.info('logout')
+end
+
+function example.exit_wechat_event(event)
+    wxbox.info('exit wechat')
+end
+
+function example.hello()
+    wxbox.info("hello im example module")
+    wxbox.info("storage path : " .. example.storage_path)
+    return 'hello'
+end
+
+function example.long_time_task_test()
+    for i=1,100,1 do
+        wxbox.info(i)
+        wxbox.send_text_to_filehelper(i)
+        wxbox.sleep(1000)
+    end
+end
+
+function example.dispatch_message()
+    local hostEvent = wxbox_host_event.create()
+    hostEvent:set_type(wxbox_host_event.ReportHelp)
+    wxbox.dispatch_host_event(hostEvent)
+end
+
+function example.parse_a_json(j)
+    local obj = JSON:decode(j)
+    for k, v in pairs(obj) do
+        wxbox.info("key : " .. k .. ", value : " ..  v)
+    end
+end
+
+function example.say_template_hello()
+    wxbox.info(template.hello())
+end

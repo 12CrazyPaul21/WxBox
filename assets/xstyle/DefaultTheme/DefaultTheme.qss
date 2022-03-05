@@ -1,0 +1,166 @@
+// #XStyleWindowTheme#
+
+.xstylewindow {
+    qproperty-title_height: 40;
+    qproperty-footer_height: 20;
+    qproperty-title_button_width: 40;
+    qproperty-title_button_height: 40;
+    qproperty-reserve_border_width: 2;
+    qproperty-reserve_shadow_width: 6;
+    qproperty-shadow_color: black;
+    qproperty-border_radius: 4;
+    qproperty-window_fade_out_duration: 200;
+    qproperty-window_icon_url: ":/XStyleTheme/DefaultTheme/image/app.png";
+}
+
+.xstylewindow * {
+    font-family: "Microsoft YaHei";
+}
+
+.xstylewindow_container {
+    background: rgb(0, 0, 77);
+}
+
+.xstylewindow_title_panel {
+    background: rgb(31, 39, 100);
+}
+
+.xstylewindow_title_label {
+    font: normal bold 15px "Microsoft YaHei";
+    color: rgba(255, 255, 255, 200);
+}
+
+.xstylewindow_body_container {
+    background: rgba(31, 39, 100, 150);
+}
+
+.xstylewindow_footer_panel {
+    background: rgb(31, 39, 100);
+}
+
+.xstylewindow_title_button {
+    border: 1px solid transparent;
+    border-radius: 0px;
+}
+
+.xstylewindow_title_button:hover {
+    border: 1px solid black;
+}
+
+.xstylewindow_min_button {
+    qproperty-icon_url: ":/XStyleTheme/DefaultTheme/image/minimize.png";
+    qproperty-down_color: rgba(0, 102, 255, 220);
+}
+
+.xstylewindow_max_button {
+    qproperty-icon_url: ":/XStyleTheme/DefaultTheme/image/maximize.png";
+}
+
+.xstylewindow_close_button {
+    qproperty-icon_url: ":/XStyleTheme/DefaultTheme/image/close.png";
+    qproperty-hover_color: rgba(230, 0, 0, 220);
+    qproperty-down_color: rgba(230, 0, 0, 255);
+}
+
+.xstylemessagebox {
+    qproperty-footer_height: 10;
+    qproperty-information_icon_url: ":/XStyleTheme/DefaultTheme/image/information.png";
+    qproperty-warning_icon_url: ":/XStyleTheme/DefaultTheme/image/warning.png";
+    qproperty-error_icon_url: ":/XStyleTheme/DefaultTheme/image/error.png";
+}
+
+#MainWindow_xstylewindow {
+    qproperty-window_loading_icon_url: ":/XStyleTheme/DefaultTheme/image/loading.png";
+}
+
+#MainWindowBodyFrame {
+    
+}
+
+#CrashDumper_body_container QLabel {
+    color: rgba(200, 200, 200, 200);
+}
+
+#CrashDumper_body_container QCheckBox {
+    color: rgba(200, 200, 200, 200);
+}
+
+#CrashDumper_xstylewindow {
+    qproperty-footer_height: 35;
+}
+
+#CrashDumper_link_label {
+    color: white;
+}
+
+QMenu::right-arrow {
+    image: url(":/XStyleTheme/DefaultTheme/image/menu-right-arrow.png")
+}
+
+QMenu::right-arrow:selected {
+    image: url(":/XStyleTheme/DefaultTheme/image/menu-right-arrow-hover.png")
+}
+
+#DownloadDialog_labelStatus {
+    font: normal bold 14px "Microsoft YaHei";
+    color: white;
+}
+
+#groupBoxCommand {
+    font: normal bold 13px "Microsoft YaHei";
+    color: white;
+}
+
+#labelCommandPrefix {
+    font: normal bold 12px "Microsoft YaHei";
+    color: white;
+}
+
+#lineCommand {
+    font: normal bold 12px "Microsoft YaHei";
+}
+
+#viewCommandExecuteLogger {
+    font: normal bold 12px "Microsoft YaHei";
+}
+
+#viewWeChatStatus QHeaderView::section {
+    background-color: rgba(200, 200, 200, 240);
+}
+
+#viewWeChatStatus::item:selected:active {
+    selection-background-color: rgb(51, 133, 255);
+}
+
+#viewWeChatStatus::item:selected:!active {
+    selection-background-color: rgb(51, 133, 255);
+}
+
+#WxBoxSettingDialog_body_container * {
+    font-family: "Microsoft YaHei";
+}
+
+#labelAboutContent {
+    font-size: 12px;
+}
+
+#AboutWxBoxDialog_xstylewindow {
+    qproperty-footer_height: 18;
+}
+
+#AboutWxBoxDialog_body_container {
+    background: rgba(255, 255, 255, 230);
+}
+
+#WxBoxToolbar::separator {
+    background: rgba(255, 255, 255, 40);
+    width: 1px;
+}
+
+#WxBoxToolbar QToolButton:hover {
+    background: rgba(100, 100, 100, 100);
+}
+
+#WxBoxToolbar QToolButton:checked {
+    background: rgba(10, 240, 10, 200);
+}

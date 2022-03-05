@@ -1,0 +1,41 @@
+#include <winver.h>
+#include <config.h>
+
+//
+// version info
+//
+
+#ifndef DEBUG
+#define VER_DEBUG 0x0L
+#else
+#define VER_DEBUG VS_FF_DEBUG
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION WXBOT_MAJOR_VERSION, WXBOT_MINOR_VERSION, WXBOT_REVISION_NUMBER, 1
+ PRODUCTVERSION WXBOT_MAJOR_VERSION, WXBOT_MINOR_VERSION, WXBOT_REVISION_NUMBER, 1
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+ FILEFLAGS VER_DEBUG
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "CompanyName", "phantom"
+            VALUE "FileDescription", "WxBot Injected Robot Module"
+            VALUE "FileVersion", WXBOT_VERSION
+            VALUE "InternalName", "wxbot.dll"
+            VALUE "LegalCopyright", "Copyright (C) 2022"
+            VALUE "OriginalFilename", "wxbot.dll"
+            VALUE "ProductName", "WxBot"
+            VALUE "ProductVersion", WXBOT_VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
