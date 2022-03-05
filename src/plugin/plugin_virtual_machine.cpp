@@ -406,7 +406,13 @@ static void RefreshPlugins(wxbox::plugin::PPluginVirtualMachine vm)
     }
 
     // execute garbage collection
-    lua_gc(vm->state, LUA_GCCOLLECT);
+    WXBOX_TRY
+    {
+        lua_gc(vm->state, LUA_GCCOLLECT);
+    }
+    WXBOX_EXCEPT
+    {
+    }
 
     // fetch all plugin's filename
     auto pluginLists = wb_file::ListFilesInDirectoryWithExt(vm->pluginPath, WXBOX_PLUGIN_FILE_EXT);
