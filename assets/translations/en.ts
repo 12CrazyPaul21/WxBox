@@ -347,6 +347,10 @@
         <source>Some interfaces are interdependent, so not marking [UnSupported] does not mean that the corresponding functions can be used</source>
         <translation>Some interfaces are interdependent, so not marking [UnSupported] does not mean that the corresponding functions can be used</translation>
     </message>
+    <message>
+        <source>UnInject WxBot Module maybe cause WeChat Crash</source>
+        <translation>UnInject WxBot Module maybe cause WeChat Crash</translation>
+    </message>
 </context>
 <context>
     <name>AppMenu</name>

@@ -34,9 +34,6 @@
 >>wxbox.wxid_to_wxnumber: 'gh_3dfda90e39d6'
 >>wxbox.wxnumber_to_wxid: 'wxzhifu'
 >>wxbox.chatroom_wxid: '<根据实际情况修改>'
->>wxbox.get_contact_with_wxid: 'filehelper'
->>wxbox.get_contact_with_wxnumber: 'wxzhifu'
->>wxbox.get_all_contacts
 >>wxbox.send_text_to_filehelper: '你好文件传输助手'
 >>wxbox.send_picture_to_filehelper: "<根据实际情况修改图片文件路径>"
 >>wxbox.send_file_to_filehelper: 'c:\windows\notepad.exe'

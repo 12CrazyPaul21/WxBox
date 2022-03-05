@@ -26,6 +26,7 @@
 
 - \>>wxbox.version查看wxbox的版本
 - \>>wxbox.help查看wxbox命令帮助，它会给文件传输助手发送一个wxbox_apis.txt文件
+- \>>wxbox.get_phone_test_case如果处于登录状态的话，会给手机上的文件传输助手发送所有手机的测试用例
 - \>>wxbox.snap向filehelper发送一个桌面系统所有显示器拼接的“载图”
 - \>>wxbox.snap_main_monitor向filehelper发送一个桌面主Monitor的“载图”
 - \>>wxbox.info、>>wxbox.warning、>>wxbox.error向WxBox发送不同Level的日志
@@ -42,7 +43,6 @@
 - \>>wxbox.nickname_to_wxid昵称转为wxid
 - \>>wxbox.wxid_to_wxnumber从wxid转为wxnumber
 - \>>wxbox.chatroom_wxid获取群聊的roomWxid
-- \>>wxbox.get_all_contacts获取所有联系人信息，这不是给filehelper或者WxBox调用的，这个在Plugin中调用
 - \>>wxbox.send_text_to_filehelper向filehelper发送文本消息
 - \>>wxbox.send_picture_to_filehelper向filehelper发送图片
 - \>>wxbox.send_file_to_filehelper向filehelper发送文件

@@ -347,6 +347,10 @@
         <source>Some interfaces are interdependent, so not marking [UnSupported] does not mean that the corresponding functions can be used</source>
         <translation>有些接口相互依赖，没标注[不支持]不代表对应的功能就能使用</translation>
     </message>
+    <message>
+        <source>UnInject WxBot Module maybe cause WeChat Crash</source>
+        <translation>卸载WxBot模块容易让WeChat进程崩溃或者锁住，是否继续卸载？</translation>
+    </message>
 </context>
 <context>
     <name>AppMenu</name>

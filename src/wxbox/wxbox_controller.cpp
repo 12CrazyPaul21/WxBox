@@ -397,6 +397,10 @@ bool WxBoxController::UnInjectWxBotModule(wb_process::PID pid)
         return false;
     }
 
+    if (xstyle::warning(view, "", _wctr("UnInject WxBot Module maybe cause WeChat Crash"), XStyleMessageBoxButtonType::YesNo) != XStyleMessageBoxButton::Yes) {
+        return false;
+    }
+
     wxbox::WxBoxMessage msg(wxbox::MsgRole::WxBox, wxbox::WxBoxMessageType::WxBoxRequest);
     msg.pid = pid;
     msg.u.wxBoxControlPacket.set_type(wxbox::ControlPacketType::UNINJECT_WXBOT_REQUEST);

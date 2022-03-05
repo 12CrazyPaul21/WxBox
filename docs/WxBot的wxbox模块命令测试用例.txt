@@ -102,6 +102,7 @@ wxbox.profile_nickname
 # 触发账户退出登录
 wxbox.logout
 
+
 @@@wxid、wxnumber与wxid的相互转换【不能转自己的，自己的用上面的profile直接获取】
 # 昵称转wxid
 wxbox.nickname_to_wxid: '文件传输助手'
@@ -111,14 +112,6 @@ wxbox.wxid_to_wxnumber: 'gh_3dfda90e39d6'
 wxbox.wxnumber_to_wxid: 'wxzhifu'
 # 根据群聊名获取群聊的roomWxid【根据实际情况修改】
 wxbox.chatroom_wxid: '群聊的备注'
-
-@@@获取contact信息【这部分要在Plugin中调才能提取有用的数据，所以不需要测】
-# 根据wxid返回一个contact对象
-wxbox.get_contact_with_wxid: 'filehelper'
-# 根据wxnumber返回一个contact对象
-wxbox.get_contact_with_wxnumber: 'wxzhifu'
-# 获取所有联系人
-wxbox.get_all_contacts
 
 
 @@@给文件传输助手文本、图片、文件消息
