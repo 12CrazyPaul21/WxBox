@@ -7,6 +7,7 @@
 std::jmp_buf lua_painc_jmp;
 
 static wb_plugin::PPluginVirtualMachine g_vm_signleton = nullptr;
+static std::mutex                       g_vm_signleton_mutex;
 
 static constexpr const char* ERROR_MESSAGE_MODULE_INVALID          = "the specified module is invalid";
 static constexpr const char* ERROR_MESSAGE_MODULE_NOT_REGISTERED   = "the specified module is not registered";
@@ -802,6 +803,8 @@ static void PluginVirtualMachineRoutine(wxbox::plugin::PPluginVirtualMachine vm)
 
 bool wxbox::plugin::StartPluginVirtualMachine(PPluginVirtualMachineStartupInfo startupInfo)
 {
+    std::lock_guard<std::mutex> lock(g_vm_signleton_mutex);
+
     if (!startupInfo || ::g_vm_signleton) {
         return false;
     }
@@ -830,16 +833,22 @@ bool wxbox::plugin::StartPluginVirtualMachine(PPluginVirtualMachineStartupInfo s
 
 void wxbox::plugin::StopPluginVirtualMachine()
 {
+    std::lock_guard<std::mutex> lock(g_vm_signleton_mutex);
+
     if (!::g_vm_signleton) {
         return;
     }
 
-    wb_file::CloseFolderFilesChangeMonitor(::g_vm_signleton->pluginPath);
-    ::g_vm_signleton->exitSignal.set_value();
-    ::g_vm_signleton->cv.notify_one();
-    ::g_vm_signleton->doneFuture.wait();
-    ClosePluginVirtualMachine(::g_vm_signleton);
-    ReleasePluginVirtualMachine(&::g_vm_signleton);
+    try {
+        wb_file::CloseFolderFilesChangeMonitor(::g_vm_signleton->pluginPath);
+        ::g_vm_signleton->exitSignal.set_value();
+        ::g_vm_signleton->cv.notify_one();
+        ::g_vm_signleton->doneFuture.wait();
+        ClosePluginVirtualMachine(::g_vm_signleton);
+        ReleasePluginVirtualMachine(&::g_vm_signleton);
+    }
+    catch (...) {
+    }
 }
 
 void wxbox::plugin::ExecutePluginVirtualMachineGC()
@@ -849,6 +858,8 @@ void wxbox::plugin::ExecutePluginVirtualMachineGC()
 
 std::string wxbox::plugin::GetPluginVirtualMachineStorageRoot()
 {
+    std::lock_guard<std::mutex> lock(g_vm_signleton_mutex);
+
     if (!::g_vm_signleton) {
         return "";
     }
@@ -860,6 +871,8 @@ std::string wxbox::plugin::GetPluginVirtualMachineStorageRoot()
 
 std::string wxbox::plugin::GetPluginVirtualMachineGlobalTempRoot()
 {
+    std::lock_guard<std::mutex> lock(g_vm_signleton_mutex);
+
     if (!::g_vm_signleton) {
         return "";
     }
@@ -871,6 +884,8 @@ std::string wxbox::plugin::GetPluginVirtualMachineGlobalTempRoot()
 
 void wxbox::plugin::ChangeLongTaskTimeout(std::time_t timeout)
 {
+    std::lock_guard<std::mutex> lock_singleton(g_vm_signleton_mutex);
+
     if (!::g_vm_signleton) {
         return;
     }
@@ -881,6 +896,8 @@ void wxbox::plugin::ChangeLongTaskTimeout(std::time_t timeout)
 
 bool wxbox::plugin::PushPluginVirtualMachineCommandSync(PluginVirtualMachineCommandPtr command)
 {
+    std::lock_guard<std::mutex> lock_singleton(g_vm_signleton_mutex);
+
     if (!::g_vm_signleton) {
         return false;
     }
@@ -902,6 +919,8 @@ bool wxbox::plugin::PushPluginVirtualMachineCommand(PluginVirtualMachineCommandP
 
 void wxbox::plugin::DispatchPluginToHostEvent(wxbox::plugin::HostEventModelPtr hostEvent)
 {
+    std::lock_guard<std::mutex> lock(g_vm_signleton_mutex);
+
     if (!::g_vm_signleton || !::g_vm_signleton->callback || !hostEvent) {
         return;
     }
