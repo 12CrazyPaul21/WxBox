@@ -46,6 +46,7 @@ static void                                 HandleWeChatLifeEventMessageCommand(
 static void                                 HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandPtr command);
 static void                                 PluginVirtualMachineMessageLoop(wxbox::plugin::PPluginVirtualMachine vm);
 static void                                 PluginVirtualMachineRoutine(wxbox::plugin::PPluginVirtualMachine vm);
+static void                                 LuaStateGC(wxbox::plugin::PPluginVirtualMachine vm);
 
 //
 // Functions
@@ -145,7 +146,7 @@ static void ClosePluginVirtualMachine(wxbox::plugin::PPluginVirtualMachine vm)
     }
 
     // execute garbage collection
-    lua_gc(vm->state, LUA_GCCOLLECT);
+    LuaStateGC(vm);
 
     // unload all plugins
     UnLoadAllPlugin(vm);
@@ -747,7 +748,7 @@ static void HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachi
 
     switch (command->type) {
         case wb_plugin::PluginVirtualMachineCommandType::GC:
-            lua_gc(vm->state, LUA_GCCOLLECT);
+            LuaStateGC(vm);
             break;
         case wb_plugin::PluginVirtualMachineCommandType::Eval:
             HandleEvalCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::Eval>(command));
