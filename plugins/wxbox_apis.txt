@@ -16,6 +16,7 @@
 
     >>wxbox.version
     >>wxbox.help
+    >>wxbox.get_phone_test_case
     >>wxbox.generate_temp_file_name
     >>wxbox.global_temp_folder_path
     >>wxbox.package_storage_path: <module name>
@@ -116,6 +117,7 @@
     UnInject
     ExitWxBox
     ReportHelp
+    GetPhoneTestCase
 
 @plugin host event static methods [only for plugin]:
 

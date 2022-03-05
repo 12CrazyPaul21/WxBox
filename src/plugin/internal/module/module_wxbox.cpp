@@ -148,6 +148,21 @@ static int __wxbox_help(lua_State* L)
     return 0;
 }
 
+static int __wxbox_get_phone_test_case(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    auto event = wb_plugin::BuildHostEventModel();
+    if (!event) {
+        return 0;
+    }
+
+    event->type = wb_plugin::HostEventType::GetPhoneTestCase;
+
+    wb_plugin::DispatchPluginToHostEvent(std::move(event));
+    return 0;
+}
+
 static int __wxbox_generate_temp_file_name(lua_State* L)
 {
     const char* prefix = luaL_checkstring(L, 1);
@@ -779,6 +794,7 @@ static int __wxbox_chatroom_notify_all(lua_State* L)
 const struct luaL_Reg wxbox::plugin::internal::WxBoxModuleMethods[] = {
     {"version", __wxbox_version},
     {"help", __wxbox_help},
+    {"get_phone_test_case", __wxbox_get_phone_test_case},
     {"generate_temp_file_name", __wxbox_generate_temp_file_name},
     {"global_temp_folder_path", __wxbox_global_temp_folder_path},
     {"package_storage_path", __wxbox_package_storage_path},

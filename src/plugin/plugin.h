@@ -150,6 +150,7 @@ namespace wxbox {
             UnInject,
             ExitWxBox,
             ReportHelp,
+            GetPhoneTestCase,
             _TotalHostEventType
         };
 

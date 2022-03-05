@@ -123,6 +123,7 @@ namespace wxbot {
 
         void PluginExecuteResultEventHandler(const wb_plugin::PluginVirtualMachineExecuteResultEventPtr& resultEvent);
         void PluginSendMessageHandler(const wb_plugin::PluginSendWeChatMessagePtr& sendMessageArgs);
+        void PluginGetPhoneTestCase();
         void PluginToHostEventHandler(const wb_plugin::PluginVirtualMachinePluginToHostEventPtr& pluginToHostEvent);
 
         //

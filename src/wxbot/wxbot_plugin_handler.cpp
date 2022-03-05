@@ -275,6 +275,35 @@ void wxbot::WxBot::PluginSendMessageHandler(const wb_plugin::PluginSendWeChatMes
     }
 }
 
+void wxbot::WxBot::PluginGetPhoneTestCase()
+{
+    std::string testCaseTxtFilePath = wb_file::JoinPath(args->plugins_root, "wxbox_phone_test_case.txt");
+    if (!wb_file::IsPathExists(testCaseTxtFilePath)) {
+        return;
+    }
+
+    bool        isLogined = wb_crack::IsLoign();
+    std::string line;
+
+    try {
+        std::ifstream stream;
+        stream.open(testCaseTxtFilePath);
+        if (stream.is_open()) {
+            while (stream.good() && !stream.eof()) {
+                std::getline(stream, line);
+                if (isLogined) {
+                    SendTextMessageToFileHelper(line);
+                }
+                else {
+                    ResponseExecutePluginResult(line);
+                }
+            }
+        }
+    }
+    catch (...) {
+    }
+}
+
 void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachinePluginToHostEventPtr& pluginToHostEvent)
 {
     if (!pluginToHostEvent || !pluginToHostEvent->hostEvent) {
@@ -351,6 +380,11 @@ void wxbot::WxBot::PluginToHostEventHandler(const wb_plugin::PluginVirtualMachin
             if (wb_file::IsPathExists(helpTxtFilePath)) {
                 SendFileToFileHelper(wb_string::NativeToUtf8String(helpTxtFilePath));
             }
+            break;
+        }
+
+        case wb_plugin::HostEventType::GetPhoneTestCase: {
+            PluginGetPhoneTestCase();
             break;
         }
     }

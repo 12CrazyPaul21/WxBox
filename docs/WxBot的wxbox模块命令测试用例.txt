@@ -1,0 +1,154 @@
+@注意：
+ - WxBox Plugin用的是UTF8编码，要确保中文用的是UTF8
+ - 注意标点符号要用半角英文的 ''和""
+ - ''内可以包含多个""，同样""内可以包含多个''，但''内不能包含''，同样""也不能包含""
+ - Plugin命令字符串不支持转义
+
+
+@WeChat文件传输助手测试用例：
+# 登录情况下在WxBox桌面端执行下面指令
+wxbox.get_phone_test_case
+# 手机上的文件传输助手会收到测试用例的每一行，每行逐条复制粘贴来测试
+# 先测试下面的WxBox桌面端先，再回过来到手机测试
+
+
+@WxBox桌面端测试用例：
+【这一整节的命令可以直接复制到WxBox的命令框上执行，!!! 部分指令需要根据实际情况修改一下 !!!】
+
+wxbox.version
+# 给文件传输助手发送wxbox_apis.txt帮助文档
+wxbox.help
+# 如果用户登录那么给文件传输助手发送手机上的测试用例，没登录发给WxBox桌面端
+wxbox.get_phone_test_case
+wxbox.generate_temp_file_name: '前缀'
+wxbox.global_temp_folder_path
+wxbox.package_storage_path: 'example'
+
+
+
+@@载图测试
+# 全屏载图，给文件传输助手发送载图
+wxbox.snap
+# 主屏幕载图
+wxbox.snap_main_monitor
+
+
+
+@@不同级别的WxBot日志
+wxbox.info: '这是一个information'
+wxbox.warning: '这是一个warning'
+wxbox.error: '这是一个"error"日志"'
+# 清空wxbox桌面端上的日志
+wxbox.clear
+
+
+
+@@PC桌面系统相关辅助接口
+
+# 这个给plugin内用的，可以休眠1~3000毫秒，如果太长PluginVirtualMachine是无法把这个调用让出的
+wxbox.sleep: 100
+
+# 执行shell命令，下面在Windows上会打开一个计算器
+wxbox.shell: 'calc'
+# 同样是执行shell命令，在Windows上会定时关机，时间是2分钟
+wxbox.shell: 'shutdown', '/s /t 120'
+# 取消定时关机
+wxbox.shell: 'shutdown', '/a'
+
+# 在桌面端显示一个对话框
+wxbox.msgbox: 'hello这是一个对话框'
+# 在桌面端播放一段语音
+wxbox.speak: 'hello这是一段语音'
+
+# 锁定桌面端屏幕
+wxbox.lock_screen
+
+# 列出桌面端所有磁盘驱动器盘符
+wxbox.list_drives
+# 列出桌面端指定路径下的所有文件
+wxbox.list_files: 'C:\Users'
+
+# 下载文件发送给文件传输助手，大小限制跟WeChat一样
+wxbox.download: 'c:\windows\notepad.exe'
+
+
+@@WxBox与WxBot管理指令
+# 单独修改账户关联的WxBot模块的配置【这个不会影响WxBox的设置】
+## 启用/禁用，防止消息撤回
+wxbox.set_config: 'avoid_revoke', true
+# 启用/禁用，是否hook WeChat的原始消息
+wxbox.set_config: 'enable_raw_message_hook', true
+# 启用/禁用，是否hook WeChat的发送文本消息（PC端）
+wxbox.set_config: 'enable_send_text_message_hook', true
+
+# 让WeChat进程卸载WxBot模块【注意卸载之后，需要重新注入，否则下面的命令也执行不了】
+wxbox.uninject_wxbot
+# 让桌面端的WxBox程序关闭
+wxbox.exit_wxbox
+
+
+
+@@WeChat相关API
+
+@@@登录用户状态以及Profile相关
+# 判断是否处于登录状态
+wxbox.is_logined
+# 获取账户的wxid
+wxbox.profile_wxid
+# 获取账户的WeChat号【WeChat号就是'wei' 'xin'号】
+wxbox.profile_wxnumber
+# 获取账户的昵称
+wxbox.profile_nickname
+# 触发账户退出登录
+wxbox.logout
+
+@@@wxid、wxnumber与wxid的相互转换【不能转自己的，自己的用上面的profile直接获取】
+# 昵称转wxid
+wxbox.nickname_to_wxid: '文件传输助手'
+# wxid转WeChat号
+wxbox.wxid_to_wxnumber: 'gh_3dfda90e39d6'
+# WeChat号转wxid
+wxbox.wxnumber_to_wxid: 'wxzhifu'
+# 根据群聊名获取群聊的roomWxid【根据实际情况修改】
+wxbox.chatroom_wxid: '群聊的备注'
+
+@@@获取contact信息【这部分要在Plugin中调才能提取有用的数据，所以不需要测】
+# 根据wxid返回一个contact对象
+wxbox.get_contact_with_wxid: 'filehelper'
+# 根据wxnumber返回一个contact对象
+wxbox.get_contact_with_wxnumber: 'wxzhifu'
+# 获取所有联系人
+wxbox.get_all_contacts
+
+
+@@@给文件传输助手文本、图片、文件消息
+# 发送文本消息给文件传输助手
+wxbox.send_text_to_filehelper: '你好文件传输助手'
+# 发送图片给文件传输助手【根据实际修改图片的文件路径】
+wxbox.send_picture_to_filehelper: "<根据实际情况修改图片文件路径>"
+# 发送文件【自己改】
+wxbox.send_file_to_filehelper: 'c:\windows\notepad.exe'
+
+
+@@@给指定wxid联系人发送文本、图片、文件消息
+wxbox.send_text: '<根据实际情况填写wxid>', '你好联系人wxid'
+wxbox.send_picture: '<根据实际情况填写wxid>', "<根据实际情况修改图片文件路径>"
+wxbox.send_file: '<根据实际情况填写wxid>', 'c:\windows\notepad.exe'
+
+
+@@@给指定WeChat号联系人发送文本、图片、文件消息
+wxbox.send_text_with_wxnumber: '根据实际情况填写wxnumber', '你好联系人wxid'
+wxbox.send_picture_with_wxnumber: '根据实际情况填写wxnumber', "<根据实际情况修改图片文件路径>"
+wxbox.send_file_with_wxnumber: '根据实际情况填写wxnumber', 'c:\windows\notepad.exe'
+
+
+@@@给指定群聊发送文本、图片、文件消息
+# 第一个参数是群聊的wxid，第二个参数是文本消息，之后是可选的@列表的wxid，每个wxid独立一个字符串
+wxbox.send_text_to_chatroom: '根据实际情况填写群聊的wxid', '你好群聊，这个参数后面接可选的@列表，每个都是一个联系人的wxid', '[根据实际情况填写要@的人的wxd，每个独立一个字符串]...'
+wxbox.send_picture_to_chatroom: '根据实际情况填写群聊的wxid', "<根据实际情况修改图片文件路径>"
+wxbox.send_file_to_chatroom: '根据实际情况填写群聊的wxid', 'c:\windows\notepad.exe'
+
+
+@@@在群聊中单纯@人
+wxbox.chatroom_notify: '根据实际情况填写群聊的wxid', '[根据实际情况填写要@的人的wxd，每个独立一个字符串]...'
+wxbox.chatroom_notify_all: '根据实际情况填写群聊的wxid'
