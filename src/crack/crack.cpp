@@ -1035,6 +1035,14 @@ bool wxbox::crack::CollectAllContact(std::vector<wxbox::crack::wx::WeChatContact
 
     std::lock_guard<std::mutex> lock(g_mutex);
 
+    //
+    // check logged-in
+    //
+
+    if (!wb_crack::IsLoign()) {
+        return false;
+    }
+
     uint8_t* contactHeaderAddress = FetchContactHeaderAddress();
     if (!contactHeaderAddress || !g_crack_env->wechat_datastructure_supplement.weChatContactDataBeginOffset) {
         return false;
@@ -1150,6 +1158,14 @@ bool Inner_SearchContact(_Inner_SearchContactRole role, const std::string& patte
 
     std::lock_guard<std::mutex> lock(g_mutex);
 
+    //
+    // check logged-in
+    //
+
+    if (!wb_crack::IsLoign()) {
+        return false;
+    }
+
     uint8_t* contactHeaderAddress = wb_crack::FetchContactHeaderAddress();
     if (!contactHeaderAddress || !args->wechat_datastructure_supplement.weChatContactDataBeginOffset) {
         return false;
@@ -1226,6 +1242,14 @@ bool wxbox::crack::GetContactWithWxid(const std::string& wxid, wxbox::crack::wx:
     }
 
     std::lock_guard<std::mutex> lock(g_mutex);
+
+    //
+    // check logged-in
+    //
+
+    if (!wb_crack::IsLoign()) {
+        return false;
+    }
 
     //
     // compare wechat version number
