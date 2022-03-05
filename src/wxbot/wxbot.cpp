@@ -83,20 +83,20 @@ void wxbot::WxBot::Wait()
 
 void wxbot::WxBot::Stop()
 {
-    if (!running) {
+    bool isRunning = true;
+    running.compare_exchange_strong(isRunning, false);
+
+    if (!isRunning) {
         return;
     }
 
-    // stop plugin virtual machine
-    wb_plugin::StopPluginVirtualMachine();
+    wb_process::async_task([this]() {
+        // stop plugin virtual machine
+        wb_plugin::StopPluginVirtualMachine();
 
-    // stop wxbox client
-    client->Stop();
-
-    // deinit crack environment
-    wb_crack::DeInitWeChatApiCrackEnvironment();
-
-    running = false;
+        // stop wxbox client
+        client->Stop();
+    });
 }
 
 void wxbot::WxBot::Shutdown()
@@ -443,6 +443,9 @@ static void WxBotRoutine(wb_crack::WxBotEntryParameterPtr args)
     bot.UnHookWeChat();
 
 _Finish:
+
+    // deinit crack environment
+    wb_crack::DeInitWeChatApiCrackEnvironment();
 
     // unload wxbot module
     wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
