@@ -380,3 +380,50 @@ TEST(wxbox_utils, internal_allocator)
 
 	wb_memory::deinit_internal_allocator();
 }
+
+TEST(wxbox_utils, thread_suspend_malloc_lock_watch_dog)
+{
+	// begin a loop malloc thread
+    std::thread([] {
+        for (;;) {
+            void* p = malloc(100);
+            //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            free(p);
+        }
+	}).detach();
+
+    std::time_t msOvertime = 10000;
+    bool        isClean    = false;
+    auto        timestamp  = wb_process::GetCurrentTimestamp(true);
+
+	// start watch dog
+    wb_process::TID watchDogTid = wb_process::StartSuspendLockWatchDog(1000);
+
+    wb_memory::init_internal_allocator();
+    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId(), watchDogTid);
+
+    for (;;) {
+		// lock
+        void* p = malloc(100);
+        free(p);
+
+		// foo
+        isClean = false && wb_process::HitTestAllOtherThreadCallFrame((void*)0x10000, 0xff00f, watchDogTid);
+        if (isClean || wb_process::GetCurrentTimestamp(true) - timestamp > msOvertime) {
+            break;
+        }
+
+        wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId(), watchDogTid);
+
+		// touch watch dog
+        wb_process::TouchSuspendLockWatchDog();
+    }
+
+    wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+    wb_memory::deinit_internal_allocator();
+
+	// stop watch dog
+    spdlog::info("watch catch lock times : {}", wb_process::StopSuspendLockWatchDog());
+}

@@ -102,7 +102,7 @@ namespace wxbot {
         void ReleasePreHookWeChatHookPoint();
         void RegisterInterceptHanlders();
         void UnRegisterInterceptHanlders();
-        void ExecuteHookWeChat(bool hook, std::time_t msOvertime, bool forced);
+        void ExecuteHookWeChat(bool hook, std::time_t msOvertime, wb_process::TID watchDogTid, bool forced);
 
       private:
         //

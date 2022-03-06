@@ -99,7 +99,7 @@ namespace wxbox {
         bool IsWxBotInjected(wxbox::util::process::PID pid);
         bool InjectWxBot(wxbox::util::process::PID pid, const WxBotEntryParameter& parameter);
         bool UnInjectWxBot(wxbox::util::process::PID pid);
-        bool UnInjectWxBotBySelf(std::time_t msOvertime, bool forced);
+        bool UnInjectWxBotBySelf(std::time_t msOvertime, std::time_t msWatchDogCheckInterval, bool forced);
 
         bool PreInterceptWeChatExit(const WxApis& wxApis);
         void RegisterWeChatExitHandler(FnWeChatExitHandler handler);

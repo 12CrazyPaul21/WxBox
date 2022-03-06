@@ -1,7 +1,9 @@
 #include <wxbot.hpp>
 
 #define UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME 5000
+#define UNINJECT_WXBOT_BY_SELF_WATCH_INTERVAL 1000
 #define WXBOT_HOOK_CHECK_OVERTIME 5000
+#define WXBOT_HOOK_WATCH_INTERVAL 1000
 
 static std::atomic_int g_singleton = 0;
 
@@ -129,17 +131,23 @@ bool wxbot::WxBot::HookWeChat()
     // init internal allocator's heap
     wb_memory::init_internal_allocator();
 
+    // start suspend watch dog
+    auto watchDogTid = wb_process::StartSuspendLockWatchDog(WXBOT_HOOK_WATCH_INTERVAL);
+
     // suspend all other threads
-    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId(), watchDogTid);
 
     // execute hook
-    ExecuteHookWeChat(true, WXBOT_HOOK_CHECK_OVERTIME, true);
+    ExecuteHookWeChat(true, WXBOT_HOOK_CHECK_OVERTIME, watchDogTid, true);
 
     // register intercept handlers
     RegisterInterceptHanlders();
 
     // resume all other threads
     wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+
+    // stop suspend watch dog
+    wb_process::StopSuspendLockWatchDog();
 
     // deref internal allocator
     wb_memory::deinit_internal_allocator();
@@ -151,17 +159,23 @@ void wxbot::WxBot::UnHookWeChat()
     // init internal allocator's heap
     wb_memory::init_internal_allocator();
 
+    // start suspend watch dog
+    auto watchDogTid = wb_process::StartSuspendLockWatchDog(WXBOT_HOOK_WATCH_INTERVAL);
+
     // suspend all other threads
-    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+    wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId(), watchDogTid);
 
     // execute unhook
-    ExecuteHookWeChat(false, WXBOT_HOOK_CHECK_OVERTIME, true);
+    ExecuteHookWeChat(false, WXBOT_HOOK_CHECK_OVERTIME, watchDogTid, true);
 
     // unregister intercept handlers
     UnRegisterInterceptHanlders();
 
     // resume all other threads
     wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+
+    // stop suspend watch dog
+    wb_process::StopSuspendLockWatchDog();
 
     // deref internal allocator
     wb_memory::deinit_internal_allocator();
@@ -273,7 +287,7 @@ void wxbot::WxBot::UnRegisterInterceptHanlders()
 }
 
 // must avoid system calling and memory alloc&free calling
-void wxbot::WxBot::ExecuteHookWeChat(bool hook, std::time_t msOvertime, bool forced)
+void wxbot::WxBot::ExecuteHookWeChat(bool hook, std::time_t msOvertime, wb_process::TID watchDogTid, bool forced)
 {
     wb_process::CallFrameHitTestItemVector testPoints;
     for (auto hookPoint : hookPoints) {
@@ -282,10 +296,12 @@ void wxbot::WxBot::ExecuteHookWeChat(bool hook, std::time_t msOvertime, bool for
         }
     }
 
+    auto pid       = wb_process::GetCurrentProcessId();
+    auto tid       = wb_process::GetCurrentThreadId();
     auto timestamp = wb_process::GetCurrentTimestamp(true);
 
     for (;;) {
-        auto hittedPoints = wb_process::HitTestAllOtherThreadCallFrame(testPoints);
+        auto hittedPoints = wb_process::HitTestAllOtherThreadCallFrame(testPoints, watchDogTid);
         for (auto it = testPoints.begin(); it != testPoints.end();) {
             void* hookPoint = it->addr;
             if (std::find(hittedPoints.begin(), hittedPoints.end(), (ucpulong_t)hookPoint) == hittedPoints.end()) {
@@ -302,9 +318,12 @@ void wxbot::WxBot::ExecuteHookWeChat(bool hook, std::time_t msOvertime, bool for
             break;
         }
 
-        wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
+        wb_process::ResumeAllThread(pid);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId());
+        wb_process::SuspendAllOtherThread(pid, tid, watchDogTid);
+
+        // touch watch dog
+        wb_process::TouchSuspendLockWatchDog();
     }
 
     if (!forced) {
@@ -448,7 +467,7 @@ _Finish:
     wb_crack::DeInitWeChatApiCrackEnvironment();
 
     // unload wxbot module
-    wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
+    wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, UNINJECT_WXBOT_BY_SELF_WATCH_INTERVAL, false);
     --g_singleton;
 }
 
@@ -461,7 +480,7 @@ WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
     }
 
     if (!args) {
-        wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
+        wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, UNINJECT_WXBOT_BY_SELF_WATCH_INTERVAL, false);
         --g_singleton;
         return;
     }
@@ -469,7 +488,7 @@ WXBOT_PUBLIC_API void WxBotEntry(wb_crack::PWxBotEntryParameter args)
     // duplicate wxbot entry parameter
     wb_crack::WxBotEntryParameterPtr duplicatedArgs = std::make_shared<wb_crack::WxBotEntryParameter>();
     if (!duplicatedArgs) {
-        wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, false);
+        wb_crack::UnInjectWxBotBySelf(UNINJECT_WXBOT_BY_SELF_CHECK_OVERTIME, UNINJECT_WXBOT_BY_SELF_WATCH_INTERVAL, false);
         --g_singleton;
         return;
     }
