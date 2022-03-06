@@ -170,17 +170,21 @@ namespace wxbox {
             bool                    GetProcessInfoByPID(PID pid, ProcessInfo& pi);
 
             PID  StartProcess(const std::string& binFilePath, bool isAttach);
-            bool SuspendAllOtherThread(PID pid, TID tid);
+            bool SuspendAllOtherThread(PID pid, TID tid = 0, TID watchDogTid = 0);
             void ResumeAllThread(PID pid, TID tid = 0);
 
             void        SetThreadName(THREAD_HANDLE hThread, const std::string& threadName);
             std::string GetThreadName(THREAD_HANDLE hThread);
 
-            std::vector<TID, wxbox::util::memory::internal_allocator<TID>>                            GetAllThreadId(PID pid, TID excludeThreadId = 0);
+            std::vector<TID, wxbox::util::memory::internal_allocator<TID>>                            GetAllThreadId(PID pid, TID excludeThreadId = 0, TID watchDogThreadId = 0);
             std::vector<ucpulong_t, wxbox::util::memory::internal_allocator<ucpulong_t>>              WalkThreadStack(TID tid);
-            std::set<ucpulong_t, std::less<int>, wxbox::util::memory::internal_allocator<ucpulong_t>> GetAllOtherThreadCallFrameEips();
-            std::vector<ucpulong_t, wxbox::util::memory::internal_allocator<ucpulong_t>>              HitTestAllOtherThreadCallFrame(const CallFrameHitTestItemVector& targets);
-            bool                                                                                      HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t length);
+            std::set<ucpulong_t, std::less<int>, wxbox::util::memory::internal_allocator<ucpulong_t>> GetAllOtherThreadCallFrameEips(TID watchDogThreadId = 0);
+            std::vector<ucpulong_t, wxbox::util::memory::internal_allocator<ucpulong_t>>              HitTestAllOtherThreadCallFrame(const CallFrameHitTestItemVector& targets, TID watchDogThreadId);
+            bool                                                                                      HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t length, TID watchDogThreadId);
+
+            TID  StartSuspendLockWatchDog(std::time_t intervalMs);
+            void TouchSuspendLockWatchDog();
+            int  StopSuspendLockWatchDog();
 
             //
             // Async

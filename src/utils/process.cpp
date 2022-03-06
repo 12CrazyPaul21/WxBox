@@ -1,6 +1,18 @@
 #include <utils/common.h>
 
 //
+// Global Variables
+//
+
+wb_process::TID          g_watchDogTID            = 0;
+std::atomic<std::time_t> g_watchDogCheckTimestamp = 0;
+std::atomic<int>         g_watchDogFoundLockTimes = 0;
+std::time_t              g_watchDogResumeInterval = 1000;
+std::atomic<bool>        g_watchDogIsRunning      = false;
+std::promise<void>       g_watchDogStopSignal;
+std::promise<void>       g_watchDogExitSignal;
+
+//
 // AutoProcessHandle
 //
 
@@ -318,7 +330,7 @@ static inline wb_process::PID StartProcess_Windows(const std::string& binFilePat
     return pi.dwProcessId;
 }
 
-static bool SuspendOrResumeAllThread_Windows(wb_process::PID pid, wb_process::TID tid, bool suspend)
+static bool SuspendOrResumeAllThread_Windows(wb_process::PID pid, wb_process::TID tid, wb_process::TID watchDogTid, bool suspend)
 {
     HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, pid);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
@@ -334,7 +346,7 @@ static bool SuspendOrResumeAllThread_Windows(wb_process::PID pid, wb_process::TI
     }
 
     do {
-        if (threadEntry.th32OwnerProcessID == pid && threadEntry.th32ThreadID != tid) {
+        if (threadEntry.th32OwnerProcessID == pid && threadEntry.th32ThreadID != tid && threadEntry.th32ThreadID != watchDogTid) {
             HANDLE hThread = ::OpenThread(THREAD_ALL_ACCESS, FALSE, threadEntry.th32ThreadID);
             if (hThread) {
                 suspend ? ::SuspendThread(hThread) : ResumeThread(hThread);
@@ -348,17 +360,17 @@ static bool SuspendOrResumeAllThread_Windows(wb_process::PID pid, wb_process::TI
     return true;
 }
 
-static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID tid)
+static bool SuspendAllOtherThread_Windows(wb_process::PID pid, wb_process::TID tid, wb_process::TID watchDogTid)
 {
-    return SuspendOrResumeAllThread_Windows(pid, tid, true);
+    return SuspendOrResumeAllThread_Windows(pid, tid, watchDogTid, true);
 }
 
 static void ResumeAllThread_Windows(wb_process::PID pid, wb_process::TID tid)
 {
-    SuspendOrResumeAllThread_Windows(pid, tid, false);
+    SuspendOrResumeAllThread_Windows(pid, tid, 0, false);
 }
 
-std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> GetAllThreadId_Windows(wb_process::PID pid, wb_process::TID excludeThreadId)
+std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> GetAllThreadId_Windows(wb_process::PID pid, wb_process::TID excludeThreadId, wb_process::TID watchDogThreadId)
 {
     std::vector<wxbox::util::process::TID, wb_memory::internal_allocator<wxbox::util::process::TID>> result;
 
@@ -376,7 +388,7 @@ std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> Get
     }
 
     do {
-        if (threadEntry.th32OwnerProcessID == GetCurrentProcessId() && threadEntry.th32ThreadID != excludeThreadId) {
+        if (threadEntry.th32OwnerProcessID == GetCurrentProcessId() && threadEntry.th32ThreadID != excludeThreadId && threadEntry.th32ThreadID != watchDogThreadId) {
             result.push_back(threadEntry.th32ThreadID);
         }
 
@@ -473,18 +485,17 @@ static inline wb_process::PID StartProcess_Mac(const std::string& binFilePath, b
     return 0;
 }
 
-static bool SuspendAllOtherThread_Mac(wb_process::PID pid, wb_process::TID tid)
+static bool SuspendAllOtherThread_Mac(wb_process::PID pid, wb_process::TID tid, wb_process::TID watchDogTid)
 {
     throw std::exception("SuspendAllOtherThread_Mac stub");
     return false;
 }
-
 static void ResumeAllThread_Mac(wb_process::PID pid, wb_process::TID tid)
 {
     throw std::exception("SuspendAllOtherThread_Mac stub");
 }
 
-static std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> GetAllThreadId_Mac(wb_process::PID pid, wb_process::TID excludeThreadId)
+static std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> GetAllThreadId_Mac(wb_process::PID pid, wb_process::TID excludeThreadId, wb_process::TID watchDogThreadId)
 {
     std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> result;
     throw std::exception("GetAllThreadId_Mac stub");
@@ -689,12 +700,12 @@ wb_process::PID wxbox::util::process::StartProcess(const std::string& binFilePat
 #endif
 }
 
-bool wxbox::util::process::SuspendAllOtherThread(PID pid, TID tid)
+bool wxbox::util::process::SuspendAllOtherThread(PID pid, TID tid, TID watchDogTid)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return SuspendAllOtherThread_Windows(pid, tid);
+    return SuspendAllOtherThread_Windows(pid, tid, watchDogTid);
 #elif WXBOX_IN_MAC_OS
-    return SuspendAllOtherThread_Mac(pid, tid);
+    return SuspendAllOtherThread_Mac(pid, tid, watchDogTid);
 #endif
 }
 
@@ -782,12 +793,12 @@ std::string wxbox::util::process::GetThreadName(THREAD_HANDLE hThread)
 #endif
 }
 
-std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> wxbox::util::process::GetAllThreadId(PID pid, TID excludeThreadId)
+std::vector<wb_process::TID, wb_memory::internal_allocator<wb_process::TID>> wxbox::util::process::GetAllThreadId(PID pid, TID excludeThreadId, TID watchDogThreadId)
 {
 #if WXBOX_IN_WINDOWS_OS
-    return GetAllThreadId_Windows(pid, excludeThreadId);
+    return GetAllThreadId_Windows(pid, excludeThreadId, watchDogThreadId);
 #elif WXBOX_IN_MAC_OS
-    return GetAllThreadId_Mac(pid, excludeThreadId);
+    return GetAllThreadId_Mac(pid, excludeThreadId, watchDogThreadId);
 #endif
 }
 
@@ -800,21 +811,21 @@ std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::
 #endif
 }
 
-std::set<ucpulong_t, std::less<int>, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::process::GetAllOtherThreadCallFrameEips()
+std::set<ucpulong_t, std::less<int>, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::process::GetAllOtherThreadCallFrameEips(wb_process::TID watchDogThreadId)
 {
     std::set<ucpulong_t, std::less<int>, wb_memory::internal_allocator<ucpulong_t>> eips;
-    for (auto tid : wb_process::GetAllThreadId(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId())) {
+    for (auto tid : wb_process::GetAllThreadId(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId(), watchDogThreadId)) {
         auto frames = WalkThreadStack(tid);
         eips.insert(frames.begin(), frames.end());
     }
     return eips;
 }
 
-std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::process::HitTestAllOtherThreadCallFrame(const CallFrameHitTestItemVector& targets)
+std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> wxbox::util::process::HitTestAllOtherThreadCallFrame(const CallFrameHitTestItemVector& targets, TID watchDogThreadId)
 {
     std::vector<ucpulong_t, wb_memory::internal_allocator<ucpulong_t>> hit;
 
-    auto eips = GetAllOtherThreadCallFrameEips();
+    auto eips = GetAllOtherThreadCallFrameEips(watchDogThreadId);
     if (eips.empty()) {
         return hit;
     }
@@ -844,9 +855,9 @@ _Finish:
     return hit;
 }
 
-bool wxbox::util::process::HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t length)
+bool wxbox::util::process::HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t length, TID watchDogThreadId)
 {
-    auto eips = GetAllOtherThreadCallFrameEips();
+    auto eips = GetAllOtherThreadCallFrameEips(watchDogThreadId);
     if (eips.empty()) {
         return false;
     }
@@ -861,4 +872,95 @@ bool wxbox::util::process::HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t
     }
 
     return false;
+}
+
+static void Inner_SuspendLockWatchDogRoutine()
+{
+    if (!g_watchDogIsRunning) {
+        return;
+    }
+
+    try {
+        auto pid        = wb_process::GetCurrentProcessId();
+        auto stopFuture = g_watchDogStopSignal.get_future();
+        g_watchDogCheckTimestamp.store(wb_process::GetCurrentTimestamp(true));
+        g_watchDogFoundLockTimes.store(0);
+
+        for (;;) {
+            if (stopFuture.wait_for(std::chrono::milliseconds(10)) != std::future_status::timeout) {
+                break;
+            }
+
+            // check interval
+            auto timestamp = wb_process::GetCurrentTimestamp(true);
+            if (timestamp - g_watchDogCheckTimestamp <= g_watchDogResumeInterval) {
+                continue;
+            }
+            g_watchDogCheckTimestamp = timestamp;
+            ++g_watchDogFoundLockTimes;
+
+            // resume all thread
+            wb_process::ResumeAllThread(pid);
+        }
+
+        g_watchDogExitSignal.set_value();
+        g_watchDogIsRunning = false;
+    }
+    catch (...) {
+    }
+}
+
+wb_process::TID wxbox::util::process::StartSuspendLockWatchDog(std::time_t intervalMs)
+{
+    std::promise<wb_process::TID> tidRequest;
+
+    bool alreadyRunning = false;
+    g_watchDogIsRunning.compare_exchange_strong(alreadyRunning, true);
+
+    if (alreadyRunning) {
+        return 0;
+    }
+
+    g_watchDogTID            = 0;
+    g_watchDogStopSignal     = std::promise<void>();
+    g_watchDogResumeInterval = intervalMs;
+
+    try {
+        auto watchDogThread = std::thread([intervalMs, &tidRequest] {
+            tidRequest.set_value(wb_process::GetCurrentThreadId());
+            Inner_SuspendLockWatchDogRoutine();
+        });
+        g_watchDogTID       = tidRequest.get_future().get();
+
+        watchDogThread.detach();
+    }
+    catch (...) {
+    }
+
+    return g_watchDogTID;
+}
+
+void wxbox::util::process::TouchSuspendLockWatchDog()
+{
+    if (!g_watchDogIsRunning) {
+        return;
+    }
+
+    g_watchDogCheckTimestamp.store(wb_process::GetCurrentTimestamp(true));
+}
+
+int wxbox::util::process::StopSuspendLockWatchDog()
+{
+    if (!g_watchDogIsRunning) {
+        return 0;
+    }
+
+    try {
+        g_watchDogStopSignal.set_value();
+        g_watchDogExitSignal.get_future().wait();
+    }
+    catch (...) {
+    }
+
+    return g_watchDogFoundLockTimes;
 }
