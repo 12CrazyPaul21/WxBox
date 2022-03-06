@@ -24,7 +24,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="7,1,1">
       <item>
-       <widget class="QLabel" name="labelStatus">
+       <widget class="QLabel" name="labelDownloadStatus">
         <property name="text">
          <string/>
         </property>

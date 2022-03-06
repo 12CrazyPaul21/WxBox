@@ -101,7 +101,7 @@ QMenu::right-arrow:selected {
     image: url(":/XStyleTheme/DefaultTheme/image/menu-right-arrow-hover.png")
 }
 
-#DownloadDialog_labelStatus {
+#labelDownloadStatus {
     font: normal bold 14px "Microsoft YaHei";
     color: white;
 }
