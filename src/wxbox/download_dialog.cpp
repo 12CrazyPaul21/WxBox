@@ -18,7 +18,6 @@ DownloadDialog::DownloadDialog(QWidget* parent, bool deleteWhenClose)
     SetWindowTitle(Translate(WXBOX_DOWNLOAD_DIALOG_TITLE));
 
     // ui
-    ui->labelStatus->setObjectName(QString::fromUtf8("DownloadDialog_labelStatus"));
     SetCloseButtonEnabled(false);
 #if WXBOX_IN_WINDOWS_OS
     taskbarButton.setWindow(windowHandle());
@@ -47,7 +46,7 @@ void DownloadDialog::RetranslateUi()
 
 void DownloadDialog::SetStatus(const QString& status)
 {
-    ui->labelStatus->setText(status);
+    ui->labelDownloadStatus->setText(status);
 }
 
 void DownloadDialog::SetProgress(qint64 progress, qint64 total)
@@ -149,7 +148,7 @@ FileDownloadStatus DownloadDialog::download(const std::string& sinkFolder, const
             [this, filename](const QUrl& url, qint64 progress, qint64 total) {
                 Q_UNUSED(url);
 
-                ui->labelStatus->setText(Translate("Downloading : ") + filename.c_str());
+                ui->labelDownloadStatus->setText(Translate("Downloading : ") + filename.c_str());
                 SetProgress(progress, total < 0 ? 0 : total);
             },
             [&, filename](const QUrl& url, const QByteArray& bytes) {
