@@ -253,7 +253,7 @@ static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, con
 
             while (closeFuture.wait_for(std::chrono::microseconds(10)) == std::future_status::timeout) {
                 // read directory changes with completion i/o
-                if (!::ReadDirectoryChangesW(hDirectory, &notifyBuf, sizeof(notifyBuf), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE, &dwBytesReturned, &overlapped, FolderFilesChangeMonitorCompletionRoutine)) {
+                if (!::ReadDirectoryChangesW(hDirectory, &notifyBuf, sizeof(notifyBuf), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE, &dwBytesReturned, &overlapped, nullptr)) {
                     continue;
                 }
 
@@ -669,10 +669,15 @@ void wxbox::util::file::CloseFolderFilesChangeMonitor(const std::string& dirPath
         return;
     }
 
-    pRecord->second.closeSignal.set_value();
-    pRecord->second.finishFuture.wait_for(std::chrono::milliseconds(FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS));
+    try {
+        pRecord->second.closeSignal.set_value();
+        pRecord->second.finishFuture.wait_for(std::chrono::milliseconds(FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS));
 
-    g_fileMonitorRecords.erase(pRecord);
+        g_fileMonitorRecords.erase(pRecord);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    catch (...) {
+    }
 }
 
 void wxbox::util::file::CloseFolderFilesChangeMonitor()
