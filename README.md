@@ -394,7 +394,7 @@ meson compile -C build/release pretty_format
 
 ### Plugin例子
 
-​	这个扩展的功能是，文件传输助手收到“关机”那么系统会定时2分钟后关机，“取消关机”就是取消这次关机任务。
+​	这个扩展的功能是，文件传输助手收到“关机”那么系统会定时2分钟后关机，“取消关机”就是取消这次关机任务，收到其它消息，在PC上会自动把文本语音播放出来。
 
 ```lua
 helpme = declare_plugin('helpme')
@@ -406,6 +406,8 @@ function helpme.handle_filehelper_text_message(event)
         wxbox.shell('shutdown', '/s /t 120')
     elseif (message == '取消关机') then
         wxbox.shell('shutdown', '/a')
+    else
+        wxbox.speak(message)
     end
 end
 
