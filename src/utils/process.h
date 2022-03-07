@@ -170,6 +170,7 @@ namespace wxbox {
             bool                    GetProcessInfoByPID(PID pid, ProcessInfo& pi);
 
             PID  StartProcess(const std::string& binFilePath, bool isAttach);
+            void KillProcess(PID pid);
             bool SuspendAllOtherThread(PID pid, TID tid = 0, TID watchDogTid = 0);
             void ResumeAllThread(PID pid, TID tid = 0);
 

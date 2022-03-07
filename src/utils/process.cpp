@@ -1,5 +1,7 @@
 #include <utils/common.h>
 
+#define WATCH_DOG_MAX_THREAD_COUNT 200
+
 //
 // Global Variables
 //
@@ -11,6 +13,8 @@ std::time_t              g_watchDogResumeInterval = 1000;
 std::atomic<bool>        g_watchDogIsRunning      = false;
 std::promise<void>       g_watchDogStopSignal;
 std::promise<void>       g_watchDogExitSignal;
+wb_process::TID          g_suspendThreadRecords[WATCH_DOG_MAX_THREAD_COUNT] = {0};
+std::atomic<ucpulong_t>  g_suspendThreadRecordCount                         = 0;
 
 //
 // AutoProcessHandle
@@ -345,13 +349,26 @@ static bool SuspendOrResumeAllThread_Windows(wb_process::PID pid, wb_process::TI
         return false;
     }
 
+    g_suspendThreadRecordCount = 0;
+
     do {
         if (threadEntry.th32OwnerProcessID == pid && threadEntry.th32ThreadID != tid && threadEntry.th32ThreadID != watchDogTid) {
             HANDLE hThread = ::OpenThread(THREAD_ALL_ACCESS, FALSE, threadEntry.th32ThreadID);
-            if (hThread) {
-                suspend ? ::SuspendThread(hThread) : ResumeThread(hThread);
-                ::CloseHandle(hThread);
+            if (!hThread) {
+                continue;
             }
+
+            if (suspend) {
+                ::SuspendThread(hThread);
+                if (g_suspendThreadRecordCount < WATCH_DOG_MAX_THREAD_COUNT) {
+                    g_suspendThreadRecords[g_suspendThreadRecordCount++] = threadEntry.th32ThreadID;
+                }
+            }
+            else {
+                ::ResumeThread(hThread);
+            }
+
+            ::CloseHandle(hThread);
         }
 
     } while (::Thread32Next(hSnapshot, &threadEntry));
@@ -700,6 +717,18 @@ wb_process::PID wxbox::util::process::StartProcess(const std::string& binFilePat
 #endif
 }
 
+void wxbox::util::process::KillProcess(PID pid)
+{
+#if WXBOX_IN_WINDOWS_OS
+    auto hProcess = OpenProcessAutoHandle(pid);
+    if (hProcess.valid()) {
+        TerminateProcess(hProcess.hProcess, 0);
+    }
+#elif WXBOX_IN_MAC_OS
+    kill(pid, SIGKILL);
+#endif
+}
+
 bool wxbox::util::process::SuspendAllOtherThread(PID pid, TID tid, TID watchDogTid)
 {
 #if WXBOX_IN_WINDOWS_OS
@@ -874,6 +903,23 @@ bool wxbox::util::process::HitTestAllOtherThreadCallFrame(void* addr, ucpulong_t
     return false;
 }
 
+static void Inner_SuspendLockWatchDogRoutine_ResumeAllThread()
+{
+    ucpulong_t count = g_suspendThreadRecordCount.load();
+
+    for (ucpulong_t i = 0; i < count; i++) {
+#if WXBOX_IN_WINDOWS_OS
+        HANDLE hThread = ::OpenThread(THREAD_ALL_ACCESS, FALSE, g_suspendThreadRecords[i]);
+        if (hThread) {
+            ::ResumeThread(hThread);
+            ::CloseHandle(hThread);
+        }
+#else
+        throw std::exception("Inner_SuspendLockWatchDogRoutine_ResumeAllThread stub");
+#endif
+    }
+}
+
 static void Inner_SuspendLockWatchDogRoutine()
 {
     if (!g_watchDogIsRunning) {
@@ -881,7 +927,6 @@ static void Inner_SuspendLockWatchDogRoutine()
     }
 
     try {
-        auto pid        = wb_process::GetCurrentProcessId();
         auto stopFuture = g_watchDogStopSignal.get_future();
         g_watchDogCheckTimestamp.store(wb_process::GetCurrentTimestamp(true));
         g_watchDogFoundLockTimes.store(0);
@@ -899,8 +944,8 @@ static void Inner_SuspendLockWatchDogRoutine()
             g_watchDogCheckTimestamp = timestamp;
             ++g_watchDogFoundLockTimes;
 
-            // resume all thread
-            wb_process::ResumeAllThread(pid);
+            // resume suspended threads
+            Inner_SuspendLockWatchDogRoutine_ResumeAllThread();
         }
 
         g_watchDogExitSignal.set_value();
