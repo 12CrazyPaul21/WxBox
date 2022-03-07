@@ -4,8 +4,8 @@
 // Global variables
 //
 
-static std::unordered_map<std::string, wb_file::FileChangeMonitorContext> g_fileMonitorRecords;
-static std::mutex                                                         g_fileMonitorMutex;
+static std::unordered_map<std::string, wb_file::FileChangeMonitorContextPtr> g_fileMonitorRecords;
+static std::mutex                                                            g_fileMonitorMutex;
 
 static constexpr DWORD FOLDER_FILES_CHANGE_MONITOR_INTERVAL_MS                = 500;
 static constexpr DWORD FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS = 10000;
@@ -80,6 +80,7 @@ bool wb_file::_VersionNumber::operator<=(const _VersionNumber& right)
 #if WXBOX_IN_WINDOWS_OS
 
 #include <ShlObj_core.h>
+#include <process.h>
 
 static inline std::string GetProcessRootPath_Windows()
 {
@@ -207,6 +208,103 @@ static inline void ReportFileChangeAsync(const wb_file::FileChangeMonitorCallbac
     wb_process::async_task(callback, report);
 }
 
+unsigned __stdcall FolderFilesChangeMonitorRoutine(LPVOID lpParam)
+{
+    static constexpr size_t FOLDER_FILES_CHANGE_MONITOR_BUFFER_SIZE = sizeof(FILE_NOTIFY_INFORMATION) + MAX_PATH * 10;
+
+    if (!lpParam) {
+        return 0;
+    }
+
+    uint8_t                            notifyBuf[FOLDER_FILES_CHANGE_MONITOR_BUFFER_SIZE];
+    FILE_NOTIFY_INFORMATION*           pNotifyInfo        = (FILE_NOTIFY_INFORMATION*)notifyBuf;
+    decltype(pNotifyInfo)              pNotifyInfoCursor  = nullptr;
+    DWORD                              dwBytesReturned    = 0;
+    OVERLAPPED                         overlapped         = {0};
+    DWORD                              dwLastAction       = 0;
+    std::string                        lastActionFileName = "";
+    wb_file::PFileChangeMonitorContext context            = reinterpret_cast<wb_file::PFileChangeMonitorContext>(lpParam);
+    std::string&                       dirPath            = context->dirpath;
+    auto                               callback           = context->callback;
+    auto                               hDirectory         = context->hDirectory;
+
+    // reset notify buffer
+    ::memset(notifyBuf, 0, sizeof(notifyBuf));
+
+    /**
+	* ReadDirectoryChangesW is very sensitive to processing time and is not 100% able to receive events
+	* perhaps can use "Change Journal" for higher accuracy
+	*/
+
+    while (WaitForSingleObject(context->hCloseEvent, 10) == WAIT_TIMEOUT) {
+        // read directory changes with completion i/o
+        if (!::ReadDirectoryChangesW(hDirectory, &notifyBuf, sizeof(notifyBuf), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE, &dwBytesReturned, &overlapped, nullptr)) {
+            continue;
+        }
+
+        // wait for completion routine finish
+        if (::WaitForSingleObject(hDirectory, FOLDER_FILES_CHANGE_MONITOR_INTERVAL_MS) == WAIT_TIMEOUT) {
+            continue;
+        }
+
+        // get overlapped result
+        if (!::GetOverlappedResult(hDirectory, &overlapped, &dwBytesReturned, TRUE)) {
+            continue;
+        }
+
+        pNotifyInfoCursor = pNotifyInfo;
+        while (pNotifyInfoCursor) {
+            wchar_t filename[MAX_PATH];
+            ::memset(filename, 0, sizeof(filename));
+            ::memcpy_s(filename, sizeof(filename), pNotifyInfoCursor->FileName, pNotifyInfoCursor->FileNameLength);
+
+            wb_file::FileChangeMonitorReport report;
+            report.dirpath  = dirPath;
+            report.filename = wb_string::ToNativeString(std::wstring(filename));
+            report.fullpath = wb_file::JoinPath(report.dirpath, report.filename);
+
+            switch (pNotifyInfoCursor->Action) {
+                case FILE_ACTION_ADDED:
+                    report.type = wb_file::FileChangeType::Added;
+                    break;
+                case FILE_ACTION_REMOVED:
+                    report.type = wb_file::FileChangeType::Removed;
+                    break;
+                case FILE_ACTION_MODIFIED:
+                    report.type = wb_file::FileChangeType::Modified;
+                    break;
+                case FILE_ACTION_RENAMED_OLD_NAME:
+                    // do nothing
+                    break;
+                case FILE_ACTION_RENAMED_NEW_NAME:
+                    if (dwLastAction == FILE_ACTION_RENAMED_OLD_NAME) {
+                        report.type    = wb_file::FileChangeType::Renamed;
+                        report.oldname = lastActionFileName;
+                    }
+                    break;
+            }
+
+            dwLastAction       = pNotifyInfoCursor->Action;
+            lastActionFileName = report.filename;
+
+            // report file change
+            if (report.type != wb_file::FileChangeType::Invalid) {
+                ReportFileChangeAsync(callback, report);
+            }
+
+            // next record
+            if (!pNotifyInfoCursor->NextEntryOffset) {
+                break;
+            }
+            pNotifyInfoCursor = reinterpret_cast<FILE_NOTIFY_INFORMATION*>((uint8_t*)pNotifyInfoCursor + pNotifyInfoCursor->NextEntryOffset);
+        }
+    }
+
+    ::CloseHandle(hDirectory);
+
+    return 0;
+}
+
 static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, const wb_file::FileChangeMonitorCallback& callback)
 {
     static constexpr size_t FOLDER_FILES_CHANGE_MONITOR_BUFFER_SIZE = sizeof(FILE_NOTIFY_INFORMATION) + MAX_PATH * 10;
@@ -214,8 +312,6 @@ static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, con
     if (!wb_file::IsDirectory(dirPath) || !callback) {
         return false;
     }
-
-    std::lock_guard<std::mutex> lock(g_fileMonitorMutex);
 
     // cannot monitor the same folder at the same time
     if (std::find_if(g_fileMonitorRecords.begin(), g_fileMonitorRecords.end(), [&dirPath](const decltype(g_fileMonitorRecords)::value_type& item) {
@@ -230,99 +326,58 @@ static bool OpenFolderFilesChangeMonitor_Windows(const std::string& dirPath, con
         return false;
     }
 
-    // run monitor in async task
-    wb_file::FileChangeMonitorContext context;
-    context.dirpath      = dirPath;
-    context.finishFuture = std::async(
-        std::launch::async, [dirPath, callback, hDirectory](std::future<void> closeFuture) {
-            uint8_t                  notifyBuf[FOLDER_FILES_CHANGE_MONITOR_BUFFER_SIZE];
-            FILE_NOTIFY_INFORMATION* pNotifyInfo        = (FILE_NOTIFY_INFORMATION*)notifyBuf;
-            decltype(pNotifyInfo)    pNotifyInfoCursor  = nullptr;
-            DWORD                    dwBytesReturned    = 0;
-            OVERLAPPED               overlapped         = {0};
-            DWORD                    dwLastAction       = 0;
-            std::string              lastActionFileName = "";
+    // create close event
+    HANDLE hCloseEvent = ::CreateEventA(NULL, TRUE, FALSE, "");
+    if (!hCloseEvent) {
+        ::CloseHandle(hDirectory);
+        return false;
+    }
 
-            // reset notify buffer
-            ::memset(notifyBuf, 0, sizeof(notifyBuf));
+    // build monitor context
+    wb_file::FileChangeMonitorContextPtr context = std::make_unique<wb_file::FileChangeMonitorContext>();
+    if (!context) {
+        ::CloseHandle(hDirectory);
+        return false;
+    }
+    context->dirpath     = dirPath;
+    context->callback    = callback;
+    context->hCloseEvent = hCloseEvent;
+    context->hDirectory  = hDirectory;
 
-            /**
-		     * ReadDirectoryChangesW is very sensitive to processing time and is not 100% able to receive events
-		     * perhaps can use "Change Journal" for higher accuracy
-		     */
-
-            while (closeFuture.wait_for(std::chrono::microseconds(10)) == std::future_status::timeout) {
-                // read directory changes with completion i/o
-                if (!::ReadDirectoryChangesW(hDirectory, &notifyBuf, sizeof(notifyBuf), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE, &dwBytesReturned, &overlapped, nullptr)) {
-                    continue;
-                }
-
-                // wait for completion routine finish
-                if (::WaitForSingleObject(hDirectory, FOLDER_FILES_CHANGE_MONITOR_INTERVAL_MS) == WAIT_TIMEOUT) {
-                    continue;
-                }
-
-                // get overlapped result
-                if (!::GetOverlappedResult(hDirectory, &overlapped, &dwBytesReturned, TRUE)) {
-                    continue;
-                }
-
-                pNotifyInfoCursor = pNotifyInfo;
-                while (pNotifyInfoCursor) {
-                    wchar_t filename[MAX_PATH];
-                    ::memset(filename, 0, sizeof(filename));
-                    ::memcpy_s(filename, sizeof(filename), pNotifyInfoCursor->FileName, pNotifyInfoCursor->FileNameLength);
-
-                    wb_file::FileChangeMonitorReport report;
-                    report.dirpath  = dirPath;
-                    report.filename = wb_string::ToNativeString(std::wstring(filename));
-                    report.fullpath = wb_file::JoinPath(report.dirpath, report.filename);
-
-                    switch (pNotifyInfoCursor->Action) {
-                        case FILE_ACTION_ADDED:
-                            report.type = wb_file::FileChangeType::Added;
-                            break;
-                        case FILE_ACTION_REMOVED:
-                            report.type = wb_file::FileChangeType::Removed;
-                            break;
-                        case FILE_ACTION_MODIFIED:
-                            report.type = wb_file::FileChangeType::Modified;
-                            break;
-                        case FILE_ACTION_RENAMED_OLD_NAME:
-                            // do nothing
-                            break;
-                        case FILE_ACTION_RENAMED_NEW_NAME:
-                            if (dwLastAction == FILE_ACTION_RENAMED_OLD_NAME) {
-                                report.type    = wb_file::FileChangeType::Renamed;
-                                report.oldname = lastActionFileName;
-                            }
-                            break;
-                    }
-
-                    dwLastAction       = pNotifyInfoCursor->Action;
-                    lastActionFileName = report.filename;
-
-                    // report file change
-                    if (report.type != wb_file::FileChangeType::Invalid) {
-                        ReportFileChangeAsync(callback, report);
-                    }
-
-                    // next record
-                    if (!pNotifyInfoCursor->NextEntryOffset) {
-                        break;
-                    }
-                    pNotifyInfoCursor = reinterpret_cast<FILE_NOTIFY_INFORMATION*>((uint8_t*)pNotifyInfoCursor + pNotifyInfoCursor->NextEntryOffset);
-                }
-            }
-
-            ::CloseHandle(hDirectory);
-        },
-        context.closeSignal.get_future());
+    // begin monitor thread
+    context->hMonitorThread = (HANDLE)_beginthreadex(nullptr, 0, FolderFilesChangeMonitorRoutine, context.get(), 0, nullptr);
+    if (!context->hMonitorThread) {
+        ::CloseHandle(hDirectory);
+        return false;
+    }
 
     // record
     g_fileMonitorRecords[dirPath] = std::move(context);
 
     return true;
+}
+
+static void CloseFolderFilesChangeMonitor_Windows(const std::string& dirPath)
+{
+    auto pRecord = std::find_if(g_fileMonitorRecords.begin(), g_fileMonitorRecords.end(), [&dirPath](const decltype(g_fileMonitorRecords)::value_type& item) {
+        return !::_stricmp(item.first.c_str(), dirPath.c_str());
+    });
+    if (pRecord == g_fileMonitorRecords.end()) {
+        return;
+    }
+
+    SetEvent(pRecord->second->hCloseEvent);
+    WaitForSingleObject(pRecord->second->hMonitorThread, FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS);
+}
+
+static void CloseFolderFilesChangeMonitor_Windows()
+{
+    std::for_each(g_fileMonitorRecords.begin(), g_fileMonitorRecords.end(), [&](decltype(g_fileMonitorRecords)::value_type& pRecord) {
+        SetEvent(pRecord.second->hCloseEvent);
+        WaitForSingleObject(pRecord.second->hMonitorThread, FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS);
+    });
+
+    g_fileMonitorRecords.clear();
 }
 
 #elif WXBOX_IN_MAC_OS
@@ -361,6 +416,36 @@ static bool OpenFolderFilesChangeMonitor_Mac(const std::string& dirPath, const w
 {
     throw std::exception("OpenFolderFilesChangeMonitor_Mac stub");
     return false;
+}
+
+static void CloseFolderFilesChangeMonitor_Mac(const std::string& dirPath)
+{
+    auto pRecord = std::find_if(g_fileMonitorRecords.begin(), g_fileMonitorRecords.end(), [&dirPath](const decltype(g_fileMonitorRecords)::value_type& item) {
+        return !::_stricmp(item.first.c_str(), dirPath.c_str());
+    });
+    if (pRecord == g_fileMonitorRecords.end()) {
+        return;
+    }
+
+    try {
+        pRecord->second->closeSignal.set_value();
+        pRecord->second->finishFuture.wait_for(std::chrono::milliseconds(FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS));
+
+        g_fileMonitorRecords.erase(pRecord);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    catch (...) {
+    }
+}
+
+static void CloseFolderFilesChangeMonitor_Mac()
+{
+    std::for_each(g_fileMonitorRecords.begin(), g_fileMonitorRecords.end(), [&](decltype(g_fileMonitorRecords)::value_type& pRecord) {
+        pRecord.second->closeSignal.set_value();
+        pRecord.second->finishFuture.wait_for(std::chrono::milliseconds(FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS));
+    });
+
+    g_fileMonitorRecords.clear();
 }
 
 #endif
@@ -650,6 +735,14 @@ std::vector<std::string> wxbox::util::file::ListFolderInDirectory(const std::str
 
 bool wxbox::util::file::OpenFolderFilesChangeMonitor(const std::string& dirPath, const FileChangeMonitorCallback& callback)
 {
+    static bool                 s_firstShoot = true;
+    std::lock_guard<std::mutex> lock(g_fileMonitorMutex);
+
+    if (s_firstShoot) {
+        atexit(wxbox::util::file::CloseFolderFilesChangeMonitor);
+        s_firstShoot = false;
+    }
+
 #if WXBOX_IN_WINDOWS_OS
     return OpenFolderFilesChangeMonitor_Windows(dirPath, callback);
 #elif WXBOX_IN_MAC_OS
@@ -661,35 +754,22 @@ void wxbox::util::file::CloseFolderFilesChangeMonitor(const std::string& dirPath
 {
     std::lock_guard<std::mutex> lock(g_fileMonitorMutex);
 
-    // cannot monitor the same folder at the same time
-    auto pRecord = std::find_if(g_fileMonitorRecords.begin(), g_fileMonitorRecords.end(), [&dirPath](const decltype(g_fileMonitorRecords)::value_type& item) {
-        return !::_stricmp(item.first.c_str(), dirPath.c_str());
-    });
-    if (pRecord == g_fileMonitorRecords.end()) {
-        return;
-    }
-
-    try {
-        pRecord->second.closeSignal.set_value();
-        pRecord->second.finishFuture.wait_for(std::chrono::milliseconds(FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS));
-
-        g_fileMonitorRecords.erase(pRecord);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-    catch (...) {
-    }
+#if WXBOX_IN_WINDOWS_OS
+    return CloseFolderFilesChangeMonitor_Windows(dirPath);
+#elif WXBOX_IN_MAC_OS
+    return CloseFolderFilesChangeMonitor_Mac(dirPath);
+#endif
 }
 
 void wxbox::util::file::CloseFolderFilesChangeMonitor()
 {
     std::lock_guard<std::mutex> lock(g_fileMonitorMutex);
 
-    std::for_each(g_fileMonitorRecords.begin(), g_fileMonitorRecords.end(), [&](decltype(g_fileMonitorRecords)::value_type& pRecord) {
-        pRecord.second.closeSignal.set_value();
-        pRecord.second.finishFuture.wait_for(std::chrono::milliseconds(FOLDER_FILES_CHANGE_MONITOR_WAIT_FOR_FINISH_TIMEOUT_MS));
-    });
-
-    g_fileMonitorRecords.clear();
+#if WXBOX_IN_WINDOWS_OS
+    return CloseFolderFilesChangeMonitor_Windows();
+#elif WXBOX_IN_MAC_OS
+    return CloseFolderFilesChangeMonitor_Mac();
+#endif
 }
 
 std::string wxbox::util::file::GetFileVersion(const std::string& path)

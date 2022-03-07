@@ -413,6 +413,10 @@
         <source>Logout</source>
         <translation>Logout</translation>
     </message>
+    <message>
+        <source>Forced Quit</source>
+        <translation>Forced Quit</translation>
+    </message>
 </context>
 <context>
     <name>ContactListDialog_xstylewindow</name>

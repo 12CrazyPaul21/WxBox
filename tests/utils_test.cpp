@@ -288,7 +288,7 @@ TEST(wxbox_utils, hook)
     wb_hook::RevokeInProcessHook(before_hook);
     EXPECT_EQ(0, before_hook().compare("before hook"));
 
-	wb_hook::InProcessHook(before_hook, after_hook);
+    wb_hook::InProcessHook(before_hook, after_hook);
     EXPECT_EQ(0, before_hook().compare("after hook"));
     wb_hook::RevokeInProcessHook(before_hook);
     EXPECT_EQ(0, before_hook().compare("before hook"));
@@ -364,50 +364,51 @@ void print_internal_allocator_ref(std::vector<TestItem, wb_memory::internal_allo
 
 TEST(wxbox_utils, internal_allocator)
 {
-	wb_memory::init_internal_allocator();
+    wb_memory::init_internal_allocator();
 
-    std::vector<TestItem, wb_memory::internal_allocator<TestItem>> vt;
+    std::vector<TestItem, wb_memory::internal_allocator<TestItem>>                         vt;
     std::set<ucpulong_t, std::less<ucpulong_t>, wb_memory::internal_allocator<ucpulong_t>> s;
 
-	vt.push_back(TestItem(1, 2, "3"));
+    vt.push_back(TestItem(1, 2, "3"));
     vt.emplace_back(TestItem(4, 5, "6"));
 
-	s.insert(1);
+    s.insert(1);
     s.insert(2);
     s.insert(3);
 
-	print_internal_allocator_ref(vt, s);
+    print_internal_allocator_ref(vt, s);
 
-	wb_memory::deinit_internal_allocator();
+    wb_memory::deinit_internal_allocator();
 }
 
 TEST(wxbox_utils, thread_suspend_malloc_lock_watch_dog)
 {
-	// begin a loop malloc thread
+    // begin a loop malloc thread
     std::thread([] {
         for (;;) {
             void* p = malloc(100);
             //std::this_thread::sleep_for(std::chrono::milliseconds(10));
             free(p);
         }
-	}).detach();
+    })
+        .detach();
 
     std::time_t msOvertime = 10000;
     bool        isClean    = false;
     auto        timestamp  = wb_process::GetCurrentTimestamp(true);
 
-	// start watch dog
+    // start watch dog
     wb_process::TID watchDogTid = wb_process::StartSuspendLockWatchDog(1000);
 
     wb_memory::init_internal_allocator();
     wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId(), watchDogTid);
 
     for (;;) {
-		// lock
+        // lock
         void* p = malloc(100);
         free(p);
 
-		// foo
+        // foo
         isClean = false && wb_process::HitTestAllOtherThreadCallFrame((void*)0x10000, 0xff00f, watchDogTid);
         if (isClean || wb_process::GetCurrentTimestamp(true) - timestamp > msOvertime) {
             break;
@@ -417,13 +418,13 @@ TEST(wxbox_utils, thread_suspend_malloc_lock_watch_dog)
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         wb_process::SuspendAllOtherThread(wb_process::GetCurrentProcessId(), wb_process::GetCurrentThreadId(), watchDogTid);
 
-		// touch watch dog
+        // touch watch dog
         wb_process::TouchSuspendLockWatchDog();
     }
 
     wb_process::ResumeAllThread(wb_process::GetCurrentProcessId());
     wb_memory::deinit_internal_allocator();
 
-	// stop watch dog
+    // stop watch dog
     spdlog::info("watch catch lock times : {}", wb_process::StopSuspendLockWatchDog());
 }

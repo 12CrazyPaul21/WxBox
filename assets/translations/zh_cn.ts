@@ -413,6 +413,10 @@
         <source>Logout</source>
         <translation>退出登录</translation>
     </message>
+    <message>
+        <source>Forced Quit</source>
+        <translation>强制关闭WeChat进程</translation>
+    </message>
 </context>
 <context>
     <name>ContactListDialog_xstylewindow</name>
