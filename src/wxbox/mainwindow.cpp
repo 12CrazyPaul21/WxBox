@@ -331,6 +331,7 @@ void MainWindow::InitAppMenu()
     clientItemContextMenu.pushAction("All Contact");
     clientItemContextMenu.pushSeparator();
     clientItemContextMenu.pushAction("Logout");
+    clientItemContextMenu.pushAction("Forced Quit");
 }
 
 void MainWindow::InitAppTray()
@@ -512,6 +513,10 @@ void MainWindow::RegisterWidgetEventHandler()
             clientItemContextMenu.disable("All Contact");
             clientItemContextMenu.disable("Logout");
         }
+
+        clientItemContextMenu.connectAction("Forced Quit", this, [this, pid]() {
+            wb_process::KillProcess(pid);
+        });
 
         clientItemContextMenu.connectAction("Raise To Foreground", this, [this, pid]() {
             controller.RaiseClientWindowToForeground(pid);
