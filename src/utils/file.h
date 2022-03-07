@@ -84,9 +84,27 @@ namespace wxbox {
 
             } FileChangeMonitorReport, *PFileChangeMonitorReport;
 
+            using FileChangeMonitorCallback = std::function<void(FileChangeMonitorReport report)>;
+
             typedef struct _FileChangeMonitorContext
             {
-                std::string        dirpath;
+                std::string               dirpath;
+                FileChangeMonitorCallback callback;
+
+#if WXBOX_IN_WINDOWS_OS
+                HANDLE hMonitorThread;
+                HANDLE hDirectory;
+                HANDLE hCloseEvent;
+
+                _FileChangeMonitorContext()
+                  : dirpath("")
+                  , callback(nullptr)
+                  , hMonitorThread(NULL)
+                  , hDirectory(NULL)
+                  , hCloseEvent(NULL)
+                {
+                }
+#else
                 std::promise<void> closeSignal;
                 std::future<void>  finishFuture;
 
@@ -95,6 +113,7 @@ namespace wxbox {
 
                 _FileChangeMonitorContext()
                   : dirpath("")
+                  , callback(nullptr)
                 {
                 }
 
@@ -104,10 +123,10 @@ namespace wxbox {
                     closeSignal  = std::move(other.closeSignal);
                     finishFuture = std::move(other.finishFuture);
                 }
-
+#endif
             } FileChangeMonitorContext, *PFileChangeMonitorContext;
 
-            using FileChangeMonitorCallback = std::function<void(FileChangeMonitorReport report)>;
+            using FileChangeMonitorContextPtr = std::unique_ptr<FileChangeMonitorContext>;
 
             //
             // Function
