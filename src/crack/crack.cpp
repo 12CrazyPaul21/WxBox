@@ -553,8 +553,7 @@ bool wxbox::crack::VerifyWxApis(const WxApis& apis)
 
 bool wxbox::crack::IsFullFeaturesValid(const WxBotEntryParameter& parameter)
 {
-    const ucpulong_t* apiCursor        = reinterpret_cast<const ucpulong_t*>(&parameter.wechat_apis);
-    const ucpulong_t* supplementCursor = reinterpret_cast<const ucpulong_t*>(&parameter.wechat_datastructure_supplement);
+    const ucpulong_t* apiCursor = reinterpret_cast<const ucpulong_t*>(&parameter.wechat_apis);
 
     for (int i = 0; i < sizeof(WxApis) / sizeof(ucpulong_t); i++) {
         if (!*apiCursor++) {
@@ -562,11 +561,13 @@ bool wxbox::crack::IsFullFeaturesValid(const WxBotEntryParameter& parameter)
         }
     }
 
-    for (int i = 0; i < sizeof(wxbox::crack::feature::WxDataStructSupplement) / sizeof(ucpulong_t); i++) {
-        if (!*supplementCursor++) {
-            return false;
-        }
-    }
+    // const ucpulong_t* supplementCursor = reinterpret_cast<const ucpulong_t*>(&parameter.wechat_datastructure_supplement);
+    //
+    // for (int i = 0; i < sizeof(wxbox::crack::feature::WxDataStructSupplement) / sizeof(ucpulong_t); i++) {
+    //     if (!*supplementCursor++) {
+    //         return false;
+    //     }
+    // }
 
     return true;
 }
@@ -715,16 +716,16 @@ void wxbox::crack::UnRegisterWeChatLoginHandler()
     g_wechat_login_handler = nullptr;
 }
 
-bool wxbox::crack::PreInterceptWeChatHandleRawMessage(const WxApis& wxApis)
+bool wxbox::crack::PreInterceptWeChatHandleRawMessage(const WxApis& wxApis, const ucpulong_t locateOffset)
 {
     if (!wxApis.HandleRawMessages) {
         return false;
     }
 
 #if WXBOX_CPU_IS_X86
-    g_wechat_raw_message_type_point_offset = *(reinterpret_cast<signed long*>(wxApis.HandleRawMessages) - 1);
+    g_wechat_raw_message_type_point_offset = *(reinterpret_cast<signed long*>((uint8_t*)wxApis.HandleRawMessages - locateOffset) - 1);
 #else
-    g_wechat_raw_message_type_point_offset = *(reinterpret_cast<signed long*>(wxApis.HandleRawMessages) - 1);
+    g_wechat_raw_message_type_point_offset = *(reinterpret_cast<signed long*>((uint8_t*)wxApis.HandleRawMessages - locateOffset) - 1);
 #endif
 
     return wb_hook::PreInProcessIntercept((void*)wxApis.HandleRawMessages, internal_wechat_raw_message_handler_stub);
@@ -804,6 +805,9 @@ void wxbox::crack::InitWeChatApiCrackEnvironment(WxBotEntryParameterPtr& args)
     }
     else if (!strcmp(g_crack_env->wechat_version, "3.5.0.46")) {
         g_wechat_message_structure_known_presize = 0x290;
+    }
+    else if (!strcmp(g_crack_env->wechat_version, "3.6.0.18")) {
+        g_wechat_message_structure_known_presize = 0x298;
     }
     else {
         g_wechat_message_structure_known_presize = 0x0;

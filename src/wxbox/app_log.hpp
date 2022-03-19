@@ -81,15 +81,16 @@
         spdlog::info("WeChatEventProc va : 0x{:08X}", WECHAT_APIS.WeChatEventProc);                                                                 \
     }
 
-#define WXBOX_LOG_WECHAT_DATASTRUCTURE_SUPPLEMENT(WECHAT_DATASTRUCTURE_SUPPLEMENT)                                                          \
-    {                                                                                                                                       \
-        spdlog::info("WeChat Profile NickName item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.NickName);         \
-        spdlog::info("WeChat Profile WeChatNumber item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.WeChatNumber); \
-        spdlog::info("WeChat Profile Wxid item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.Wxid);                 \
-        spdlog::info("WeChat Logout trigger event id : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.logoutTriggerEventId);                    \
-        spdlog::info("WeChat contact header item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatContactHeaderItemOffset);        \
-        spdlog::info("WeChat contact data begin offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatContactDataBeginOffset);          \
-        spdlog::info("WeChat message structure size : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatMessageStructureSize);               \
+#define WXBOX_LOG_WECHAT_DATASTRUCTURE_SUPPLEMENT(WECHAT_DATASTRUCTURE_SUPPLEMENT)                                                                     \
+    {                                                                                                                                                  \
+        spdlog::info("WeChat Profile NickName item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.NickName);                    \
+        spdlog::info("WeChat Profile WeChatNumber item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.WeChatNumber);            \
+        spdlog::info("WeChat Profile Wxid item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.profileItemOffset.Wxid);                            \
+        spdlog::info("WeChat Logout trigger event id : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.logoutTriggerEventId);                               \
+        spdlog::info("WeChat contact header item offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatContactHeaderItemOffset);                   \
+        spdlog::info("WeChat contact data begin offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatContactDataBeginOffset);                     \
+        spdlog::info("WeChat message structure size : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatMessageStructureSize);                          \
+        spdlog::info("WeChat raw message type point locate offset : 0x{:08X}", WECHAT_DATASTRUCTURE_SUPPLEMENT.weChatRawMessageTypePointLocateOffset); \
     }
 
 #endif  // #ifndef __WXBOX_APP_LOG_H

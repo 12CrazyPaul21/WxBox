@@ -221,7 +221,7 @@ void wxbot::WxBot::PreHookWeChat()
     wb_crack::PreInterceptWeChatExit(wxApis);
     wb_crack::PreInterceptWeChatLogout(wxApis);
     wb_crack::PreInterceptWeChatLogin(wxApis);
-    wb_crack::PreInterceptWeChatHandleRawMessage(wxApis);
+    wb_crack::PreInterceptWeChatHandleRawMessage(wxApis, args->wechat_datastructure_supplement.weChatRawMessageTypePointLocateOffset);
     wb_crack::PreInterceptWeChatHandleReceviedMessages(wxApis);
     wb_crack::PreInterceptWeChatSendTextMessage(wxApis);
 

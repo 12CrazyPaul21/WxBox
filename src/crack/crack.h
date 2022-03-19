@@ -113,7 +113,7 @@ namespace wxbox {
         void RegisterWeChatLoginHandler(FnWeChatLoginHandler handler);
         void UnRegisterWeChatLoginHandler();
 
-        bool PreInterceptWeChatHandleRawMessage(const WxApis& wxApis);
+        bool PreInterceptWeChatHandleRawMessage(const WxApis& wxApis, const ucpulong_t locateOffset);
         void RegisterWeChatRawMessageHandler(FnWeChatRawMessageHandler handler);
         void UnRegisterWeChatRawMessageHandler();
 

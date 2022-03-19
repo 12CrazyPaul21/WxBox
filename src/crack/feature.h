@@ -146,6 +146,9 @@ namespace wxbox {
                 // fill stream
                 std::vector<uint8_t> fillStream;
 
+                // calling instruction
+                bool callInstructionLocate;
+
                 //
                 // constructor
                 //
@@ -155,6 +158,7 @@ namespace wxbox {
                   , hookPointOffset(0)
                   , locateActionRange(0)
                   , locateActionExecuteTimes(0)
+                  , callInstructionLocate(false)
                 {
                 }
 
@@ -197,6 +201,9 @@ namespace wxbox {
 
                     // fill stream
                     fillStream = other.fillStream;
+
+                    // calling instruction
+                    callInstructionLocate = other.callInstructionLocate;
                 }
 
                 SETUP_MOVE_METHOD(_HookPointFeatureInfo, other)
@@ -238,6 +245,9 @@ namespace wxbox {
 
                     // fill stream
                     fillStream = std::move(other.fillStream);
+
+                    // calling instruction
+                    callInstructionLocate = other.callInstructionLocate;
                 }
 
                 //
@@ -283,6 +293,9 @@ namespace wxbox {
 
                     // fill stream
                     fillStream.clear();
+
+                    // calling instruction
+                    callInstructionLocate = false;
                 }
 
             } HookPointFeatureInfo, *PHookPointFeatureInfo;
@@ -380,6 +393,7 @@ namespace wxbox {
                 ucpulong_t          weChatContactHeaderItemOffset;
                 ucpulong_t          weChatContactDataBeginOffset;
                 ucpulong_t          weChatMessageStructureSize;
+                ucpulong_t          weChatRawMessageTypePointLocateOffset;
             } WxDataStructSupplement, *PWxDataStructSupplement;
 
             PRAGMA(pack(pop))

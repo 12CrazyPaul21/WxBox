@@ -474,12 +474,14 @@ void WxBoxController::DisplayClientInjectArgs(wb_process::PID pid)
 
     reportTextStream << "DataStructure : " << XSTYLE_REPORT_ENDL;
     REPORT_WX_DATASTRUCT("Profile NickName Offset", profileItemOffset.NickName);
-    REPORT_WX_DATASTRUCT("Profile NickName WeChatNumber", profileItemOffset.WeChatNumber);
-    REPORT_WX_DATASTRUCT("Profile NickName WXID", profileItemOffset.Wxid);
+    REPORT_WX_DATASTRUCT("Profile WeChatNumber", profileItemOffset.WeChatNumber);
+    REPORT_WX_DATASTRUCT("Profile WXID", profileItemOffset.Wxid);
     REPORT_WX_DATASTRUCT("Logout Event ID", logoutTriggerEventId);
     REPORT_WX_DATASTRUCT("Contact Header Item Offset", weChatContactHeaderItemOffset);
     REPORT_WX_DATASTRUCT("Contact Data Begin Offset", weChatContactDataBeginOffset);
     REPORT_WX_DATASTRUCT("Message Structure Size", weChatMessageStructureSize);
+    reportTextStream << "&nbsp;&nbsp;&nbsp;&nbsp;Raw Message Type Point Locate Offset : " << injectArgs.wechat_datastructure_supplement.weChatRawMessageTypePointLocateOffset
+                     << XSTYLE_REPORT_ENDL;
 
     if (!fullFeatures) {
         reportTextStream << "<center>"
