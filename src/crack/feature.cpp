@@ -181,6 +181,14 @@ static inline bool UnwindFeature(const YAML::Node& featInfo, const std::string& 
         hookPointFeatureInfo.fillStream = hookPointFeatureNode["FillStream"].as<std::vector<uint8_t>>();
     }
 
+    //
+    // calling instruction
+    //
+
+    if (hookPointFeatureNode["CallInstructionLocate"].IsScalar()) {
+        hookPointFeatureInfo.callInstructionLocate = hookPointFeatureNode["CallInstructionLocate"].as<bool>();
+    }
+
     return true;
 }
 
@@ -301,6 +309,23 @@ static inline bool UnwindWxDataStructSupplement(const YAML::Node& dataSupplement
     }
 
     wxDataStructSupplement.weChatMessageStructureSize = dataSupplement["WeChatMessageStructureSize"].as<ucpulong_t>();
+
+    //
+    // weChatRawMessageTypePointLocateOffset
+    //
+
+    try {
+        auto weChatRawMessageTypePointLocateOffsetNode = dataSupplement["WeChatRawMessageTypePointLocateOffset"];
+        if (weChatRawMessageTypePointLocateOffsetNode.IsDefined() && weChatRawMessageTypePointLocateOffsetNode.IsScalar()) {
+            wxDataStructSupplement.weChatRawMessageTypePointLocateOffset = weChatRawMessageTypePointLocateOffsetNode.as<ucpulong_t>();
+        }
+        else {
+            wxDataStructSupplement.weChatRawMessageTypePointLocateOffset = 0;
+        }
+    }
+    catch (...) {
+        wxDataStructSupplement.weChatRawMessageTypePointLocateOffset = 0;
+    }
 
     return true;
 }
@@ -426,6 +451,17 @@ static inline ucpulong_t LocateWxAPIHookPointVA_Step_Locate(const wb_feature::Lo
 
     if (va) {
         va += hookPointFeatureInfo.hookPointOffset;
+    }
+
+    if (hookPointFeatureInfo.callInstructionLocate) {
+        // read offset
+        void* offset = nullptr;
+        if (!wb_memory::ReadMemory(locateTarget.hProcess, (void*)(va + 1), (uint8_t*)&offset, sizeof(void*), nullptr)) {
+            return 0;
+        }
+
+        // calc va
+        va = (va + 1 + sizeof(long)) + (ucpulong_t)offset;
     }
 
     return va;
