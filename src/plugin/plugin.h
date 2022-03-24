@@ -230,6 +230,7 @@ namespace wxbox {
         bool TriggerPluginOnUnLoad(_PluginVirtualMachine* vm, const std::string& pluginName);
         bool TriggerPluginOnPreReLoad(_PluginVirtualMachine* vm, const std::string& pluginName);
         bool TriggerPluginEvent(_PluginVirtualMachine* vm, const std::string& pluginName, PluginEventModelPtr pluginEvent);
+        bool TriggerPluginTimerEvent(_PluginVirtualMachine* vm, const std::string& pluginName, int id, bool isPeriodTimer);
 
         bool IsPluginEventName(const std::string& methodName);
 

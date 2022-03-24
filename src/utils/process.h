@@ -149,6 +149,8 @@ namespace wxbox {
             //
 
             std::time_t GetCurrentTimestamp(bool ms = true);
+            bool        GetCurrentDate(struct std::tm& tm);
+            std::string GetCurrentDateDesc();
 
             std::vector<ProcessInfo> GetProcessList();
 

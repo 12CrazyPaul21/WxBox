@@ -112,6 +112,182 @@ static int __plugin_on_exit_wechat_event(lua_State* L)
     return 0;
 }
 
+static int __plugin_on_timer_event(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    // do nothing
+    return 0;
+}
+
+static int __plugin_on_every_day_timer_event(lua_State* L)
+{
+    WXBOX_UNREF(L);
+
+    // do nothing
+    return 0;
+}
+
+static int __plugin_start_timer(lua_State* L)
+{
+    if (lua_gettop(L) != 3) {
+        luaL_argerror(L, lua_gettop(L), "start_timer(id, period)");
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    //
+    // get timer args
+    //
+
+    lua_Integer timerId = luaL_checkinteger(L, 2);
+    luaL_argcheck(L, timerId >= 0, 2, "timer id must equal or greater than 0");
+
+    lua_Integer period = luaL_checkinteger(L, 3);
+    luaL_argcheck(L, period >= 10, 3, "timer period must equal or greater than 10 ms");
+
+    //
+    // get plugin name
+    //
+
+    if (!lua_getfield(L, -3, "plugin_name")) {
+        luaL_argerror(L, lua_gettop(L), "get plugin name failed");
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    const char* pluginName = luaL_checkstring(L, -1);
+    luaL_argcheck(L, pluginName != nullptr, 1, "invalid plugin name");
+
+    //
+    // start plugin timer
+    //
+
+    lua_pushboolean(L, wb_plugin::StartPluginTimer(pluginName, (int)timerId, (int)period));
+    return 1;
+}
+
+static int __plugin_start_every_day_timer(lua_State* L)
+{
+    if (lua_gettop(L) != 5) {
+        luaL_argerror(L, lua_gettop(L), "start_every_day_timer(id, hour, minute, second)");
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    //
+    // get timer args
+    //
+
+    lua_Integer timerId = luaL_checkinteger(L, 2);
+    luaL_argcheck(L, timerId >= 0, 2, "timer id must equal or greater than 0");
+
+    lua_Integer hour = luaL_checkinteger(L, 3);
+    luaL_argcheck(L, hour >= 0 && hour < 24, 3, "hour[0~23]");
+
+    lua_Integer minute = luaL_checkinteger(L, 4);
+    luaL_argcheck(L, minute >= 0 && minute < 60, 4, "minute[0~59]");
+
+    lua_Integer second = luaL_checkinteger(L, 5);
+    luaL_argcheck(L, minute >= 0 && minute < 60, 5, "second[0~59]");
+
+    //
+    // get plugin name
+    //
+
+    if (!lua_getfield(L, -5, "plugin_name")) {
+        luaL_argerror(L, lua_gettop(L), "get plugin name failed");
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    const char* pluginName = luaL_checkstring(L, -1);
+    luaL_argcheck(L, pluginName != nullptr, 1, "invalid plugin name");
+
+    //
+    // start plugin timer
+    //
+
+    lua_pushboolean(L, wb_plugin::StartPluginTimer(pluginName, (int)timerId, wb_timer::EveryDayPeriodDesc((uint8_t)hour, (uint8_t)minute, (uint8_t)second)));
+    return 1;
+}
+
+static int __plugin_kill_timer(lua_State* L)
+{
+    if (lua_gettop(L) != 2) {
+        luaL_argerror(L, lua_gettop(L), "kill_timer(id)");
+        return 0;
+    }
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    //
+    // get timer args
+    //
+
+    lua_Integer timerId = luaL_checkinteger(L, 2);
+    luaL_argcheck(L, timerId >= 0, 2, "timer id must equal or greater than 0");
+
+    //
+    // get plugin name
+    //
+
+    if (!lua_getfield(L, -2, "plugin_name")) {
+        luaL_argerror(L, lua_gettop(L), "get plugin name failed");
+        return 0;
+    }
+
+    const char* pluginName = luaL_checkstring(L, -1);
+    luaL_argcheck(L, pluginName != nullptr, 1, "invalid plugin name");
+
+    //
+    // stop plugin timer
+    //
+
+    wb_plugin::StopPluginTimer(pluginName, (int)timerId, true);
+    return 0;
+}
+
+static int __plugin_kill_every_day_timer(lua_State* L)
+{
+    if (lua_gettop(L) != 2) {
+        luaL_argerror(L, lua_gettop(L), "kill_every_day_timer(id)");
+        return 0;
+    }
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    //
+    // get timer args
+    //
+
+    lua_Integer timerId = luaL_checkinteger(L, 2);
+    luaL_argcheck(L, timerId >= 0, 2, "timer id must equal or greater than 0");
+
+    //
+    // get plugin name
+    //
+
+    if (!lua_getfield(L, -2, "plugin_name")) {
+        luaL_argerror(L, lua_gettop(L), "get plugin name failed");
+        return 0;
+    }
+
+    const char* pluginName = luaL_checkstring(L, -1);
+    luaL_argcheck(L, pluginName != nullptr, 1, "invalid plugin name");
+
+    //
+    // stop plugin timer
+    //
+
+    wb_plugin::StopPluginTimer(pluginName, (int)timerId, false);
+    return 0;
+}
+
 /**
  *
  * global function "declare_module":
@@ -140,6 +316,12 @@ int wxbox::plugin::__declare_plugin(lua_State* L)
         {"login_wechat_event", __plugin_on_login_wechat_event},
         {"logout_wechat_event", __plugin_on_logout_wechat_event},
         {"exit_wechat_event", __plugin_on_exit_wechat_event},
+        {"timer_event", __plugin_on_timer_event},
+        {"every_day_timer_event", __plugin_on_every_day_timer_event},
+        {"start_timer", __plugin_start_timer},
+        {"start_every_day_timer", __plugin_start_every_day_timer},
+        {"kill_timer", __plugin_kill_timer},
+        {"kill_every_day_timer", __plugin_kill_every_day_timer},
         {NULL, NULL},
     };
 
@@ -306,6 +488,40 @@ bool wxbox::plugin::TriggerPluginEvent(PPluginVirtualMachine vm, const std::stri
 
     // push event
     PushUserDataPtrToStack<wb_plugin::PluginEventModel, EVENT_MODEL_NAME>(vm->state, pluginEvent.get());
+
+    // trigger event with timeout
+    BEGIN_PLUGIN_VIRTUAL_MACHINE_LONG_TASK_WITH_TIMEOUT(vm);
+    if (lua_pcall(vm->state, 1, 0, 0) != LUA_OK) {
+        CANCEL_PLUGIN_VIRTUAL_MACHINE_LONG_TASK(vm);
+        lua_pop(vm->state, 2);
+        return false;
+    }
+    END_PLUGIN_VIRTUAL_MACHINE_LONG_TASK_WITH_TIMEOUT(vm);
+
+    lua_pop(vm->state, 1);
+    return true;
+}
+
+bool wxbox::plugin::TriggerPluginTimerEvent(_PluginVirtualMachine* vm, const std::string& pluginName, int id, bool isPeriodTimer)
+{
+    if (!CheckPluginVirtualMachineValid(vm) || pluginName.empty()) {
+        return false;
+    }
+
+    // check whether plugin is a table object
+    if (lua_getglobal(vm->state, pluginName.c_str()) != LUA_TTABLE) {
+        lua_pop(vm->state, 1);
+        return false;
+    }
+
+    // check whether timer event method is exist
+    if (lua_getfield(vm->state, -1, isPeriodTimer ? "timer_event" : "every_day_timer_event") != LUA_TFUNCTION) {
+        lua_pop(vm->state, 2);
+        return false;
+    }
+
+    // push timer event parameters
+    lua_pushinteger(vm->state, id);
 
     // trigger event with timeout
     BEGIN_PLUGIN_VIRTUAL_MACHINE_LONG_TASK_WITH_TIMEOUT(vm);

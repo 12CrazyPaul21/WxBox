@@ -19,7 +19,8 @@ function example.prereload()
 end
 
 function example.unload()
-    wxbox.info("example.unload")
+    -- wxbox.info("example.unload")
+    print('example.unload')
 end
 
 function example.receive_raw_message(event)
@@ -56,6 +57,16 @@ function example.exit_wechat_event(event)
     wxbox.info('exit wechat')
 end
 
+function example.timer_event(id)
+    wxbox.info('timer event, timer id : ' .. id)
+    wxbox.send_text_to_filehelper('timer event, timer id : ' .. id)
+end
+
+function example.every_day_timer_event(id)
+    wxbox.info('every day timer event, timer id : ' .. id)
+    wxbox.send_text_to_filehelper('every day timer event, timer id : ' .. id)
+end
+
 function example.hello()
     wxbox.info("hello im example module")
     wxbox.info("storage path : " .. example.storage_path)
@@ -85,4 +96,20 @@ end
 
 function example.say_template_hello()
     wxbox.info(template.hello())
+end
+
+function example.test_timer(period)
+    example:start_timer(0, period)
+end
+
+function example.stop_test_timer()
+    example:kill_timer(0)
+end
+
+function example.test_every_day_timer(hour, minute, second)
+    example:start_every_day_timer(0, hour, minute, second)
+end
+
+function example.stop_test_every_day_timer()
+    example:kill_every_day_timer(0)
 end

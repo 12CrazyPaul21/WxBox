@@ -1,5 +1,5 @@
 project('WxBox', ['c', 'cpp'],
-    version: '0.1.3',
+    version: '0.1.4',
     default_options: ['warning_level=3', 'cpp_std=c++17']
 )
 
@@ -345,6 +345,8 @@ utils_src = files([
     join_paths(utils_root, 'coredump.cpp'),
     join_paths(utils_root, 'config.hpp'),
     join_paths(utils_root, 'config.cpp'),
+    join_paths(utils_root, 'timer.h'),
+    join_paths(utils_root, 'timer.cpp'),
 
     # wxbox crack
     join_paths(crack_root, 'wx.h'),

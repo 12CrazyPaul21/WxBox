@@ -428,3 +428,34 @@ TEST(wxbox_utils, thread_suspend_malloc_lock_watch_dog)
     // stop watch dog
     spdlog::info("watch catch lock times : {}", wb_process::StopSuspendLockWatchDog());
 }
+
+TEST(wxbox_utils, timer)
+{
+    spdlog::info("main thread id : {} ### date : {}", wb_process::GetCurrentThreadId(), wb_process::GetCurrentDateDesc());
+
+	struct std::tm t;
+    wb_process::GetCurrentDate(t);
+
+    wb_timer::StartPeriodTimer("test_period_timer", 0, 100, [](const std::string nspace, int id, bool isPeriodTimer) {
+        WXBOX_UNREF(isPeriodTimer);
+        spdlog::info("period timer nspace : {} # timer id : {} ### timer thread id : {} ### date : {}", nspace, id, wb_process::GetCurrentThreadId(), wb_process::GetCurrentDateDesc());
+    });
+    wb_timer::StartEveryDayPeriodTimer("test_every_day_period_timer_1", 0, wb_timer::EveryDayPeriodDesc((uint8_t)t.tm_hour, (uint8_t)t.tm_min, (uint8_t)t.tm_sec + 2), [](const std::string nspace, int id, bool isPeriodTimer) {
+        WXBOX_UNREF(isPeriodTimer);
+        spdlog::info("every day period timer nspace : {} # timer id : {} ### timer thread id : {} ### date : {}", nspace, id, wb_process::GetCurrentThreadId(), wb_process::GetCurrentDateDesc());
+    });
+    wb_timer::StartEveryDayPeriodTimer("test_every_day_period_timer_2", 1, wb_timer::EveryDayPeriodDesc((uint8_t)t.tm_hour, (uint8_t)t.tm_min, (uint8_t)t.tm_sec + 10), [](const std::string nspace, int id, bool isPeriodTimer) {
+        WXBOX_UNREF(isPeriodTimer);
+        spdlog::info("every day period timer nspace : {} # timer id : {} ### timer thread id : {} ### date : {}", nspace, id, wb_process::GetCurrentThreadId(), wb_process::GetCurrentDateDesc());
+    });
+
+	spdlog::info("wait for 3 seconds");
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	spdlog::info("stop all timer and wait 2 seconds");
+
+	wb_timer::StopPeriodTimerWithNameSpace("test_period_timer");
+    wb_timer::StopPeriodTimerWithNameSpace("test_every_day_period_timer_1");
+    wb_timer::StopPeriodTimerWithNameSpace("test_every_day_period_timer_2");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+}

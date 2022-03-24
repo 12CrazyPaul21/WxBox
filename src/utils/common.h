@@ -133,6 +133,7 @@ typedef unsigned long long ucpulong_t;
 #include <utils/hook.h>
 #include <utils/coredump.h>
 #include <utils/config.hpp>
+#include <utils/timer.h>
 
 //
 // WxBox crack headers
@@ -156,6 +157,7 @@ namespace wb_inject   = wxbox::util::inject;
 namespace wb_hook     = wxbox::util::hook;
 namespace wb_coredump = wxbox::util::coredump;
 namespace wb_config   = wxbox::util::config;
+namespace wb_timer    = wxbox::util::timer;
 
 namespace wb_wx      = wxbox::crack::wx;
 namespace wb_feature = wxbox::crack::feature;
