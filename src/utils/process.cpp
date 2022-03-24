@@ -540,6 +540,41 @@ std::time_t wxbox::util::process::GetCurrentTimestamp(bool ms)
     }
 }
 
+bool wxbox::util::process::GetCurrentDate(struct std::tm& tm)
+{
+    bool result = true;
+
+    try {
+        std::time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        if (localtime_s(&tm, &tt)) {
+            result = false;
+        }
+    }
+    catch (...) {
+        result = false;
+    }
+
+    return result;
+}
+
+std::string wxbox::util::process::GetCurrentDateDesc()
+{
+    struct std::tm tm;
+    if (!GetCurrentDate(tm)) {
+        return "";
+    }
+
+    std::stringstream ss;
+
+    try {
+        ss << std::put_time(&tm, "%F %T");
+    }
+    catch (...) {
+    }
+
+    return ss.str();
+}
+
 std::vector<wb_process::ProcessInfo> wxbox::util::process::GetProcessList()
 {
 #if WXBOX_IN_WINDOWS_OS

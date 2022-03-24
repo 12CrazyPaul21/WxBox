@@ -43,6 +43,8 @@ static const char*                          VerifyCommandInfo(wxbox::plugin::PPl
 static void                                 ExecuteCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::CommandParseResultPtr parseResult, bool fromFilehelper);
 static void                                 HandleEvalCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandEvalPtr command);
 static void                                 HandleWeChatLifeEventMessageCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandWeChatLifeEventMessagePtr command);
+static void                                 PluginTimerCallback(const std::string pluginName, int id, bool isPeriodTimer);
+static void                                 HanldePluginTimerEventCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandTimerEventPtr command);
 static void                                 HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandPtr command);
 static void                                 PluginVirtualMachineMessageLoop(wxbox::plugin::PPluginVirtualMachine vm);
 static void                                 PluginVirtualMachineRoutine(wxbox::plugin::PPluginVirtualMachine vm);
@@ -341,6 +343,9 @@ static bool UnLoadPlugin(wxbox::plugin::PPluginVirtualMachine vm, const std::str
         vm->plugins.erase(p);
         return true;
     }
+
+    // kill all plugin's timer
+    wb_timer::StopAllTimerWithNameSpace(pluginContext->name);
 
     // trigger plugin "unload" event
     wb_plugin::TriggerPluginOnUnLoad(vm, pluginContext->name);
@@ -745,6 +750,26 @@ static void HandleWeChatLifeEventMessageCommand(wxbox::plugin::PPluginVirtualMac
     DispatchPluginEvent(vm, command->event);
 }
 
+static void PluginTimerCallback(const std::string pluginName, int id, bool isPeriodTimer)
+{
+    auto command           = wb_plugin::BuildPluginVirtualMachineCommand<wb_plugin::PluginVirtualMachineCommandType::TimerEvent>();
+    command->pluginName    = pluginName;
+    command->timerId       = id;
+    command->isPeriodTimer = isPeriodTimer;
+    wb_plugin::PushPluginVirtualMachineCommand(command);
+}
+
+static void HanldePluginTimerEventCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandTimerEventPtr command)
+{
+    assert(vm != nullptr && vm->state != nullptr);
+
+    if (!command) {
+        return;
+    }
+
+    TriggerPluginTimerEvent(vm, command->pluginName, command->timerId, command->isPeriodTimer);
+}
+
 static void HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachine vm, wxbox::plugin::PluginVirtualMachineCommandPtr command)
 {
     assert(vm != nullptr && vm->state != nullptr && command != nullptr);
@@ -758,6 +783,9 @@ static void HandlePluginVirtualMachineCommand(wxbox::plugin::PPluginVirtualMachi
             break;
         case wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage:
             HandleWeChatLifeEventMessageCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage>(command));
+            break;
+        case wb_plugin::PluginVirtualMachineCommandType::TimerEvent:
+            HanldePluginTimerEventCommand(vm, wb_plugin::CastPluginVirtualMachineCommandPtr<wb_plugin::PluginVirtualMachineCommandType::TimerEvent>(command));
             break;
     }
 
@@ -855,6 +883,7 @@ void wxbox::plugin::StopPluginVirtualMachine()
     }
 
     try {
+        wb_timer::StopAllTimer();
         wb_file::CloseFolderFilesChangeMonitor(::g_vm_signleton->pluginPath);
         ::g_vm_signleton->exitSignal.set_value();
         ::g_vm_signleton->cv.notify_one();
@@ -901,6 +930,26 @@ void wxbox::plugin::ChangeLongTaskTimeout(std::time_t timeout)
 
     std::unique_lock<std::shared_mutex> lock(::g_vm_signleton->rwmutex);
     g_vm_signleton->longTaskTimeout = timeout;
+}
+
+bool wxbox::plugin::StartPluginTimer(const std::string& pluginName, int id, int period)
+{
+    return wb_timer::StartPeriodTimer(pluginName, id, period, PluginTimerCallback);
+}
+
+bool wxbox::plugin::StartPluginTimer(const std::string& pluginName, int id, const wb_timer::EveryDayPeriodDesc& datePeriod)
+{
+    return wb_timer::StartEveryDayPeriodTimer(pluginName, id, datePeriod, PluginTimerCallback);
+}
+
+void wxbox::plugin::StopPluginTimer(const std::string& pluginName, int id, bool isPeriodTimer)
+{
+    if (isPeriodTimer) {
+        wb_timer::StopPeriodTimer(pluginName, id);
+    }
+    else {
+        wb_timer::StopEveryDayPeriodTimer(pluginName, id);
+    }
 }
 
 bool wxbox::plugin::PushPluginVirtualMachineCommandSync(PluginVirtualMachineCommandPtr command)

@@ -91,6 +91,19 @@
     logout_wechat_event
     exit_wechat_event
 
+    timer_event
+    every_day_timer_event
+
+@plugin global variable:
+    plugin_name
+    storage_path
+
+@plugin methods:
+    start_timer
+    start_every_day_timer
+    kill_timer
+    kill_every_day_timer
+
 @plugin event object getters [only for plugin]:
 
     event:type()

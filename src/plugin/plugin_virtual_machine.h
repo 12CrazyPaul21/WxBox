@@ -14,6 +14,7 @@ namespace wxbox {
             GC,                      // lua gc
             Eval,                    // wxbox execute plugin command
             WeChatLifeEventMessage,  // dispatch wechat lifetime event to all plugin
+            TimerEvent,              // timer event
         };
 
         struct PluginVirtualMachineCommand
@@ -30,6 +31,13 @@ namespace wxbox {
         struct PluginVirtualMachineCommandWeChatLifeEventMessage : public PluginVirtualMachineCommand
         {
             wxbox::plugin::PluginEventModelPtr event;
+        };
+
+        struct PluginVirtualMachineCommandTimerEvent : public PluginVirtualMachineCommand
+        {
+            std::string pluginName;
+            int         timerId;
+            bool        isPeriodTimer;
         };
 
         template<PluginVirtualMachineCommandType type>
@@ -155,6 +163,10 @@ namespace wxbox {
         std::string GetPluginVirtualMachineGlobalTempRoot();
         void        ChangeLongTaskTimeout(std::time_t timeout);
 
+        bool StartPluginTimer(const std::string& pluginName, int id, int period);
+        bool StartPluginTimer(const std::string& pluginName, int id, const wb_timer::EveryDayPeriodDesc& datePeriod);
+        void StopPluginTimer(const std::string& pluginName, int id, bool isPeriodTimer);
+
         template<PluginVirtualMachineCommandType type>
         auto BuildPluginVirtualMachineCommand() -> typename PluginVirtualMachineCommandTypeTrait<type>::ContainerPtrType
         {
@@ -265,6 +277,7 @@ RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineComma
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::GC, PluginVirtualMachineCommand);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::Eval, PluginVirtualMachineCommandEval);
 RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::WeChatLifeEventMessage, PluginVirtualMachineCommandWeChatLifeEventMessage);
+RegisterPluginVirtualMachineCommandType(wxbox::plugin::PluginVirtualMachineCommandType::TimerEvent, PluginVirtualMachineCommandTimerEvent);
 
 // register plugin virtual machine event type
 RegisterPluginVirtualMachineEventType(wxbox::plugin::PluginVirtualMachineEventType::Unknown, PluginVirtualMachineEvent);
